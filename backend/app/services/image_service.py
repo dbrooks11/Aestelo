@@ -1,0 +1,1 @@
+# Resize, compress, EXIF extraction

@@ -1,0 +1,198 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# Flask
+instance/
+.webassets-cache
+.env
+.flaskenv
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment Variables
+.env
+.env.*
+!.env.example
+.envrc
+.env.local
+.env.production
+.env.development
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+.DS_Store
+.sublime-text
+*.sublime-workspace
+.project
+.pydevproject
+.settings/
+
+# Testing
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+test-results/
+.benchmarks/
+
+# Logs
+*.log
+logs/
+log/
+*.pid
+*.seed
+*.pid.lock
+
+# Database
+*.db
+*.rdb
+migrations/versions/*
+!migrations/versions/.gitkeep
+
+# Media/Uploads
+uploads/
+media/
+static/uploads/
+user_uploads/
+temp/
+tmp/
+
+# Secrets & Credentials
+*.pem
+*.key
+*.crt
+*.p12
+.secrets/
+credentials/
+service-account-key.json
+firebase-admin-sdk.json
+
+# AWS
+.aws/
+aws-exports.js
+
+# Docker
+docker-compose.override.yml
+.docker/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+celery.db
+
+# Redis
+dump.rdb
+redis.conf
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Mac
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+*.lnk
+
+# Node (for React frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Production
+*.production
+*.prod
+!.env.example
+
+# Backup files
+*.bak
+*.backup
+*.old
+*~
+
+# Compressed files
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# SSL
+*.pem
+*.crt
+*.key
+
+# Other
+.history/
+*.orig
