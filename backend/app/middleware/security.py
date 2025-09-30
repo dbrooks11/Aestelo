@@ -1,1 +1,0 @@
-# Security headers, input sanitization

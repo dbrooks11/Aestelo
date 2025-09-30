@@ -1,1 +1,0 @@
-# Post creation/response schemas

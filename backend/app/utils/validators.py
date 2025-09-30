@@ -1,1 +1,0 @@
-# Email, phone, URL validators

@@ -1,1 +1,0 @@
-# Geospatial queries, map integration

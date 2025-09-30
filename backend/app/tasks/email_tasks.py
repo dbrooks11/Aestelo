@@ -1,1 +1,0 @@
-# Async email sending
