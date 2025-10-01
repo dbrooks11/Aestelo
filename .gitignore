@@ -27,3 +27,10 @@ Thumbs.db
 
 # Uploads (for later)
 uploads/
+
+#Docker stuff
+docker-compose.yml
+.yml
+
+#gitginore
+.gitignore

@@ -8,7 +8,7 @@ function App() {
   const [currentTime, setCurrentTime] = useState('')
 
   useEffect(()=>{
-      fetch('/api/time/showtime').then(res => res.json()).then(data =>{
+      fetch('api/time/showtime').then(res => res.json()).then(data =>{
         setCurrentTime(data.time);
       })
  
