@@ -17,12 +17,10 @@ def create_app():
      # Register blueprints
     # from routes.auth import auth_bp
     # from routes.profile import profile_bp
-    from routes.time import time_bp
     from models import post, user
 
     # app.register_blueprint(auth_bp, url_prefix='/api/auth')
     # app.register_blueprint(profile_bp, url_prefix='/api/profile')
-    app.register_blueprint(time_bp)
 
     # Create tables
     with app.app_context():
