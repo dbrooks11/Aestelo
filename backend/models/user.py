@@ -1,4 +1,4 @@
-from app import db
+from exstensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
@@ -16,7 +16,7 @@ class User(db.Model):
     last_login = Column(DateTime, default= datetime.now(timezone.utc).strftime('%b %d, %Y %H:%M:%S'),)
     password_hash = Column(String(255), nullable=False)
 
-    user_info = relationship('user_info', backref= 'user', lazy=True)
+    user_info = relationship('UserInfo', backref= 'user', lazy=True)
 
     def generate_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -41,6 +41,7 @@ class UserInfo(db.Model):
     gender = Column(String(10), default= 'Not specified')
     height_ft = Column(Integer, default=0)
     height_in = Column(Integer, default=0)
+    id = Column(BigInteger, ForeignKey('user.id'), nullable=False)
 
     def to_dict(self):
         user_info = {
