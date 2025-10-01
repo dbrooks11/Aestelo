@@ -26,19 +26,25 @@ def create_app():
     jwt.init_app(app)
     limiter.init_app(app)
     
-    CORS(app)
-
      # Register blueprints
     # from routes.auth import auth_bp
     # from routes.profile import profile_bp
+    from routes.time import time_bp
+    from models.user import User
 
     # app.register_blueprint(auth_bp, url_prefix='/api/auth')
     # app.register_blueprint(profile_bp, url_prefix='/api/profile')
+    app.register_blueprint(time_bp)
 
     # Create tables
     with app.app_context():
         db.engine.connect()
         db.create_all()
+
+    user = User(first_name = 'me', last_name = 'me', email = 'hellome@gmail.com', username = 'mememem12')
+    user.generate_password('mypassword123')
+    db.session.add(user)
+    db.session.commit()
 
     @app.route('/')
     def health_check():

@@ -26,7 +26,7 @@ class Config:
     JWT_ALGORITHM = 'HS256'
     
     # CORS
-    CORS_ORIGINS = ['http://localhost:3000', 'http://localhost:5173']  # Add your frontend URLs
+    CORS_ORIGINS = ['http://localhost:5000', 'http://localhost:5173']  # Add your frontend URLs
 
     # Cloudflare R2 (NEW)
     R2_ACCESS_KEY_ID = os.environ.get('R2_ACCESS_KEY_ID')
