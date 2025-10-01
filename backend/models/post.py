@@ -1,6 +1,7 @@
-from app import db
-from datetime import datetime
-
+# from app import db
+# from sqlalchemy import Column, ForeignKey, BigInteger, String, Integer, Float, Text
+# from sqlalchemy.orm import relationship
+# from datetime import datetime
 #todo: Create post model
 #todo: create rating model
 #todo: create filter models
