@@ -1,13 +1,21 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() {
   const [count, setCount] = useState(0)
+  const [currentTime, setCurrentTime] = useState('')
+
+  useEffect(()=>{
+      fetch('/api/time/showtime').then(res => res.json()).then(data =>{
+        setCurrentTime(data.time);
+      })
+ 
+  }, []);
 
   return (
-    <>
+    <>  
       <div>
         <a href="https://vite.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />
@@ -21,6 +29,7 @@ function App() {
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
         </button>
+        <p>The current time is {currentTime}.</p>
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
         </p>
