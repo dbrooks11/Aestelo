@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from sqlalchemy import (Column, ForeignKey, BigInteger, 
                         String, Integer, Float, Text, DateTime, Boolean)
 from sqlalchemy.dialects.postgresql import UUID
+from .schema_types import *
 #TODO: Stuff to do/link to user
 #socials
 #allow messages from -put in user settings
@@ -13,20 +14,16 @@ from sqlalchemy.dialects.postgresql import UUID
 #referal code
 
 
-private = 'private'
-public = 'public'
-
-
 
 
 class User(db.Model):
     __tablename__ = "user"
-    __table_args__ = {'schema': public} 
-    removed_user_id = Column(UUID(as_uuid=True), ForeignKey(f'{private}.removed_user.removed_user_id'), nullable=True)
+    __table_args__ = {'schema': user_schema} 
+    #removed_user_id = Column(UUID(as_uuid=True), ForeignKey(f'{private}.removed_user.removed_user_id'), nullable=True)
     id = Column(UUID(as_uuid=True), primary_key=True)
 
     username = Column(String(50), unique=True, nullable=False)
-    profile_pic = Column(String())
+    profile_image = Column(Text)
     bio = Column(String(250))
 
     instagram = Column(Text)
@@ -41,7 +38,7 @@ class User(db.Model):
     tiktok = Column(Text)
     is_verified_tiktok = Column(Boolean, default=False)
 
-    profile_image = Column(Text)
+    
     follower_count = Column(Integer, default=0)
     following_count = Column(Integer, default=0)
     is_private = Column(Boolean, default=False)
@@ -56,6 +53,7 @@ class User(db.Model):
     post_media = relationship('PostMedia', backref='user', lazy=True)
     visit = relationship('Visit', backref='user', lazy=True)
     visit_media = relationship('VisitMedia', backref='user', lazy=True)
+    rating = relationship('Rating', backref='user', lazy=True)
     
     def to_dict(self):
         return {
@@ -82,9 +80,8 @@ class User(db.Model):
     
 class UserInfo(db.Model):
     __tablename__ = "user_info"
-    __table_args__ = {'schema': private} 
-    id = Column(UUID(as_uuid=True), ForeignKey(f'{public}.user.id'), nullable=False)
-    user_info_id = Column(UUID(as_uuid=True), primary_key=True)
+    __table_args__ = {'schema': user_info_schema} 
+    id = Column(UUID(as_uuid=True), ForeignKey(f'{user_schema}.user.id'),primary_key=True, nullable=False)
     first_name = Column(String(30))
     last_name = Column(String(30))
     date_of_birth = Column(DateTime)
@@ -101,7 +98,6 @@ class UserInfo(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
-            'user_info_id': self.user_info_id,
             'first_name': self.first_name,
             'last_name': self.last_name,
             'date_of_birth': self.date_of_birth,
@@ -115,19 +111,33 @@ class UserInfo(db.Model):
             'city': self.city
     }
 
+
 class UserRole(db.Model):
     __tablename__ = "user_role"
-    __table_args__ = {'schema': private}
-    id = Column(UUID(as_uuid=True), ForeignKey(f'{public}.user.id'), nullable=False)
-    is_user = Column(Boolean, default=True)
+    __table_args__ = {'schema': user_role_schema}
+    id = Column(UUID(as_uuid=True), ForeignKey(f'{user_schema}.user.id'), primary_key=True, nullable=False)
     is_admin = Column(Boolean, default=False)
     is_moderator = Column(Boolean, default=False)
     is_owner = Column(Boolean, default=False)
-    
+    granted_at = Column(DateTime, default=datetime.now(timezone.utc))
+    granted_by = Column(UUID(as_uuid=True), nullable=True)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'is_admin': self.is_admin,
+            'is_moderator': self.is_moderator,
+            'is_owner': self.is_owner,
+            'granted_at': self.granted_at,
+            'granted_by':self.granted_by
+        }
+        
+
+
 class UserSettings(db.Model):
     __tablename__ = "user_settings"
-    __table_args__ = {'schema': private} 
-    id = Column(UUID(as_uuid=True), ForeignKey(f'{public}.user.id'), nullable=False)
+    __table_args__ = {'schema': user_settings_schema} 
+    id = Column(UUID(as_uuid=True), ForeignKey(f'{user_schema}.user.id'), primary_key=True, nullable=False)
     email_notifications = Column(Boolean, default=True)
     push_notifications = Column(Boolean, default=True)
     location_sharing = Column(Boolean, default=False)
@@ -138,7 +148,6 @@ class UserSettings(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
-            'user_settings_id': self.user_settings_id,
             'email_notifications': self.email_notifications,
             'push_notifications': self.push_notifications,
             'location_sharing': self.location_sharing,
@@ -151,21 +160,20 @@ class UserSettings(db.Model):
 
 class UserSubscription(db.Model):
     __tablename__ = "user_subscription"
-    __table_args__ = {'schema': private} 
-    id = Column(UUID(as_uuid=True), ForeignKey(f'{public}.user.id'), nullable=False)
+    __table_args__ = {'schema': user_subscription_schema} 
+    id = Column(UUID(as_uuid=True), ForeignKey(f'{user_schema}.user.id'),primary_key=True, nullable=False)
     tier = Column(String(8), default='free') #free, premium, business
     price = Column(Integer)
     started_at= Column(DateTime)
     expires_at = Column(DateTime)
     auto_renew = Column(Boolean, default=False)
-    payment_method_id = Column(UUID(as_uuid=True), primary_key=True)
-    billing_cycle = Column(Boolean, default=True)  #True = monthly, False = yearly
+    payment_method_id = Column(UUID(as_uuid=True), nullable=True) 
+    billing_cycle = Column(String(10), default='monthly')  #monthly or yearly
     trial_used = Column(Boolean, default=False)
     
     def to_dict(self):
         return {
             'id': self.id,
-            'subscription_id': self.subscription_id,
             'tier': self.tier,
             'price': self.price,
             'started_at': self.started_at,
@@ -179,8 +187,8 @@ class UserSubscription(db.Model):
 
 class RemovedUser(db.Model):
     __tablename__ = "removed_user"
-    __table_args__ = {'schema': private} 
-    id = relationship('User', backref='removed_user', lazy=True)
+    __table_args__ = {'schema': removed_user_schema} 
+
     removed_user_id = Column(UUID(as_uuid=True), primary_key=True)
     
     username = Column(String(50), unique=True, nullable=False)
@@ -191,3 +199,8 @@ class RemovedUser(db.Model):
     account_locked_until = Column(DateTime)
     is_business_account = Column(Boolean, default=False)
     password_hash = Column(String(255), nullable=False)
+
+    removed_at = Column(DateTime, default= datetime.now(timezone.utc).strftime('%b %d, %Y %H:%M:%S'))
+    removed_by = Column(String(50))  # 'self', 'admin', etc.
+    removal_reason = Column(String(255))
+    recoverable_until = Column(DateTime)  # Auto-delete after 30 days

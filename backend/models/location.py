@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from sqlalchemy import (Column, ForeignKey, BigInteger, 
                         String, Integer, Float, Text, DateTime, Boolean)
 from sqlalchemy.dialects.postgresql import UUID
+from .schema_types import *
 
 #todo: Come back to mapbox and google place id. 
 #todo: check format of altitude
@@ -20,22 +21,19 @@ from sqlalchemy.dialects.postgresql import UUID
 #User uses builtin camera function in app so meta_data_id cant be changed
 #Get meta_data_id from pics
 
-private = 'private'
-public = 'public'
-
 
 class Location(db.Model):
     __tablename__ = "location"
-    __table_args__ = {'schema': private} 
-    post_id = Column(UUID(as_uuid=True), ForeignKey(f'{public}.post.post_id'), nullable=True)
-    visit_id = Column(UUID(as_uuid=True), ForeignKey(f'{public}.visit.visit_id'), nullable=True)
+    __table_args__ = {'schema': location_schema} 
+    post_id = Column(UUID(as_uuid=True), ForeignKey(f'{post_schema}.post.post_id'))
+    visit_id = Column(UUID(as_uuid=True), ForeignKey(f'{visit_schema}.visit.visit_id'))
     location_coredata = relationship('LocationCoreData', backref='location', lazy=True)
     business_location_details = relationship('BusinessLocationDetails', backref='location', lazy=True) #will be handled later
     is_visit = Column(Boolean, default=False) #if its a visit, itll refernce the visit id
         
     meta_data_id = Column(UUID(as_uuid=True), primary_key=True)
     longitude = Column(Float)
-    lagitude = Column(Float)
+    latitude = Column(Float)
     is_long_lat = Column(Boolean) #if place where picture is taken provides the long and late properly, 
                                   #skips Locations details besides basics for post like desciption, name, tags, etc
     altitude = Column(Float, default=0.0)
@@ -46,12 +44,11 @@ class Location(db.Model):
     def to_dict(self):
         return {
             'post_id': self.post_id,
-            'visit_id': self.visit_id,
-            # 'location_coredata' and 'business_location_details' are relationships and are omitted.
+            'visit_id': self.visit_id, 
             'is_visit': self.is_visit,
             'meta_data_id': self.meta_data_id,
             'longitude': self.longitude,
-            'lagitude': self.lagitude,
+            'lagitude': self.latitude,
             'is_long_lat': self.is_long_lat,
             'altitude': self.altitude,
             'created_on': self.created_on,
@@ -61,17 +58,15 @@ class Location(db.Model):
 # Want Exact locations
 class LocationCoreData(db.Model):
     __tablename__ = "location_core_data"
-    __table_args__ = {'schema': private} 
-    meta_data_id = Column(UUID(as_uuid=True), ForeignKey(f'{private}.location.meta_data_id'), nullable=False)
+    __table_args__ = {'schema': location_coredata_schema} 
+    meta_data_id = Column(UUID(as_uuid=True), ForeignKey(f'{location_schema}.location.meta_data_id'), primary_key=True, nullable=False)
     mapbox_place_id = Column(BigInteger, default=0)
-    location_core_data_id = Column(UUID(as_uuid=True), primary_key=True)
     name = Column(String(150))
 
     def to_dict(self):
         return {
             'meta_data_id': self.meta_data_id,
             'mapbox_place_id': self.mapbox_place_id,
-            'location_core_data_id': self.location_core_data_id,
             'name': self.name
     }
 
@@ -80,9 +75,8 @@ class LocationCoreData(db.Model):
 #For businesses mainly
 class BusinessLocationDetails(db.Model):
     __tablename__ = "businesss_location_details"
-    __table_args__ = {'schema': public} 
-    meta_data_id = Column(UUID(as_uuid=True), ForeignKey(f'{private}.location.meta_data_id'), nullable=False)
-    details_id = Column(BigInteger, primary_key=True)
+    __table_args__ = {'schema': business_location_details_schema} 
+    meta_data_id = Column(UUID(as_uuid=True), ForeignKey(f'{location_schema}.location.meta_data_id'), primary_key=True)
     description = Column(String(200), default='')
     address_line1 = Column(String(50))
     address_line2 = Column(String(20))
@@ -93,7 +87,6 @@ class BusinessLocationDetails(db.Model):
     def to_dict(self):
         return {
             'meta_data_id': self.meta_data_id,
-            'details_id': self.details_id,
             'description': self.description,
             'address_line1': self.address_line1,
             'address_line2': self.address_line2,

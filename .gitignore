@@ -40,3 +40,5 @@ docker-compose.yml
 dist/
 build/
 .next/
+
+schema_types.py
