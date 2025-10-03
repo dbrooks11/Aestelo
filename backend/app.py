@@ -3,7 +3,6 @@ from flask_cors import CORS
 from config import Config
 from exstensions import db, ma, jwt, limiter,mg
 
-
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -13,6 +12,8 @@ def create_app():
     jwt.init_app(app)
     limiter.init_app(app)
     mg.init_app(app, db)
+
+    
     
     CORS(app)
     # Register blueprints
