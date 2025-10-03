@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from sqlalchemy import (Column, ForeignKey, BigInteger, 
                         String, Integer, Float, Text, DateTime, Boolean)
-
+from sqlalchemy.dialects.postgresql import UUID
 
 #todo: Come back to mapbox and google place id. 
 #todo: check format of altitude
@@ -27,13 +27,13 @@ public = 'public'
 class Location(db.Model):
     __tablename__ = "location"
     __table_args__ = {'schema': private} 
-    post_id = Column(BigInteger, ForeignKey(f'{public}.post.post_id'), nullable=True)
-    visit_id = Column(BigInteger, ForeignKey(f'{public}.visit.visit_id'), nullable=True)
+    post_id = Column(UUID(as_uuid=True), ForeignKey(f'{public}.post.post_id'), nullable=True)
+    visit_id = Column(UUID(as_uuid=True), ForeignKey(f'{public}.visit.visit_id'), nullable=True)
     location_coredata = relationship('LocationCoreData', backref='location', lazy=True)
     business_location_details = relationship('BusinessLocationDetails', backref='location', lazy=True) #will be handled later
     is_visit = Column(Boolean, default=False) #if its a visit, itll refernce the visit id
         
-    meta_data_id = Column(BigInteger, primary_key=True)
+    meta_data_id = Column(UUID(as_uuid=True), primary_key=True)
     longitude = Column(Float)
     lagitude = Column(Float)
     is_long_lat = Column(Boolean) #if place where picture is taken provides the long and late properly, 
@@ -62,9 +62,9 @@ class Location(db.Model):
 class LocationCoreData(db.Model):
     __tablename__ = "location_core_data"
     __table_args__ = {'schema': private} 
-    meta_data_id = Column(BigInteger, ForeignKey(f'{private}.location.meta_data_id'), nullable=False)
+    meta_data_id = Column(UUID(as_uuid=True), ForeignKey(f'{private}.location.meta_data_id'), nullable=False)
     mapbox_place_id = Column(BigInteger, default=0)
-    location_core_data_id = Column(BigInteger, primary_key=True)
+    location_core_data_id = Column(UUID(as_uuid=True), primary_key=True)
     name = Column(String(150))
 
     def to_dict(self):
@@ -81,7 +81,7 @@ class LocationCoreData(db.Model):
 class BusinessLocationDetails(db.Model):
     __tablename__ = "businesss_location_details"
     __table_args__ = {'schema': public} 
-    meta_data_id = Column(BigInteger, ForeignKey(f'{private}.location.meta_data_id'), nullable=False)
+    meta_data_id = Column(UUID(as_uuid=True), ForeignKey(f'{private}.location.meta_data_id'), nullable=False)
     details_id = Column(BigInteger, primary_key=True)
     description = Column(String(200), default='')
     address_line1 = Column(String(50))

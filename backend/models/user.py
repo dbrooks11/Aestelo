@@ -3,8 +3,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from sqlalchemy import (Column, ForeignKey, BigInteger, 
                         String, Integer, Float, Text, DateTime, Boolean)
-
-
+from sqlalchemy.dialects.postgresql import UUID
 #TODO: Stuff to do/link to user
 #socials
 #allow messages from -put in user settings
@@ -23,8 +22,8 @@ public = 'public'
 class User(db.Model):
     __tablename__ = "user"
     __table_args__ = {'schema': public} 
-    removed_user_id = Column(BigInteger, ForeignKey(f'{private}.removed_user.removed_user_id'), nullable=True)
-    id = Column(BigInteger, primary_key=True)
+    removed_user_id = Column(UUID(as_uuid=True), ForeignKey(f'{private}.removed_user.removed_user_id'), nullable=True)
+    id = Column(UUID(as_uuid=True), primary_key=True)
 
     username = Column(String(50), unique=True, nullable=False)
     profile_pic = Column(String())
@@ -83,9 +82,9 @@ class User(db.Model):
     
 class UserInfo(db.Model):
     __tablename__ = "user_info"
-    __table_args__ = {'schema': public} 
-    id = Column(BigInteger, ForeignKey(f'{public}.user.id'), nullable=False)
-    user_info_id = Column(BigInteger, primary_key=True)
+    __table_args__ = {'schema': private} 
+    id = Column(UUID(as_uuid=True), ForeignKey(f'{public}.user.id'), nullable=False)
+    user_info_id = Column(UUID(as_uuid=True), primary_key=True)
     first_name = Column(String(30))
     last_name = Column(String(30))
     date_of_birth = Column(DateTime)
@@ -119,9 +118,9 @@ class UserInfo(db.Model):
 
 class UserSettings(db.Model):
     __tablename__ = "user_settings"
-    __table_args__ = {'schema': public} 
-    id = Column(BigInteger, ForeignKey(f'{public}.user.id'), nullable=False)
-    user_settings_id = Column(BigInteger, primary_key=True)
+    __table_args__ = {'schema': private} 
+    id = Column(UUID(as_uuid=True), ForeignKey(f'{public}.user.id'), nullable=False)
+    user_settings_id = Column(UUID(as_uuid=True), primary_key=True)
     email_notifications = Column(Boolean, default=True)
     push_notifications = Column(Boolean, default=True)
     location_sharing = Column(Boolean, default=False)
@@ -146,14 +145,14 @@ class UserSettings(db.Model):
 class UserSubscription(db.Model):
     __tablename__ = "user_subscription"
     __table_args__ = {'schema': private} 
-    id = Column(BigInteger, ForeignKey(f'{public}.user.id'), nullable=False)
-    subscription_id = Column(BigInteger, primary_key=True)
+    id = Column(UUID(as_uuid=True), ForeignKey(f'{public}.user.id'), nullable=False)
+    subscription_id = Column(UUID(as_uuid=True), primary_key=True)
     tier = Column(String(8), default='free') #free, premium, business
     price = Column(Integer)
     started_at= Column(DateTime)
     expires_at = Column(DateTime)
     auto_renew = Column(Boolean, default=False)
-    payment_method_id = Column(BigInteger, primary_key=True)
+    payment_method_id = Column(UUID(as_uuid=True), primary_key=True)
     billing_cycle = Column(Boolean, default=True)  #True = monthly, False = yearly
     trial_used = Column(Boolean, default=False)
     
@@ -176,7 +175,7 @@ class RemovedUser(db.Model):
     __tablename__ = "removed_user"
     __table_args__ = {'schema': private} 
     id = relationship('User', backref='removed_user', lazy=True)
-    removed_user_id = Column(BigInteger, primary_key=True)
+    removed_user_id = Column(UUID(as_uuid=True), primary_key=True)
     
     username = Column(String(50), unique=True, nullable=False)
     email = Column(String(150),unique=True, nullable=False)

@@ -2,6 +2,7 @@ from exstensions import db
 from sqlalchemy import Column, ForeignKey, BigInteger, String, Integer, Float, Text, DateTime, Boolean, ARRAY
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
+from sqlalchemy.dialects.postgresql import UUID
 #todo: Create post model
 #todo: create rating model
 #todo: create filter models
@@ -31,13 +32,13 @@ public = 'public'
 class Post(db.Model):
     __tablename__ = "post"
     __table_args__ = {'schema': public} 
-    removed_post_id = Column(BigInteger, ForeignKey(f'{private}.removed_post.removed_post_id'), nullable=True)
-    id = Column(BigInteger, ForeignKey(f'{public}.user.id'),nullable=False)
+    removed_post_id = Column(UUID(as_uuid=True), ForeignKey(f'{private}.removed_post.removed_post_id'), nullable=True)
+    id = Column(UUID(as_uuid=True), ForeignKey(f'{public}.user.id'),nullable=False)
     post_media_id = relationship('PostMedia', backref='post', lazy=True)
     visit_id = relationship('Visit', backref='post', lazy=True)
     rating = relationship('Rating', backref='post', lazy=True)
     
-    post_id = Column(BigInteger, primary_key=True)
+    post_id = Column(UUID(as_uuid=True), primary_key=True)
 
     date_posted = Column(DateTime, default=datetime.now(timezone.utc))
     description = Column(String(200), default='', nullable=False)
@@ -84,10 +85,10 @@ class Post(db.Model):
 class PostMedia(db.Model):
     __tablename__ = "post_media"
     __table_args__ = {'schema': public} 
-    post_id = Column(BigInteger, ForeignKey(f'{public}.post.post_id'), nullable=False)
-    uploaded_by = Column(BigInteger, ForeignKey(f'{public}.user.id'), nullable=False)
+    post_id = Column(UUID(as_uuid=True), ForeignKey(f'{public}.post.post_id'), nullable=False)
+    uploaded_by = Column(UUID(as_uuid=True), ForeignKey(f'{public}.user.id'), nullable=False)
     meta_data_id = relationship('Location', backref='post_media', lazy=True)
-    post_media_id =Column(BigInteger, primary_key=True)
+    post_media_id =Column(UUID(as_uuid=True), primary_key=True)
     media_url = Column(Text)
     media_type = Column(String(15), default = 'image') #stores what type of media is uploaed, image, video, 360 video, etc
     width =  Column(Integer)
@@ -116,10 +117,10 @@ class PostMedia(db.Model):
 class Rating(db.Model):
     __tablename__ = "rating"
     __table_args__ = {'schema': public} 
-    rating_id = Column(BigInteger, primary_key=True)
+    rating_id = Column(UUID(as_uuid=True), primary_key=True)
     rating_choice = Column(Integer, default=0, nullable=True)
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
-    post_id = Column(BigInteger, ForeignKey(f'{public}.post.post_id'), nullable=False)
+    post_id = Column(UUID(as_uuid=True), ForeignKey(f'{public}.post.post_id'), nullable=False)
 
     def to_dict(self):
         return {
@@ -135,10 +136,10 @@ class Rating(db.Model):
 class Visit(db.Model):
     __tablename__ = "visit"
     __table_args__ = {'schema': public} 
-    visit_id = Column(BigInteger, primary_key=True)
-    removed_visit_id = Column(BigInteger, ForeignKey(f'{private}.removed_visit.removed_visit_id'), nullable=True)
-    post_id = Column(BigInteger, ForeignKey(f'{public}.post.post_id'), nullable=False)
-    id = Column(BigInteger, ForeignKey(f'{public}.user.id'), nullable=False)
+    visit_id = Column(UUID(as_uuid=True), primary_key=True)
+    removed_visit_id = Column(UUID(as_uuid=True), ForeignKey(f'{private}.removed_visit.removed_visit_id'), nullable=True)
+    post_id = Column(UUID(as_uuid=True), ForeignKey(f'{public}.post.post_id'), nullable=False)
+    id = Column(UUID(as_uuid=True),  ForeignKey(f'{public}.user.id'), nullable=False)
     meta_data_id = relationship('Location', backref='post', lazy=True)
     
     song_id = Column(Text)
@@ -179,11 +180,11 @@ class Visit(db.Model):
 class VisitMedia(db.Model):
     __tablename__ = "visit_media"
     __table_args__ = {'schema': public} 
-    visit_id = Column(BigInteger, ForeignKey(f'{public}.visit.visit_id'), nullable=False)
+    visit_id = Column(UUID(as_uuid=True), ForeignKey(f'{public}.visit.visit_id'), nullable=False)
     
-    uploaded_by = Column(BigInteger, ForeignKey(f'{public}.user.id'), nullable=False)
+    uploaded_by = Column(UUID(as_uuid=True), ForeignKey(f'{public}.user.id'), nullable=False)
     meta_data_id = relationship('Location', backref='visit_media', lazy=True)
-    visit_media_id =Column(BigInteger, primary_key=True)
+    visit_media_id =Column(UUID(as_uuid=True), primary_key=True)
     media_url = Column(Text)
     media_type = Column(String(15), default = 'image') #stores what type of media is uploaed, image, video, 360 video, etc
     width =  Column(Integer)
@@ -213,7 +214,7 @@ class RemovedPost(db.Model):
     __tablename__ = "removed_post"
     __table_args__ = {'schema': private} 
     post_id = relationship('Post',backref= 'removed_post', lazy=True)
-    removed_post_id = Column(BigInteger, primary_key=True)
+    removed_post_id = Column(UUID(as_uuid=True), primary_key=True)
     posted_by = Column(String(50), nullable= False)
 
     date_posted = Column(DateTime, default=datetime.now(timezone.utc))
@@ -259,9 +260,9 @@ class RemovedPost(db.Model):
 class RemovedVisit(db.Model):
     __tablename__ = "removed_visit"
     __table_args__ = {'schema': private} 
-    removed_visit_id = Column(BigInteger, primary_key=True)
+    removed_visit_id = Column(UUID(as_uuid=True), primary_key=True)
     visit_id = relationship('Visit', backref='removed_visit', lazy=True)
-    id = Column(BigInteger, ForeignKey(f'{public}.user.id'), nullable=False)
+    id = Column(UUID(as_uuid=True), ForeignKey(f'{public}.user.id'), nullable=False)
     
     song_id = Column(Text)
     song_artist = Column(Text)
