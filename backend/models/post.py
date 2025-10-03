@@ -21,14 +21,22 @@ visit_count
 save_count
 '''
 
+
+private = 'private'
+public = 'public'
+
+
+
+
 class Post(db.Model):
     __tablename__ = "post"
-    __table_args__ = {'schema': 'public'} 
-    id = Column(BigInteger, ForeignKey('user.id'),nullable=False)
+    __table_args__ = {'schema': public} 
+    removed_post_id = Column(BigInteger, ForeignKey(f'{private}.removed_post.removed_post_id'), nullable=True)
+    id = Column(BigInteger, ForeignKey(f'{public}.user.id'),nullable=False)
     post_media_id = relationship('PostMedia', backref='post', lazy=True)
     visit_id = relationship('Visit', backref='post', lazy=True)
     rating = relationship('Rating', backref='post', lazy=True)
-    removed_post_id = Column(BigInteger, ForeignKey('removed_post.removed_post_id'), nullable=True)
+    
     post_id = Column(BigInteger, primary_key=True)
 
     date_posted = Column(DateTime, default=datetime.now(timezone.utc))
@@ -75,10 +83,10 @@ class Post(db.Model):
 
 class PostMedia(db.Model):
     __tablename__ = "post_media"
-    __table_args__ = {'schema': 'private'} 
-    post_id = Column(BigInteger, ForeignKey('post.post_id'), nullable=False)
-    uploaded_by = Column(BigInteger, ForeignKey('user.id'), nullable=False)
-    metadata_id = relationship('Location', backref='post_media', lazy=True)
+    __table_args__ = {'schema': public} 
+    post_id = Column(BigInteger, ForeignKey(f'{public}.post.post_id'), nullable=False)
+    uploaded_by = Column(BigInteger, ForeignKey(f'{public}.user.id'), nullable=False)
+    meta_data_id = relationship('Location', backref='post_media', lazy=True)
     post_media_id =Column(BigInteger, primary_key=True)
     media_url = Column(Text)
     media_type = Column(String(15), default = 'image') #stores what type of media is uploaed, image, video, 360 video, etc
@@ -93,7 +101,7 @@ class PostMedia(db.Model):
         return {
             'post_id': self.post_id,
             'uploaded_by': self.uploaded_by,
-            # The 'metadata_id' relationship is omitted as it is a related object collection, not a direct column value.
+            # The 'meta_data_id' relationship is omitted as it is a related object collection, not a direct column value.
             'post_media_id': self.post_media_id,
             'media_url': self.media_url,
             'media_type': self.media_type,
@@ -104,14 +112,34 @@ class PostMedia(db.Model):
             'is_primary': self.is_primary
     }
 
+
+class Rating(db.Model):
+    __tablename__ = "rating"
+    __table_args__ = {'schema': public} 
+    rating_id = Column(BigInteger, primary_key=True)
+    rating_choice = Column(Integer, default=0, nullable=True)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    post_id = Column(BigInteger, ForeignKey(f'{public}.post.post_id'), nullable=False)
+
+    def to_dict(self):
+        return {
+            'rating_id': self.rating_id,
+            'rating_choice': self.rating_choice,
+            'created_at': self.created_at,
+            'post_id': self.post_id
+    }
+
+
+
 #The post under a locations posts
 class Visit(db.Model):
     __tablename__ = "visit"
-    __table_args__ = {'schema': 'public'} 
+    __table_args__ = {'schema': public} 
     visit_id = Column(BigInteger, primary_key=True)
-    post_id = Column(BigInteger, ForeignKey('post.post_id'), nullable=False)
-    id = Column(BigInteger, ForeignKey('user.id', lazy = True))
-    metadata_id = relationship('Location', backref='post', lazy=True)
+    removed_visit_id = Column(BigInteger, ForeignKey(f'{private}.removed_visit.removed_visit_id'), nullable=True)
+    post_id = Column(BigInteger, ForeignKey(f'{public}.post.post_id'), nullable=False)
+    id = Column(BigInteger, ForeignKey(f'{public}.user.id'), nullable=False)
+    meta_data_id = relationship('Location', backref='post', lazy=True)
     
     song_id = Column(Text)
     song_artist = Column(Text)
@@ -132,7 +160,7 @@ class Visit(db.Model):
             'visit_id': self.visit_id,
             'post_id': self.post_id,
             'id': self.id,
-            # 'metadata_id' is a relationship and is omitted for simple serialization.
+            # 'meta_data_id' is a relationship and is omitted for simple serialization.
             'song_id': self.song_id,
             'song_artist': self.song_artist,
             'song_name': self.song_name,
@@ -150,11 +178,11 @@ class Visit(db.Model):
 
 class VisitMedia(db.Model):
     __tablename__ = "visit_media"
-    __table_args__ = {'schema': 'private'} 
-    visit_id = Column(BigInteger, ForeignKey('visit.visit_id'), nullable=False)
-    removed_visit_id = Column(BigInteger, ForeignKey('RemovedVisit'), nullable=True)
-    uploaded_by = Column(BigInteger, ForeignKey('user.id'), nullable=False)
-    metadata = relationship('Location', backref='visit_media', lazy=True)
+    __table_args__ = {'schema': public} 
+    visit_id = Column(BigInteger, ForeignKey(f'{public}.visit.visit_id'), nullable=False)
+    
+    uploaded_by = Column(BigInteger, ForeignKey(f'{public}.user.id'), nullable=False)
+    meta_data_id = relationship('Location', backref='visit_media', lazy=True)
     visit_media_id =Column(BigInteger, primary_key=True)
     media_url = Column(Text)
     media_type = Column(String(15), default = 'image') #stores what type of media is uploaed, image, video, 360 video, etc
@@ -168,7 +196,7 @@ class VisitMedia(db.Model):
         return {
             'visit_id': self.visit_id,
             'uploaded_by': self.uploaded_by,
-            # 'metadata' is a relationship and is omitted for simple serialization.
+            # 'meta_data_id' is a relationship and is omitted for simple serialization.
             'visit_media_id': self.visit_media_id,
             'media_url': self.media_url,
             'media_type': self.media_type,
@@ -179,25 +207,11 @@ class VisitMedia(db.Model):
             'is_primary': self.is_primary
     }
 
-class Rating(db.Model):
-    __tablename__ = "rating"
-    __table_args__ = {'schema': 'private'} 
-    rating_id = Column(BigInteger, primary_key=True)
-    rating_choice = Column(Integer, default=0, nullable=True)
-    created_at = Column(DateTime, default=datetime.now(timezone.utc))
-    post_id = Column(BigInteger, ForeignKey('post.post_id'), nullable=False)
 
-    def to_dict(self):
-        return {
-            'rating_id': self.rating_id,
-            'rating_choice': self.rating_choice,
-            'created_at': self.created_at,
-            'post_id': self.post_id
-    }
 
 class RemovedPost(db.Model):
     __tablename__ = "removed_post"
-    __table_args__ = {'schema': 'private'} 
+    __table_args__ = {'schema': private} 
     post_id = relationship('Post',backref= 'removed_post', lazy=True)
     removed_post_id = Column(BigInteger, primary_key=True)
     posted_by = Column(String(50), nullable= False)
@@ -218,7 +232,7 @@ class RemovedPost(db.Model):
 
     num_reports = Column(Integer, default=0)
     is_removed = Column(Boolean, default=True)
-    metadata_id = Column(BigInteger)
+    meta_data_id = Column(BigInteger)
 
    
 
@@ -237,17 +251,17 @@ class RemovedPost(db.Model):
             'trending_score': self.trending_score,
             'num_reports': self.num_reports,
             'is_removed': self.is_removed,
-            'metadata_id': self.metadata_id
+            'meta_data_id': self.meta_data_id
             # The 'post_id' relationship is omitted as it is a related object collection, not a column value.
             # Serializing relationships requires separate logic (e.g., nesting or listing IDs).
         }
     
 class RemovedVisit(db.Model):
     __tablename__ = "removed_visit"
-    __table_args__ = {'schema': 'private'} 
+    __table_args__ = {'schema': private} 
     removed_visit_id = Column(BigInteger, primary_key=True)
     visit_id = relationship('Visit', backref='removed_visit', lazy=True)
-    id = Column(BigInteger, ForeignKey('user.id', lazy = True))
+    id = Column(BigInteger, ForeignKey(f'{public}.user.id'), nullable=False)
     
     song_id = Column(Text)
     song_artist = Column(Text)

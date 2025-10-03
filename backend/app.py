@@ -19,7 +19,7 @@ def create_app():
     # Register blueprints
     # from routes.auth import auth_bp
     # from routes.profile import profile_bp
-    from models import post, user, location
+    from models import location, user, post
 
     # app.register_blueprint(auth_bp, url_prefix='/api/auth')
     # app.register_blueprint(profile_bp, url_prefix='/api/profile')
