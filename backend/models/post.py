@@ -181,7 +181,6 @@ class VisitMedia(db.Model):
     __tablename__ = "visit_media"
     __table_args__ = {'schema': public} 
     visit_id = Column(UUID(as_uuid=True), ForeignKey(f'{public}.visit.visit_id'), nullable=False)
-    
     uploaded_by = Column(UUID(as_uuid=True), ForeignKey(f'{public}.user.id'), nullable=False)
     meta_data_id = relationship('Location', backref='visit_media', lazy=True)
     visit_media_id =Column(UUID(as_uuid=True), primary_key=True)

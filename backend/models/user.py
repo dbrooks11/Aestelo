@@ -115,12 +115,19 @@ class UserInfo(db.Model):
             'city': self.city
     }
 
-
+class UserRole(db.Model):
+    __tablename__ = "user_role"
+    __table_args__ = {'schema': private}
+    id = Column(UUID(as_uuid=True), ForeignKey(f'{public}.user.id'), nullable=False)
+    is_user = Column(Boolean, default=True)
+    is_admin = Column(Boolean, default=False)
+    is_moderator = Column(Boolean, default=False)
+    is_owner = Column(Boolean, default=False)
+    
 class UserSettings(db.Model):
     __tablename__ = "user_settings"
     __table_args__ = {'schema': private} 
     id = Column(UUID(as_uuid=True), ForeignKey(f'{public}.user.id'), nullable=False)
-    user_settings_id = Column(UUID(as_uuid=True), primary_key=True)
     email_notifications = Column(Boolean, default=True)
     push_notifications = Column(Boolean, default=True)
     location_sharing = Column(Boolean, default=False)
@@ -146,7 +153,6 @@ class UserSubscription(db.Model):
     __tablename__ = "user_subscription"
     __table_args__ = {'schema': private} 
     id = Column(UUID(as_uuid=True), ForeignKey(f'{public}.user.id'), nullable=False)
-    subscription_id = Column(UUID(as_uuid=True), primary_key=True)
     tier = Column(String(8), default='free') #free, premium, business
     price = Column(Integer)
     started_at= Column(DateTime)
