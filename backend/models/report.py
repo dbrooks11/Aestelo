@@ -23,7 +23,7 @@ class Report(db.Model):
     
     # Moderation tracking
     status = Column(String(20), default='pending')  # 'pending', 'reviewed', 'dismissed', 'actioned'
-    reviewed_by = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'), nullable=True)
+    reviewed_by = Column(UUID(as_uuid=True))
     reviewed_at = Column(DateTime, nullable=True)
     
     created_at = Column(DateTime, default=datetime.now(timezone.utc))

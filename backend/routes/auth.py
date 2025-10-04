@@ -3,7 +3,6 @@ from flask_jwt_extended import create_access_token, create_refresh_token, jwt_re
 from app import db
 from models.user import UserProfile, UserInfo, UserSettings, UserRole, UserSubscription
 from exstensions import supabase, db
-from auth_required_wrapper import auth_required
 
 auth_bp = Blueprint('auth', __name__, url_prefix='auth')
 
@@ -28,8 +27,8 @@ def signup():
     new_user.save()
 
     new_user_info = UserInfo(user_profile_id = id ,
-                             email = email, 
-                             phone_number = phone_number)
+                             email = email if email else None, 
+                             phone_number = phone_number if phone_number else None)
     new_user_info.save()
 
     new_user_settings = UserSettings(user_profile_id = id)

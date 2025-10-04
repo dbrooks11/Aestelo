@@ -74,7 +74,7 @@ class VisitMedia(db.Model):
     width =  Column(Integer)
     height = Column(Integer)
     upload_date = Column(DateTime, default=datetime.now(timezone.utc))
-    verified_status = Column(String(8), default='pending') #Will either be pending, verified, or rejected to verify each image
+    verified_status = Column(String(10), default='pending') #Will either be pending, verified, or rejected to verify each image
     is_primary = Column(Boolean, default=False) #Sets the primary pic in front
     
     def to_dict(self):
@@ -98,10 +98,10 @@ class VisitMedia(db.Model):
         db.session.commit()
     
 #* Visits can get likes but not ratings.Only post can have star ratings
-class VisitLike(db.Model):
-    pass
+# class VisitLike(db.Model):
+#     pass
 
 
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
+#     def save(self):
+#         db.session.add(self)
+#         db.session.commit()

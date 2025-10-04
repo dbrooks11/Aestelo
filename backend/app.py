@@ -15,19 +15,24 @@ def create_app():
 
     
     
-    CORS(app)
+    CORS(app, 
+     origins=["http://localhost:5173", "http://127.0.0.1:5173", "null"],
+     allow_headers=["Content-Type", "Authorization"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     supports_credentials=True)
+    
     # Register blueprints
     from routes.auth import auth_bp
     # from routes.profile import profile_bp
     from routes import auth, profile, main_location_post, user_settings, visit
     from models import location, user, post, rating, visit, report
 
-    # app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    app.register_blueprint(auth_bp, url_prefix='/auth')
     # app.register_blueprint(profile_bp, url_prefix='/api/profile')
 
     # Create tables
     with app.app_context():
-        # db.drop_all()   #* temporary for testing
+        db.drop_all()   #* temporary for testing
         db.create_all()
 
         @app.route('/')

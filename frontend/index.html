@@ -1,13 +1,140 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Auth</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <style>
+        body { font-family: Arial; max-width: 400px; margin: 50px auto; }
+        input, button { display: block; width: 100%; margin: 10px 0; padding: 10px; }
+        .section { border: 1px solid #ccc; padding: 20px; margin: 20px 0; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>Test Aestelo Auth</h1>
+    
+    <!-- Signup Form -->
+    <div class="section">
+        <h2>Sign Up</h2>
+        <input type="email" id="signup-email" placeholder="Email">
+        <input type="password" id="signup-password" placeholder="Password">
+        <button onclick="signup()">Sign Up</button>
+        <div id="signup-result"></div>
+    </div>
+    
+    <!-- Sign In Form -->
+    <div class="section">
+        <h2>Sign In</h2>
+        <input type="email" id="signin-email" placeholder="Email">
+        <input type="password" id="signin-password" placeholder="Password">
+        <button onclick="signin()">Sign In</button>
+        <div id="signin-result"></div>
+    </div>
+    
+    <!-- Test Protected Route -->
+    <div class="section">
+        <h2>Get My Profile</h2>
+        <button onclick="getProfile()">Get Profile (needs auth)</button>
+        <div id="profile-result"></div>
+    </div>
+
+    <script>
+        const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY)
+        const FLASK_API = CONFIG.FLASK_API
+        
+        async function signup() {
+            const email = document.getElementById('signup-email').value
+            const password = document.getElementById('signup-password').value
+            const resultDiv = document.getElementById('signup-result')
+            
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password
+                })
+                
+                if (error) {
+                    resultDiv.innerHTML = `<p class="error">Supabase error: ${error.message}</p>`
+                    return
+                }
+                
+                const token = data.session.access_token
+                
+                const response = await fetch(`${FLASK_API}/auth/signup`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                })
+                
+                const result = await response.json()
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<p class="success">Success! ${result.message}</p>`
+                } else {
+                    resultDiv.innerHTML = `<p class="error">Backend error: ${result.error}</p>`
+                }
+                
+            } catch (err) {
+                resultDiv.innerHTML = `<p class="error">Error: ${err.message}</p>`
+            }
+        }
+        
+        async function signin() {
+            const email = document.getElementById('signin-email').value
+            const password = document.getElementById('signin-password').value
+            const resultDiv = document.getElementById('signin-result')
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                })
+                
+                if (error) {
+                    resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`
+                    return
+                }
+                
+                resultDiv.innerHTML = `<p class="success">Signed in! Token: ${data.session.access_token.substring(0, 20)}...</p>`
+                
+            } catch (err) {
+                resultDiv.innerHTML = `<p class="error">Error: ${err.message}</p>`
+            }
+        }
+        
+        async function getProfile() {
+            const resultDiv = document.getElementById('profile-result')
+            
+            try {
+                const { data: { session } } = await supabase.auth.getSession()
+                
+                if (!session) {
+                    resultDiv.innerHTML = `<p class="error">Not signed in</p>`
+                    return
+                }
+                
+                const response = await fetch(`${FLASK_API}/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`
+                    }
+                })
+                
+                const result = await response.json()
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<pre class="success">${JSON.stringify(result, null, 2)}</pre>`
+                } else {
+                    resultDiv.innerHTML = `<p class="error">Error: ${result.error}</p>`
+                }
+                
+            } catch (err) {
+                resultDiv.innerHTML = `<p class="error">Error: ${err.message}</p>`
+            }
+        }
+    </script>
+</body>
 </html>

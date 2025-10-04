@@ -22,7 +22,7 @@ class UserProfile(db.Model):
     id = Column(UUID(as_uuid=True), primary_key=True)
     banner_theme = Column(String(30))
 
-    username = Column(String(50), unique=True, nullable=False)
+    username = Column(String(50), unique=True, nullable=True)
     profile_image = Column(Text)
     bio = Column(String(250))
 
@@ -105,11 +105,11 @@ class UserInfo(db.Model):
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'),primary_key=True, nullable=False)
     first_name = Column(String(30))
     last_name = Column(String(30))
-    email = Column(Text, unique=True)
-    phone_number = Column(Text, unique=True)
+    email = Column(Text)
+    phone_number = Column(String(20))
     date_of_birth = Column(DateTime)
     age = Column(Integer, default=0)
-    gender = Column(String(10), default= 'Not specified')
+    gender = Column(String(15), default= 'Not specified')
     height_ft = Column(Integer, default=0)
     height_in = Column(Integer, default=0)
     
@@ -147,7 +147,7 @@ class UserRole(db.Model):
     is_moderator = Column(Boolean, default=False)
     is_owner = Column(Boolean, default=False)
     granted_at = Column(DateTime)
-    granted_by = Column(UUID(as_uuid=True), nullable=True)
+    granted_by = Column(UUID(as_uuid=True))
 
     def to_dict(self):
         return {
@@ -170,8 +170,8 @@ class UserSettings(db.Model):
     __table_args__ = {'schema': user_settings_schema} 
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'), primary_key=True, nullable=False)
     language_preference = Column(String(50))
-    email_notifications = Column(Boolean, default=True)
-    push_notifications = Column(Boolean, default=True)
+    email_notifications = Column(Boolean, default=False)
+    push_notifications = Column(Boolean, default=False)
     location_sharing = Column(Boolean, default=False)
     data_usage_consent = Column(Boolean, default=False)
     marketing_consent = Column(Boolean , default=False)
@@ -198,12 +198,12 @@ class UserSubscription(db.Model):
     __tablename__ = "user_subscription"
     __table_args__ = {'schema': user_subscription_schema} 
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'),primary_key=True, nullable=False)
-    tier = Column(String(8), default='free') #free, premium, business
-    price = Column(Integer, default=0)
+    tier = Column(String(10), default='premium') #free, premium, business
+    price = Column(Float, default=6.99)
     started_at= Column(DateTime)
     expires_at = Column(DateTime)
     auto_renew = Column(Boolean, default=False)
-    payment_method_id = Column(UUID(as_uuid=True), nullable=True) 
+    payment_method_id = Column(UUID(as_uuid=True)) 
     billing_cycle = Column(String(10), default='monthly')  #monthly or yearly
     trial_used = Column(Boolean, default=False)
     
