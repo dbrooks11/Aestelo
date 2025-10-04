@@ -185,22 +185,3 @@ class UserSubscription(db.Model):
     }
 
 
-class RemovedUser(db.Model):
-    __tablename__ = "removed_user"
-    __table_args__ = {'schema': removed_user_schema} 
-
-    removed_user_id = Column(UUID(as_uuid=True), primary_key=True)
-    
-    username = Column(String(50), unique=True, nullable=False)
-    email = Column(String(150),unique=True, nullable=False)
-    date_joined = Column(DateTime, default= datetime.now(timezone.utc).strftime('%b %d, %Y'))
-    login_attempts = Column(Integer, default=0)
-    last_login = Column(DateTime, default= datetime.now(timezone.utc).strftime('%b %d, %Y %H:%M:%S'))
-    account_locked_until = Column(DateTime)
-    is_business_account = Column(Boolean, default=False)
-    password_hash = Column(String(255), nullable=False)
-
-    removed_at = Column(DateTime, default= datetime.now(timezone.utc).strftime('%b %d, %Y %H:%M:%S'))
-    removed_by = Column(String(50))  # 'self', 'admin', etc.
-    removal_reason = Column(String(255))
-    recoverable_until = Column(DateTime)  # Auto-delete after 30 days
