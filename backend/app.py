@@ -17,7 +17,7 @@ def create_app():
     
     CORS(app)
     # Register blueprints
-    # from routes.auth import auth_bp
+    from routes.auth import auth_bp
     # from routes.profile import profile_bp
     from routes import auth, profile, main_location_post, user_settings, visit
     from models import location, user, post
@@ -27,7 +27,6 @@ def create_app():
 
     # Create tables
     with app.app_context():
-        db.engine.connect()
         # db.drop_all()   #* temporary for testing
         db.create_all()
 
