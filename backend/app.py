@@ -27,6 +27,7 @@ def create_app():
     # Create tables
     with app.app_context():
         db.engine.connect()
+        # db.drop_all()   #* temporary for testing
         db.create_all()
 
         @app.route('/')

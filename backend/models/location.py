@@ -31,7 +31,7 @@ class Location(db.Model):
     business_location_details = relationship('BusinessLocationDetails', backref='location', lazy=True) #will be handled later
     is_visit = Column(Boolean, default=False) #if its a visit, itll refernce the visit id
         
-    location_id = Column(UUID(as_uuid=True), primary_key=True)
+    location_id = Column(BigInteger, primary_key=True)
     longitude = Column(Float)
     latitude = Column(Float)
     is_long_lat = Column(Boolean) #if place where picture is taken provides the long and late properly, 
