@@ -34,3 +34,6 @@ docker-compose.yml
 
 #gitginore
 .gitignore
+gitignore
+
+.schema_types.py
