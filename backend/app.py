@@ -20,7 +20,7 @@ def create_app():
     from routes.auth import auth_bp
     # from routes.profile import profile_bp
     from routes import auth, profile, main_location_post, user_settings, visit
-    from models import location, user, post
+    from models import location, user, post, rating, visit, report
 
     # app.register_blueprint(auth_bp, url_prefix='/api/auth')
     # app.register_blueprint(profile_bp, url_prefix='/api/profile')

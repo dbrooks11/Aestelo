@@ -3,7 +3,6 @@ from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from sqlalchemy import (Column, ForeignKey, BigInteger, 
                         String, Integer, Float, Text, DateTime, Boolean)
-from sqlalchemy.dialects.postgresql import UUID
 from .schema_types import *
 
 #todo: Come back to mapbox and google place id. 

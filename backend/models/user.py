@@ -19,7 +19,6 @@ from .schema_types import *
 class UserProfile(db.Model):
     __tablename__ = "user_profile"
     __table_args__ = {'schema': user_profile_schema} 
-    #removed_user_id = Column(UUID(as_uuid=True), ForeignKey(f'{private}.removed_user.removed_user_id'), nullable=True)
     id = Column(UUID(as_uuid=True), primary_key=True)
     banner_theme = Column(String(30))
 
@@ -38,10 +37,10 @@ class UserProfile(db.Model):
 
     tiktok = Column(Text)
     is_verified_tiktok = Column(Boolean, default=False)
-
     
     follower_count = Column(Integer, default=0)
     following_count = Column(Integer, default=0)
+
     is_private = Column(Boolean, default=False)
     show_online_status = Column(Boolean, default=False)
     is_business_account = Column(Boolean, default=False)
@@ -49,6 +48,11 @@ class UserProfile(db.Model):
     is_banned = Column(Boolean, default=False)
     banned_at = Column(DateTime, nullable=True)
     banned_reason = Column(String(255), nullable=True)
+
+    num_reports_made = Column(Integer, default=0)
+    num_reports = Column(Integer, default=0)
+
+    
 
     
     user_info = relationship('UserInfo', backref='user_profile', lazy=True)
@@ -59,6 +63,7 @@ class UserProfile(db.Model):
     visit = relationship('Visit', backref='user_profile', lazy=True)
     visit_media = relationship('VisitMedia', backref='user_profile', lazy=True)
     rating = relationship('Rating', backref='user_profile', lazy=True)
+    report = relationship('Report', backref='user_profile', lazy=True)
     
     def to_dict(self):
         return {
@@ -93,12 +98,14 @@ class UserInfo(db.Model):
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'),primary_key=True, nullable=False)
     first_name = Column(String(30))
     last_name = Column(String(30))
+    email = Column(Text, unique=True)
+    phone_number = Column(Text, unique=True)
     date_of_birth = Column(DateTime)
     age = Column(Integer, default=0)
     gender = Column(String(10), default= 'Not specified')
     height_ft = Column(Integer, default=0)
     height_in = Column(Integer, default=0)
-    secondary_email = Column(String(150),unique=True)
+    
     preferred_language = Column(String(20))
     state = Column(String(20))
     city = Column(String(25))
@@ -109,12 +116,13 @@ class UserInfo(db.Model):
             'user_profile_id': self.user_profile_id,
             'first_name': self.first_name,
             'last_name': self.last_name,
+            'email': self.email,
+            'phone_number': self.phone_number,
             'date_of_birth': self.date_of_birth,
             'age': self.age,
             'gender': self.gender,
             'height_ft': self.height_ft,
             'height_in': self.height_in,
-            'secondary_email': self.secondary_email,
             'preferred_language': self.preferred_language,
             'state': self.state,
             'city': self.city

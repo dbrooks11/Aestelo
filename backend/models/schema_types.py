@@ -21,3 +21,6 @@ removed_visit_schema = 'private'
 location_schema = 'public'
 location_coredata_schema = 'private'
 business_location_details_schema = 'public'
+
+#*REPORT
+report_schema = 'private'
