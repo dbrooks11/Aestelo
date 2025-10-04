@@ -39,6 +39,3 @@ def signup():
 
     return jsonify({'message':'Account created successfully'}), 201
         
-        
-
-    
