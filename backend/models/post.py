@@ -211,5 +211,9 @@ class VisitMedia(db.Model):
             "verified_status": self.verified_status,
             "is_primary": self.is_primary
         }
+    
+#* Visits can get likes but not ratings.Only post can have star ratings
+class VisitLike(db.Model):
+    pass
 
 
