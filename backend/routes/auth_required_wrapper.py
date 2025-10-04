@@ -8,7 +8,8 @@ def auth_required(func):
         try:
             user = supabase.auth.get_user(token)
             request.current_user = user
+            func(*args, **kwargs)
         except Exception:
             return jsonify({'error': 'Unauthorized'}), 401
-        func(*args, **kwargs)
+            
     return wrapper

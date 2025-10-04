@@ -146,7 +146,7 @@ class UserRole(db.Model):
     is_admin = Column(Boolean, default=False)
     is_moderator = Column(Boolean, default=False)
     is_owner = Column(Boolean, default=False)
-    granted_at = Column(DateTime, default=datetime.now(timezone.utc))
+    granted_at = Column(DateTime)
     granted_by = Column(UUID(as_uuid=True), nullable=True)
 
     def to_dict(self):
@@ -199,7 +199,7 @@ class UserSubscription(db.Model):
     __table_args__ = {'schema': user_subscription_schema} 
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'),primary_key=True, nullable=False)
     tier = Column(String(8), default='free') #free, premium, business
-    price = Column(Integer)
+    price = Column(Integer, default=0)
     started_at= Column(DateTime)
     expires_at = Column(DateTime)
     auto_renew = Column(Boolean, default=False)

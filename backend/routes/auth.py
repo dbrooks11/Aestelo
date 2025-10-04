@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 from app import db
-from models.user import UserProfile, UserSettings
+from models.user import UserProfile, UserInfo, UserSettings, UserRole, UserSubscription
 from exstensions import supabase, db
 from auth_required_wrapper import auth_required
 
@@ -21,10 +21,25 @@ def signup():
     email = user.user.email
     phone_number = user.user.phone
 
-    if UserProfile.query.get(id = id) or UserSettings.query.filter_by(email = email) or UserSettings.query.filter_by(phone_number = phone_number):
-        return jsonify({'error': 'Account already exist'}), 400
+    if UserProfile.query.get(id):
+        return jsonify({'error': 'Profile already exists'}), 400
 
     new_user = UserProfile(id = id)
-    new_user = UserSettings(email = email, phone_number = phone_number)
+    new_user.save()
+
+    new_user_info = UserInfo(user_profile_id = id ,
+                             email = email, 
+                             phone_number = phone_number)
+    new_user_info.save()
+
+    new_user_settings = UserSettings(user_profile_id = id)
+    new_user_settings.save()
+
+    new_user_role = UserRole(user_profile_id = id)
+    new_user_role.save()
+
+    return jsonify({'message':'Account created successfully'}), 201
+        
+        
 
     
