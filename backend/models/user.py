@@ -52,9 +52,7 @@ class UserProfile(db.Model):
     num_reports_made = Column(Integer, default=0)
     num_reports = Column(Integer, default=0)
 
-    
 
-    
     user_info = relationship('UserInfo', backref='user_profile', lazy=True)
     user_settings = relationship('UserSettings', backref= 'user_profile', lazy=True)
     user_subscription = relationship('UserSubscription', backref= 'user_profile', lazy=True)
@@ -89,6 +87,8 @@ class UserProfile(db.Model):
             "banned_at": self.banned_at,
             "banned_reason": self.banned_reason
     }
+
+    
 
        
     
