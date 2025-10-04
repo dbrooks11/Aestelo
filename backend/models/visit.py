@@ -54,6 +54,11 @@ class Visit(db.Model):
             "num_reports": self.num_reports,
             "is_removed": self.is_removed
         }
+    
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
 
 
 class VisitMedia(db.Model):
@@ -87,6 +92,16 @@ class VisitMedia(db.Model):
             "is_primary": self.is_primary
         }
     
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+    
 #* Visits can get likes but not ratings.Only post can have star ratings
 class VisitLike(db.Model):
     pass
+
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()

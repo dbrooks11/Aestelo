@@ -17,9 +17,13 @@ class Rating(db.Model):
 
     def to_dict(self):
         return {
+            'post_id': self.post_id,
             'user_profile_id': self.user_profile_id,
             'rating_id': self.rating_id,
             'rating_choice': self.rating_choice,
-            'created_at': self.created_at,
-            'post_id': self.post_id
-    }
+            'created_at': self.created_at
+        }
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()

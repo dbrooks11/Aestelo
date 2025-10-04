@@ -27,3 +27,21 @@ class Report(db.Model):
     reviewed_at = Column(DateTime, nullable=True)
     
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
+
+    def to_dict(self):
+        return {
+            'report_id': self.report_id,
+            'reporter_id': self.reporter_id,
+            'reported_type': self.reported_type,
+            'reported_id': self.reported_id,
+            'reason': self.reason,
+            'description': self.description,
+            'status': self.status,
+            'reviewed_by': self.reviewed_by,
+            'reviewed_at': self.reviewed_at,
+            'created_at': self.created_at
+    }
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()

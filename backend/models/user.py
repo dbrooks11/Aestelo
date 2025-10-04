@@ -65,29 +65,36 @@ class UserProfile(db.Model):
     
     def to_dict(self):
         return {
-            "id": self.id,
-            "banner_theme": self.banner_theme,
-            "username": self.username,
-            "profile_image": self.profile_image,
-            "bio": self.bio,
-            "instagram": self.instagram,
-            "is_verified_instagram": self.is_verified_instagram,
-            "facebook": self.facebook,
-            "is_verified_facebook": self.is_verified_facebook,
-            "twitter_x": self.twitter_x,
-            "is_verified_twitter_x": self.is_verified_twitter_x,
-            "tiktok": self.tiktok,
-            "is_verified_tiktok": self.is_verified_tiktok,
-            "follower_count": self.follower_count,
-            "following_count": self.following_count,
-            "is_private": self.is_private,
-            "show_online_status": self.show_online_status,
-            "is_business_account": self.is_business_account,
-            "is_banned": self.is_banned,
-            "banned_at": self.banned_at,
-            "banned_reason": self.banned_reason
-    }
+            'id': self.id,
+            'banner_theme': self.banner_theme,
+            'username': self.username,
+            'profile_image': self.profile_image,
+            'bio': self.bio,
+            'instagram': self.instagram,
+            'is_verified_instagram': self.is_verified_instagram,
+            'facebook': self.facebook,
+            'is_verified_facebook': self.is_verified_facebook,
+            'twitter_x': self.twitter_x,
+            'is_verified_twitter_x': self.is_verified_twitter_x,
+            'tiktok': self.tiktok,
+            'is_verified_tiktok': self.is_verified_tiktok,
+            'follower_count': self.follower_count,
+            'following_count': self.following_count,
+            'is_private': self.is_private,
+            'show_online_status': self.show_online_status,
+            'is_business_account': self.is_business_account,
+            'is_banned': self.is_banned,
+            'banned_at': self.banned_at,
+            'banned_reason': self.banned_reason,
+            'num_reports_made': self.num_reports_made,
+            'num_reports': self.num_reports
+        }
 
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+        
     
 
        
@@ -128,6 +135,9 @@ class UserInfo(db.Model):
             'city': self.city
     }
 
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
 
 class UserRole(db.Model):
     __tablename__ = "user_role"
@@ -141,13 +151,17 @@ class UserRole(db.Model):
 
     def to_dict(self):
         return {
-            'id': self.user_profile_id,
+            'user_profile_id': self.user_profile_id,
             'is_admin': self.is_admin,
             'is_moderator': self.is_moderator,
             'is_owner': self.is_owner,
             'granted_at': self.granted_at,
             'granted_by':self.granted_by
         }
+    
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
         
 
 
@@ -173,6 +187,10 @@ class UserSettings(db.Model):
             'marketing_consent': self.marketing_consent,
             'theme_preference': self.theme_preference
     }
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
     
 
 
@@ -201,5 +219,9 @@ class UserSubscription(db.Model):
             'billing_cycle': self.billing_cycle,
             'trial_used': self.trial_used
     }
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
 
 

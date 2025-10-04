@@ -44,8 +44,8 @@ class Location(db.Model):
         return {
             "post_id": self.post_id,
             "visit_id": self.visit_id, 
-            "is_visit": self.is_visit,
             "location_id": self.location_id,
+            "is_visit": self.is_visit,
             "longitude": self.longitude,
             "latitude": self.latitude,  # fixed typo: lagitude → latitude
             "is_long_lat": self.is_long_lat,
@@ -53,6 +53,10 @@ class Location(db.Model):
             "created_on": self.created_on,
             "verified_status": self.verified_status
     }
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
 
 
 # Want Exact locations
@@ -69,6 +73,10 @@ class LocationCoreData(db.Model):
             'mapbox_place_id': self.mapbox_place_id,
             'name': self.name
     }
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
 
 
 
@@ -94,6 +102,10 @@ class BusinessLocationDetails(db.Model):
             'state': self.state,
             'postal_code': self.postal_code
     }
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
 
 
 

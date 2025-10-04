@@ -75,6 +75,10 @@ class Post(db.Model):
             "is_removed": self.is_removed
     }
 
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
 
 
 class PostMedia(db.Model):
@@ -111,6 +115,10 @@ class PostMedia(db.Model):
             "verified_status": self.verified_status,
             "is_primary": self.is_primary
     }
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
 
 
 
