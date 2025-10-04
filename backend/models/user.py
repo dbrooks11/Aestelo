@@ -147,6 +147,7 @@ class UserSettings(db.Model):
     __tablename__ = "user_settings"
     __table_args__ = {'schema': user_settings_schema} 
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'), primary_key=True, nullable=False)
+    language_preference = Column(String(50))
     email_notifications = Column(Boolean, default=True)
     push_notifications = Column(Boolean, default=True)
     location_sharing = Column(Boolean, default=False)
