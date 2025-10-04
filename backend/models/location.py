@@ -18,7 +18,7 @@ from .schema_types import *
 # Ex. key (opening hours, wifi avaliable, etc)
 
 
-#User uses builtin camera function in app so location_id cant be changed
+#user uses builtin camera function in app so location_id cant be changed
 #Get location_id from pics
 
 
@@ -43,17 +43,18 @@ class Location(db.Model):
     
     def to_dict(self):
         return {
-            'post_id': self.post_id,
-            'visit_id': self.visit_id, 
-            'is_visit': self.is_visit,
-            'location_id': self.location_id,
-            'longitude': self.longitude,
-            'lagitude': self.latitude,
-            'is_long_lat': self.is_long_lat,
-            'altitude': self.altitude,
-            'created_on': self.created_on,
-            'verified_status': self.verified_status
+            "post_id": self.post_id,
+            "visit_id": self.visit_id, 
+            "is_visit": self.is_visit,
+            "location_id": self.location_id,
+            "longitude": self.longitude,
+            "latitude": self.latitude,  # fixed typo: lagitude → latitude
+            "is_long_lat": self.is_long_lat,
+            "altitude": self.altitude,
+            "created_on": self.created_on,
+            "verified_status": self.verified_status
     }
+
 
 # Want Exact locations
 class LocationCoreData(db.Model):

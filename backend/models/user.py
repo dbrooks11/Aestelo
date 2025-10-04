@@ -5,9 +5,9 @@ from sqlalchemy import (Column, ForeignKey, BigInteger,
                         String, Integer, Float, Text, DateTime, Boolean)
 from sqlalchemy.dialects.postgresql import UUID
 from .schema_types import *
-#TODO: Stuff to do/link to user
+#TODO: Stuff to do/link to user_profile
 #socials
-#allow messages from -put in user settings
+#allow messages from -put in user_profile settings
 #circles - for users to be together
 #post privacy settings (might go in post.py)
 #content_filter_mode
@@ -16,11 +16,12 @@ from .schema_types import *
 
 
 
-class User(db.Model):
-    __tablename__ = "user"
-    __table_args__ = {'schema': user_schema} 
+class UserProfile(db.Model):
+    __tablename__ = "user_profile"
+    __table_args__ = {'schema': user_profile_schema} 
     #removed_user_id = Column(UUID(as_uuid=True), ForeignKey(f'{private}.removed_user.removed_user_id'), nullable=True)
     id = Column(UUID(as_uuid=True), primary_key=True)
+    banner_theme = Column(String(30))
 
     username = Column(String(50), unique=True, nullable=False)
     profile_image = Column(Text)
@@ -45,43 +46,51 @@ class User(db.Model):
     show_online_status = Column(Boolean, default=False)
     is_business_account = Column(Boolean, default=False)
 
+    is_banned = Column(Boolean, default=False)
+    banned_at = Column(DateTime, nullable=True)
+    banned_reason = Column(String(255), nullable=True)
+
     
-    user_info = relationship('UserInfo', backref='user', lazy=True)
-    user_settings = relationship('UserSettings', backref= 'user', lazy=True)
-    user_subscription = relationship('UserSubscription', backref= 'user', lazy=True)
-    post = relationship('Post', backref='user', lazy=True)
-    post_media = relationship('PostMedia', backref='user', lazy=True)
-    visit = relationship('Visit', backref='user', lazy=True)
-    visit_media = relationship('VisitMedia', backref='user', lazy=True)
-    rating = relationship('Rating', backref='user', lazy=True)
+    user_info = relationship('UserInfo', backref='user_profile', lazy=True)
+    user_settings = relationship('UserSettings', backref= 'user_profile', lazy=True)
+    user_subscription = relationship('UserSubscription', backref= 'user_profile', lazy=True)
+    post = relationship('Post', backref='user_profile', lazy=True)
+    post_media = relationship('PostMedia', backref='user_profile', lazy=True)
+    visit = relationship('Visit', backref='user_profile', lazy=True)
+    visit_media = relationship('VisitMedia', backref='user_profile', lazy=True)
+    rating = relationship('Rating', backref='user_profile', lazy=True)
     
     def to_dict(self):
         return {
-            'id': self.id,
-            'username': self.username,
-            'profile_pic': self.profile_pic,
-            'bio': self.bio,
-            'instagram': self.instagram,
-            'is_verified_instagram': self.is_verified_instagram,
-            'facebook': self.facebook,
-            'is_verified_facebook': self.is_verified_facebook,
-            'twitter_x': self.twitter_x,
-            'is_verified_twitter_x': self.is_verified_twitter_x,
-            'tiktok': self.tiktok,
-            'is_verified_tiktok': self.is_verified_tiktok,
-            'profile_image': self.profile_image,
-            'follower_count': self.follower_count,
-            'following_count': self.following_count,
-            'is_private': self.is_private,
-            'show_online_status': self.show_online_status,
-            'is_business_account': self.is_business_account
+            "id": self.id,
+            "banner_theme": self.banner_theme,
+            "username": self.username,
+            "profile_image": self.profile_image,
+            "bio": self.bio,
+            "instagram": self.instagram,
+            "is_verified_instagram": self.is_verified_instagram,
+            "facebook": self.facebook,
+            "is_verified_facebook": self.is_verified_facebook,
+            "twitter_x": self.twitter_x,
+            "is_verified_twitter_x": self.is_verified_twitter_x,
+            "tiktok": self.tiktok,
+            "is_verified_tiktok": self.is_verified_tiktok,
+            "follower_count": self.follower_count,
+            "following_count": self.following_count,
+            "is_private": self.is_private,
+            "show_online_status": self.show_online_status,
+            "is_business_account": self.is_business_account,
+            "is_banned": self.is_banned,
+            "banned_at": self.banned_at,
+            "banned_reason": self.banned_reason
     }
+
        
     
 class UserInfo(db.Model):
     __tablename__ = "user_info"
     __table_args__ = {'schema': user_info_schema} 
-    id = Column(UUID(as_uuid=True), ForeignKey(f'{user_schema}.user.id'),primary_key=True, nullable=False)
+    user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'),primary_key=True, nullable=False)
     first_name = Column(String(30))
     last_name = Column(String(30))
     date_of_birth = Column(DateTime)
@@ -97,7 +106,7 @@ class UserInfo(db.Model):
 
     def to_dict(self):
         return {
-            'id': self.id,
+            'user_profile_id': self.user_profile_id,
             'first_name': self.first_name,
             'last_name': self.last_name,
             'date_of_birth': self.date_of_birth,
@@ -115,7 +124,7 @@ class UserInfo(db.Model):
 class UserRole(db.Model):
     __tablename__ = "user_role"
     __table_args__ = {'schema': user_role_schema}
-    id = Column(UUID(as_uuid=True), ForeignKey(f'{user_schema}.user.id'), primary_key=True, nullable=False)
+    user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'), primary_key=True, nullable=False)
     is_admin = Column(Boolean, default=False)
     is_moderator = Column(Boolean, default=False)
     is_owner = Column(Boolean, default=False)
@@ -124,7 +133,7 @@ class UserRole(db.Model):
 
     def to_dict(self):
         return {
-            'id': self.id,
+            'id': self.user_profile_id,
             'is_admin': self.is_admin,
             'is_moderator': self.is_moderator,
             'is_owner': self.is_owner,
@@ -137,7 +146,7 @@ class UserRole(db.Model):
 class UserSettings(db.Model):
     __tablename__ = "user_settings"
     __table_args__ = {'schema': user_settings_schema} 
-    id = Column(UUID(as_uuid=True), ForeignKey(f'{user_schema}.user.id'), primary_key=True, nullable=False)
+    user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'), primary_key=True, nullable=False)
     email_notifications = Column(Boolean, default=True)
     push_notifications = Column(Boolean, default=True)
     location_sharing = Column(Boolean, default=False)
@@ -147,7 +156,7 @@ class UserSettings(db.Model):
 
     def to_dict(self):
         return {
-            'id': self.id,
+            'user_profile_id': self.user_profile_id,
             'email_notifications': self.email_notifications,
             'push_notifications': self.push_notifications,
             'location_sharing': self.location_sharing,
@@ -161,7 +170,7 @@ class UserSettings(db.Model):
 class UserSubscription(db.Model):
     __tablename__ = "user_subscription"
     __table_args__ = {'schema': user_subscription_schema} 
-    id = Column(UUID(as_uuid=True), ForeignKey(f'{user_schema}.user.id'),primary_key=True, nullable=False)
+    user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'),primary_key=True, nullable=False)
     tier = Column(String(8), default='free') #free, premium, business
     price = Column(Integer)
     started_at= Column(DateTime)
@@ -173,7 +182,7 @@ class UserSubscription(db.Model):
     
     def to_dict(self):
         return {
-            'id': self.id,
+            'user_profile_id': self.user_profile_id,
             'tier': self.tier,
             'price': self.price,
             'started_at': self.started_at,
