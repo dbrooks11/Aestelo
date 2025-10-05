@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
+from backend.routes import post
 from config import Config
 from exstensions import db, ma, jwt, limiter,mg
 
@@ -24,7 +25,7 @@ def create_app():
     # Register blueprints
     from routes.auth import auth_bp
     # from routes.profile import profile_bp
-    from routes import auth, profile, main_location_post, user_settings, visit
+    from routes import auth, profile, user_settings, visit, post
     from models import location, user, post, rating, visit, report
 
     app.register_blueprint(auth_bp, url_prefix='/auth')

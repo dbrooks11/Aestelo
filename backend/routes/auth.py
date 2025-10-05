@@ -3,6 +3,7 @@ from flask_jwt_extended import create_access_token, create_refresh_token, jwt_re
 from app import db
 from models.user import UserProfile, UserInfo, UserSettings, UserRole, UserSubscription
 from exstensions import supabase, db
+from auth_required_wrapper import auth_required
 
 auth_bp = Blueprint('auth', __name__, url_prefix='auth')
 
@@ -38,4 +39,43 @@ def signup():
     new_user_role.save()
 
     return jsonify({'message':'Account created successfully'}), 201
+
+
+@auth_bp.route('/me', methods=['GET'])
+@auth_required
+def me():
+    user_id = request.current_user.user.id
+    profile = UserProfile.query.get(user_id)
+    
+    if not profile:
+        return jsonify({'error': 'Profile not found'}), 404
+    
+    return jsonify({
+        'id': profile.id,
+        'username': profile.username,
+        'profile_complete': profile.username is not None
+    }), 200
         
+
+@auth_bp.route('/complete-profile', methods = ['PUT'])
+@auth_required
+def complete_profile():
+
+    is_profile = request.current_user.user.id
+    data = request.get_json()
+    username = data.get('username')
+
+    if not is_profile:
+        return jsonify({'error': 'Profile does not exist'}), 404
+    
+    if not username:
+        return jsonify({'error': 'Please enter an Username'}), 400
+    
+    if UserProfile.query.filter_by(username = username).first():
+        return jsonify({'error':'Username is already taken'}), 409
+
+    user_profile_finish = UserProfile.query.get(is_profile)
+
+    user_profile_finish.username = username
+    user_profile_finish.save()
+    return jsonify({'message': 'Username successfully added'}), 200
