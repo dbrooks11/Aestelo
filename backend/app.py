@@ -26,12 +26,14 @@ def create_app():
     from routes.profile import profile_bp
     from routes.follow import follow_bp
     from routes.block import block_bp
+    from routes.post import post_bp
     from models import (location, user, post, rating, visit, report,followers_and_following)
 
-    app.register_blueprint(auth_bp, url_prefix='/auth')
-    app.register_blueprint(profile_bp, url_prefix='/profile')
-    app.register_blueprint(follow_bp, url_prefix = '/profile/follow')
-    app.register_blueprint(block_bp, url_prefix = '/block')
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(profile_bp)
+    app.register_blueprint(follow_bp)
+    app.register_blueprint(block_bp)
+    app.register_blueprint(post_bp)
 
     # Create tables
     with app.app_context():
