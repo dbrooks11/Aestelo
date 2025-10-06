@@ -12,6 +12,6 @@ class Follow(db.Model):
     __tablename__ = 'follow'
     __table_args__ = {'schema': follow_schema} 
     follow_id = Column(BigInteger, primary_key=True)
-    follower_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'))
-    following_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'))
+    follower_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id')) # Who is following
+    following_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id')) # Who is being followed
     
