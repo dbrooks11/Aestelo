@@ -59,7 +59,7 @@ class Post(db.Model):
 
     def to_dict(self):
         return {
-            "user_profile_id": self.user_profile_id,
+            "user_profile_id": str(self.user_profile_id),
             "post_id": self.post_id,
             "date_posted": self.date_posted,
             "description": self.description,
@@ -106,7 +106,7 @@ class PostMedia(db.Model):
     def to_dict(self):
         return {
             "post_id": self.post_id,
-            "uploaded_by": self.uploaded_by,
+            "uploaded_by": str(self.uploaded_by),
             "location_id": self.location_id,
             "post_media_id": self.post_media_id,
             "media_url": self.media_url,

@@ -69,7 +69,7 @@ class UserProfile(db.Model):
     
     def to_dict(self):
         return {
-            'id': self.id,
+            'id': str(self.id),
             'banner_theme': self.banner_theme,
             'username': self.username,
             'profile_image': self.profile_image,
@@ -145,7 +145,7 @@ class UserInfo(db.Model):
 
     def to_dict(self):
         return {
-            'user_profile_id': self.user_profile_id,
+            'user_profile_id': str(self.user_profile_id),
             'first_name': self.first_name,
             'last_name': self.last_name,
             'email': self.email,
@@ -177,7 +177,7 @@ class UserRole(db.Model):
 
     def to_dict(self):
         return {
-            'user_profile_id': self.user_profile_id,
+            'user_profile_id': str(self.user_profile_id),
             'is_admin': self.is_admin,
             'is_moderator': self.is_moderator,
             'is_owner': self.is_owner,
@@ -206,7 +206,7 @@ class UserSettings(db.Model):
 
     def to_dict(self):
         return {
-            'user_profile_id': self.user_profile_id,
+            'user_profile_id': str(self.user_profile_id),
             'email_notifications': self.email_notifications,
             'push_notifications': self.push_notifications,
             'location_sharing': self.location_sharing,
@@ -237,7 +237,7 @@ class UserSubscription(db.Model):
     
     def to_dict(self):
         return {
-            'user_profile_id': self.user_profile_id,
+            'user_profile_id': str(self.user_profile_id),
             'tier': self.tier,
             'price': self.price,
             'started_at': self.started_at,
