@@ -48,10 +48,7 @@ def get_profile_post_all(username):
             per_page=per_page
         )
 
-        post_list = [{
-            'all_post': post.to_dict()
-        }
-        for post in paginated_post.items]
+        post_list = [post.to_dict() for post in paginated_post.items]
 
         return jsonify({
             'posts': post_list,
@@ -64,7 +61,7 @@ def get_profile_post_all(username):
         return jsonify({'error': 'Failed to fetch post'}), 500
 
 
-@post_bp.route('/<string:username>/profile-post/<bigint:post_id>', methods = ['GET'])
+@post_bp.route('/<string:username>/profile-post/<int:post_id>', methods = ['GET'])
 @auth_required
 def get_profile_post(username, post_id):
     current_user = request.current_user.user.id
@@ -89,9 +86,12 @@ def get_profile_post(username, post_id):
                                         following_id = user_profile.id).first()
         if not is_following:
             return jsonify({'error': 'Profile is private'}), 403
+        
 
     try:
         post = Post.query.get(post_id)
+        if not post or (post.user_profile_id != user_profile.id):
+             return jsonify({'error': 'Post not found'}), 404
         return jsonify({'post': post.to_dict()}), 200
 
     except Exception:
@@ -101,7 +101,7 @@ def get_profile_post(username, post_id):
 @post_bp.route('/<string:username>/profile-post/<bigint:post_id>/edit', methods = ['PATCH'])
 @auth_required
 def edit_post(username, post_id):
-    
+
     
 
    
