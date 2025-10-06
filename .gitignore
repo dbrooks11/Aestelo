@@ -36,4 +36,6 @@ docker-compose.yml
 #gitginore
 .gitignore
 gitignore
-/frontend/config.js
+
+config.js
+frontend/config.js

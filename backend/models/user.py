@@ -38,9 +38,8 @@ class UserProfile(db.Model):
     tiktok = Column(Text)
     is_verified_tiktok = Column(Boolean, default=False)
     
-    followers = Column
-    follower_count = Column(Integer, default=0)
-    following_count = Column(Integer, default=0)
+    follower_count = Column(BigInteger, default=0)
+    following_count = Column(BigInteger, default=0)
 
     is_private = Column(Boolean, default=False)
     show_online_status = Column(Boolean, default=False)
@@ -63,6 +62,7 @@ class UserProfile(db.Model):
     visit_media = relationship('VisitMedia', backref='user_profile', lazy=True)
     rating = relationship('Rating', backref='user_profile', lazy=True)
     report = relationship('Report', backref='user_profile', lazy=True)
+    follow = relationship('Follow', backref='user_profile', lazy=True)
     
     def to_dict(self):
         return {
