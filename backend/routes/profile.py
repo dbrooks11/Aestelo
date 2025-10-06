@@ -2,8 +2,8 @@ from flask import Blueprint, request, jsonify
 from app import db
 from models.user import UserProfile
 from models.followers_and_following import Follow
-from schemas.profile_schema import ProfileSchema
-from auth_required_wrapper import auth_required
+# from schemas.profile_schema import ProfileSchema
+from routes.auth_required_wrapper import auth_required
 
 profile_bp = Blueprint('profile',__name__, url_prefix='/profile')
 

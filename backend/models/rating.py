@@ -8,7 +8,7 @@ from .schema_types import *
 
 class Rating(db.Model):
     __tablename__ = "rating"
-    __table_args__ = ({'schema': rating_schema} ,UniqueConstraint('user_id', 'post_id', name='unique_rating'))
+    __table_args__ = (UniqueConstraint('user_profile_id', 'post_id', name='unique_rating'), {'schema': rating_schema})
     
     rating_id = Column(BigInteger, primary_key=True)
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'), nullable=False)

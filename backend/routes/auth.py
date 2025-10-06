@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify
 from app import db
-from models.user import UserProfile, UserInfo, UserSettings, UserRole, UserSubscription
-from exstensions import supabase, db
-from auth_required_wrapper import auth_required
+from models.user import UserProfile, UserInfo, UserSettings, UserRole
+from exstensions import supabase
+from routes.auth_required_wrapper import auth_required
 
 auth_bp = Blueprint('auth', __name__, url_prefix='auth')
 

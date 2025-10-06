@@ -25,8 +25,7 @@ def create_app():
     from routes.auth import auth_bp
     from routes.profile import profile_bp
     from routes.follow import follow_bp
-    from routes import (auth, profile, user_settings, visit, post)
-    from models import (location, user, post, rating, visit, report)
+    from models import (location, user, post, rating, visit, report,followers_and_following)
 
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(profile_bp, url_prefix='/profile')
