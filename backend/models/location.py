@@ -2,7 +2,7 @@ from exstensions import db
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from sqlalchemy import (Column, ForeignKey, BigInteger, 
-                        String, Integer, Float, Text, DateTime, Boolean)
+                        String, Integer, Float, Text, DateTime, Boolean, Index)
 from .schema_types import *
 
 #todo: Come back to mapbox and google place id. 
@@ -23,9 +23,10 @@ from .schema_types import *
 
 class Location(db.Model):
     __tablename__ = "location"
-    __table_args__ = {'schema': location_schema} 
-    post_id = Column(BigInteger, ForeignKey(f'{post_schema}.post.post_id'))
-    visit_id = Column(BigInteger, ForeignKey(f'{visit_schema}.visit.visit_id'))
+    __table_args__ = ({'schema': location_schema})
+    
+    post_id = Column(BigInteger, ForeignKey(f'{post_schema}.post.post_id'), index=True)
+    visit_id = Column(BigInteger, ForeignKey(f'{visit_schema}.visit.visit_id'), index=True)
     location_coredata = relationship('LocationCoreData', backref='location', lazy=True)
     business_location_details = relationship('BusinessLocationDetails', backref='location', lazy=True) #will be handled later
     is_visit = Column(Boolean, default=False) #if its a visit, itll refernce the visit id
@@ -63,6 +64,7 @@ class Location(db.Model):
 class LocationCoreData(db.Model):
     __tablename__ = "location_core_data"
     __table_args__ = {'schema': location_coredata_schema} 
+
     location_id = Column(BigInteger, ForeignKey(f'{location_schema}.location.location_id'), primary_key=True, nullable=False)
     mapbox_place_id = Column(BigInteger, default=0)
     name = Column(String(150))
@@ -84,6 +86,7 @@ class LocationCoreData(db.Model):
 class BusinessLocationDetails(db.Model):
     __tablename__ = "businesss_location_details"
     __table_args__ = {'schema': business_location_details_schema} 
+
     location_id = Column(BigInteger, ForeignKey(f'{location_schema}.location.location_id'), primary_key=True)
     description = Column(String(200), default='')
     address_line1 = Column(String(50))

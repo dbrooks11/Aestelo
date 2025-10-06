@@ -1,6 +1,6 @@
 from exstensions import db
 from datetime import datetime, timezone
-from sqlalchemy import (Column, ForeignKey, BigInteger, Integer, DateTime)
+from sqlalchemy import (Column, ForeignKey, BigInteger, Integer, DateTime, UniqueConstraint)
 from sqlalchemy.dialects.postgresql import UUID
 from .schema_types import *
 
@@ -8,12 +8,14 @@ from .schema_types import *
 
 class Rating(db.Model):
     __tablename__ = "rating"
-    __table_args__ = {'schema': rating_schema} 
+    __table_args__ = ({'schema': rating_schema} ,UniqueConstraint('user_id', 'post_id', name='unique_rating'))
+    
     rating_id = Column(BigInteger, primary_key=True)
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'), nullable=False)
+    post_id = Column(BigInteger, ForeignKey(f'{post_schema}.post.post_id'), nullable=False)
     rating_choice = Column(Integer, default=0, nullable=True)
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
-    post_id = Column(BigInteger, ForeignKey(f'{post_schema}.post.post_id'), nullable=False)
+    
 
     def to_dict(self):
         return {
