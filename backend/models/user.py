@@ -38,6 +38,7 @@ class UserProfile(db.Model):
     tiktok = Column(Text)
     is_verified_tiktok = Column(Boolean, default=False)
     
+    followers = Column
     follower_count = Column(Integer, default=0)
     following_count = Column(Integer, default=0)
 
@@ -89,7 +90,26 @@ class UserProfile(db.Model):
             'num_reports_made': self.num_reports_made,
             'num_reports': self.num_reports
         }
-
+    def to_dict_public(self):
+        return{
+            'banner_theme': self.banner_theme,
+            'username': self.username,
+            'profile_image': self.profile_image,
+            'bio': self.bio,
+            'instagram': self.instagram,
+            'facebook': self.facebook,
+            'twitter_x': self.twitter_x,
+            'tiktok': self.tiktok,
+            'follower_count': self.follower_count,
+            'following_count': self.following_count,
+            'show_online_status': self.show_online_status,
+        }
+    def to_dict_private(self):
+        return{
+            'banner_theme': self.banner_theme,
+            'username': self.username,
+            'profile_image': self.profile_image,
+        }
 
     def save(self):
         db.session.add(self)

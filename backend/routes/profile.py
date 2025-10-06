@@ -28,3 +28,31 @@ def profile_me():
         for edit_field in can_edit:
             if edit_field in data:
                 setattr(my_profile, edit_field, data[edit_field])
+
+@profile_bp.route('/profile/<string:username>', methods = ['GET'])
+@auth_required
+def user_profile(username):
+    user_profile = UserProfile.query.filter_by(username = username).first()
+    current_user = request.current_user.user.id
+    current_user_profile = UserProfile.query.get(id)
+
+
+    if not user_profile:
+        return jsonify({'error': 'Profile not found'}), 404
+    
+    #checks if the profile the user is veiwing is themselves
+    if user_profile.id == current_user:
+        return jsonify({'me': user_profile.to_dict()}), 200
+
+    #if user profile is private, check if the person that is trying to view it is following them
+    if user_profile.is_private:
+        if user_profile.id in current_user_profile.followers:
+            jsonify({'user_profile':user_profile.to_dict_public}), 200
+        else:
+            return jsonify({'user_profile':user_profile.to_dict_private}), 200
+
+    if user_profile.is_banned:
+        return jsonify({'error':'Profile unavailable'}),404
+    
+    return jsonify({'user_profile':user_profile.to_dict_public()}), 200
+    
