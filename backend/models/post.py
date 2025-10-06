@@ -29,10 +29,6 @@ class Post(db.Model):
     __table_args__ = {'schema': post_schema} 
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'),nullable=False)
     post_id = Column(BigInteger, primary_key=True)
-
-    post_media_id = relationship('PostMedia', backref='post', lazy=True)
-    visit_id = relationship('Visit', backref='post', lazy=True)
-    rating = relationship('Rating', backref='post', lazy=True)
     
     date_posted = Column(DateTime, default=datetime.now(timezone.utc))
     description = Column(String(200), default='', nullable=False)
@@ -54,6 +50,11 @@ class Post(db.Model):
     num_reports = Column(Integer, default=0)
     is_removed = Column(Boolean, default=False) #removed due to moderaters, admin, etc (does NOT mean deleted by user_profile)
     
+    
+    post_media_id = relationship('PostMedia', backref='post', lazy=True)
+    visit_id = relationship('Visit', backref='post', lazy=True)
+    rating = relationship('Rating', backref='post', lazy=True)
+
 
     def to_dict(self):
         return {

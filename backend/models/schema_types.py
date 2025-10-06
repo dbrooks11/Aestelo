@@ -24,3 +24,6 @@ business_location_details_schema = 'public'
 
 #*REPORT
 report_schema = 'private'
+
+#*FOLLOWING & FOLLOWERS
+follow_schema = 'public'
