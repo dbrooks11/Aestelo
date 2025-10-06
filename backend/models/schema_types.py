@@ -27,3 +27,6 @@ report_schema = 'private'
 
 #*FOLLOWING & FOLLOWERS
 follow_schema = 'public'
+
+#* BLOCK PROFILE
+block_profile_schema = 'public'
