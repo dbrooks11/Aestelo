@@ -19,6 +19,7 @@ from .schema_types import *
 class UserProfile(db.Model):
     __tablename__ = "user_profile"
     __table_args__ = {'schema': user_profile_schema} 
+    
     id = Column(UUID(as_uuid=True), primary_key=True)
     banner_theme = Column(String(30))
 
@@ -51,6 +52,8 @@ class UserProfile(db.Model):
 
     num_reports_made = Column(Integer, default=0)
     num_reports = Column(Integer, default=0)
+
+    profile_created_at = Column(DateTime, default=datetime.now(timezone.utc))
 
 
     user_info = relationship('UserInfo', backref='user_profile', lazy=True)
@@ -88,7 +91,8 @@ class UserProfile(db.Model):
             'banned_at': self.banned_at,
             'banned_reason': self.banned_reason,
             'num_reports_made': self.num_reports_made,
-            'num_reports': self.num_reports
+            'num_reports': self.num_reports,
+            'profile_created_at':self.profile_created_at
         }
     def to_dict_public(self):
         return{
@@ -122,6 +126,7 @@ class UserProfile(db.Model):
 class UserInfo(db.Model):
     __tablename__ = "user_info"
     __table_args__ = {'schema': user_info_schema} 
+
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'),primary_key=True, nullable=False)
     first_name = Column(String(30))
     last_name = Column(String(30))
@@ -162,6 +167,7 @@ class UserInfo(db.Model):
 class UserRole(db.Model):
     __tablename__ = "user_role"
     __table_args__ = {'schema': user_role_schema}
+
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'), primary_key=True, nullable=False)
     is_admin = Column(Boolean, default=False)
     is_moderator = Column(Boolean, default=False)
@@ -188,6 +194,7 @@ class UserRole(db.Model):
 class UserSettings(db.Model):
     __tablename__ = "user_settings"
     __table_args__ = {'schema': user_settings_schema} 
+
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'), primary_key=True, nullable=False)
     language_preference = Column(String(50))
     email_notifications = Column(Boolean, default=False)
@@ -217,6 +224,7 @@ class UserSettings(db.Model):
 class UserSubscription(db.Model):
     __tablename__ = "user_subscription"
     __table_args__ = {'schema': user_subscription_schema} 
+
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'),primary_key=True, nullable=False)
     tier = Column(String(10), default='premium') #free, premium, business
     price = Column(Float, default=6.99)

@@ -1,6 +1,5 @@
 from flask import Flask
 from flask_cors import CORS
-from backend.routes import post
 from config import Config
 from exstensions import db, ma, jwt, limiter,mg
 
@@ -15,7 +14,7 @@ def create_app():
     mg.init_app(app, db)
 
     
-    
+    #todo: TEMPORARY CORS Attributes
     CORS(app, 
      origins=["http://localhost:5173", "http://127.0.0.1:5173", "null"],
      allow_headers=["Content-Type", "Authorization"],
