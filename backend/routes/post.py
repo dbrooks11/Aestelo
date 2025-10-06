@@ -98,9 +98,33 @@ def get_profile_post(username, post_id):
         return jsonify({'error':'Failed to fetch post'}), 500
     
 
-@post_bp.route('/<string:username>/profile-post/<bigint:post_id>/edit', methods = ['PATCH'])
+@post_bp.route('/profile-post/<int:post_id>/edit', methods = ['PATCH'])
 @auth_required
-def edit_post(username, post_id):
+def edit_post(post_id):
+    current_user = request.current_user.user.id
+    my_profile = UserProfile.query.get(current_user)
+    post = Post.query.filter_by(user_profile_id = current_user, post_id = post_id, is_deleted = False, is_removed = False).first()
+    if not my_profile:
+        return jsonify({'error': 'Profile not found'}), 404
+    
+    if not post:
+        return jsonify({'error': 'You cannot edit this post'}), 403
+
+    try:
+        data = request.get_json()
+
+        can_edit = ('description','name', 'accessibility')
+
+        for edit_field in can_edit:
+            if edit_field in data:
+                setattr(post, edit_field, data[edit_field])
+        db.session.commit()
+        jsonify({'message':'Fields updated successfully'}), 200
+    except Exception as e:
+        error = getattr(e,'messages', str(e))
+        return jsonify({'error': error}), 500
+
+
 
     
 

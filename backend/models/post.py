@@ -31,6 +31,7 @@ class Post(db.Model):
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'),nullable=False)
     post_id = Column(BigInteger, primary_key=True)
     
+    name = Column(String(100))
     date_posted = Column(DateTime, default=datetime.now(timezone.utc))
     description = Column(String(200), default='', nullable=False)
     total_num_of_photos = Column(Integer)
