@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app import db
 from models.user import UserProfile
+from models.block_profile import BlockProfile
 from models.followers_and_following import Follow
 # from schemas.profile_schema import ProfileSchema
 from routes.auth_required_wrapper import auth_required
@@ -46,6 +47,14 @@ def profile_me():
 def user_profile(username):
     user_profile = UserProfile.query.filter_by(username = username).first()
     current_user = request.current_user.user.id
+
+    is_blocked = BlockProfile.query.filter_by(blocker_id = user_profile.id,
+                                              blocked_id = current_user).first()
+    is_current_user_blocking = BlockProfile.query.filter_by(blocker_id = current_user,
+                                                            blocked_id = user_profile.id).first()
+
+    if is_blocked or is_current_user_blocking:
+        return jsonify({'error': 'Profile unavailable'}), 404
    
     if not user_profile:
         return jsonify({'error': 'Profile not found'}), 404
@@ -53,6 +62,7 @@ def user_profile(username):
     #checks if the profile the user is veiwing is themselves
     if user_profile.id == current_user:
         return jsonify({'me': user_profile.to_dict()}), 200
+    
     
     #check if the user they are trying to veiw is banned
     if user_profile.is_banned:
