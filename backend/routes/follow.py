@@ -120,6 +120,7 @@ def get_followers(username):
             "total_pages": paginated_followers.pages,
             "current_page": paginated_followers.page
         }), 200
+    
     except Exception:
         return jsonify({'error': 'Failed to fetch followers'}), 500
     
