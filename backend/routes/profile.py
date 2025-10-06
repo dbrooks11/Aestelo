@@ -33,6 +33,7 @@ def profile_me():
             for edit_field in can_edit:
                 if edit_field in data:
                     setattr(my_profile, edit_field, data[edit_field])
+            db.session.commit()
             jsonify({'message':'Fields updated successfully'}), 200
         except Exception as e:
             error = getattr(e,'messages', str(e))

@@ -32,7 +32,10 @@ def follow_user(username):
         new_follow = Follow(follower_id = current_user,
                              following_id = user_profile.id)
         user_profile.follower_count += 1
-        new_follow.save()
+        current_user_profile = UserProfile.query.get(current_user)
+        current_user_profile.following_count += 1
+        db.session.add(new_follow)
+        db.session.commit()
         return jsonify({'message': 'Profile successfully followed'}), 201
     except Exception:
         db.session.rollback()

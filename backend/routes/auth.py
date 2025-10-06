@@ -45,7 +45,7 @@ def signup():
     
     
 
-@auth_bp.route('/complete-profile', methods = ['PUT'])
+@auth_bp.route('/complete-profile', methods = ['PATCH'])
 @auth_required
 def complete_profile():
 
@@ -66,7 +66,7 @@ def complete_profile():
         user_profile_finish = UserProfile.query.get(is_profile)
 
         user_profile_finish.username = username
-        user_profile_finish.save()
+        db.session.commit()
         return jsonify({'message': 'Username successfully added'}), 200
     except Exception:
         db.session.rollback()
