@@ -51,7 +51,6 @@ class Post(db.Model):
     num_reports = Column(Integer, default=0)
     is_removed = Column(Boolean, default=False) #removed due to moderaters, admin, etc (does NOT mean deleted by user_profile)
     
-    
     post_media_id = relationship('PostMedia', backref='post', lazy=True)
     visit_id = relationship('Visit', backref='post', lazy=True)
     rating = relationship('Rating', backref='post', lazy=True)
