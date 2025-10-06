@@ -31,7 +31,7 @@ def create_app():
 
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(profile_bp, url_prefix='/profile')
-    app.register_blueprint(follow_bp, url_prefix = '/follow')
+    app.register_blueprint(follow_bp, url_prefix = '/profile/follow')
 
     # Create tables
     with app.app_context():

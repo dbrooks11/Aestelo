@@ -5,7 +5,7 @@ from models.followers_and_following import Follow
 from schemas.profile_schema import ProfileSchema
 from auth_required_wrapper import auth_required
 
-follow_bp = Blueprint('follow', __name__, url_prefix='/follow')
+follow_bp = Blueprint('follow', __name__, url_prefix='/profile/follow')
 
 
 @follow_bp.route('/<string:username>/follow-user', methods = ['POST'])
@@ -20,9 +20,20 @@ def follow_user(username):
     if user_profile.is_banned:
         return jsonify({'error':'Profile unavailable'}),404
     
-    if user_profile.is_private:
-        return jsonify({'error':'Profile is private'}),404
+    if user_profile.id == current_user:
+        return jsonify({'error': 'Cannot follow yourself'}), 400
+    
+    is_following = Follow.query.filter_by(follower_id = current_user,
+                                          following_id = user_profile.id).first()
+    if is_following:
+        return jsonify({'error': 'Profile already followed'}), 409
 
     try:
-        will_follow = Follow(follower_id = current_user,
+        new_follow = Follow(follower_id = current_user,
                              following_id = user_profile.id)
+        user_profile.follower_count += 1
+        new_follow.save()
+        return jsonify({'message': 'Profile successfully followed'}), 201
+    except Exception:
+        db.session.rollback()
+        return jsonify({'error': 'Failed to follow profile'}), 500

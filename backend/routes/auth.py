@@ -23,22 +23,25 @@ def signup():
     if UserProfile.query.get(id):
         return jsonify({'error': 'Profile already exists'}), 400
 
-    new_user = UserProfile(id = id)
-    new_user.save()
+    try:
+        new_user = UserProfile(id = id)
+        new_user.save()
 
-    new_user_info = UserInfo(user_profile_id = id ,
-                             email = email if email else None, 
-                             phone_number = phone_number if phone_number else None)
-    new_user_info.save()
+        new_user_info = UserInfo(user_profile_id = id ,
+                                email = email if email else None, 
+                                phone_number = phone_number if phone_number else None)
+        new_user_info.save()
 
-    new_user_settings = UserSettings(user_profile_id = id)
-    new_user_settings.save()
+        new_user_settings = UserSettings(user_profile_id = id)
+        new_user_settings.save()
 
-    new_user_role = UserRole(user_profile_id = id)
-    new_user_role.save()
+        new_user_role = UserRole(user_profile_id = id)
+        new_user_role.save()
 
-    return jsonify({'message':'Account created successfully'}), 201
-
+        return jsonify({'message':'Account created successfully'}), 201
+    except Exception:
+        db.session.rollback()
+        return jsonify({'error': 'Profile could not be created'}), 500
 
 @auth_bp.route('/me', methods=['GET'])
 @auth_required
