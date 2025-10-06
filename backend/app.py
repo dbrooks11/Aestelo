@@ -35,7 +35,7 @@ def create_app():
 
     # Create tables
     with app.app_context():
-        db.drop_all()   #* temporary for testing
+        db.drop_all()   #todo: TEMPORARY for testing
         db.create_all()
 
         @app.route('/')

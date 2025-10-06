@@ -10,7 +10,7 @@ follow_bp = Blueprint('follow', __name__, url_prefix='/profile/follow')
 #FOLLOW A USER
 @follow_bp.route('/<string:username>/follow-profile', methods = ['POST'])
 @auth_required
-def follow_user(username):
+def follow_profile(username):
     current_user = request.current_user.user.id
     user_profile = UserProfile.query.filter_by(username = username).first()
 
@@ -45,7 +45,7 @@ def follow_user(username):
 #UNFOLLOW A USER
 @follow_bp.route('/<string:username>/unfollow-profile', methods = ['DELETE'])
 @auth_required
-def unfollow_user(username):
+def unfollow_profile(username):
     current_user = request.current_user.user.id
     user_profile = UserProfile.query.filter_by(username = username).first()
 
