@@ -42,22 +42,8 @@ def signup():
     except Exception:
         db.session.rollback()
         return jsonify({'error': 'Profile could not be created'}), 500
-
-@auth_bp.route('/me', methods=['GET'])
-@auth_required
-def me():
-    user_id = request.current_user.user.id
-    profile = UserProfile.query.get(user_id)
     
-    if not profile:
-        return jsonify({'error': 'Profile not found'}), 404
     
-    return jsonify({
-        'id': profile.id,
-        'username': profile.username,
-        'profile_complete': profile.username is not None
-    }), 200
-        
 
 @auth_bp.route('/complete-profile', methods = ['PUT'])
 @auth_required
@@ -76,8 +62,30 @@ def complete_profile():
     if UserProfile.query.filter_by(username = username).first():
         return jsonify({'error':'Username is already taken'}), 409
 
-    user_profile_finish = UserProfile.query.get(is_profile)
+    try:
+        user_profile_finish = UserProfile.query.get(is_profile)
 
-    user_profile_finish.username = username
-    user_profile_finish.save()
-    return jsonify({'message': 'Username successfully added'}), 200
+        user_profile_finish.username = username
+        user_profile_finish.save()
+        return jsonify({'message': 'Username successfully added'}), 200
+    except Exception:
+        db.session.rollback()
+        return jsonify({'error': 'Failed to complete profile'}), 500
+    
+
+    
+@auth_bp.route('/me', methods=['GET'])
+@auth_required
+def me():
+    user_id = request.current_user.user.id
+    profile = UserProfile.query.get(user_id)
+    
+    if not profile:
+        return jsonify({'error': 'Profile not found'}), 404
+    
+    return jsonify({
+        'id': profile.id,
+        'username': profile.username,
+        'profile_complete': profile.username is not None
+    }), 200
+        
