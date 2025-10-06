@@ -57,15 +57,16 @@ def user_profile(username):
     if user_profile.is_banned:
         return jsonify({'error':'Profile unavailable'}),404
     
-    is_following = Follow(follower_id = current_user,
-                          following_id = user_profile.id).first()
+    #check if current user is a follower of the person's profile they are trying to view
+    is_following = Follow.query.filter_by(follower_id = current_user,
+                                          following_id = user_profile.id).first()
 
     #if user profile is private, check if the person that is trying to view it is following them
     if user_profile.is_private:
         if is_following:
-            jsonify({'user_profile':user_profile.to_dict_public}), 200
+            jsonify({'user_profile':user_profile.to_dict_public()}), 200
         else:
-            return jsonify({'user_profile':user_profile.to_dict_private}), 200
+            return jsonify({'user_profile':user_profile.to_dict_private()}), 200
     
     return jsonify({'user_profile':user_profile.to_dict_public()}), 200
     
