@@ -15,3 +15,7 @@ class Follow(db.Model):
     follower_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id')) # Who is following
     following_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id')) # Who is being followed
     
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+        

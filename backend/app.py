@@ -25,11 +25,13 @@ def create_app():
     # Register blueprints
     from routes.auth import auth_bp
     from routes.profile import profile_bp
-    from routes import auth, profile, user_settings, visit, post
-    from models import location, user, post, rating, visit, report
+    from routes.follow import follow_bp
+    from routes import (auth, profile, user_settings, visit, post)
+    from models import (location, user, post, rating, visit, report)
 
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(profile_bp, url_prefix='/profile')
+    app.register_blueprint(follow_bp, url_prefix = '/follow')
 
     # Create tables
     with app.app_context():
