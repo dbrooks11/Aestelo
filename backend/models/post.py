@@ -51,6 +51,8 @@ class Post(db.Model):
     deleted_at = Column(DateTime)
     num_reports = Column(Integer, default=0)
     is_removed = Column(Boolean, default=False) #removed due to moderaters, admin, etc (does NOT mean deleted by user_profile)
+    removed_at = Column(DateTime)
+    
     
     post_media_id = relationship('PostMedia', backref='post', lazy=True)
     visit_id = relationship('Visit', backref='post', lazy=True)
@@ -59,7 +61,7 @@ class Post(db.Model):
 
     def to_dict(self):
         return {
-            "user_profile_id": str(self.user_profile_id),
+            "user_profile_id": self.user_profile_id,
             "post_id": self.post_id,
             "date_posted": self.date_posted,
             "description": self.description,
@@ -76,6 +78,10 @@ class Post(db.Model):
             "num_reports": self.num_reports,
             "is_removed": self.is_removed
     }
+
+    @classmethod
+    def active(cls):
+        return cls.query.filter_by(is_deleted = False, is_removed = False)
 
     def save(self):
         db.session.add(self)
@@ -106,7 +112,7 @@ class PostMedia(db.Model):
     def to_dict(self):
         return {
             "post_id": self.post_id,
-            "uploaded_by": str(self.uploaded_by),
+            "uploaded_by": self.uploaded_by,
             "location_id": self.location_id,
             "post_media_id": self.post_media_id,
             "media_url": self.media_url,

@@ -5,7 +5,8 @@ from models.user import UserProfile
 from models.block_profile import BlockProfile
 from models.post import Post
 from models.followers_and_following import Follow
-from routes.auth_required_wrapper import auth_required
+from routes.auth_required_wrapper import auth_required, admin_required
+from datetime import datetime, timezone
 
 
 post_bp = Blueprint('post', __name__, url_prefix='/post')
@@ -41,7 +42,7 @@ def get_profile_post_all(username):
         page = request.args.get('page', default=1, type=int)
         per_page = request.args.get('per_page', default=20, type=int)
 
-        post_query = Post.query.filter_by(user_profile_id = user_profile.id)
+        post_query = Post.active().filter_by(user_profile_id = user_profile.id)
 
         paginated_post = post_query.paginate(
             page = page,
@@ -90,7 +91,7 @@ def get_profile_post(username, post_id):
 
     try:
         post = Post.query.get(post_id)
-        if not post or (post.user_profile_id != user_profile.id):
+        if not post or (post.user_profile_id != user_profile.id) or post.is_deleted or post.is_removed:
              return jsonify({'error': 'Post not found'}), 404
         return jsonify({'post': post.to_dict()}), 200
 
@@ -103,7 +104,8 @@ def get_profile_post(username, post_id):
 def edit_post(post_id):
     current_user = request.current_user.user.id
     my_profile = UserProfile.query.get(current_user)
-    post = Post.query.filter_by(user_profile_id = current_user, post_id = post_id, is_deleted = False, is_removed = False).first()
+    post = Post.active().filter_by(user_profile_id = current_user, post_id = post_id).first()
+
     if not my_profile:
         return jsonify({'error': 'Profile not found'}), 404
     
@@ -125,9 +127,44 @@ def edit_post(post_id):
         return jsonify({'error': error}), 500
 
 
-
+@post_bp.route('/profile-post/<int:post_id>/delete', methods = ['DELETE'])
+@auth_required
+def delete_post(post_id):
+    current_user = request.current_user.user.id
+    post = Post.active().filter_by(user_profile_id = current_user, post_id =post_id).first()
+    
+    if not post:
+        return jsonify({'error': 'Post unavailable'}), 403
+    
+    try:
+        post.is_deleted = True
+        post.deleted_at = datetime.now(timezone.utc)
+        db.session.commit()
+        return jsonify({'error':'Post deleted successfully'}), 200
+    except Exception:
+        db.session.rollback()
+        return jsonify({'error':'Failed to delete post'}), 500
     
 
-   
+
+@post_bp.route('admin/profile-post/<int:post_id>/remove', methods = ['DELETE'])
+@auth_required
+@admin_required
+def remove_post_admin(post_id):
+    current_user = request.current_user.user.id
+    post = Post.active().filter_by(user_profile_id = current_user, post_id = post_id).first()
+    
+    if not post:
+        return jsonify({'error': 'Post unavailable'}), 404
+    
+    try:
+        post.is_removed = True
+        post.removed_at = datetime.now(timezone.utc)
+        db.session.commit()
+        return jsonify({'error':'Post removed successfully'}), 200
+    except Exception:
+        db.session.rollback()
+        return jsonify({'error':'Failed to remove post'}), 500
+    
     
 

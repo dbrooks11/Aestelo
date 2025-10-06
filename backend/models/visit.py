@@ -38,7 +38,7 @@ class Visit(db.Model):
         return {
             "visit_id": self.visit_id,
             "post_id": self.post_id,
-            "user_profile_id": str(self.user_profile_id),
+            "user_profile_id": self.user_profile_id,
             "location_id": self.location_id,
             "song_id": self.song_id,
             "song_artist": self.song_artist,
@@ -55,6 +55,9 @@ class Visit(db.Model):
             "is_removed": self.is_removed
         }
     
+    @classmethod
+    def active(cls):
+        return cls.query.filter_by(is_deleted = False, is_removed = False)
 
     def save(self):
         db.session.add(self)
@@ -80,7 +83,7 @@ class VisitMedia(db.Model):
     def to_dict(self):
         return {
             "visit_id": self.visit_id,
-            "uploaded_by": str(self.uploaded_by),
+            "uploaded_by": self.uploaded_by,
             "location_id": self.location_id,
             "visit_media_id": self.visit_media_id,
             "media_url": self.media_url,
