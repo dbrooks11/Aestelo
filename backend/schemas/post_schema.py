@@ -1,6 +1,6 @@
 from app import ma
 from marshmallow import (fields, validates, 
-                         ValidationError, validate)
+                         ValidationError, validate, pre_load)
 from models.post import Post,PostMedia
 
 class PostSchema(ma.SQLAlchemyAutoSchema):
@@ -19,6 +19,13 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
     save_count = fields.Integer(validate=[(validate.Range(min=0))], dump_only=True)
     share_count = fields.Integer(validate=[(validate.Range(min=0))], dump_only=True)
     trending_score = fields.Integer(validate=[(validate.Range(min=0))], dump_only=True)
+
+    @pre_load
+    def strip_strings(self, data, **kwargs):
+        for key, value in data.items():
+            if isinstance(value, str):
+                data[key] = value.strip()
+        return data
 
 
 class PostMediaSchema(ma.SQLAlchemyAutoSchema):
@@ -46,3 +53,10 @@ class PostMediaSchema(ma.SQLAlchemyAutoSchema):
         if value not in allowed:
             raise ValidationError(f"Status must be one of: {allowed}")
         return value
+    
+    @pre_load
+    def strip_strings(self, data, **kwargs):
+        for key, value in data.items():
+            if isinstance(value, str):
+                data[key] = value.strip()
+        return data

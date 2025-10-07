@@ -1,7 +1,7 @@
 # schemas/visit.py
 from app import ma
 from models.visit import Visit, VisitMedia
-from marshmallow import validates, ValidationError, fields, validate
+from marshmallow import validates, ValidationError, fields, validate, pre_load
 
 class VisitSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -46,6 +46,13 @@ class VisitSchema(ma.SQLAlchemyAutoSchema):
         if value > 3:
             raise ValidationError("Maximum 3 edits allowed per visit")
         return value
+    
+    @pre_load
+    def strip_strings(self, data, **kwargs):
+        for key, value in data.items():
+            if isinstance(value, str):
+                data[key] = value.strip()
+        return data
 
 class VisitMediaSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -77,3 +84,10 @@ class VisitMediaSchema(ma.SQLAlchemyAutoSchema):
         if value not in allowed:
             raise ValidationError(f"Status must be one of: {allowed}")
         return value
+    
+    @pre_load
+    def strip_strings(self, data, **kwargs):
+        for key, value in data.items():
+            if isinstance(value, str):
+                data[key] = value.strip()
+        return data

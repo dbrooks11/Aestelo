@@ -137,7 +137,6 @@ class UserInfo(db.Model):
     first_name = Column(String(30))
     last_name = Column(String(30))
     email = Column(String(150))
-    phone_number = Column(String(15))
     date_of_birth = Column(DateTime)
     age = Column(Integer, default=0)
     gender = Column(String(15), default= 'Not specified')
@@ -155,7 +154,6 @@ class UserInfo(db.Model):
             'first_name': self.first_name,
             'last_name': self.last_name,
             'email': self.email,
-            'phone_number': self.phone_number,
             'date_of_birth': self.date_of_birth,
             'age': self.age,
             'gender': self.gender,

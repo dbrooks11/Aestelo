@@ -1,7 +1,7 @@
 # schemas/report.py
 from app import ma
 from models.report import Report
-from marshmallow import validates, ValidationError, fields, validate
+from marshmallow import validates, ValidationError, fields, validate, pre_load
 
 class ReportSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -51,6 +51,13 @@ class ReportSchema(ma.SQLAlchemyAutoSchema):
         if not value or value.strip() == '':
             raise ValidationError("reported_id cannot be empty")
         return value
+    
+    @pre_load
+    def strip_strings(self, data, **kwargs):
+        for key, value in data.items():
+            if isinstance(value, str):
+                data[key] = value.strip()
+        return data
 
    
 

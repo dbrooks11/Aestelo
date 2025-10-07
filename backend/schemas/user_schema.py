@@ -1,9 +1,9 @@
 # schemas/user.py
 from app import ma
 from models.user import UserProfile, UserInfo, UserRole, UserSettings, UserSubscription
-from marshmallow import validates, ValidationError, fields, validate
+from marshmallow import validates, ValidationError, fields, validate,pre_load
 from datetime import datetime
-
+from flask import request
 class UserProfileSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserProfile
@@ -27,6 +27,25 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
     twitter_x= fields.Str(validate=validate.URL())
 
 
+    @pre_load
+    def strip_strings(self, data, **kwargs):
+        for key, value in data.items():
+            if isinstance(value, str):
+                data[key] = value.strip()
+        return data
+        
+    @validates('username')
+    def validate_username(self, value):
+        existing_user = UserProfile.query.filter_by(username=value).first()
+        current_user = self.context.get('instance')
+        
+        # If username exists AND it's not the current user's username
+        if existing_user and (not current_user or existing_user.id != current_user.id):
+            raise ValidationError('Username already exists')
+        
+        return value
+
+
 class UserInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserInfo
@@ -39,7 +58,6 @@ class UserInfoSchema(ma.SQLAlchemyAutoSchema):
     first_name = fields.Str(validate=[validate.Length(max=30), validate.Regexp(r"^[a-zA-Z\s'-]+$",error="Name can only contain letters, spaces, apostrophe, and hyphen")])
     last_name = fields.Str(validate=[validate.Length(max=30), validate.Regexp(r"^[a-zA-Z\s'-]+$",error="Name can only contain letters, spaces, apostrophe, and hyphen")])
     email = fields.Email(required=False, validate=validate.Length(max=150))
-    phone_number = fields.Str(validate=[validate.Length(max=15), validate.Regexp(r'^[0-9]+$', error='Phone number can only contain numbers')])
     date_of_birth = fields.DateTime()
     gender = fields.Str(
         validate=validate.OneOf([
@@ -99,6 +117,13 @@ class UserInfoSchema(ma.SQLAlchemyAutoSchema):
         if value and value > min_age_date:
             raise ValidationError("You must be at least 13 years old")
         return value
+    
+    @pre_load
+    def strip_strings(self, data, **kwargs):
+        for key, value in data.items():
+            if isinstance(value, str):
+                data[key] = value.strip()
+        return data
    
 class UserRoleSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

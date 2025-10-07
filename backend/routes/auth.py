@@ -3,6 +3,7 @@ from app import db
 from models.user import UserProfile, UserInfo, UserSettings, UserRole
 from exstensions import supabase
 from routes.auth_required_wrapper import auth_required
+from schemas.user_schema import UserProfileSchema
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -50,6 +51,7 @@ def signup():
 def complete_profile():
 
     is_profile = request.current_user.user.id
+    profile = UserProfileSchema()
     data = request.get_json()
     username = data.get('username')
 
