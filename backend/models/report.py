@@ -21,7 +21,7 @@ class Report(db.Model):
     
     # Report details
     reason = Column(String(50), nullable=False)  # 'spam', 'harassment', 'inappropriate', etc.
-    description = Column(Text)  # Optional elaboration
+    description = Column(String(500))  # Optional elaboration
     
     # Moderation tracking
     status = Column(String(20), default='pending')  # 'pending', 'reviewed', 'dismissed', 'actioned'

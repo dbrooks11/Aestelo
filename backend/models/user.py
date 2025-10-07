@@ -23,7 +23,7 @@ class UserProfile(db.Model):
     id = Column(UUID(as_uuid=True), primary_key=True)
     banner_theme = Column(String(30))
 
-    username = Column(String(50), unique=True, nullable=True)
+    username = Column(String(50), unique=True)
     profile_image = Column(Text)
     bio = Column(String(250))
 
@@ -47,8 +47,9 @@ class UserProfile(db.Model):
     is_business_account = Column(Boolean, default=False)
 
     is_banned = Column(Boolean, default=False)
-    banned_at = Column(DateTime, nullable=True)
-    banned_reason = Column(String(255), nullable=True)
+    banned_at = Column(DateTime)
+    banned_reason = Column(String(255))
+    banned_by = Column(UUID(as_uuid=True))
 
     num_reports_made = Column(Integer, default=0)
     num_reports = Column(Integer, default=0)
@@ -130,8 +131,8 @@ class UserInfo(db.Model):
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'),primary_key=True, nullable=False)
     first_name = Column(String(30))
     last_name = Column(String(30))
-    email = Column(Text)
-    phone_number = Column(String(20))
+    email = Column(String(150))
+    phone_number = Column(String(15))
     date_of_birth = Column(DateTime)
     age = Column(Integer, default=0)
     gender = Column(String(15), default= 'Not specified')
