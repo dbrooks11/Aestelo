@@ -115,6 +115,11 @@ class UserProfile(db.Model):
             'username': self.username,
             'profile_image': self.profile_image,
         }
+    
+    @classmethod
+    def active(cls):
+        return cls.query.filter_by(is_banned = False)
+
 
     def save(self):
         db.session.add(self)

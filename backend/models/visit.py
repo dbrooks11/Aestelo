@@ -31,6 +31,7 @@ class Visit(db.Model):
     num_of_edits = Column(Integer, default=0) # user_profile can edit their vistit only 3 times (caption, image, hashtag, song, etc)
     is_deleted = Column(Boolean, default=False) #is the post deleted by user_profile
     deleted_at = Column(DateTime)
+    deleted_by = Column(UUID(as_uuid=True))
     num_reports = Column(Integer, default=0)
     is_removed = Column(Boolean, default=False) #removed due to moderaters, admin, etc (does NOT mean deleted by user_profile)
 

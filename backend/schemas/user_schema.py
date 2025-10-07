@@ -4,9 +4,6 @@ from models.user import UserProfile, UserInfo, UserRole, UserSettings, UserSubsc
 from marshmallow import validates, ValidationError, fields, validate
 from datetime import datetime
 
-# ============================================
-# USER PROFILE SCHEMA
-# ============================================
 class UserProfileSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserProfile
