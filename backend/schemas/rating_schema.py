@@ -1,6 +1,5 @@
 from app import ma
-from marshmallow import (fields, Schema, validates, 
-                         validates_schema, ValidationError, validate)
+from marshmallow import (fields, validate)
 from models.rating import Rating
 
 

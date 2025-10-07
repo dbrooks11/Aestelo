@@ -1,5 +1,4 @@
-from marshmallow import (fields, Schema, validates, 
-                         validates_schema, ValidationError, validate)
+from marshmallow import (fields, ValidationError, validate)
 from app import ma
 from models.location import Location, LocationCoreData, BusinessLocationDetails
 

@@ -1,6 +1,6 @@
 from app import ma
-from marshmallow import (fields, Schema, validates, 
-                         validates_schema, ValidationError, validate)
+from marshmallow import (fields, validates, 
+                         ValidationError, validate)
 from models.post import Post,PostMedia
 
 class PostSchema(ma.SQLAlchemyAutoSchema):
@@ -11,7 +11,7 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('is_deleted','deleted_at','num_reports','is_removed','removed_at')
 
     post_id = fields.Integer(dump_only=True)
-    date_posted = fields.DateTime(dump_only=True)
+    date_posted = fields.DateTime(dump_only=True, format='%b %d, %Y')
     total_num_of_photos = fields.Integer(validate=[(validate.Range(min=0,max=5))], dump_only=True)
     average_rating = fields.Float(validate=[(validate.Range(min=0.0, max=5.0))], dump_only=True)
     total_num_of_ratings = fields.Integer(validate=[(validate.Range(min=0))], dump_only=True)
