@@ -166,10 +166,10 @@ def remove_post_admin(post_id):
         return jsonify({'error':'Failed to remove post'}), 500
     
 
-# @post_bp.route('/create', methods = ['POST'])
-# @auth_required
-# def create_post():
-#     current_user = request.current_user.user.id
-
+@post_bp.route('/create', methods = ['POST'])
+@auth_required
+def create_post():
+    current_user = request.current_user.user.id
+    
     
 
