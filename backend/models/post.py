@@ -33,12 +33,12 @@ class Post(db.Model):
     
     name = Column(String(100))
     date_posted = Column(DateTime, default=datetime.now(timezone.utc))
-    description = Column(String(200), default='', nullable=False)
+    description = Column(String(200))
     total_num_of_photos = Column(Integer)
 
     #total_visits = Column(Integer, default=0)  #* Might add total visits to a post
     average_rating = Column(Float, default=0.0)
-    total_num_of_ratings = Column(Float, default=0.0)
+    total_num_of_ratings = Column(Integer, default=0)
     last_rated_at = Column(DateTime, default=datetime.now(timezone.utc))
 
     save_count = Column(Integer, default=0)
@@ -104,7 +104,6 @@ class PostMedia(db.Model):
     width =  Column(Integer)
     height = Column(Integer)
 
-    upload_date = Column(DateTime, default=datetime.now(timezone.utc))
     verified_status = Column(String(8), default='pending') #Will either be pending, verified, or rejected to verify each image
     is_primary = Column(Boolean,default=False) #Sets the primary pic in front
     

@@ -37,7 +37,7 @@ class Location(db.Model):
     latitude = Column(Float)
     is_long_lat = Column(Boolean) #if place where picture is taken provides the long and late properly, 
                                   #skips Locations details besides basics for post like desciption, name, tags, etc
-    altitude = Column(Float, default=0.0)
+    # altitude = Column(Float, default=0.0)
 
     created_on = Column(DateTime, default= datetime.now(timezone.utc).strftime('%b %d, %Y'))
     verified_status = Column(String(8), default='pending') #Will either be pending, verified, or rejected to verify the location
@@ -94,7 +94,7 @@ class BusinessLocationDetails(db.Model):
     address_line2 = Column(String(20))
     city = Column(String(30))
     state = Column(String(30))
-    postal_code = Column(Integer)
+    postal_code = Column(String(10))
     
     def to_dict(self):
         return {
