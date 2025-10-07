@@ -15,8 +15,8 @@ class Visit(db.Model):
     __table_args__ = {'schema': visit_schema} 
     visit_id = Column(BigInteger, primary_key=True)
     
-    post_id = Column(BigInteger, ForeignKey(f'{post_schema}.post.post_id'), nullable=False)
-    user_profile_id = Column(UUID(as_uuid=True),  ForeignKey(f'{user_profile_schema}.user_profile.id'), nullable=False)
+    post_id = Column(BigInteger, ForeignKey(f'{post_schema}.post.post_id'), nullable=False, index=True)
+    user_profile_id = Column(UUID(as_uuid=True),  ForeignKey(f'{user_profile_schema}.user_profile.id'), nullable=False, index=True)
     location_id = relationship('Location', backref='post', lazy=True)
     
     song_id = Column(Text)
@@ -67,10 +67,10 @@ class Visit(db.Model):
 class VisitMedia(db.Model):
     __tablename__ = "visit_media"
     __table_args__ = {'schema': visit_media_schema} 
-    visit_id = Column(BigInteger, ForeignKey(f'{visit_schema}.visit.visit_id'), nullable=False)
-    uploaded_by = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'), nullable=False)
+    visit_id = Column(BigInteger, ForeignKey(f'{visit_schema}.visit.visit_id'), nullable=False, index=True)
+    uploaded_by = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'), nullable=False, index=True)
+    location_id = Column(BigInteger, ForeignKey(f'{location_schema}.location.location_id'), index=True)
 
-    location_id = Column(BigInteger, ForeignKey(f'{location_schema}.location.location_id'))
     visit_media_id =Column(BigInteger, primary_key=True)
     media_url = Column(Text)
     media_type = Column(String(15), default = 'image') #stores what type of media is uploaed, image, video, 360 video, etc

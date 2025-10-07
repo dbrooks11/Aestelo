@@ -1,5 +1,5 @@
 from exstensions import db
-from sqlalchemy import Column, ForeignKey, BigInteger, String, Integer, Float, Text, DateTime, Boolean, UniqueConstraint
+from sqlalchemy import Column, ForeignKey, BigInteger, String, Integer, Float, Text, DateTime, Boolean, UniqueConstraint, Index
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import UUID
@@ -7,8 +7,10 @@ from .schema_types import *
 
 class Report(db.Model):
     __tablename__ = "report"
-    __table_args__ = (UniqueConstraint('reporter_id', 'reported_type', 'reported_id', name='unique_report'),
-    {'schema': report_schema}) # Moderation data is private
+    __table_args__ = (Index('idx_report_item', 'reported_type', 'reported_id'), 
+                    Index('idx_report_status', 'status'),
+                    UniqueConstraint('reporter_id', 'reported_type', 'reported_id', name='unique_report'),
+                    {'schema': report_schema}) # Moderation data is private
     
     report_id = Column(BigInteger, primary_key=True, autoincrement=True)
     reporter_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'), nullable=False)

@@ -4,7 +4,7 @@ from models.user import UserProfile, UserInfo, UserSettings, UserRole
 from exstensions import supabase
 from routes.auth_required_wrapper import auth_required
 
-auth_bp = Blueprint('auth', __name__, url_prefix='auth')
+auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 @auth_bp.route('/signup', methods = ['POST'])
 def signup():

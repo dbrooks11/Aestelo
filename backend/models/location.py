@@ -23,7 +23,8 @@ from .schema_types import *
 
 class Location(db.Model):
     __tablename__ = "location"
-    __table_args__ = ({'schema': location_schema})
+    __table_args__ = (Index('idx_location_coords', 'latitude', 'longitude'),
+                      {'schema': location_schema})
     
     post_id = Column(BigInteger, ForeignKey(f'{post_schema}.post.post_id'), index=True)
     visit_id = Column(BigInteger, ForeignKey(f'{visit_schema}.visit.visit_id'), index=True)

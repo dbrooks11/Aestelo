@@ -28,7 +28,7 @@ class Post(db.Model):
     __tablename__ = "post"
     __table_args__ = {'schema': post_schema} 
     
-    user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'),nullable=False)
+    user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'),nullable=False, index=True)
     post_id = Column(BigInteger, primary_key=True)
     
     name = Column(String(100))
@@ -96,7 +96,7 @@ class PostMedia(db.Model):
     post_id = Column(BigInteger, ForeignKey(f'{post_schema}.post.post_id'), index=True)
     uploaded_by = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'), index=True)
 
-    location_id = Column(BigInteger, ForeignKey(f'{location_schema}.location.location_id'))
+    location_id = Column(BigInteger, ForeignKey(f'{location_schema}.location.location_id'), index=True)
     post_media_id =Column(BigInteger, primary_key=True)
 
     media_url = Column(Text)
