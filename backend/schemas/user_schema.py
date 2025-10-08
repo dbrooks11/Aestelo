@@ -3,7 +3,6 @@ from app import ma
 from models.user import UserProfile, UserInfo, UserRole, UserSettings, UserSubscription
 from marshmallow import validates, ValidationError, fields, validate,pre_load
 from datetime import datetime
-from flask import request
 class UserProfileSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserProfile
