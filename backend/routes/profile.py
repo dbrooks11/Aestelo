@@ -14,27 +14,26 @@ def profile_me():
     user_id = request.current_user.user.id
 
     my_profile = UserProfile.query.get(user_id)
-    profile_schema = UserProfileSchema()
 
     if not my_profile:
         return jsonify({'error': 'Profile not found'}), 404
     
     if request.method == 'GET':
         try:
-            return jsonify({'my_profile': profile_schema.dump(my_profile)}), 200
+            return jsonify({'my_profile': user_profile_schema.dump(my_profile)}), 200
         except Exception as e:
             return jsonify({"error": e.messages}), 500
     
     if request.method == 'PATCH':
         try:
-            data = profile_schema.load(request.get_json(), partial=True)
+            data = user_profile_schema.load(request.get_json(), partial=True)
             
             # Update fields (schema already filtered dump_only fields)
             for field, value in data.items():
                 setattr(my_profile, field, value)
             
             db.session.commit()
-            return profile_schema.dump(my_profile), 200
+            return user_profile_schema.dump(my_profile), 200
             
         except ValidationError as e:
             db.session.rollback()
