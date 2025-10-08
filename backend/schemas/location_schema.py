@@ -28,3 +28,6 @@ class BusinessLocationDetailsSchema(ma.SQLAlchemyAutoSchema):
         load_instance = True
         include_fk = True
 
+location_schema = LocationSchema()
+location_coredata_schema = LocationCoreDataSchema()
+business_location_schema = BusinessLocationDetailsSchema()

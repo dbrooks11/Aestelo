@@ -91,3 +91,6 @@ class VisitMediaSchema(ma.SQLAlchemyAutoSchema):
             if isinstance(value, str):
                 data[key] = value.strip()
         return data
+
+visit_schema = VisitSchema()
+visit_media_schema = VisitMediaSchema()

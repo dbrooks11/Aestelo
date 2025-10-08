@@ -19,7 +19,7 @@ def follow_profile(username):
     
     if user_profile.is_banned:
         return jsonify({'error':'Profile unavailable'}),404
-    
+
     if user_profile.id == current_user:
         return jsonify({'error': 'Cannot follow yourself'}), 400
     
@@ -79,10 +79,10 @@ def unfollow_profile(username):
         return jsonify({'message': 'Profile successfully unfollowed',
                         'profile_unfollowed': {
                             'username': user_profile.username,
-                            'follower_count': user_profile.following_count
+                            'follower_count': user_profile.follower_count
                         },
                         'current_user_following': current_user_profile.following_count
-                        }), 201
+                        }), 200
     except Exception:
         db.session.rollback()
         return jsonify({'error': 'Could not unfollow profile'}), 500
@@ -119,7 +119,7 @@ def get_followers(username):
         )
 
         followers_list = [{
-            'id': str(follower.id),
+            'id': str(follower.follower_id),
             'banner_theme':follower.banner_theme,
             'username': follower.username,
             'profile_image': follower.profile_image

@@ -3,3 +3,4 @@
 # from app import db
 # from models.user_profile import UserProfile
 # from schemas.profile_schema import ProfileSchema
+# from routes.logging_wrapper import handle_errors

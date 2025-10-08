@@ -3,7 +3,7 @@ from app import db
 from models.user import UserProfile, UserInfo, UserSettings, UserRole
 from exstensions import supabase
 from routes.auth_required_wrapper import auth_required
-from schemas.user_schema import UserProfileSchema, ValidationError
+from schemas.user_schema import user_profile_schema, ValidationError
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -52,13 +52,12 @@ def complete_profile():
 
     user_id = request.current_user.user.id
     user_profile_finish = UserProfile.query.get(user_id)
-    profile = UserProfileSchema()
 
     if not user_id:
         return jsonify({'error': 'Profile does not exist'}), 404
     
     try:
-        validate = profile.load(request.get_json, partial = True)
+        validate = user_profile_schema.load(request.get_json(), partial = True)
     except ValidationError as error:
         return jsonify({"error": error.messages}), 400
 
@@ -67,7 +66,7 @@ def complete_profile():
             setattr(user_profile_finish, field, value)
         
         db.session.commit()
-        return profile.dump(user_profile_finish), 200
+        return user_profile_schema.dump(user_profile_finish), 200
     except Exception:
         db.session.rollback()
         return jsonify({'error': 'Failed to complete profile'}), 500

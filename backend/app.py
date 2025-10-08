@@ -2,10 +2,36 @@ from flask import Flask
 from flask_cors import CORS
 from config import Config
 from exstensions import db, ma, jwt, limiter,mg
+from logging.config import dictConfig
+from routes.logging_wrapper import handle_errors
+
+
+dictConfig({
+    "version": 1,
+    "formatters": {
+        "default": {
+            "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
+            "datefmt": "%B %d, %Y %I:%M:%S %p",
+        }
+    },
+    "handlers": {
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": "app_logs.log",
+            "formatter": "default",
+        },
+    },
+    "root": {
+        "level": "DEBUG",  
+        "handlers": ["file"],  
+    },
+})
+
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+    register_global_error_handler(app)
 
     db.init_app(app)
     ma.init_app(app)
@@ -44,7 +70,14 @@ def create_app():
         def health_check():
             return {'status': 'healthy', 'message': 'Aestelo API is running'}
         
+
         return app
+    
+
+def register_global_error_handler(app):
+        for endpoint, func in app.view_functions.items():
+            if endpoint not in ('static',):  # skip static routes
+                app.view_functions[endpoint] = handle_errors(func)
 
 if __name__ == '__main__':
     app = create_app()

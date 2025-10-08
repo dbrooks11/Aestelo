@@ -165,3 +165,10 @@ class UserSubscriptionSchema(ma.SQLAlchemyAutoSchema):
     
     auto_renew = fields.Bool()
     billing_cycle = fields.Str(validate=validate.OneOf(['monthly', 'yearly']))
+
+
+
+user_profile_schema = UserProfileSchema()
+user_info_schema = UserInfoSchema()
+user_settings_schema = UserSettingsSchema()
+user_subscription_schema = UserSubscriptionSchema()

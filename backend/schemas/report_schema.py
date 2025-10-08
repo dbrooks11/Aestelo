@@ -61,3 +61,4 @@ class ReportSchema(ma.SQLAlchemyAutoSchema):
 
    
 
+report_schema = ReportSchema()

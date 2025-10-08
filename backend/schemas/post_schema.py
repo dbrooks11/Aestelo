@@ -76,3 +76,7 @@ class PostMediaSchema(ma.SQLAlchemyAutoSchema):
             if isinstance(value, str):
                 data[key] = value.strip()
         return data
+
+
+post_schema = PostSchema()
+post_media_schema = PostMediaSchema()

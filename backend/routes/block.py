@@ -48,9 +48,9 @@ def block_profile(username):
         
         if is_user_follow_them:
             db.session.delete(is_user_follow_them)
-            user_profile.following_count -= 1
             current_user_profile.follower_count -= 1
-
+            user_profile.following_count -= 1
+            
         db.session.add(new_blocked)
         db.session.commit()
         return jsonify({'message':'Profile blocked successfully'}), 201

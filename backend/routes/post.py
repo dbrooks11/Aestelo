@@ -6,7 +6,7 @@ from models.post import Post
 from models.followers_and_following import Follow
 from routes.auth_required_wrapper import auth_required, admin_required
 from datetime import datetime, timezone
-from schemas.post_schema import PostSchema, ValidationError
+from schemas.post_schema import post_schema, ValidationError
 
 post_bp = Blueprint('post', __name__, url_prefix='/post')
 
@@ -48,7 +48,7 @@ def get_profile_post_all(username):
             per_page=per_page
         )
 
-        post_list = PostSchema.dump(paginated_post, many=True)
+        post_list = post_schema.dump(paginated_post.items, many=True)
 
         return jsonify({
             'posts': post_list,
@@ -89,7 +89,7 @@ def get_profile_post(username, post_id):
         
     try:
         post = Post.query.get(post_id)
-        result = PostSchema.dump(post)
+        result = post_schema.dump(post)
         if not post or (post.user_profile_id != user_profile.id) or post.is_deleted or post.is_removed:
              return jsonify({'error': 'Post not found'}), 404
         return jsonify({'post': result}), 200
@@ -113,10 +113,10 @@ def edit_post(post_id):
 
     try:
         data = request.get_json()
-        validate_post_edits = PostSchema()
+        
 
         try:
-            validate_post_edits.load(data)
+            post_schema.load(data, partial = True)
         except ValidationError as error:
             return jsonify({"error": error.messages}), 400
 
@@ -126,12 +126,9 @@ def edit_post(post_id):
             if edit_field in data:
                 setattr(post, edit_field, data[edit_field])
         db.session.commit()
-        return jsonify({'message':'Fields updated successfully',
-                        'fields':{
-                            'name':post.name,
-                            'description': post.description,
-                            'accessibility':post.accessibility
-                        }}), 200
+        return jsonify({'message':'Post updated successfully',
+                        'updated_post': post_schema.dump(post)
+                        }), 200
     except Exception as e:
         db.session.rollback()
         error = getattr(e,'messages', str(e))
@@ -151,7 +148,7 @@ def delete_post(post_id):
         post.is_deleted = True
         post.deleted_at = datetime.now(timezone.utc)
         db.session.commit()
-        return jsonify({'error':'Post deleted successfully'}), 200
+        return jsonify({'message':'Post deleted successfully'}), 200
     except Exception:
         db.session.rollback()
         return jsonify({'error':'Failed to delete post'}), 500
@@ -172,7 +169,7 @@ def remove_post_admin(post_id):
         post.is_removed = True
         post.removed_at = datetime.now(timezone.utc)
         db.session.commit()
-        return jsonify({'error':'Post removed successfully'}), 200
+        return jsonify({'message':'Post removed successfully'}), 200
     except Exception:
         db.session.rollback()
         return jsonify({'error':'Failed to remove post'}), 500
