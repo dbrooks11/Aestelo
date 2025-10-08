@@ -20,6 +20,22 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
     share_count = fields.Integer(validate=[(validate.Range(min=0))], dump_only=True)
     trending_score = fields.Integer(validate=[(validate.Range(min=0))], dump_only=True)
 
+    name = fields.Str(validate= [validate.Regexp(r"^[a-zA-Z\s]+$",error="Name can only contain letters")])
+    description = fields.Str(validate=[validate.Regexp(r"^(?!.*<[^>]+>)[\p{L}\p{N}\p{P}\p{Zs}\n\r\t]$")])
+
+    @validates('name')
+    def validate_first_name(self, value):
+        if not value or value.strip() == '':
+            return value
+        
+        if "  " in value:
+            raise ValidationError("Invalid post name")
+        
+        if value.startswith(("'", '-')) or value.endswith(("'", '-')):
+            raise ValidationError("Name cannot start or end with apostrophe or hyphen")
+        
+        return value.strip()
+
     @pre_load
     def strip_strings(self, data, **kwargs):
         for key, value in data.items():

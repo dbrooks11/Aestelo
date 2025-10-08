@@ -6,7 +6,7 @@ from models.post import Post
 from models.followers_and_following import Follow
 from routes.auth_required_wrapper import auth_required, admin_required
 from datetime import datetime, timezone
-
+from schemas.post_schema import PostSchema, ValidationError
 
 post_bp = Blueprint('post', __name__, url_prefix='/post')
 
@@ -48,7 +48,7 @@ def get_profile_post_all(username):
             per_page=per_page
         )
 
-        post_list = [post.to_dict() for post in paginated_post.items]
+        post_list = PostSchema.dump(paginated_post, many=True)
 
         return jsonify({
             'posts': post_list,
@@ -87,12 +87,12 @@ def get_profile_post(username, post_id):
         if not is_following:
             return jsonify({'error': 'Profile is private'}), 403
         
-
     try:
         post = Post.query.get(post_id)
+        result = PostSchema.dump(post)
         if not post or (post.user_profile_id != user_profile.id) or post.is_deleted or post.is_removed:
              return jsonify({'error': 'Post not found'}), 404
-        return jsonify({'post': post.to_dict()}), 200
+        return jsonify({'post': result}), 200
 
     except Exception:
         return jsonify({'error':'Failed to fetch post'}), 500
@@ -113,6 +113,12 @@ def edit_post(post_id):
 
     try:
         data = request.get_json()
+        validate_post_edits = PostSchema()
+
+        try:
+            validate_post_edits.load(data)
+        except ValidationError as error:
+            return jsonify({"error": error.messages}), 400
 
         can_edit = ('description','name', 'accessibility')
 
@@ -120,8 +126,14 @@ def edit_post(post_id):
             if edit_field in data:
                 setattr(post, edit_field, data[edit_field])
         db.session.commit()
-        jsonify({'message':'Fields updated successfully'}), 200
+        return jsonify({'message':'Fields updated successfully',
+                        'fields':{
+                            'name':post.name,
+                            'description': post.description,
+                            'accessibility':post.accessibility
+                        }}), 200
     except Exception as e:
+        db.session.rollback()
         error = getattr(e,'messages', str(e))
         return jsonify({'error': error}), 500
 

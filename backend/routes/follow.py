@@ -36,7 +36,13 @@ def follow_profile(username):
         current_user_profile.following_count += 1
         db.session.add(new_follow)
         db.session.commit()
-        return jsonify({'message': 'Profile successfully followed'}), 201
+        return jsonify({'message': 'Profile successfully followed',
+                        'profile_followed': {
+                            'username': user_profile.username,
+                            'follower_count': user_profile.follower_count
+                        },
+                        'current_user_following': current_user_profile.following_count
+                        }), 201
     except Exception:
         db.session.rollback()
         return jsonify({'error': 'Failed to follow profile'}), 500
@@ -70,13 +76,19 @@ def unfollow_profile(username):
         current_user_profile.following_count -= 1
         user_profile.follower_count -= 1
         db.session.commit()
-        return jsonify({'message':'Profile unfollowed successfully'}), 200
+        return jsonify({'message': 'Profile successfully unfollowed',
+                        'profile_unfollowed': {
+                            'username': user_profile.username,
+                            'follower_count': user_profile.following_count
+                        },
+                        'current_user_following': current_user_profile.following_count
+                        }), 201
     except Exception:
         db.session.rollback()
         return jsonify({'error': 'Could not unfollow profile'}), 500
 
 
-#GET ALL FOLLOWERS OF A USER
+#GET ALL FOLLOWERS OF A USER (PAGINATED)
 @follow_bp.route('/<string:username>/followers', methods = ['GET'])
 @auth_required
 def get_followers(username):
@@ -125,7 +137,7 @@ def get_followers(username):
         return jsonify({'error': 'Failed to fetch followers'}), 500
     
 
-#GET LIST OF PEOPLE THE USER IS FOLLOWING
+#GET LIST OF PEOPLE THE USER IS FOLLOWING(PAGINATED)
 @follow_bp.route('/<string:username>/following', methods = ['GET'])
 @auth_required
 def get_following(username):

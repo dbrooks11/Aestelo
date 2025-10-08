@@ -19,7 +19,7 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
     visit_count = fields.Int(dump_only=True)
     
     username = fields.Str(required=True,validate=[validate.Length(min=1, max=50),validate.Regexp(r'^[a-zA-Z0-9_]+$', error='Username can only contain letters, numbers, and underscores')])
-    bio = fields.Str(validate=validate.Length(max=150))
+    bio = fields.Str(validate=[validate.Length(max=150), validate.Regexp(r"^(?!.*<[^>]+>)")])
     profile_image= fields.Str(validate=validate.URL())
     instagram= fields.Str(validate=validate.URL())
     facebook= fields.Str(validate=validate.URL())
@@ -146,7 +146,7 @@ class UserSettingsSchema(ma.SQLAlchemyAutoSchema):
         include_fk = True
     
     user_profile_id = fields.UUID(dump_only=True)
-    langauge_preference = fields.Str(validate=validate.OneOf(['english']))
+    langauge_preference = fields.Str(validate=validate.OneOf(['english', 'spanish']))
 
 
 class UserSubscriptionSchema(ma.SQLAlchemyAutoSchema):

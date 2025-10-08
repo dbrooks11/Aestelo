@@ -22,8 +22,8 @@ def profile_me():
     if request.method == 'GET':
         try:
             return jsonify({'my_profile': profile_schema.dump(my_profile)}), 200
-        except Exception:
-            return jsonify({'error': 'Failed to get profile'}), 500
+        except Exception as e:
+            return jsonify({"error": e.messages}), 500
     
     if request.method == 'PATCH':
         try:
@@ -37,6 +37,7 @@ def profile_me():
             return profile_schema.dump(my_profile), 200
             
         except ValidationError as e:
+            db.session.rollback()
             return jsonify({'error': e.messages}), 400
         except Exception:
             db.session.rollback()
@@ -75,8 +76,6 @@ def user_profile(username):
         except Exception:
             return jsonify({'error': 'Failed to fetch profile'}), 500
     
-    
-   
     
     #check if current user is a follower of the person's profile they are trying to view
     is_following = Follow.query.filter_by(follower_id = current_user,

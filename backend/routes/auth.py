@@ -3,7 +3,7 @@ from app import db
 from models.user import UserProfile, UserInfo, UserSettings, UserRole
 from exstensions import supabase
 from routes.auth_required_wrapper import auth_required
-from schemas.user_schema import UserProfileSchema
+from schemas.user_schema import UserProfileSchema, ValidationError
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -50,26 +50,24 @@ def signup():
 @auth_required
 def complete_profile():
 
-    is_profile = request.current_user.user.id
+    user_id = request.current_user.user.id
+    user_profile_finish = UserProfile.query.get(user_id)
     profile = UserProfileSchema()
-    data = request.get_json()
-    username = data.get('username')
 
-    if not is_profile:
+    if not user_id:
         return jsonify({'error': 'Profile does not exist'}), 404
     
-    if not username:
-        return jsonify({'error': 'Please enter an Username'}), 400
-    
-    if UserProfile.query.filter_by(username = username).first():
-        return jsonify({'error':'Username is already taken'}), 409
+    try:
+        validate = profile.load(request.get_json, partial = True)
+    except ValidationError as error:
+        return jsonify({"error": error.messages}), 400
 
     try:
-        user_profile_finish = UserProfile.query.get(is_profile)
-
-        user_profile_finish.username = username
+        for field, value in validate.items():
+            setattr(user_profile_finish, field, value)
+        
         db.session.commit()
-        return jsonify({'message': 'Username successfully added'}), 200
+        return profile.dump(user_profile_finish), 200
     except Exception:
         db.session.rollback()
         return jsonify({'error': 'Failed to complete profile'}), 500
