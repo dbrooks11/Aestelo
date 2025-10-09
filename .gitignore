@@ -28,7 +28,12 @@ Thumbs.db
 
 # Uploads (for later)
 uploads/
-
+meexample.png
+.png
+.jpg
+png
+jpg
+util/meexample1.jpg
 #Docker stuff
 docker-compose.yml
 .yml
