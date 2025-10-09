@@ -1,9 +1,5 @@
-from PIL import Image, ImageOps, ImageFilter, ExifTags
-from PIL.ExifTags import TAGS, GPSTAGS
-import os, sys
+from PIL import Image, ImageOps, ExifTags
 import io
-from urllib.request import urlopen
-from flask import jsonify
 
 
 def get_decimal_coordinates(gps_info):
