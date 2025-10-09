@@ -1,5 +1,7 @@
 import os
 from datetime import timedelta
+import boto3
+from botocore.client import Config
 
 class Config:
     # Flask
@@ -24,10 +26,12 @@ class Config:
     CORS_ORIGINS = ['http://localhost:5000', 'http://localhost:5173']  # Add your frontend URLs
 
     # Cloudflare R2 (NEW)
+    R2_ACCOUNT_ID = os.environ.get('R2_ACCOUNT_ID')
     R2_ACCESS_KEY_ID = os.environ.get('R2_ACCESS_KEY_ID')
     R2_SECRET_ACCESS_KEY = os.environ.get('R2_SECRET_ACCESS_KEY')
     R2_BUCKET_NAME = os.environ.get('R2_BUCKET_NAME')
     R2_ENDPOINT_URL = os.environ.get('R2_ENDPOINT_URL')
+    R2_PUBLIC_URL = os.environ.get('R2_PUBLIC_URL')
 
     #SIGHTENGINE
     SIGHTENGINE_API_USER = os.environ.get('SIGHTENGINE_API_USER')

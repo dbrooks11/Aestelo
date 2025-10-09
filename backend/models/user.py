@@ -38,6 +38,9 @@ class UserProfile(db.Model):
 
     tiktok = Column(Text)
     is_verified_tiktok = Column(Boolean, default=False)
+
+    post_count = Column(Integer, default=0)
+    visit_count = Column(Integer, default=0)
     
     follower_count = Column(BigInteger, default=0)
     following_count = Column(BigInteger, default=0)

@@ -12,6 +12,8 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
 
     id = fields.UUID(dump_only=True)
     profile_created_at = fields.DateTime(dump_only=True)
+    post_count = fields.Int(dump_only=True)
+    visit_count = fields.Int(dump_only=True)
     follower_count = fields.Int(dump_only=True)
     following_count = fields.Int(dump_only=True)
     post_count = fields.Int(dump_only=True)

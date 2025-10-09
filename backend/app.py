@@ -47,6 +47,7 @@ def create_app():
      methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
      supports_credentials=True)
     
+    
     # Register blueprints
     from routes.auth import auth_bp
     from routes.profile import profile_bp

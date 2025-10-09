@@ -26,21 +26,20 @@ class Location(db.Model):
     __table_args__ = (Index('idx_location_coords', 'latitude', 'longitude'),
                       {'schema': location_schema})
     
-    post_id = Column(BigInteger, ForeignKey(f'{post_schema}.post.post_id'), index=True)
-    visit_id = Column(BigInteger, ForeignKey(f'{visit_schema}.visit.visit_id'), index=True)
-    location_coredata = relationship('LocationCoreData', backref='location', lazy=True)
+    post_media_id = Column(BigInteger, ForeignKey(f'{post_media_schema}.post_media.post_media_id'), index=True, nullable=True)
+    visit_id = Column(BigInteger, ForeignKey(f'{visit_schema}.visit.visit_id'), index=True, nullable=True)
     business_location_details = relationship('BusinessLocationDetails', backref='location', lazy=True) #will be handled later
     is_visit = Column(Boolean, default=False) #if its a visit, itll refernce the visit id
         
     location_id = Column(BigInteger, primary_key=True)
     longitude = Column(Float)
     latitude = Column(Float)
+    altitude = Column(Float)
     is_long_lat = Column(Boolean) #if place where picture is taken provides the long and late properly, 
                                   #skips Locations details besides basics for post like desciption, name, tags, etc
-    # altitude = Column(Float, default=0.0)
 
     created_on = Column(DateTime, default= datetime.now(timezone.utc).strftime('%b %d, %Y'))
-    verified_status = Column(String(8), default='pending') #Will either be pending, verified, or rejected to verify the location
+
     
     def to_dict(self):
         return {
@@ -54,27 +53,6 @@ class Location(db.Model):
             "altitude": self.altitude,
             "created_on": self.created_on,
             "verified_status": self.verified_status
-    }
-
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
-
-
-# Want Exact locations
-class LocationCoreData(db.Model):
-    __tablename__ = "location_core_data"
-    __table_args__ = {'schema': location_coredata_schema} 
-
-    location_id = Column(BigInteger, ForeignKey(f'{location_schema}.location.location_id'), primary_key=True, nullable=False)
-    mapbox_place_id = Column(BigInteger, default=0)
-    name = Column(String(150))
-
-    def to_dict(self):
-        return {
-            'location_id': self.location_id,
-            'mapbox_place_id': self.mapbox_place_id,
-            'name': self.name
     }
 
     def save(self):

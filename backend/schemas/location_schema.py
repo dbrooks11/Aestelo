@@ -11,8 +11,8 @@ class LocationSchema(ma.SQLAlchemyAutoSchema):
     is_visit = fields.Boolean()
     longitude = fields.Float(required=True, validate=[(validate.Range(min=-180.0, max=180.0))])
     latitude = fields.Float(required=True, validate=[(validate.Range(min=-90, max=90))])
-    created_on = fields.DateTime(required=True, format='%b %d, %Y')
-    #  altitude = fields.Float(validate=[(validate.Range(min=0.0, max=30000.0))])
+    created_on = fields.DateTime(format='%b %d, %Y')
+    altitude = fields.Float(validate=[(validate.Range(min=0.0, max=30000.0))])
 
 
 class LocationCoreDataSchema(ma.SQLAlchemyAutoSchema):

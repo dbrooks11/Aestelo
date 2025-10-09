@@ -2,11 +2,17 @@ from flask import Blueprint, request, jsonify
 from app import db
 from models.user import UserProfile
 from models.block_profile import BlockProfile
-from models.post import Post
+from models.post import Post, PostMedia
 from models.followers_and_following import Follow
+from models.location import Location
 from routes.auth_required_wrapper import auth_required, admin_required
 from datetime import datetime, timezone
-from schemas.post_schema import post_schema, ValidationError
+from schemas.post_schema import post_schema,post_media_schema, ValidationError
+from schemas.location_schema import location_schema
+from util.image_processing import image_processing, get_decimal_coordinates
+from util.validation import image_validation
+from util.storage import upload_to_r2
+from util.outlier_coords import average_location
 
 post_bp = Blueprint('post', __name__, url_prefix='/post')
 
@@ -174,11 +180,80 @@ def remove_post_admin(post_id):
         db.session.rollback()
         return jsonify({'error':'Failed to remove post'}), 500
     
+    
+
+@post_bp.route('/upload-images', methods=['POST'])
+@auth_required
+def upload_images():
+    current_user_id = request.current_user.user.id
+
+    files = request.files.getlist('images')
+    
+    if not files or len(files) == 0:
+        return jsonify({'error': 'No images provided'}), 400
+    
+    if len(files) > 5:
+        return jsonify({'error': 'Maximum 5 images per post'}), 400
+    
+    image_bytes = [img.read() for img in files]
+
+    validated_bytes, errors = image_validation(*image_bytes)
+    if errors:
+        return jsonify({'error': 'Images rejected', 'details': errors}), 400
+    
+    result, status = image_processing(*validated_bytes)
+    if status != 200:
+        return jsonify(result), status
+
+    uploaded_images = []
+    gps_coords = []
+    errors = []
+    img_count = 0
+
+    try:
+        for img_data in result['images']:
+            img_count +=1
+            image_url = upload_to_r2(img_data['image'], current_user_id, folder='posts')
+            thumb_url = upload_to_r2(img_data['thumbnail'], current_user_id, folder= 'thumbnails')
+            
+            gps = img_data.get('gps_data')
+            if gps:
+                lat,long,alt = get_decimal_coordinates(gps)
+                if long and lat:
+                    gps_coords.append({
+                        'latitude': lat,
+                        'longitude': long,
+                        'altitude': alt
+                    })
+                else:
+                    errors.append(f'Failed to get metadata of Image {img_count}')
+                    continue
+
+            
+            uploaded_images.append({
+                'image_url': image_url,
+                'thumbnail_url': thumb_url,
+                'width': img_data['width'],
+                'height': img_data['height'],
+                'gps': gps,
+                'order': img_count
+            })
+        
+        avg_location = average_location(gps_coords) if gps_coords else None
+
+        return jsonify({
+            'message': 'Images uploaded successfully',
+            'images': uploaded_images,
+            'location': avg_location,
+            'image_count': len(uploaded_images),
+            'error': errors
+        }), 200
+    
+    except Exception:
+        return jsonify({'error':'Failed to upload images'}), 500
+    
 
 @post_bp.route('/create', methods = ['POST'])
 @auth_required
 def create_post():
-    current_user = request.current_user.user.id
     
-    
-

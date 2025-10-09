@@ -1,5 +1,5 @@
 from exstensions import db
-from sqlalchemy import Column, ForeignKey, BigInteger, String, Integer, Float, Text, DateTime, Boolean
+from sqlalchemy import Column, ForeignKey, BigInteger, String, Integer, Float, Text, DateTime, Boolean, ARRAY
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import UUID
@@ -32,6 +32,7 @@ class Post(db.Model):
     post_id = Column(BigInteger, primary_key=True)
     
     name = Column(String(100))
+    refined_location = Column(Float, nullable=False)
     date_posted = Column(DateTime, default=datetime.now(timezone.utc))
     description = Column(String(200))
     total_num_of_photos = Column(Integer)
@@ -44,7 +45,10 @@ class Post(db.Model):
     save_count = Column(Integer, default=0)
     share_count = Column(Integer, default=0)
     trending_score = Column(Integer, default=0) #will be used to calculate a score for trending post to keep track of which post is trending
+    tags = Column(ARRAY(String)) #different from hastags, can put tags on post like ('graffiti', 'red', 'streetwear','dark')
 
+    #* Color pallete willl be added later
+    # color_pallette = Column(String())
     accessibility = Column(Boolean, default=False) #is it accessible to people who are handicapped. True = yes, False = no
 
     is_deleted = Column(Boolean, default=False) #is the post deleted by user_profile
@@ -96,15 +100,17 @@ class PostMedia(db.Model):
     post_id = Column(BigInteger, ForeignKey(f'{post_schema}.post.post_id'), index=True)
     uploaded_by = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'), index=True)
 
-    location_id = Column(BigInteger, ForeignKey(f'{location_schema}.location.location_id'), index=True)
+    location = relationship('Location', backref='post_media', lazy=True)
     post_media_id =Column(BigInteger, primary_key=True)
+
+    thumbnail_url = Column(Text)
+    thumb_media_type = Column(String(15), default = 'image')
 
     media_url = Column(Text)
     media_type = Column(String(15), default = 'image') #stores what type of media is uploaed, image, video, 360 video, etc
     width =  Column(Integer)
     height = Column(Integer)
 
-    verified_status = Column(String(8), default='pending') #Will either be pending, verified, or rejected to verify each image
     is_primary = Column(Boolean,default=False) #Sets the primary pic in front
     
 

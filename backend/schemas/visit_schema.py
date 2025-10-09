@@ -22,7 +22,7 @@ class VisitSchema(ma.SQLAlchemyAutoSchema):
   
     caption = fields.Str(validate=validate.Length(max=250))
     hashtags = fields.List(
-        fields.Str(validate=validate.Regexp(r'^[a-zA-Z0-9_]+$', error="Hashtags can only contain letters, numbers, and underscores")),
+        fields.Str(validate=validate.Regexp(r'^[a-zA-Z0-9_#]+$', error="Hashtags can only contain letters, numbers, and underscores")),
         validate=validate.Length(max=20)
     )
     song_id = fields.Str()

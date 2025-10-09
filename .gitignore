@@ -33,7 +33,7 @@ meexample.png
 .jpg
 png
 jpg
-util/meexample1.jpg
+meexample1.jpg
 #Docker stuff
 docker-compose.yml
 .yml
