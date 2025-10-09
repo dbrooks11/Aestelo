@@ -9,8 +9,8 @@ class LocationSchema(ma.SQLAlchemyAutoSchema):
         include_fk = True
         exclude = ('verified_status', 'is_long_lat')
     is_visit = fields.Boolean()
-    longitude = fields.Float(required=True, validate=[(validate.Range(min=-180.0, max=180.0))])
     latitude = fields.Float(required=True, validate=[(validate.Range(min=-90, max=90))])
+    longitude = fields.Float(required=True, validate=[(validate.Range(min=-180.0, max=180.0))])
     created_on = fields.DateTime(format='%b %d, %Y')
     altitude = fields.Float(validate=[(validate.Range(min=0.0, max=30000.0))])
 

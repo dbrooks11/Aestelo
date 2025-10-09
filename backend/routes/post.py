@@ -216,7 +216,7 @@ def upload_images():
             image_url = upload_to_r2(img_data['image'], current_user_id, folder='posts')
             thumb_url = upload_to_r2(img_data['thumbnail'], current_user_id, folder= 'thumbnails')
             
-            gps = img_data.get('gps_data')
+            gps = img_data.get('gps')
             if gps:
                 lat,long,alt = get_decimal_coordinates(gps)
                 if long and lat:
@@ -235,6 +235,9 @@ def upload_images():
                 'thumbnail_url': thumb_url,
                 'width': img_data['width'],
                 'height': img_data['height'],
+                'latitude': lat,
+                'longitude':long,
+                'altitude': alt,
                 'gps': gps,
                 'order': img_count
             })
@@ -256,4 +259,84 @@ def upload_images():
 @post_bp.route('/create', methods = ['POST'])
 @auth_required
 def create_post():
-    
+    current_user = request.current_user.user.id
+    current_user_profile = UserProfile.query.get(current_user)
+
+    data = request.get_json()
+
+    if not (data.get('images') or data.get('location') or data.get('image_count')):
+        return jsonify({'error':'Invalid data provided'}), 400
+
+    post_name = data.get('name')
+    post_description = data.get('description')
+    accessibility = data.get('accessibility')
+    tags = data.get('tags', [])
+    images = data['images']
+    avg_location = data['location']
+    num_of_images = data['image_count']
+
+    try:
+        try:
+            post_schema.load(name = post_name, refined_location = avg_location,
+                             description = post_description,total_num_of_photos = num_of_images, tags = tags, partial = True)
+        except ValidationError as error:
+            return jsonify({"error": error.messages}), 400
+
+        new_post = Post(
+            user_profile_id=current_user,
+            name=post_name,
+            refined_location = avg_location,
+            description=post_description,
+            total_num_of_photos= num_of_images,
+            accessibility=accessibility,
+            tags=tags
+        )
+        db.session.add(new_post)
+        db.session.flush()
+
+        for img_data in images:
+
+            try:
+                post_media_schema.load(thumbnail_url=img_data['thumbnail_url'], thumb_media_type='image', media_url=img_data['image_url'],media_type='image', width=img_data['width'],
+                height=img_data['height'], partial = True)
+            except ValidationError as error:
+                return jsonify({"error": error.messages}), 400
+
+            post_media = PostMedia(
+                post_id=new_post.post_id,
+                uploaded_by=current_user,
+                media_url=img_data['image_url'],     
+                thumbnail_url=img_data['thumbnail_url'],
+                media_type='image',
+                thumb_media_type='image',
+                width=img_data['width'],
+                height=img_data['height'],
+            )
+            db.session.add(post_media)
+            db.session.flush()
+
+            try:
+                location_schema.load(is_visit=False, latitude=img_data['latitude'], longitude=img_data['longitude'],
+                altitude=img_data.get('altitude'), partial = True)
+            except ValidationError as error:
+                return jsonify({"error": error.messages}), 400
+
+            location = Location(
+                post_media_id=post_media.post_media_id,
+                is_visit=False,
+                latitude=img_data['latitude'],
+                longitude=img_data['longitude'],
+                altitude=img_data.get('altitude'),
+                is_long_lat=img_data['gps'] is not None,
+            )
+            db.session.add(location)
+            db.session.flush()
+
+            current_user_profile.post_count += 1
+            db.session.commit()
+            
+            return post_schema.dump(new_post), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Failed to create post: {str(e)}'}), 500
+
