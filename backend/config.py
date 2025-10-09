@@ -29,6 +29,10 @@ class Config:
     R2_BUCKET_NAME = os.environ.get('R2_BUCKET_NAME')
     R2_ENDPOINT_URL = os.environ.get('R2_ENDPOINT_URL')
 
+    #SIGHTENGINE
+    SIGHTENGINE_API_USER = os.environ.get('SIGHTENGINE_API_USER')
+    SIGHTENGINE_API_SECRET =os.environ.get('SIGHTENGINE_API_SECRET')
+
 class DevelopmentConfig(Config):
     DEBUG = True
     
