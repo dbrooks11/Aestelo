@@ -243,6 +243,12 @@ def upload_images():
             })
         
         avg_location = average_location(gps_coords) if gps_coords else None
+        if avg_location is None:
+            return jsonify({
+                'error': 'Photos are from different locations',
+                'message': 'All images must be taken at the same location (within 30 meters of each other).',
+                'suggestion': 'Please select photos taken at the same place, or create separate posts for different locations.'
+            }), 400
 
         return jsonify({
             'message': 'Images uploaded successfully',
@@ -276,9 +282,16 @@ def create_post():
     num_of_images = data['image_count']
 
     try:
+
         try:
-            post_schema.load(name = post_name, refined_location = avg_location,
-                             description = post_description,total_num_of_photos = num_of_images, tags = tags, partial = True)
+            data_to_load = {
+                "name": post_name, 
+                "refined_location": avg_location,
+                "description": post_description,
+                "total_num_of_images": num_of_images, 
+                "tags": tags
+            }
+            post_schema.load(data_to_load, partial = True)
         except ValidationError as error:
             return jsonify({"error": error.messages}), 400
 
@@ -296,9 +309,16 @@ def create_post():
 
         for img_data in images:
 
+            media_data_to_load = {
+                "thumbnail_url": img_data['thumbnail_url'],
+                "thumb_media_type": 'image',
+                "media_url": img_data['image_url'],
+                "media_type": 'image',
+                "width": img_data['width'],
+                "height": img_data['height']
+            }
             try:
-                post_media_schema.load(thumbnail_url=img_data['thumbnail_url'], thumb_media_type='image', media_url=img_data['image_url'],media_type='image', width=img_data['width'],
-                height=img_data['height'], partial = True)
+                post_media_schema.load(media_data_to_load, partial = True)
             except ValidationError as error:
                 return jsonify({"error": error.messages}), 400
 
@@ -316,8 +336,14 @@ def create_post():
             db.session.flush()
 
             try:
-                location_schema.load(is_visit=False, latitude=img_data['latitude'], longitude=img_data['longitude'],
-                altitude=img_data.get('altitude'), partial = True)
+
+                location_data_to_load = {
+                    "is_visit": False,
+                    "latitude": img_data['latitude'],
+                    "longitude": img_data['longitude'],
+                    "altitude": img_data.get('altitude') 
+                }
+                location_schema.load(location_data_to_load, partial = True)
             except ValidationError as error:
                 return jsonify({"error": error.messages}), 400
 
@@ -332,10 +358,10 @@ def create_post():
             db.session.add(location)
             db.session.flush()
 
-            current_user_profile.post_count += 1
-            db.session.commit()
-            
-            return post_schema.dump(new_post), 201
+        current_user_profile.post_count += 1
+        db.session.commit()
+
+        return post_schema.dump(new_post), 201
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': f'Failed to create post: {str(e)}'}), 500

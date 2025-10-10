@@ -7,13 +7,14 @@ def average_location(coords):
     avg_lat = sum(c['lat'] for c in coords) / len(coords)
     avg_long = sum(c['long'] for c in coords) / len(coords)
 
+    threshold_meters = 30
     filtered = [
         c for c in coords
-        if distance((c['lat'], c['long']), (avg_lat, avg_long)).m <= 100
+        if distance((c['lat'], c['long']), (avg_lat, avg_long)).m <= threshold_meters
     ]
 
     if not filtered:
-        filtered = coords 
+        return None 
 
     avg_lat = sum(c['lat'] for c in filtered) / len(filtered)
     avg_long = sum(c['long'] for c in filtered) / len(filtered)
