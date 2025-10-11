@@ -27,6 +27,8 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
     tiktok= fields.Str(validate=validate.URL())
     twitter_x= fields.Str(validate=validate.URL())
 
+    is_pro_account = fields.Bool(dump_only=True)
+
 
     @pre_load
     def strip_strings(self, data, **kwargs):

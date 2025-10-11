@@ -19,9 +19,7 @@ class Visit(db.Model):
     user_profile_id = Column(UUID(as_uuid=True),  ForeignKey(f'{user_profile_schema}.user_profile.id'), nullable=False, index=True)
     location_id = relationship('Location', backref='post', lazy=True)
     
-    song_id = Column(Text)
-    song_artist = Column(Text)
-    song_name = Column(Text)
+    spotify_track_id = Column(String(50), ForeignKey(f'{spotify_track_schema}.spotify_track.spotify_track_id'))
     caption = Column(String(250))
     hashtags = Column(ARRAY(String))
     date_posted = Column(DateTime, default=datetime.now(timezone.utc))
@@ -34,6 +32,8 @@ class Visit(db.Model):
     deleted_by = Column(UUID(as_uuid=True))
     num_reports = Column(Integer, default=0)
     is_removed = Column(Boolean, default=False) #removed due to moderaters, admin, etc (does NOT mean deleted by user_profile)
+
+    spotify_track = relationship('SpotifyTrack', backref='visit', lazy=True)
 
     def to_dict(self):
         return {

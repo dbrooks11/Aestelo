@@ -48,6 +48,7 @@ class UserProfile(db.Model):
     is_private = Column(Boolean, default=False)
     show_online_status = Column(Boolean, default=False)
     is_business_account = Column(Boolean, default=False)
+    is_pro_account = Column(Boolean, default=False)
 
     is_banned = Column(Boolean, default=False)
     banned_at = Column(DateTime)
