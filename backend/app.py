@@ -55,7 +55,9 @@ def create_app():
     from routes.block import block_bp
     from routes.post import post_bp
     from routes.visit import visit_bp
-    from models import (location, user, post, rating, visit, report,followers_and_following)
+    from routes.user_info import user_info_bp
+    from routes.user_settings import user_settings_bp
+    from models import (location, user, post, rating, visit, report,followers_and_following, block_profile, spotify_track)
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(profile_bp)
@@ -63,6 +65,8 @@ def create_app():
     app.register_blueprint(block_bp)
     app.register_blueprint(post_bp)
     app.register_blueprint(visit_bp)
+    app.register_blueprint(user_info_bp)
+    app.register_blueprint(user_settings_bp)
 
     # Create tables
     with app.app_context():

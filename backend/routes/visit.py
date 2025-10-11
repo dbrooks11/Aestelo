@@ -7,7 +7,6 @@ from models.followers_and_following import Follow
 from models.visit import Visit, VisitMedia
 from models.post import Post
 from models.location import Location
-from schemas.user_schema import ProfileSchema
 from schemas.visit_schema import visit_schema, visit_media_schema,ValidationError
 from schemas.location_schema import location_schema
 from routes.auth_required_wrapper import auth_required, admin_required
@@ -16,7 +15,8 @@ from util.validation import photo_validation
 from util.storage import upload_to_r2
 from util.outlier_coords import average_location
 
-visit_bp = Blueprint('visit', __name__, '/visit')
+
+visit_bp = Blueprint('visit', __name__, url_prefix='/visit')
 
 @visit_bp.route('/<string:username>/profile-visits', methods = ['GET'])
 @auth_required
@@ -68,7 +68,7 @@ def get_profile_visit_all(username):
     except Exception:
         return jsonify({'error': 'Failed to fetch visit'}), 500
     
-    
+
 
 @visit_bp.route('/<string:username>/profile-visit/<int:visit_id>', methods = ['GET'])
 @auth_required
@@ -199,7 +199,6 @@ def remove_post_admin(visit_id):
     
 
 
-
 visit_bp.route('/upload-photos', methods = ['POST'])
 @auth_required
 def upload_photos():
@@ -302,6 +301,7 @@ def upload_photos():
     except Exception:
         return jsonify({'error':'Failed to upload photos'}), 500
     
+
 
 @visit_bp.route('/create/under-post/<int:post_id>', methods = ['POST'])
 @auth_required

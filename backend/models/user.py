@@ -151,7 +151,6 @@ class UserInfo(db.Model):
     height_ft = Column(Integer, default=0)
     height_in = Column(Integer, default=0)
     
-    preferred_language = Column(String(20))
     state = Column(String(20))
     city = Column(String(25))
     
@@ -167,7 +166,6 @@ class UserInfo(db.Model):
             'gender': self.gender,
             'height_ft': self.height_ft,
             'height_in': self.height_in,
-            'preferred_language': self.preferred_language,
             'state': self.state,
             'city': self.city
     }
