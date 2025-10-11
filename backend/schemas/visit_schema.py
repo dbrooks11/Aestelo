@@ -14,7 +14,7 @@ class VisitSchema(ma.SQLAlchemyAutoSchema):
     date_posted = fields.DateTime(dump_only=True)
     like_count = fields.Int(dump_only=True)
     share_count = fields.Int(dump_only=True)
-    num_of_edits = fields.Int(dump_only=True)
+    num_of_edits = fields.Int(dump_only=True, validate=validate.Range(max=3, error='Visit can only be edited 3 times'))
     user_profile_id = fields.UUID(dump_only=True) 
     
     # Required fields
@@ -25,9 +25,7 @@ class VisitSchema(ma.SQLAlchemyAutoSchema):
         fields.Str(validate=validate.Regexp(r'^[a-zA-Z0-9_#]+$', error="Hashtags can only contain letters, numbers, and underscores")),
         validate=validate.Length(max=20)
     )
-    song_id = fields.Str()
-    song_artist = fields.Str()
-    song_name = fields.Str()
+    
     
     @validates('hashtags')
     def validate_hashtags(self, value):

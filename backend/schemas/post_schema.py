@@ -19,7 +19,9 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
     last_rated_at = fields.DateTime(dump_only=True)
     save_count = fields.Integer(validate=[(validate.Range(min=0))], dump_only=True)
     share_count = fields.Integer(validate=[(validate.Range(min=0))], dump_only=True)
+    num_of_edits = fields.Int(dump_only=True, validate=validate.Range(max=1, error='Post can only be edited once'))
     trending_score = fields.Integer(validate=[(validate.Range(min=0))], dump_only=True)
+
 
     name = fields.Str(validate= [validate.Regexp(r"^[a-zA-Z\s]+$",error="Name can only contain letters")])
     description = fields.Str(validate=[validate.Regexp(r"^(?!.*<[^>]+>)[\p{L}\p{N}\p{P}\p{Zs}\n\r\t]$")])

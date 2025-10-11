@@ -50,7 +50,7 @@ class Post(db.Model):
     #* Color pallete willl be added later
     # color_pallette = Column(String())
     accessibility = Column(Boolean, default=False) #is it accessible to people who are handicapped. True = yes, False = no
-
+    num_of_edits = Column(Integer, default=0)
     is_deleted = Column(Boolean, default=False) #is the post deleted by user_profile
     deleted_at = Column(DateTime)
     num_reports = Column(Integer, default=0)

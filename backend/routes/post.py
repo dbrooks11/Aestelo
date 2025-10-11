@@ -119,8 +119,8 @@ def edit_post(post_id):
 
     try:
         data = request.get_json()
+        post.num_of_edits += 1
         
-
         try:
             post_schema.load(data, partial = True)
         except ValidationError as error:
@@ -131,10 +131,11 @@ def edit_post(post_id):
         for edit_field in can_edit:
             if edit_field in data:
                 setattr(post, edit_field, data[edit_field])
+        
+        
         db.session.commit()
         return jsonify({'message':'Post updated successfully',
-                        'updated_post': post_schema.dump(post)
-                        }), 200
+                        'updated_post': post_schema.dump(post)}), 200
     except Exception as e:
         db.session.rollback()
         error = getattr(e,'messages', str(e))
@@ -145,10 +146,17 @@ def edit_post(post_id):
 @auth_required
 def delete_post(post_id):
     current_user = request.current_user.user.id
+    current_user_profile = UserProfile.query.get(current_user)
     post = Post.active().filter_by(user_profile_id = current_user, post_id =post_id).first()
+
+    if not current_user_profile:
+        return jsonify({'error':'Profile not found'}), 404
+
+    if current_user_profile.is_banned:
+        return jsonify({'error':'Profile does not exist'}), 404
     
-    if not post:
-        return jsonify({'error': 'Post unavailable'}), 403
+    if (not post) or post.is_deleted or post.is_removed:
+        return jsonify({'error':'Post does not exist'}), 404
     
     try:
         post.is_deleted = True
@@ -192,8 +200,9 @@ def upload_images():
     if not files or len(files) == 0:
         return jsonify({'error': 'No images provided'}), 400
     
-    if len(files) > 5:
-        return jsonify({'error': 'Maximum 5 images per post'}), 400
+    max_image_count = 5
+    if len(files) > max_image_count:
+        return jsonify({'error': f'Maximum {max_image_count} images per post'}), 400
     
     image_bytes = [img.read() for img in files]
 
@@ -214,18 +223,18 @@ def upload_images():
         for img_data in result['images']:
             img_count +=1
             image_url = upload_to_r2(img_data['image'], current_user_id, folder='posts')
-            thumb_url = upload_to_r2(img_data['thumbnail'], current_user_id, folder= 'thumbnails')
+            thumb_url = upload_to_r2(img_data['thumbnail'], current_user_id, folder= 'post_thumbnails')
             
             gps = img_data.get('gps')
             if gps:
                 lat,long,alt = get_decimal_coordinates(gps)
-                if long and lat:
+                if lat and long:
                     gps_coords.append({
                         'latitude': lat,
                         'longitude': long,
-                        'altitude': alt
-                    })
+                        'altitude': alt})
                 else:
+                    img_count -= 1
                     errors.append(f'Failed to get metadata of Image {img_count}')
                     continue
 
@@ -242,11 +251,12 @@ def upload_images():
                 'order': img_count
             })
         
+        max_meter_distance = 30
         avg_location = average_location(gps_coords) if gps_coords else None
         if avg_location is None:
             return jsonify({
                 'error': 'Photos are from different locations',
-                'message': 'All images must be taken at the same location (within 30 meters of each other).',
+                'message': f'All images must be taken at the same location (within {max_meter_distance} meters of each other).',
                 'suggestion': 'Please select photos taken at the same place, or create separate posts for different locations.'
             }), 400
 

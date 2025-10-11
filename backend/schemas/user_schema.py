@@ -28,6 +28,7 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
     twitter_x= fields.Str(validate=validate.URL())
 
     is_pro_account = fields.Bool(dump_only=True)
+    spotify_track_id = fields.Str(dump_only=True)
 
 
     @pre_load
