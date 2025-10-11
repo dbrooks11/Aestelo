@@ -26,17 +26,21 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
     name = fields.Str(validate= [validate.Regexp(r"^[a-zA-Z\s]+$",error="Name can only contain letters")])
     description = fields.Str(validate=[validate.Regexp(r"^(?!.*<[^>]+>)[\p{L}\p{N}\p{P}\p{Zs}\n\r\t]$")])
 
-    tags = fields.List(
-        fields.Str(validate=validate.Regexp(r'^[a-zA-Z0-9_]+$', error="Tags can only contain letters, numbers, and underscores")),
+    hashtags = fields.List(
+        fields.Str(validate=validate.Regexp(r'^[a-zA-Z0-9_#]+$', error="Hashtags can only contain letters, numbers, and underscores")),
         validate=validate.Length(max=20)
     )
 
-    @validates('tags')
-    def validate_tags(self, value):
+    @validates('hashtags')
+    def validate_hashtags(self, value):
         if value:
-            for tag in value:
-                if len(tag) > 100:
-                    raise ValidationError("Each tag must be 100 characters or less")
+            for hashtag in value:
+                if len(hashtag) > 100:
+                    raise ValidationError("Each hashtag must be 100 characters or less")
+                if hashtag.count('#') > 1:
+                    raise ValidationError("Hashtag can only contain one #")
+                if hashtag[0] != '#':
+                    raise ValidationError("Hashtags must begin with a #")
         return value
 
     @validates('name')

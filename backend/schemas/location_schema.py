@@ -1,6 +1,6 @@
 from marshmallow import (fields, validate)
 from app import ma
-from models.location import Location, LocationCoreData, BusinessLocationDetails
+from models.location import Location, BusinessLocationDetails
 
 class LocationSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -14,14 +14,6 @@ class LocationSchema(ma.SQLAlchemyAutoSchema):
     created_on = fields.DateTime(format='%b %d, %Y')
     altitude = fields.Float(validate=[(validate.Range(min=0.0, max=30000.0))])
 
-
-class LocationCoreDataSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = LocationCoreData
-        load_instance = True
-        include_fk = True
-
-
 class BusinessLocationDetailsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = BusinessLocationDetails
@@ -29,5 +21,4 @@ class BusinessLocationDetailsSchema(ma.SQLAlchemyAutoSchema):
         include_fk = True
 
 location_schema = LocationSchema()
-location_coredata_schema = LocationCoreDataSchema()
 business_location_schema = BusinessLocationDetailsSchema()

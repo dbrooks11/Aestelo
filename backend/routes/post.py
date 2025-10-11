@@ -193,7 +193,7 @@ def remove_post_admin(post_id):
 @post_bp.route('/upload-photos', methods=['POST'])
 @auth_required
 def upload_photos():
-    current_user_id = request.current_user.user.id
+    current_user = request.current_user.user.id
 
     files = request.files.getlist('photos')
     
@@ -215,6 +215,7 @@ def upload_photos():
         return jsonify(result), status
 
     uploaded_photos = []
+    failed_photos = []
     gps_coords = []
     errors = []
     pht_count = 0
@@ -222,10 +223,8 @@ def upload_photos():
     try:
         for pht_data in result['photos']:
             pht_count +=1
-            photo_url = upload_to_r2(pht_data['photo'], current_user_id, folder='posts')
-            thumb_url = upload_to_r2(pht_data['thumbnail'], current_user_id, folder= 'post_thumbnails')
             
-            gps = pht_data.get('gps')
+            gps = pht_data['gps']
             if gps:
                 lat,long,alt = get_decimal_coordinates(gps)
                 if lat and long:
@@ -234,11 +233,16 @@ def upload_photos():
                         'longitude': long,
                         'altitude': alt})
                 else:
-                    pht_count -= 1
+                    failed_photo_url = upload_to_r2(pht_data['photo'], current_user, folder='failed_photos')
+                    failed_photos.append({'failed_photo_url': failed_photo_url,
+                                          'reason':'No metadata found',
+                                          'photo_number': pht_count})
                     errors.append(f'Failed to get metadata of photo {pht_count}')
                     continue
-
             
+            photo_url = upload_to_r2(pht_data['photo'], current_user, folder='posts')
+            thumb_url = upload_photos(pht_data['thumbnail'], current_user, folder = 'post_thumbnails')
+                
             uploaded_photos.append({
                 'photo_url': photo_url,
                 'thumbnail_url': thumb_url,
@@ -250,23 +254,32 @@ def upload_photos():
                 'gps': gps,
                 'order': pht_count
             })
-        
+
         max_meter_distance = 30
-        avg_location = average_location(gps_coords) if gps_coords else None
+        avg_location = average_location(gps_coords)
         if avg_location is None:
             return jsonify({
                 'error': 'Photos are from different locations',
                 'message': f'All photos must be taken at the same location (within {max_meter_distance} meters of each other).',
                 'suggestion': 'Please select photos taken at the same place, or create separate posts for different locations.'
             }), 400
-
-        return jsonify({
-            'message': 'photos uploaded successfully',
-            'photos': uploaded_photos,
-            'location': avg_location,
-            'photo_count': len(uploaded_photos),
-            'error': errors
-        }), 200
+        
+        if errors:
+            return jsonify({
+                'message': f'{len(upload_photos)}/{len(files)} photos were uploaded successfully',
+                'uploaded_photos': uploaded_photos,
+                'failed_photos': failed_photos,
+                'location': avg_location,
+                'photo_count': len(uploaded_photos),
+                'error': errors
+            }), 200
+        else:
+            return jsonify({
+                'message': 'photos uploaded successfully',
+                'photos': uploaded_photos,
+                'location': avg_location,
+                'photo_count': len(uploaded_photos)
+            }), 200
     
     except Exception:
         return jsonify({'error':'Failed to upload photos'}), 500

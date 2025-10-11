@@ -242,9 +242,10 @@ def upload_photos():
                         'longitude': long,
                         'altitude': alt})
                 else:
-                    pht_count -= 1
                     failed_photo_url = upload_to_r2(pht_data['photo'], current_user, folder='failed_photos')
-                    failed_photos.append({'failed_photo_url': failed_photo_url})
+                    failed_photos.append({'failed_photo_url': failed_photo_url,
+                                          'reason':'No metadata found',
+                                          'photo_number': pht_count})
                     errors.append(f'Failed to get metadata of photo {pht_count}')
                     continue
             
@@ -274,7 +275,7 @@ def upload_photos():
         
         if errors:
             return jsonify({
-                'message': f'{pht_count}/{len(files)} photos were uploaded successfully',
+                'message': f'{len(upload_photos)}/{len(files)} photos were uploaded successfully',
                 'uploaded_photos': uploaded_photos,
                 'failed_photos': failed_photos,
                 'location': avg_location,
@@ -291,6 +292,29 @@ def upload_photos():
     
     except Exception:
         return jsonify({'error':'Failed to upload photos'}), 500
+    
+
+@visit_bp.route('/create', methods = ['POST'])
+@auth_required
+def create_visit():
+    current_user = request.current_user.user.id
+    current_user_profile = UserProfile.query.get(current_user)
+
+    if not current_user_profile:
+        return jsonify({'error':'Profile does not exist'})
+
+    data = request.get_json()
+
+    if not (data.get('photos') or data.get('location') or data.get('photo_count')):
+        return jsonify({'error':'Invalid data provided'}), 400
+    
+
+    spotify_song = data.get('spotify_track_id')
+    caption = data.get('caption')
+    hashtags = data.get('hashtags)
+
+
+    
 
 
 

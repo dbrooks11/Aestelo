@@ -30,12 +30,12 @@ class VisitSchema(ma.SQLAlchemyAutoSchema):
     @validates('hashtags')
     def validate_hashtags(self, value):
         if value:
-            for tag in value:
-                if len(tag) > 100:
+            for hashtag in value:
+                if len(hashtag) > 100:
                     raise ValidationError("Each hashtag must be 100 characters or less")
-                if tag.count('#') > 1:
+                if hashtag.count('#') > 1:
                     raise ValidationError("Hashtag can only contain one #")
-                if tag[0] != '#':
+                if hashtag[0] != '#':
                     raise ValidationError("Hashtags must begin with a #")
         return value
     

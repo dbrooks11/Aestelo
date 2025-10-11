@@ -45,7 +45,7 @@ class Post(db.Model):
     save_count = Column(Integer, default=0)
     share_count = Column(Integer, default=0)
     trending_score = Column(Integer, default=0) #will be used to calculate a score for trending post to keep track of which post is trending
-    tags = Column(ARRAY(String)) #different from hastags, can put tags on post like ('graffiti', 'red', 'streetwear','dark')
+    hashtags = Column(ARRAY(String)) #different from hastags, can put tags on post like ('graffiti', 'red', 'streetwear','dark')
 
     #* Color pallete willl be added later
     # color_pallette = Column(String())
@@ -76,6 +76,8 @@ class Post(db.Model):
             "save_count": self.save_count,
             "share_count": self.share_count,
             "trending_score": self.trending_score,
+            'hashtags': self.hashtags,
+            'num_of_edits': self.num_of_edits,
             "accessibility": self.accessibility,
             "is_deleted": self.is_deleted,
             "deleted_at": self.deleted_at,
