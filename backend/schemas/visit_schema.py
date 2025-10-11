@@ -71,7 +71,7 @@ class VisitMediaSchema(ma.SQLAlchemyAutoSchema):
     
     @validates('media_type')
     def validate_media_type(self, value):
-        allowed = ['image']
+        allowed = ['photo']
         if value not in allowed:
             raise ValidationError(f"Media type must be one of: {allowed}")
         return value

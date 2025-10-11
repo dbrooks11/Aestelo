@@ -35,7 +35,7 @@ class Post(db.Model):
     refined_location = Column(Float, nullable=False)
     date_posted = Column(DateTime, default=datetime.now(timezone.utc))
     description = Column(String(200))
-    total_num_of_images = Column(Integer)
+    total_num_of_photos = Column(Integer)
 
     #total_visits = Column(Integer, default=0)  #* Might add total visits to a post
     average_rating = Column(Float, default=0.0)
@@ -104,10 +104,10 @@ class PostMedia(db.Model):
     post_media_id =Column(BigInteger, primary_key=True)
 
     thumbnail_url = Column(Text)
-    thumb_media_type = Column(String(15), default = 'image')
+    thumb_media_type = Column(String(15), default = 'photo')
 
     media_url = Column(Text)
-    media_type = Column(String(15), default = 'image') #stores what type of media is uploaed, image, video, 360 video, etc
+    media_type = Column(String(15), default = 'photo') #stores what type of media is uploaed, photo, video, 360 video, etc
     width =  Column(Integer)
     height = Column(Integer)
 

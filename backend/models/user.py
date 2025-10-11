@@ -26,7 +26,7 @@ class UserProfile(db.Model):
     spotify_track_id = Column(String(50), ForeignKey(f'{spotify_track_schema}.spotify_track.spotify_track_id'))
 
     username = Column(String(50), unique=True)
-    profile_image = Column(Text)
+    profile_photo = Column(Text)
     bio = Column(String(250))
 
     instagram = Column(Text)
@@ -80,7 +80,7 @@ class UserProfile(db.Model):
             'id': str(self.id),
             'banner_theme': self.banner_theme,
             'username': self.username,
-            'profile_image': self.profile_image,
+            'profile_photo': self.profile_photo,
             'bio': self.bio,
             'instagram': self.instagram,
             'is_verified_instagram': self.is_verified_instagram,
@@ -106,7 +106,7 @@ class UserProfile(db.Model):
         return{
             'banner_theme': self.banner_theme,
             'username': self.username,
-            'profile_image': self.profile_image,
+            'profile_photo': self.profile_photo,
             'bio': self.bio,
             'instagram': self.instagram,
             'facebook': self.facebook,
@@ -120,7 +120,7 @@ class UserProfile(db.Model):
         return{
             'banner_theme': self.banner_theme,
             'username': self.username,
-            'profile_image': self.profile_image,
+            'profile_photo': self.profile_photo,
         }
     
     @classmethod

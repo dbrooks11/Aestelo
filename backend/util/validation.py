@@ -2,7 +2,7 @@ import requests
 import json
 import os 
 
-def image_validation(*images):
+def photo_validation(*photos):
 
   params = {
     'models': os.environ.get('WORKFLOW_ID'),
@@ -10,34 +10,34 @@ def image_validation(*images):
     'api_secret': os.environ.get('SIGHTENGINE_API_SECRET')
   }
 
-  valid_images =[]
+  valid_photos =[]
   errors = []
 
   try:
-    img_count = 0
-    for image in images:
-      img_count += 1
+    pht_count = 0
+    for photo in photos:
+      pht_count += 1
 
-      files = {'media': ('image.jpg', image, 'image/jpeg')}
+      files = {'media': ('photo.jpg', photo, 'photo/jpeg')}
       r = requests.post('https://api.sightengine.com/1.0/check-workflow.json', files=files, data=params)
 
       output = json.loads(r.text)
 
       if output['status'] == 'failure':
-        errors.append({f'Image {img_count} failed: {output['error']}'})
+        errors.append({f'photo {pht_count} failed: {output['error']}'})
         continue
 
       if output['summary']['action'] == 'reject':
-        errors.append(f'Image {img_count} rejected: Summary - {output['summary']['reject_reason']},\n {output['summary']['reject_prob']}')
+        errors.append(f'photo {pht_count} rejected: Summary - {output['summary']['reject_reason']},\n {output['summary']['reject_prob']}')
         continue
       
-      valid_images.append(image)
+      valid_photos.append(photo)
   except requests.exceptions.Timeout:
-    errors.append(f"Image {img_count}: Moderation timeout - image allowed")
-    valid_images.append(image)
+    errors.append(f"photo {pht_count}: Moderation timeout - photo allowed")
+    valid_photos.append(photo)
 
   except Exception as e:
-    errors.append(f"Image {img_count}: Error - {str(e)}")
+    errors.append(f"photo {pht_count}: Error - {str(e)}")
 
 
-  return valid_images, errors
+  return valid_photos, errors

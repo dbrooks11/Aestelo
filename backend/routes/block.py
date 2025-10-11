@@ -115,7 +115,7 @@ def get_blocked_profiles():
             'id': block.id,
             'banner_theme':block.banner_theme,
             'username':block.username,
-            'profile_image':block.profile_image
+            'profile_photo':block.profile_photo
         }
         for block in paginated_blocks.items]
 

@@ -8,8 +8,8 @@ from models.visit import Visit
 from schemas.user_schema import ProfileSchema
 from schemas.visit_schema import visit_schema, ValidationError
 from routes.auth_required_wrapper import auth_required, admin_required
-from util.image_processing import image_processing, get_decimal_coordinates
-from util.validation import image_validation
+from util.photo_processing import photo_processing, get_decimal_coordinates
+from util.validation import photo_validation
 from util.storage import upload_to_r2
 from util.outlier_coords import average_location
 
@@ -197,43 +197,43 @@ def remove_post_admin(visit_id):
 
 
 
-visit_bp.route('/upload-images', methods = ['POST'])
+visit_bp.route('/upload-photos', methods = ['POST'])
 @auth_required
-def upload_images():
+def upload_photos():
     current_user = request.current_user.user.id
 
-    files = request.files.getlist('images')
+    files = request.files.getlist('photos')
 
     if not files or len(files) == 0:
-        return jsonify({'error':'No images provided'}), 400
+        return jsonify({'error':'No photos provided'}), 400
 
-    max_image_count = 10
-    if len(files) > max_image_count:
-        return jsonify({'error': f'Maximum {max_image_count} images per visit'})
+    max_photo_count = 10
+    if len(files) > max_photo_count:
+        return jsonify({'error': f'Maximum {max_photo_count} photos per visit'})
     
-    image_bytes = [img.read() for img in files]
+    photo_bytes = [pht.read() for pht in files]
 
-    validated_bytes, errors = image_validation(image_bytes)
+    validated_bytes, errors = photo_validation(photo_bytes)
 
     if errors:
-       return jsonify({'error': 'Images rejected', 'details': errors}), 400
+       return jsonify({'error': 'photos rejected', 'details': errors}), 400
 
-    result, status = image_processing(validated_bytes)
+    result, status = photo_processing(validated_bytes)
 
     if status != 200:
         return jsonify(result), status
 
-    uploaded_images = []
-    failed_images = []
+    uploaded_photos = []
+    failed_photos = []
     gps_coords = []
     errors = []
-    img_count = 0
+    pht_count = 0
 
     try:
-        for img_data in result['images']:
-            img_count +=1
+        for pht_data in result['photos']:
+            pht_count +=1
             
-            gps = img_data['gps']
+            gps = pht_data['gps']
             if gps:
                 lat,long,alt = get_decimal_coordinates(gps)
                 if lat and long:
@@ -242,55 +242,55 @@ def upload_images():
                         'longitude': long,
                         'altitude': alt})
                 else:
-                    img_count -= 1
-                    failed_image_url = upload_to_r2(img_data['image'], current_user, folder='failed_images')
-                    failed_images.append({'failed_image_url': failed_image_url})
-                    errors.append(f'Failed to get metadata of Image {img_count}')
+                    pht_count -= 1
+                    failed_photo_url = upload_to_r2(pht_data['photo'], current_user, folder='failed_photos')
+                    failed_photos.append({'failed_photo_url': failed_photo_url})
+                    errors.append(f'Failed to get metadata of photo {pht_count}')
                     continue
             
-            image_url = upload_to_r2(img_data['image'], current_user, folder='visits')
-            thumb_url = upload_images(img_data['thumbnail'], current_user, folder = 'visit_thumbnails')
+            photo_url = upload_to_r2(pht_data['photo'], current_user, folder='visits')
+            thumb_url = upload_photos(pht_data['thumbnail'], current_user, folder = 'visit_thumbnails')
                 
-            uploaded_images.append({
-                'image_url': image_url,
+            uploaded_photos.append({
+                'photo_url': photo_url,
                 'thumbnail_url': thumb_url,
-                'width': img_data['width'],
-                'height': img_data['height'],
+                'width': pht_data['width'],
+                'height': pht_data['height'],
                 'latitude': lat,
                 'longitude':long,
                 'altitude': alt,
                 'gps': gps,
-                'order': img_count
+                'order': pht_count
             })
 
         max_meter_distance = 30
         avg_location = average_location(gps_coords)
         if avg_location is None:
             return jsonify({
-                'error': 'Images are from different locations',
-                'message': f'All images must be taken at the same location (within {max_meter_distance} meters of each other).',
+                'error': 'Photos are from different locations',
+                'message': f'All photos must be taken at the same location (within {max_meter_distance} meters of each other).',
                 'suggestion': 'Please select photos taken at the same place, or create separate posts for different locations.'
             }), 400
         
         if errors:
             return jsonify({
-                'message': f'{img_count}/{len(files)} images were uploaded successfully',
-                'uploaded_images': uploaded_images,
-                'failed_images': failed_images,
+                'message': f'{pht_count}/{len(files)} photos were uploaded successfully',
+                'uploaded_photos': uploaded_photos,
+                'failed_photos': failed_photos,
                 'location': avg_location,
-                'image_count': len(uploaded_images),
+                'photo_count': len(uploaded_photos),
                 'error': errors
             }), 200
         else:
             return jsonify({
-                'message': 'Images uploaded successfully',
-                'images': uploaded_images,
+                'message': 'photos uploaded successfully',
+                'photos': uploaded_photos,
                 'location': avg_location,
-                'image_count': len(uploaded_images)
+                'photo_count': len(uploaded_photos)
             }), 200
     
     except Exception:
-        return jsonify({'error':'Failed to upload images'}), 500
+        return jsonify({'error':'Failed to upload photos'}), 500
 
 
 

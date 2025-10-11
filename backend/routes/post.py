@@ -9,8 +9,8 @@ from routes.auth_required_wrapper import auth_required, admin_required
 from datetime import datetime, timezone
 from schemas.post_schema import post_schema,post_media_schema, ValidationError
 from schemas.location_schema import location_schema
-from util.image_processing import image_processing, get_decimal_coordinates
-from util.validation import image_validation
+from util.photo_processing import photo_processing, get_decimal_coordinates
+from util.validation import photo_validation
 from util.storage import upload_to_r2
 from util.outlier_coords import average_location
 
@@ -190,42 +190,42 @@ def remove_post_admin(post_id):
     
     
 
-@post_bp.route('/upload-images', methods=['POST'])
+@post_bp.route('/upload-photos', methods=['POST'])
 @auth_required
-def upload_images():
+def upload_photos():
     current_user_id = request.current_user.user.id
 
-    files = request.files.getlist('images')
+    files = request.files.getlist('photos')
     
     if not files or len(files) == 0:
-        return jsonify({'error': 'No images provided'}), 400
+        return jsonify({'error': 'No photos provided'}), 400
     
-    max_image_count = 5
-    if len(files) > max_image_count:
-        return jsonify({'error': f'Maximum {max_image_count} images per post'}), 400
+    max_photo_count = 5
+    if len(files) > max_photo_count:
+        return jsonify({'error': f'Maximum {max_photo_count} photos per post'}), 400
     
-    image_bytes = [img.read() for img in files]
+    photo_bytes = [pht.read() for pht in files]
 
-    validated_bytes, errors = image_validation(*image_bytes)
+    validated_bytes, errors = photo_validation(*photo_bytes)
     if errors:
-        return jsonify({'error': 'Images rejected', 'details': errors}), 400
+        return jsonify({'error': 'photos rejected', 'details': errors}), 400
     
-    result, status = image_processing(*validated_bytes)
+    result, status = photo_processing(*validated_bytes)
     if status != 200:
         return jsonify(result), status
 
-    uploaded_images = []
+    uploaded_photos = []
     gps_coords = []
     errors = []
-    img_count = 0
+    pht_count = 0
 
     try:
-        for img_data in result['images']:
-            img_count +=1
-            image_url = upload_to_r2(img_data['image'], current_user_id, folder='posts')
-            thumb_url = upload_to_r2(img_data['thumbnail'], current_user_id, folder= 'post_thumbnails')
+        for pht_data in result['photos']:
+            pht_count +=1
+            photo_url = upload_to_r2(pht_data['photo'], current_user_id, folder='posts')
+            thumb_url = upload_to_r2(pht_data['thumbnail'], current_user_id, folder= 'post_thumbnails')
             
-            gps = img_data.get('gps')
+            gps = pht_data.get('gps')
             if gps:
                 lat,long,alt = get_decimal_coordinates(gps)
                 if lat and long:
@@ -234,21 +234,21 @@ def upload_images():
                         'longitude': long,
                         'altitude': alt})
                 else:
-                    img_count -= 1
-                    errors.append(f'Failed to get metadata of Image {img_count}')
+                    pht_count -= 1
+                    errors.append(f'Failed to get metadata of photo {pht_count}')
                     continue
 
             
-            uploaded_images.append({
-                'image_url': image_url,
+            uploaded_photos.append({
+                'photo_url': photo_url,
                 'thumbnail_url': thumb_url,
-                'width': img_data['width'],
-                'height': img_data['height'],
+                'width': pht_data['width'],
+                'height': pht_data['height'],
                 'latitude': lat,
                 'longitude':long,
                 'altitude': alt,
                 'gps': gps,
-                'order': img_count
+                'order': pht_count
             })
         
         max_meter_distance = 30
@@ -256,20 +256,20 @@ def upload_images():
         if avg_location is None:
             return jsonify({
                 'error': 'Photos are from different locations',
-                'message': f'All images must be taken at the same location (within {max_meter_distance} meters of each other).',
+                'message': f'All photos must be taken at the same location (within {max_meter_distance} meters of each other).',
                 'suggestion': 'Please select photos taken at the same place, or create separate posts for different locations.'
             }), 400
 
         return jsonify({
-            'message': 'Images uploaded successfully',
-            'images': uploaded_images,
+            'message': 'photos uploaded successfully',
+            'photos': uploaded_photos,
             'location': avg_location,
-            'image_count': len(uploaded_images),
+            'photo_count': len(uploaded_photos),
             'error': errors
         }), 200
     
     except Exception:
-        return jsonify({'error':'Failed to upload images'}), 500
+        return jsonify({'error':'Failed to upload photos'}), 500
     
 
 @post_bp.route('/create', methods = ['POST'])
@@ -280,16 +280,16 @@ def create_post():
 
     data = request.get_json()
 
-    if not (data.get('images') or data.get('location') or data.get('image_count')):
+    if not (data.get('photos') or data.get('location') or data.get('photo_count')):
         return jsonify({'error':'Invalid data provided'}), 400
 
     post_name = data.get('name')
     post_description = data.get('description')
     accessibility = data.get('accessibility')
     tags = data.get('tags', [])
-    images = data['images']
+    photos = data['photos']
     avg_location = data['location']
-    num_of_images = data['image_count']
+    num_of_photos = data['photo_count']
 
     try:
 
@@ -298,7 +298,7 @@ def create_post():
                 "name": post_name, 
                 "refined_location": avg_location,
                 "description": post_description,
-                "total_num_of_images": num_of_images, 
+                "total_num_of_photos": num_of_photos, 
                 "tags": tags
             }
             post_schema.load(data_to_load, partial = True)
@@ -310,22 +310,22 @@ def create_post():
             name=post_name,
             refined_location = avg_location,
             description=post_description,
-            total_num_of_photos= num_of_images,
+            total_num_of_photos= num_of_photos,
             accessibility=accessibility,
             tags=tags
         )
         db.session.add(new_post)
         db.session.flush()
 
-        for img_data in images:
+        for pht_data in photos:
 
             media_data_to_load = {
-                "thumbnail_url": img_data['thumbnail_url'],
-                "thumb_media_type": 'image',
-                "media_url": img_data['image_url'],
-                "media_type": 'image',
-                "width": img_data['width'],
-                "height": img_data['height']
+                "thumbnail_url": pht_data['thumbnail_url'],
+                "thumb_media_type": 'photo',
+                "media_url": pht_data['photo_url'],
+                "media_type": 'photo',
+                "width": pht_data['width'],
+                "height": pht_data['height']
             }
             try:
                 post_media_schema.load(media_data_to_load, partial = True)
@@ -335,12 +335,12 @@ def create_post():
             post_media = PostMedia(
                 post_id=new_post.post_id,
                 uploaded_by=current_user,
-                media_url=img_data['image_url'],     
-                thumbnail_url=img_data['thumbnail_url'],
-                media_type='image',
-                thumb_media_type='image',
-                width=img_data['width'],
-                height=img_data['height'],
+                media_url=pht_data['photo_url'],     
+                thumbnail_url=pht_data['thumbnail_url'],
+                media_type='photo',
+                thumb_media_type='photo',
+                width=pht_data['width'],
+                height=pht_data['height'],
             )
             db.session.add(post_media)
             db.session.flush()
@@ -349,9 +349,9 @@ def create_post():
 
                 location_data_to_load = {
                     "is_visit": False,
-                    "latitude": img_data['latitude'],
-                    "longitude": img_data['longitude'],
-                    "altitude": img_data.get('altitude') 
+                    "latitude": pht_data['latitude'],
+                    "longitude": pht_data['longitude'],
+                    "altitude": pht_data.get('altitude') 
                 }
                 location_schema.load(location_data_to_load, partial = True)
             except ValidationError as error:
@@ -360,10 +360,10 @@ def create_post():
             location = Location(
                 post_media_id=post_media.post_media_id,
                 is_visit=False,
-                latitude=img_data['latitude'],
-                longitude=img_data['longitude'],
-                altitude=img_data.get('altitude'),
-                is_long_lat=img_data['gps'] is not None,
+                latitude=pht_data['latitude'],
+                longitude=pht_data['longitude'],
+                altitude=pht_data.get('altitude'),
+                is_long_lat=pht_data['gps'] is not None,
             )
             db.session.add(location)
             db.session.flush()

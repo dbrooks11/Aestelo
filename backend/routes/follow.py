@@ -122,7 +122,7 @@ def get_followers(username):
             'id': str(follower.follower_id),
             'banner_theme':follower.banner_theme,
             'username': follower.username,
-            'profile_image': follower.profile_image
+            'profile_photo': follower.profile_photo
         }
         for follower in paginated_followers.items]
 
@@ -171,7 +171,7 @@ def get_following(username):
             'id': str(following.id),
             'banner_theme': following.banner_theme,
             'username': following.username,
-            'profile_image': following.profile_image
+            'profile_photo': following.profile_photo
         }
         for following in paginated_following.items]
 

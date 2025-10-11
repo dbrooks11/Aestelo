@@ -26,7 +26,7 @@ class Visit(db.Model):
     like_count = Column(BigInteger, default=0)
     share_count = Column(Integer, default=0)
 
-    num_of_edits = Column(Integer, default=0) # user_profile can edit their vistit only 3 times (caption, image, hashtag, song, etc)
+    num_of_edits = Column(Integer, default=0) # user_profile can edit their vistit only 3 times (caption, photo, hashtag, song, etc)
     is_deleted = Column(Boolean, default=False) #is the post deleted by user_profile
     deleted_at = Column(DateTime)
     deleted_by = Column(UUID(as_uuid=True))
@@ -41,9 +41,7 @@ class Visit(db.Model):
             "post_id": self.post_id,
             "user_profile_id": self.user_profile_id,
             "location_id": self.location_id,
-            "song_id": self.song_id,
-            "song_artist": self.song_artist,
-            "song_name": self.song_name,
+            
             "caption": self.caption,
             "hashtags": self.hashtags,
             "date_posted": self.date_posted,
@@ -74,11 +72,11 @@ class VisitMedia(db.Model):
 
     visit_media_id =Column(BigInteger, primary_key=True)
     media_url = Column(Text)
-    media_type = Column(String(15), default = 'image') #stores what type of media is uploaed, image, video, 360 video, etc
+    media_type = Column(String(15), default = 'photo') #stores what type of media is uploaed, photo, video, 360 video, etc
     width =  Column(Integer)
     height = Column(Integer)
     upload_date = Column(DateTime, default=datetime.now(timezone.utc))
-    verified_status = Column(String(10), default='pending') #Will either be pending, verified, or rejected to verify each image
+    verified_status = Column(String(10), default='pending') #Will either be pending, verified, or rejected to verify each photo
     is_primary = Column(Boolean, default=False) #Sets the primary pic in front
     
     def to_dict(self):

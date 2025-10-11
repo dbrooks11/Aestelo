@@ -13,7 +13,7 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
     post_id = fields.Integer(dump_only=True)
     refined_location = fields.Float(dump_only=True)
     date_posted = fields.DateTime(dump_only=True, format='%b %d, %Y')
-    total_num_of_images = fields.Integer(validate=[(validate.Range(min=0,max=5))], dump_only=True)
+    total_num_of_photos = fields.Integer(validate=[(validate.Range(min=0,max=5))], dump_only=True)
     average_rating = fields.Float(validate=[(validate.Range(min=0.0, max=5.0))], dump_only=True)
     total_num_of_ratings = fields.Integer(validate=[(validate.Range(min=0))], dump_only=True)
     last_rated_at = fields.DateTime(dump_only=True)
@@ -78,14 +78,14 @@ class PostMediaSchema(ma.SQLAlchemyAutoSchema):
 
     @validates('media_type')
     def validate_media_type(self, value):
-        allowed = ['image']
+        allowed = ['photo']
         if value not in allowed:
             raise ValidationError(f"Media type must be: {allowed}")
         return value
     
     @validates('thumb_media_type')
     def validate_thumb_type(self, value):
-        allowed = ['image']
+        allowed = ['photo']
         if value not in allowed:
             raise ValidationError(f"Thumbnail Media type must be: {allowed}")
         return value
