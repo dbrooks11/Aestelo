@@ -23,6 +23,8 @@ class UserProfile(db.Model):
     id = Column(UUID(as_uuid=True), primary_key=True)
     banner_theme = Column(String(30))
 
+    spotify_track_id = Column(String(50), ForeignKey(f'{spotify_track_schema}.spotify_track.spotify_track_id'))
+
     username = Column(String(50), unique=True)
     profile_image = Column(Text)
     bio = Column(String(250))
@@ -61,16 +63,17 @@ class UserProfile(db.Model):
     profile_created_at = Column(DateTime, default=datetime.now(timezone.utc))
 
 
-    user_info = relationship('UserInfo', backref='user_profile', lazy=True)
-    user_settings = relationship('UserSettings', backref= 'user_profile', lazy=True)
-    user_subscription = relationship('UserSubscription', backref= 'user_profile', lazy=True)
-    post = relationship('Post', backref='user_profile', lazy=True)
+    user_info = relationship('UserInfo', backref='user_profile', lazy='joined')
+    user_settings = relationship('UserSettings', backref= 'user_profile', lazy='joined')
+    user_subscription = relationship('UserSubscription', backref= 'user_profile', lazy='joined')
+    post = relationship('Post', backref='user_profile', lazy='selectin')
     post_media = relationship('PostMedia', backref='user_profile', lazy=True)
-    visit = relationship('Visit', backref='user_profile', lazy=True)
+    visit = relationship('Visit', backref='user_profile', lazy='selectin')
     visit_media = relationship('VisitMedia', backref='user_profile', lazy=True)
     rating = relationship('Rating', backref='user_profile', lazy=True)
     report = relationship('Report', backref='user_profile', lazy=True)
-    follow = relationship('Follow', backref='user_profile', lazy=True)
+    follow = relationship('Follow', backref='user_profile', lazy='dynamic')
+    spotify_track = relationship('SpotifyTrack', backref='user_profile', lazy='joined')
     
     def to_dict(self):
         return {
