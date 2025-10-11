@@ -79,6 +79,7 @@ class UserProfile(db.Model):
         return {
             'id': str(self.id),
             'banner_theme': self.banner_theme,
+            'spotify_track_id':self.spotify_track_id,
             'username': self.username,
             'profile_photo': self.profile_photo,
             'bio': self.bio,

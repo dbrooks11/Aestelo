@@ -41,7 +41,7 @@ class Visit(db.Model):
             "post_id": self.post_id,
             "user_profile_id": self.user_profile_id,
             "location_id": self.location_id,
-            
+            'spotify_track_id':self.spotify_track_id,
             "caption": self.caption,
             "hashtags": self.hashtags,
             "date_posted": self.date_posted,
