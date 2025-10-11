@@ -1,7 +1,7 @@
 from exstensions import db
-from sqlalchemy import Column, ForeignKey, BigInteger, String, Integer, Float, Text, DateTime, Boolean, ARRAY
+from sqlalchemy import Column, ForeignKey, BigInteger, String, Integer, Float, Text, DateTime, Boolean, ARRAY, 
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, ColumnProperty
 from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import UUID
 from .schema_types import *
@@ -45,7 +45,7 @@ class Post(db.Model):
 
     save_count = Column(Integer, default=0)
     share_count = Column(Integer, default=0)
-    trending_score = Column(Integer, default=0) #will be used to calculate a score for trending post to keep track of which post is trending
+    trending_score = ColumnProperty() #will be used to calculate a score for trending post to keep track of which post is trending
     hashtags = Column(ARRAY(String)) #different from hastags, can put tags on post like ('graffiti', 'red', 'streetwear','dark')
 
     #* Color pallete willl be added later
