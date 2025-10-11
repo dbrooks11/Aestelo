@@ -1,5 +1,6 @@
 from exstensions import db
 from sqlalchemy import Column, ForeignKey, BigInteger, String, Integer, Float, Text, DateTime, Boolean, ARRAY
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import UUID
@@ -19,12 +20,16 @@ class Visit(db.Model):
     user_profile_id = Column(UUID(as_uuid=True),  ForeignKey(f'{user_profile_schema}.user_profile.id'), nullable=False, index=True)
     location_id = relationship('Location', backref='post', lazy=True)
     
+    refined_location = Column(JSONB, nullable=False)
+
     spotify_track_id = Column(String(50), ForeignKey(f'{spotify_track_schema}.spotify_track.spotify_track_id'))
     caption = Column(String(250))
     hashtags = Column(ARRAY(String))
     date_posted = Column(DateTime, default=datetime.now(timezone.utc))
     like_count = Column(BigInteger, default=0)
     share_count = Column(Integer, default=0)
+
+    total_num_of_photos = Column(Integer)
 
     num_of_edits = Column(Integer, default=0) # user_profile can edit their vistit only 3 times (caption, photo, hashtag, song, etc)
     is_deleted = Column(Boolean, default=False) #is the post deleted by user_profile
@@ -68,16 +73,17 @@ class VisitMedia(db.Model):
     __table_args__ = {'schema': visit_media_schema} 
     visit_id = Column(BigInteger, ForeignKey(f'{visit_schema}.visit.visit_id'), nullable=False, index=True)
     uploaded_by = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'), nullable=False, index=True)
-    location_id = Column(BigInteger, ForeignKey(f'{location_schema}.location.location_id'), index=True)
 
     visit_media_id =Column(BigInteger, primary_key=True)
+    index = Column(Integer)
     media_url = Column(Text)
     media_type = Column(String(15), default = 'photo') #stores what type of media is uploaed, photo, video, 360 video, etc
     width =  Column(Integer)
     height = Column(Integer)
     upload_date = Column(DateTime, default=datetime.now(timezone.utc))
-    verified_status = Column(String(10), default='pending') #Will either be pending, verified, or rejected to verify each photo
     is_primary = Column(Boolean, default=False) #Sets the primary pic in front
+
+    location = relationship('Location', backref='visit_media', lazy=True)
     
     def to_dict(self):
         return {

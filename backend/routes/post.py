@@ -291,6 +291,9 @@ def create_post():
     current_user = request.current_user.user.id
     current_user_profile = UserProfile.query.get(current_user)
 
+    if not current_user_profile:
+        return jsonify({'error':'Profile does not exist'})
+
     data = request.get_json()
 
     if not (data.get('photos') or data.get('location') or data.get('photo_count')):
@@ -299,7 +302,7 @@ def create_post():
     post_name = data.get('name')
     post_description = data.get('description')
     accessibility = data.get('accessibility')
-    tags = data.get('tags', [])
+    hashtags = data.get('hashtags', [])
     photos = data['photos']
     avg_location = data['location']
     num_of_photos = data['photo_count']
@@ -312,25 +315,25 @@ def create_post():
                 "refined_location": avg_location,
                 "description": post_description,
                 "total_num_of_photos": num_of_photos, 
-                "tags": tags
+                "hashtags": hashtags
             }
             post_schema.load(data_to_load, partial = True)
         except ValidationError as error:
             return jsonify({"error": error.messages}), 400
 
         new_post = Post(
-            user_profile_id=current_user,
+            user_profile_id=current_user_profile.id,
             name=post_name,
             refined_location = avg_location,
             description=post_description,
             total_num_of_photos= num_of_photos,
             accessibility=accessibility,
-            tags=tags
+            hashtags=hashtags
         )
         db.session.add(new_post)
         db.session.flush()
 
-        for pht_data in photos:
+        for position, pht_data in enumerate(photos, start=1):
 
             media_data_to_load = {
                 "thumbnail_url": pht_data['thumbnail_url'],
@@ -347,7 +350,8 @@ def create_post():
 
             post_media = PostMedia(
                 post_id=new_post.post_id,
-                uploaded_by=current_user,
+                uploaded_by=current_user_profile.id,
+                index = position,
                 media_url=pht_data['photo_url'],     
                 thumbnail_url=pht_data['thumbnail_url'],
                 media_type='photo',
@@ -361,7 +365,6 @@ def create_post():
             try:
 
                 location_data_to_load = {
-                    "is_visit": False,
                     "latitude": pht_data['latitude'],
                     "longitude": pht_data['longitude'],
                     "altitude": pht_data.get('altitude') 
@@ -372,14 +375,11 @@ def create_post():
 
             location = Location(
                 post_media_id=post_media.post_media_id,
-                is_visit=False,
                 latitude=pht_data['latitude'],
                 longitude=pht_data['longitude'],
                 altitude=pht_data.get('altitude'),
-                is_long_lat=pht_data['gps'] is not None,
             )
             db.session.add(location)
-            db.session.flush()
 
         current_user_profile.post_count += 1
         db.session.commit()

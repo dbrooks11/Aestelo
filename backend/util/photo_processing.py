@@ -42,6 +42,8 @@ def get_decimal_coordinates(gps_info):
     return None, None, None
 
 
+
+
 def photo_processing(*photos):
     min_width = 600
     max_width = 1080 

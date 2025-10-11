@@ -1,5 +1,6 @@
 from exstensions import db
 from sqlalchemy import Column, ForeignKey, BigInteger, String, Integer, Float, Text, DateTime, Boolean, ARRAY
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import UUID
@@ -32,7 +33,7 @@ class Post(db.Model):
     post_id = Column(BigInteger, primary_key=True)
     
     name = Column(String(100))
-    refined_location = Column(Float, nullable=False)
+    refined_location = Column(JSONB, nullable=False)
     date_posted = Column(DateTime, default=datetime.now(timezone.utc))
     description = Column(String(200))
     total_num_of_photos = Column(Integer)
@@ -101,10 +102,8 @@ class PostMedia(db.Model):
 
     post_id = Column(BigInteger, ForeignKey(f'{post_schema}.post.post_id'), index=True)
     uploaded_by = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'), index=True)
-
-    location = relationship('Location', backref='post_media', lazy=True)
     post_media_id =Column(BigInteger, primary_key=True)
-
+    index = Column(BigInteger)
     thumbnail_url = Column(Text)
     thumb_media_type = Column(String(15), default = 'photo')
 
@@ -114,6 +113,8 @@ class PostMedia(db.Model):
     height = Column(Integer)
 
     is_primary = Column(Boolean,default=False) #Sets the primary pic in front
+
+    location = relationship('Location', backref='post_media', lazy=True)
     
 
     def to_dict(self):

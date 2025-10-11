@@ -27,18 +27,17 @@ class Location(db.Model):
                       {'schema': location_schema})
     
     post_media_id = Column(BigInteger, ForeignKey(f'{post_media_schema}.post_media.post_media_id'), index=True, nullable=True)
-    visit_id = Column(BigInteger, ForeignKey(f'{visit_schema}.visit.visit_id'), index=True, nullable=True)
+    visit_media_id = Column(BigInteger, ForeignKey(f'{visit_media_schema}.visit_media.visit_media_id'), index=True, nullable=True)
     business_location_details = relationship('BusinessLocationDetails', backref='location', lazy=True) #will be handled later
-    is_visit = Column(Boolean, default=False) #if its a visit, itll refernce the visit id
+   
         
     location_id = Column(BigInteger, primary_key=True)
     longitude = Column(Float)
     latitude = Column(Float)
     altitude = Column(Float)
-    is_long_lat = Column(Boolean) #if place where picture is taken provides the long and late properly, 
-                                  #skips Locations details besides basics for post like desciption, name, tags, etc
 
-    created_on = Column(DateTime, default= datetime.now(timezone.utc).strftime('%b %d, %Y'))
+
+    created_on = Column(DateTime, default= datetime.now(timezone.utc))
 
     
     def to_dict(self):

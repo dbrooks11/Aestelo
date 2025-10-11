@@ -11,11 +11,13 @@ class VisitSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('is_deleted', 'deleted_at', 'is_removed', 'num_reports', 'deleted_by')  
    
     visit_id = fields.Int(dump_only=True)
+    refined_location = fields.Dict(dump_only=True)
     date_posted = fields.DateTime(dump_only=True)
     like_count = fields.Int(dump_only=True)
     share_count = fields.Int(dump_only=True)
     num_of_edits = fields.Int(dump_only=True, validate=validate.Range(max=3, error='Visit can only be edited 3 times'))
     user_profile_id = fields.UUID(dump_only=True) 
+    spotify_track_id = fields.Str(dump_only=True)
     
     # Required fields
     post_id = fields.Int(required=True)
@@ -60,11 +62,12 @@ class VisitMediaSchema(ma.SQLAlchemyAutoSchema):
  
     visit_media_id = fields.Int(dump_only=True)
     media_url = fields.Str(dump_only=True, validate=validate.URL())  
-    verified_status = fields.Str(dump_only=True)
     upload_date = fields.DateTime(dump_only=True, format='%b %d, %Y')
     uploaded_by = fields.UUID(dump_only=True) 
     visit_id = fields.Int(required=True)
+    total_num_of_photos = fields.Int(dump_only=True)
     
+    index = fields.Int(dump_only=True, validate=validate.Range(min=1))
     location_id = fields.Int()
     width = fields.Int(validate=validate.Range(min=500, max=1080), dump_only=True)
     height = fields.Int(validate=validate.Range(min=500, max=1350), dump_only=True)

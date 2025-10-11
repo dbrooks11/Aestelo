@@ -11,7 +11,7 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('is_deleted','deleted_at','num_reports','is_removed','removed_at')
 
     post_id = fields.Integer(dump_only=True)
-    refined_location = fields.Float(dump_only=True)
+    refined_location = fields.Dict(dump_only=True)
     date_posted = fields.DateTime(dump_only=True, format='%b %d, %Y')
     total_num_of_photos = fields.Integer(validate=[(validate.Range(min=0,max=5))], dump_only=True)
     average_rating = fields.Float(validate=[(validate.Range(min=0.0, max=5.0))], dump_only=True)
@@ -74,7 +74,7 @@ class PostMediaSchema(ma.SQLAlchemyAutoSchema):
 
     thumbnail_url = fields.Str(dump_only=True)
     thumb_media_type = fields.Str(dump_only=True)
-
+    index = fields.Int(dump_only=True, validate=validate.Range(min=1))
     media_url = fields.Str(dump_only=True)
     media_type = fields.Str(dump_only=True)
     width = fields.Int(validate=validate.Range(min=600, max=1080), dump_only=True)

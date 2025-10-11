@@ -4,9 +4,12 @@ from app import db
 from models.user import UserProfile
 from models.block_profile import BlockProfile
 from models.followers_and_following import Follow
-from models.visit import Visit
+from models.visit import Visit, VisitMedia
+from models.post import Post
+from models.location import Location
 from schemas.user_schema import ProfileSchema
-from schemas.visit_schema import visit_schema, ValidationError
+from schemas.visit_schema import visit_schema, visit_media_schema,ValidationError
+from schemas.location_schema import location_schema
 from routes.auth_required_wrapper import auth_required, admin_required
 from util.photo_processing import photo_processing, get_decimal_coordinates
 from util.validation import photo_validation
@@ -234,23 +237,29 @@ def upload_photos():
             pht_count +=1
             
             gps = pht_data['gps']
-            if gps:
-                lat,long,alt = get_decimal_coordinates(gps)
-                if lat and long:
-                    gps_coords.append({
-                        'latitude': lat,
-                        'longitude': long,
-                        'altitude': alt})
-                else:
-                    failed_photo_url = upload_to_r2(pht_data['photo'], current_user, folder='failed_photos')
-                    failed_photos.append({'failed_photo_url': failed_photo_url,
-                                          'reason':'No metadata found',
-                                          'photo_number': pht_count})
-                    errors.append(f'Failed to get metadata of photo {pht_count}')
-                    continue
-            
+            if not gps:
+                lat, long, alt = None, None, None
+            else:
+                lat, long, alt = get_decimal_coordinates(gps)
+  
+            if not lat or not long:
+                failed_photo_url = upload_to_r2(pht_data['photo'], current_user, folder='failed_photos')
+                failed_photos.append({
+                    'failed_photo_url': failed_photo_url,
+                    'reason': 'No GPS metadata found',
+                    'photo_number': pht_count
+                })
+                errors.append(f'Photo {pht_count}: No GPS metadata found')
+                continue
+   
+            gps_coords.append({
+                'latitude': lat,
+                'longitude': long,
+                'altitude': alt
+            })
+        
             photo_url = upload_to_r2(pht_data['photo'], current_user, folder='visits')
-            thumb_url = upload_photos(pht_data['thumbnail'], current_user, folder = 'visit_thumbnails')
+            thumb_url = upload_to_r2(pht_data['thumbnail'], current_user, folder = 'visit_thumbnails')
                 
             uploaded_photos.append({
                 'photo_url': photo_url,
@@ -275,7 +284,7 @@ def upload_photos():
         
         if errors:
             return jsonify({
-                'message': f'{len(upload_photos)}/{len(files)} photos were uploaded successfully',
+                'message': f'{len(uploaded_photos)}/{len(files)} photos were uploaded successfully',
                 'uploaded_photos': uploaded_photos,
                 'failed_photos': failed_photos,
                 'location': avg_location,
@@ -294,24 +303,125 @@ def upload_photos():
         return jsonify({'error':'Failed to upload photos'}), 500
     
 
-@visit_bp.route('/create', methods = ['POST'])
+@visit_bp.route('/create/under-post/<int:post_id>', methods = ['POST'])
 @auth_required
-def create_visit():
+def create_visit(post_id):
     current_user = request.current_user.user.id
     current_user_profile = UserProfile.query.get(current_user)
+    post = Post.query.get(post_id)
 
     if not current_user_profile:
         return jsonify({'error':'Profile does not exist'})
-
+    
+    if not post or post.is_deleted or post.is_removed:
+        return jsonify({'error': 'Post does not exist'}), 404
+    
     data = request.get_json()
-
     if not (data.get('photos') or data.get('location') or data.get('photo_count')):
         return jsonify({'error':'Invalid data provided'}), 400
+    
+    avg_location = data['location']
+
+    coords_post_visit = [post.refined_location, avg_location]
+    avg_location_post_visit = average_location(coords_post_visit)
+
+    #checks if the distance between the visit location and post location is far so user dont create falsey visits
+    if avg_location_post_visit is None:
+        return({'error':'Visit was not made at post location'}), 500
     
 
     spotify_song = data.get('spotify_track_id')
     caption = data.get('caption')
-    hashtags = data.get('hashtags)
+    hashtags = data.get('hashtags', [])
+    photos = data['photos']
+    num_of_photos = data['photo_count']
+
+    try:
+        try:
+            #Load visit data to verify and create visit
+            data_to_load = { 
+                'refined_location': avg_location,
+                'spotify_track_id': spotify_song,
+                'caption': caption,
+                'hashtags': hashtags,
+                'num_of_photos': num_of_photos 
+            }
+            visit_schema.load(data_to_load, partial = True)
+        except ValidationError as error:
+            return jsonify({"error": error.messages}), 400
+        
+        new_visit = Visit(
+            post_id = post.post_id,
+            user_profile_id = current_user_profile.id,
+            refined_location = avg_location,
+            spotify_track_id = spotify_song,
+            caption = caption,
+            hashtags = hashtags,
+        )
+
+        db.session.add(new_visit)
+        db.session.flush()
+
+        for position, pht_data in enumerate(photos, start=1):
+            try:
+
+                #creates media for each post and makes media info in database
+                visit_media_to_load = { 
+                    'index': position,
+                    'media_url': pht_data['photo_url'],
+                    'media_type': 'photo',
+                    'width':pht_data['width'],
+                    'height':pht_data['height'] 
+                }
+                visit_media_schema.load(visit_media_to_load, partial = True)
+            except ValidationError as error:
+                return jsonify({"error": error.messages}), 400
+            
+            new_visit_media = VisitMedia(
+                visit_id = new_visit.visit_id,
+                uploaded_by = current_user_profile.id,
+                media_url = pht_data['photo_url'],
+                media_type = 'photo',
+                width = pht_data['width'],
+                height = pht_data['height']
+            )
+
+            db.session.add(new_visit_media)
+            db.session.flush()
+
+            try:
+
+                #cehcks location data and makes location info database
+                location_data_to_load = {
+                    "latitude": pht_data['latitude'],
+                    "longitude": pht_data['longitude'],
+                    "altitude": pht_data.get('altitude'),
+                }
+
+                location_schema.load(location_data_to_load, partial = True)
+            except ValidationError as error:
+                return jsonify({"error": error.messages}), 400
+            
+
+            location = Location(
+                visit_media_id = new_visit_media.visit_media_id,
+                latitude = pht_data['latitude'],
+                longitude = pht_data['longitude'],
+                altitude = pht_data.get('altitude')
+            )
+            db.session.add(location)
+
+        current_user_profile.visit_count += 1
+        db.session.commit()
+
+        return visit_schema.dump(new_visit), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Failed to create post: {str(e)}'}), 500
+            
+
+
+
 
 
     

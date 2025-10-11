@@ -26,19 +26,20 @@ def signup():
 
     try:
         new_user = UserProfile(id = id)
-        new_user.save()
+        db.session.add(new_user)
 
         new_user_info = UserInfo(user_profile_id = id ,
                                 email = email if email else None, 
                                 phone_number = phone_number if phone_number else None)
-        new_user_info.save()
+        db.session.add(new_user_info)
 
         new_user_settings = UserSettings(user_profile_id = id)
-        new_user_settings.save()
+        db.session.add(new_user_settings)
 
         new_user_role = UserRole(user_profile_id = id)
-        new_user_role.save()
+        db.session.add(new_user_role)
 
+        db.session.commit()
         return jsonify({'message':'Account created successfully'}), 201
     except Exception:
         db.session.rollback()
