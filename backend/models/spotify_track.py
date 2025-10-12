@@ -6,7 +6,7 @@ class SpotifyTrack(db.Model):
     __tablename__ = "spotify_track"
     __table_args__ = {'schema': 'public'}
 
-    spotify_track_id = Column(String(50), primary_key=True)  # Spotify's ID
+    spotify_track_id = Column(String(50), primary_key=True)  # Spotify's ID (URI)
     
     # Track info
     track_name = Column(String(200), nullable=False)
@@ -20,15 +20,10 @@ class SpotifyTrack(db.Model):
     
     # Metadata
     duration_ms = Column(BigInteger)        # Track length in milliseconds
+    duration_formatted = Column(String(10))
     release_date = Column(String(20))   
-    
-    # Usage tracking
-    times_used = Column(Integer, default=0)  
-    first_used_at = Column(DateTime)
-    last_used_at = Column(DateTime)
-   
-    updated_at = Column(DateTime)
-    
+    times_used = Column(Integer, default=0)
+
     def to_dict(self):
         return {
             'spotify_track_id': self.spotify_track_id,
@@ -39,6 +34,8 @@ class SpotifyTrack(db.Model):
             'preview_url': self.preview_url,
             'spotify_url': self.spotify_url,
             'duration_ms': self.duration_ms,
+            'duration_formatted':self.duration_formatted,
+            'release_date': self.release_date,
             'times_used': self.times_used
         }
 

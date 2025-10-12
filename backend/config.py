@@ -37,6 +37,10 @@ class Config:
     SIGHTENGINE_API_USER = os.environ.get('SIGHTENGINE_API_USER')
     SIGHTENGINE_API_SECRET =os.environ.get('SIGHTENGINE_API_SECRET')
 
+    #SPOTIFY
+    SPOTIFY_CLIENT_ID = os.environ.get('SPOTIFY_CLIENT_ID')
+    SPOTIFY_CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET')
+
 class DevelopmentConfig(Config):
     DEBUG = True
     

@@ -27,7 +27,7 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
     tiktok= fields.Str(validate=validate.URL())
     twitter_x= fields.Str(validate=validate.URL())
 
-    is_pro_account = fields.Bool(dump_only=True)
+    is_prem_account = fields.Bool(dump_only=True)
     spotify_track_id = fields.Str(dump_only=True)
 
 

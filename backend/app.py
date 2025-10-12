@@ -4,6 +4,8 @@ from config import Config
 from exstensions import db, ma, jwt, limiter,mg
 from logging.config import dictConfig
 from routes.logging_wrapper import handle_errors
+from flask_debugtoolbar import DebugToolbarExtension
+from flask_sqlalchemy import get_debug_queries
 
 
 dictConfig({
@@ -32,6 +34,8 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     register_global_error_handler(app)
+    app.config['DEBUG_TB_ENABLED'] = True
+    toolbar = DebugToolbarExtension(app)
 
     db.init_app(app)
     ma.init_app(app)
@@ -57,6 +61,7 @@ def create_app():
     from routes.visit import visit_bp
     from routes.user_info import user_info_bp
     from routes.user_settings import user_settings_bp
+    from routes.spotify_track import spotify_bp
     from models import (location, user, post, rating, visit, report,followers_and_following, block_profile, spotify_track)
 
     app.register_blueprint(auth_bp)
@@ -67,6 +72,7 @@ def create_app():
     app.register_blueprint(visit_bp)
     app.register_blueprint(user_info_bp)
     app.register_blueprint(user_settings_bp)
+    app.register_blueprint(spotify_bp)
 
     # Create tables
     with app.app_context():
@@ -77,6 +83,16 @@ def create_app():
         def health_check():
             return {'status': 'healthy', 'message': 'Aestelo API is running'}
         
+    
+        @app.after_request
+        def log_queries(response):
+            queries = get_debug_queries()
+            if len(queries) > 10:  # Flag routes with many queries
+                print(f"WARNING: {len(queries)} queries executed")
+                for query in queries:
+                    print(f"{query.duration:.4f}s: {query.statement}")
+            return response
+        
 
         return app
     
@@ -85,6 +101,8 @@ def register_global_error_handler(app):
         for endpoint, func in app.view_functions.items():
             if endpoint not in ('static',):  # skip static routes
                 app.view_functions[endpoint] = handle_errors(func)
+
+
 
 if __name__ == '__main__':
     app = create_app()
