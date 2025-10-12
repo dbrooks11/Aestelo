@@ -1,10 +1,9 @@
 from flask import Flask
 from flask_cors import CORS
 from config import Config
-from exstensions import db, ma, jwt, limiter,mg
+from exstensions import db, ma, jwt, limiter,mg, toolbar
 from logging.config import dictConfig
 from routes.logging_wrapper import handle_errors
-from flask_debugtoolbar import DebugToolbarExtension
 from flask_sqlalchemy import get_debug_queries
 
 
@@ -35,8 +34,8 @@ def create_app():
     app.config.from_object(Config)
     register_global_error_handler(app)
     app.config['DEBUG_TB_ENABLED'] = True
-    toolbar = DebugToolbarExtension(app)
-
+    
+    toolbar.init_app(app)
     db.init_app(app)
     ma.init_app(app)
     jwt.init_app(app)
@@ -87,7 +86,7 @@ def create_app():
         @app.after_request
         def log_queries(response):
             queries = get_debug_queries()
-            if len(queries) > 10:  # Flag routes with many queries
+            if len(queries) > 10:  
                 print(f"WARNING: {len(queries)} queries executed")
                 for query in queries:
                     print(f"{query.duration:.4f}s: {query.statement}")
@@ -99,7 +98,7 @@ def create_app():
 
 def register_global_error_handler(app):
         for endpoint, func in app.view_functions.items():
-            if endpoint not in ('static',):  # skip static routes
+            if endpoint not in ('static',): 
                 app.view_functions[endpoint] = handle_errors(func)
 
 

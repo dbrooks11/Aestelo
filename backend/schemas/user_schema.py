@@ -8,7 +8,7 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
         model = UserProfile
         load_instance = True
         include_fk = True
-        exclude = ('is_banned', 'banned_at', 'banned_by', 'banned_reason','num_reports_made','num_reports')  # Hide ban info from users
+        exclude = ('is_banned', 'banned_at', 'banned_by', 'banned_reason','num_reports_made','num_reports', 'is_deleted','deleted_at')  # Hide ban info from users
 
     id = fields.UUID(dump_only=True)
     profile_created_at = fields.DateTime(dump_only=True)

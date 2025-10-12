@@ -4,10 +4,22 @@ import os
 import base64
 import requests 
 from dotenv import load_dotenv
+from models.spotify_track import SpotifyTrack
+from app import db
+
+
+_token_cache = {
+    'access_token': None,
+    'expires_at': None
+}
 
 
 def get_token_spotify():
     load_dotenv()
+
+    if _token_cache['access_token'] and _token_cache['expires_at']:
+        if datetime.now() < _token_cache['expires_at']:
+            return _token_cache['access_token']
     
     client_id = os.environ.get('SPOTIFY_CLIENT_ID')
     client_secret = os.environ.get('SPOTIFY_CLIENT_SECRET')
@@ -26,12 +38,18 @@ def get_token_spotify():
 
     #todo: Cache token for 59 mintues to reuse until it expires
     response = requests.post("https://accounts.spotify.com/api/token", data=payload, headers=headers)
-    return response.text
+    token = response.json()
+
+    _token_cache['access_token'] = token['access_token']
+    _token_cache['expires_at'] = datetime.now() + timedelta(seconds = 3540)
+
+    return token['access_token']
 
 
-def search_track(token, track_name, limit = 40):
 
-    token = token['access_token']
+def search_track(track_name, limit = 40):
+
+    token = get_token_spotify()
 
     headers = {
         'Authorization': f'Bearer {token}'
@@ -59,7 +77,7 @@ def search_track(token, track_name, limit = 40):
         duration_formatted = f"{minutes}:{seconds:02d}"
 
         track = {
-            'spotify_track_id': track_data[id],
+            'spotify_track_id': track_data['id'],
             'track_name': track_data['name'],
             'artist_name': track_data['artists'][0]['name'],
             'album_name': track_data['album']['name'],
@@ -75,23 +93,36 @@ def search_track(token, track_name, limit = 40):
 
     return tracks
 
-def select_track(track_data):
-    try:
-        # Check if track exists in our database
-        track = SpotifyTrack.query.get(track_id)
-        
-        if track:
-            # Track exists - update usage
-            track.times_used += 1
-            track.last_used_at = datetime.now(timezone.utc)
-            db.session.commit()
+
+def set_track(track_data):
+    track_id = track_data['id']
+
+    track = SpotifyTrack.query.get(track_id)
+
+    if track:
+        track.times_used += 1
+    else:
+        duration_ms = track_data['duration_ms']
+        minutes = duration_ms // 60000
+        seconds = (duration_ms % 60000) // 1000
+        duration_formatted = f"{minutes}:{seconds:02d}"
+
+        new_track = new_track = SpotifyTrack(
+            spotify_track_id = track_data['id'],
+            track_name = track_data['name'],
+            artist_name = track_data['artists'][0]['name'],
+            album_name = track_data['album']['name'],
+            album_art_url = track_data['album']['images'][0]['url'] if track_data['album']['images'] else None,
+            preview_url =  track_data.get('preview_url'),
+            spotify_url = track_data['external_urls']['spotify'],
+            duration_ms = duration_ms,
+            duration_formatted = duration_formatted,
+            release_date = track_data['album']['release_date'],
+            times_used = 1
+        )
+    
+    return new_track
             
-            return jsonify({
-                'track': track.to_dict(),
-                'from_database': True
-            }), 200
-    
 
     
-
     

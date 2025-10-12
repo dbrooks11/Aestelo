@@ -57,6 +57,9 @@ class UserProfile(db.Model):
     banned_reason = Column(String(255))
     banned_by = Column(UUID(as_uuid=True))
 
+    is_deleted = Column(Boolean, default=False)
+    deleted_at = Column(DateTime)
+
     num_reports_made = Column(Integer, default=0)
     num_reports = Column(Integer, default=0)
 
@@ -126,7 +129,7 @@ class UserProfile(db.Model):
     
     @classmethod
     def active(cls):
-        return cls.query.filter_by(is_banned = False)
+        return cls.query.filter_by(is_banned = False, is_deleted = False)
 
 
     def save(self):
