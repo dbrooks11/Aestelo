@@ -2,7 +2,7 @@ from app import db
 from sqlalchemy import Column, String, DateTime, Integer, BigInteger
 from datetime import datetime, timezone
 
-class musicTrack(db.Model):
+class MusicTrack(db.Model):
     __tablename__ = "music_track"
     __table_args__ = {'schema': 'public'}
 
