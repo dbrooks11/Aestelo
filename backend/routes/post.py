@@ -58,10 +58,10 @@ def get_profile_post_all(id):
             per_page=per_page
         )
 
-        post_list = post_schema.dump(paginated_post.items, many=True)
+        result = post_schema.dump(paginated_post.items, many=True)
 
         return jsonify({
-            'posts': post_list,
+            'posts': result,
             'total': paginated_post.total,
             'total_pages': paginated_post.pages,
             'current_page': paginated_post.page
@@ -102,10 +102,12 @@ def get_profile_post(id, post_id):
             return jsonify({'error': 'Profile is private'}), 403
         
     try:
-        post = Post.query.get(post_id)
+        post = Post.active().filter_by(user_profile_id = user_profile.id, post_id = post_id).first()
         result = post_schema.dump(post)
-        if not post or (post.user_profile_id != user_profile.id) or post.is_deleted or post.is_removed:
+
+        if post is None or (post.user_profile_id != user_profile.id):
              return jsonify({'error': 'Post not found'}), 404
+        
         return jsonify({'post': result}), 200
 
     except Exception:
@@ -182,42 +184,51 @@ def delete_post(post_id):
     
     try:
         post.is_deleted = True
-        post.deleted_at = datetime.now(timezone.utc)
+        post.deleted_at = datetime.now(timezone.utc).strftime('%b %d, %Y')
+
+        UserProfile.query.filter_by(id = current_user_profile.id).update({'post_count': UserProfile.post_count - 1}, synchronize_session=False)
+        
         db.session.commit()
+        current_user_profile.post_count -= 1
         return jsonify({'message':'Post deleted successfully'}), 200
     except Exception:
         db.session.rollback()
         return jsonify({'error':'Failed to delete post'}), 500
     
 
-@post_bp.route('admin/profile-post/<int:post_id>/remove', methods = ['DELETE'])
+@post_bp.route('admin/<string:id>/profile-post/<int:post_id>/remove', methods = ['DELETE'])
 @auth_required
 @admin_required
-def remove_post_admin(post_id):
+def remove_post_admin(id, post_id):
     current_user = request.current_user.user.id
     current_user_profile = UserProfile.query.get(current_user)
+    user_profile = UserProfile.query.get(id)
     post = Post.query.get(post_id)
     
-    if current_user_profile is None:
+    if current_user_profile is None or user_profile is None:
         return jsonify({'error': 'Profile not found'}), 404
     
-    if current_user_profile.is_deleted:
+    if current_user_profile.is_deleted or user_profile.is_deleted:
         return jsonify({'error': 'Profile does not exist'}), 404
     
-    if current_user_profile.is_banned:
+    if current_user_profile.is_banned or user_profile.is_banned:
         return jsonify({'error':'Profile unavailable'}),404
-
+    
     if post is None or post.is_deleted or post.is_removed:
         return jsonify({'error': 'Post not found'}), 404
     
     try:
-        post.is_removed = True
-        post.removed_at = datetime.now(timezone.utc)
+        post.is_deleted = True
+        post.deleted_at = datetime.now(timezone.utc).strftime('%b %d, %Y')
+
+        UserProfile.query.filter_by(id = user_profile.id).update({'post_count': UserProfile.post_count - 1}, synchronize_session=False)
+        
         db.session.commit()
-        return jsonify({'message':'Post removed successfully'}), 200
+        user_profile.post_count -= 1
+        return jsonify({'message':'Post removed by admin successfully'}), 200
     except Exception:
         db.session.rollback()
-        return jsonify({'error':'Failed to remove post'}), 500
+        return jsonify({'error':'Failed to remove Post'}), 500
     
     
 
@@ -265,10 +276,10 @@ def upload_photos():
                 failed_photo_url = upload_to_r2(pht_data['photo'], current_user, folder='failed_photos')
                 failed_photos.append({
                     'failed_photo_url': failed_photo_url,
-                    'reason': 'No GPS metadata found',
+                    'reason': 'No metadata found',
                     'photo_number': pht_count
                 })
-                errors.append(f'Photo {pht_count}: No GPS metadata found')
+                errors.append(f'Photo {pht_count}: No metadata found')
                 continue
 
             gps_coords.append({

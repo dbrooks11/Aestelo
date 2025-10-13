@@ -18,6 +18,7 @@ class VisitSchema(ma.SQLAlchemyAutoSchema):
     num_of_edits = fields.Int(dump_only=True, validate=validate.Range(max=3, error='Visit can only be edited 3 times'))
     user_profile_id = fields.UUID(dump_only=True) 
     spotify_track_id = fields.Str(dump_only=True)
+    total_num_of_photos = fields.Int(dump_only=True)
     
     # Required fields
     post_id = fields.Int(required=True)
@@ -95,3 +96,4 @@ class VisitMediaSchema(ma.SQLAlchemyAutoSchema):
 
 visit_schema = VisitSchema()
 visit_media_schema = VisitMediaSchema()
+partial_schema = VisitSchema(only = ('spotify_track_id','caption','hashtags'))
