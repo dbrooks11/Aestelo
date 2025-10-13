@@ -39,7 +39,51 @@ def profile_me():
         except Exception:
             db.session.rollback()
             return jsonify({'error': 'Failed to update profile'}), 500
+
+
+@profile_bp.route('/profile/<string:username>', methods = ['GET'])
+@auth_required
+def user_profile(username):
+    user_profile = UserProfile.query.filter_by(username = username).first()
+    current_user = request.current_user.user.id
+
+    if user_profile is None:
+        return jsonify({'error': 'Profile not found'}), 404
+    
+    if user_profile.is_deleted:
+        return jsonify({'error': 'Profile does not exist'}), 404
+    
+    if user_profile.is_banned:
+        return jsonify({'error':'Profile unavailable'}),404
+    
+    is_blocked = BlockProfile.query.filter_by(blocker_id = user_profile.id,
+                                              blocked_id = current_user).exists()
+    is_current_user_blocking = BlockProfile.query.filter_by(blocker_id = current_user,
+                                                            blocked_id = user_profile.id).exists()
+    
+    if is_blocked or is_current_user_blocking:
+        return jsonify({'error': 'Profile unavailable'}), 404
+    
+    #checks if the profile the user is veiwing is themselves
+    if user_profile.id == current_user:
+        try:
+            return jsonify({'me': user_profile_schema.dump(user_profile)}), 200
+        except Exception:
+            return jsonify({'error': 'Failed to fetch profile'}), 500
+    
+    #check if current user is a follower of the person's profile they are trying to view
+    is_following = Follow.query.filter_by(follower_id = current_user,
+                                          following_id = user_profile.id).exists()
+
+    #if user profile is private, check if the person that is trying to view it is following them
+    if user_profile.is_private and not is_following:
+        try:
+            return jsonify({'user_profile':user_profile_schema.dump(user_profile.to_dict_private())}), 200
+        except Exception:
+            return jsonify({'error': 'Failed to fetch profile'}), 500
         
+    return jsonify({'user_profile':user_profile_schema.dump(user_profile)}), 200
+    
         
 @profile_bp.route('/add-track', methods = ['POST'])
 @auth_required
@@ -113,49 +157,4 @@ def remove_track_profile():
         db.session.rollback()
         return jsonify({'error':'Failed to remove track',
                         'errors': str(e)}), 500
-    
-
-
-@profile_bp.route('/profile/<string:username>', methods = ['GET'])
-@auth_required
-def user_profile(username):
-    user_profile = UserProfile.query.filter_by(username = username).first()
-    current_user = request.current_user.user.id
-
-    if user_profile is None:
-        return jsonify({'error': 'Profile not found'}), 404
-    
-    if user_profile.is_deleted:
-        return jsonify({'error': 'Profile does not exist'}), 404
-    
-    if user_profile.is_banned:
-        return jsonify({'error':'Profile unavailable'}),404
-    
-    is_blocked = BlockProfile.query.filter_by(blocker_id = user_profile.id,
-                                              blocked_id = current_user).exists()
-    is_current_user_blocking = BlockProfile.query.filter_by(blocker_id = current_user,
-                                                            blocked_id = user_profile.id).exists()
-    
-    if is_blocked or is_current_user_blocking:
-        return jsonify({'error': 'Profile unavailable'}), 404
-    
-    #checks if the profile the user is veiwing is themselves
-    if user_profile.id == current_user:
-        try:
-            return jsonify({'me': user_profile_schema.dump(user_profile)}), 200
-        except Exception:
-            return jsonify({'error': 'Failed to fetch profile'}), 500
-    
-    #check if current user is a follower of the person's profile they are trying to view
-    is_following = Follow.query.filter_by(follower_id = current_user,
-                                          following_id = user_profile.id).exists()
-
-    #if user profile is private, check if the person that is trying to view it is following them
-    if user_profile.is_private and not is_following:
-        try:
-            return jsonify({'user_profile':user_profile_schema.dump(user_profile.to_dict_private())}), 200
-        except Exception:
-            return jsonify({'error': 'Failed to fetch profile'}), 500
-        
-    return jsonify({'user_profile':user_profile_schema.dump(user_profile)}), 200
     
