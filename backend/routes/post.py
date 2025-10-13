@@ -14,37 +14,17 @@ from util.photo_processing import photo_processing, get_decimal_coordinates
 from util.validation import photo_validation
 from util.storage import upload_to_r2
 from util.outlier_coords import average_location
+from util.decorators import (profile_both_check_banned_removed, block_and_follow_check,
+                             profile_current_check_post)
 
 post_bp = Blueprint('post', __name__, url_prefix='/post')
 
 
 @post_bp.route('/<string:id>/profile-post/all', methods = ['GET'])
 @auth_required
-def get_profile_post_all(id):
-    current_user = request.current_user.user.id
-    user_profile = UserProfile.query.get(id)
-    current_user_profile = UserProfile.query.get(current_user)
-
-    if not all([current_user_profile,user_profile]):
-        return jsonify({'error': 'Profile not found'}), 404
-    
-    if user_profile.is_deleted or current_user_profile.is_deleted:
-        return jsonify({'error': 'Profile does not exist'}), 404
-    
-    if user_profile.is_banned or current_user_profile.is_banned:
-        return jsonify({'error':'Profile unavailable'}),404
-    
-    is_blocked = db.session.query(exists().where((BlockProfile.blocker_id ==user_profile.id) & (BlockProfile.blocked_id == current_user))).scalar()
-
-    is_current_user_blocking = db.session.query(exists().where((BlockProfile.blocker_id == current_user) & (BlockProfile.blocked_id == user_profile.id))).scalar()
-    
-    if is_blocked or is_current_user_blocking:
-        return jsonify({'error': 'Profile unavailable'}), 404
-    
-    if (current_user != user_profile.id) and (user_profile.is_private):
-        is_following = db.session.query(exists().where((Follow.follower_id == current_user) & (Follow.following_id == user_profile.id))).scalar()
-        if not is_following:
-            return jsonify({'error': 'Profile is private'}), 403
+@profile_both_check_banned_removed
+@block_and_follow_check
+def get_profile_post_all(id, user_profile, current_user_profile):
     
     try:
         page = request.args.get('page', default=1, type=int)
@@ -72,31 +52,9 @@ def get_profile_post_all(id):
 
 @post_bp.route('/<string:id>/profile-post/<int:post_id>', methods = ['GET'])
 @auth_required
-def get_profile_post(id, post_id):
-    current_user = request.current_user.user.id
-    user_profile = UserProfile.query.get(id)
-    current_user_profile = UserProfile.query.get(current_user)
-    
-    if not all([current_user_profile,user_profile]):
-        return jsonify({'error': 'Profile not found'}), 404
-    
-    if user_profile.is_deleted or current_user_profile.is_deleted:
-        return jsonify({'error': 'Profile does not exist'}), 404
-    
-    if user_profile.is_banned or current_user_profile.is_banned:
-        return jsonify({'error':'Profile unavailable'}),404
-    
-    is_blocked = db.session.query(exists().where((BlockProfile.blocker_id ==user_profile.id) & (BlockProfile.blocked_id == current_user))).scalar()
-
-    is_current_user_blocking = db.session.query(exists().where((BlockProfile.blocker_id == current_user) & (BlockProfile.blocked_id == user_profile.id))).scalar()
-
-    if is_blocked or is_current_user_blocking:
-        return jsonify({'error': 'Profile unavailable'}), 404
-    
-    if (current_user != user_profile.id) and (user_profile.is_private):
-        is_following = db.session.query(exists().where((Follow.follower_id == current_user) & (Follow.following_id == user_profile.id))).scalar()
-        if not is_following:
-            return jsonify({'error': 'Profile is private'}), 403
+@profile_both_check_banned_removed
+@block_and_follow_check
+def get_profile_post(id, post_id, user_profile, current_user_profile):
         
     try:
         post = Post.active().filter_by(user_profile_id = user_profile.id, post_id = post_id).first()
@@ -113,25 +71,8 @@ def get_profile_post(id, post_id):
 
 @post_bp.route('/profile-post/<int:post_id>/edit', methods = ['PATCH'])
 @auth_required
-def edit_post(post_id):
-    current_user = request.current_user.user.id
-    current_user_profile = UserProfile.query.get(current_user)
-    post = Post.query.get(post_id)
-    
-    if current_user_profile is None:
-        return jsonify({'error': 'Profile not found'}), 404
-    
-    if current_user_profile.is_deleted:
-        return jsonify({'error': 'Profile does not exist'}), 404
-    
-    if current_user_profile.is_banned:
-        return jsonify({'error':'Profile unavailable'}),404
-    
-    if post.user_profile_id != current_user:
-        return jsonify({'error': 'Action not permitted'}), 403
-    
-    if post is None or post.is_deleted or post.is_removed:
-        return jsonify({'error': 'Post not found'}), 404
+@profile_current_check_post
+def edit_post(post_id, current_user_profile, post):
     
     edit_limit = 3
     if post.num_of_edits >= edit_limit:
@@ -145,7 +86,7 @@ def edit_post(post_id):
         except ValidationError as error:
             return jsonify({"error": error.messages}), 400
         
-        Post.query.filter_by(user_profile_id = current_user, post_id = post_id).update({'num_of_edits': Post.num_of_edits + 1}, synchronize_session=False)
+        Post.query.filter_by(user_profile_id = current_user_profile.id, post_id = post_id).update({'num_of_edits': Post.num_of_edits + 1}, synchronize_session=False)
 
         db.session.commit()
         post.num_of_edits += 1
@@ -159,26 +100,9 @@ def edit_post(post_id):
 
 @post_bp.route('/profile-post/<int:post_id>/delete', methods = ['DELETE'])
 @auth_required
-def delete_post(post_id):
-    current_user = request.current_user.user.id
-    current_user_profile = UserProfile.query.get(current_user)
-    post = Post.query.get(post_id)
+@profile_current_check_post
+def delete_post(post_id, current_user_profile, post):
 
-    if current_user_profile is None:
-        return jsonify({'error': 'Profile not found'}), 404
-    
-    if current_user_profile.is_deleted:
-        return jsonify({'error': 'Profile does not exist'}), 404
-    
-    if current_user_profile.is_banned:
-        return jsonify({'error':'Profile unavailable'}),404
-    
-    if post is None or post.is_deleted or post.is_removed:
-        return jsonify({'error': 'Post not found'}), 404
-    
-    if post.user_profile_id != current_user:
-        return jsonify({'error': 'Action not permitted'}), 403
-    
     try:
         post.is_deleted = True
         post.deleted_at = datetime.now(timezone.utc).strftime('%b %d, %Y')
@@ -196,23 +120,9 @@ def delete_post(post_id):
 @post_bp.route('admin/<string:id>/profile-post/<int:post_id>/remove', methods = ['DELETE'])
 @auth_required
 @admin_required
-def remove_post_admin(id, post_id):
-    current_user = request.current_user.user.id
-    current_user_profile = UserProfile.query.get(current_user)
+@profile_current_check_post
+def remove_post_admin(id, post_id, current_user_profile, post):
     user_profile = UserProfile.query.get(id)
-    post = Post.query.get(post_id)
-    
-    if current_user_profile is None or user_profile is None:
-        return jsonify({'error': 'Profile not found'}), 404
-    
-    if current_user_profile.is_deleted or user_profile.is_deleted:
-        return jsonify({'error': 'Profile does not exist'}), 404
-    
-    if current_user_profile.is_banned or user_profile.is_banned:
-        return jsonify({'error':'Profile unavailable'}),404
-    
-    if post is None or post.is_deleted or post.is_removed:
-        return jsonify({'error': 'Post not found'}), 404
     
     try:
         post.is_deleted = True

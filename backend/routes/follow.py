@@ -4,6 +4,7 @@ from sqlalchemy import exists
 from flask import Blueprint, request, jsonify
 from models.followers_and_following import Follow
 from routes.auth_required_wrapper import auth_required
+from util.decorators import profile_both_check_banned_removed
 from schemas.user_schema import UserProfileSchema, partial_schema
 
 follow_bp = Blueprint('follow', __name__, url_prefix='/profile/follow')
@@ -12,32 +13,21 @@ follow_bp = Blueprint('follow', __name__, url_prefix='/profile/follow')
 #FOLLOW A USER
 @follow_bp.route('/<string:id>/follow-profile', methods = ['POST'])
 @auth_required
-def follow_profile(id):
-    current_user = request.current_user.user.id
-    user_profile = UserProfile.query.get(id)
-    current_user_profile = UserProfile.query.get(current_user)
+@profile_both_check_banned_removed
+def follow_profile(id, user_profile, current_user_profile):
 
-    if user_profile is None or current_user_profile is None:
-        return jsonify({'error': 'Profile not found'}), 404
-    
-    if user_profile.is_deleted or current_user_profile.is_deleted:
-        return jsonify({'error': 'Profile does not exist'}), 404
-    
-    if user_profile.is_banned or current_user_profile.is_banned:
-        return jsonify({'error':'Profile unavailable'}),404
-
-    if user_profile.id == current_user:
+    if user_profile.id == current_user_profile.id:
         return jsonify({'error': 'Cannot follow yourself'}), 409
     
-    is_following = db.session.query(exists().where((Follow.follower_id == current_user) & (Follow.following_id == user_profile.id))).scalar()
+    is_following = db.session.query(exists().where((Follow.follower_id == current_user_profile.id) & (Follow.following_id == user_profile.id))).scalar()
     
     if is_following:
         return jsonify({'error': 'Profile already followed'}), 409
 
     try:
-        new_follow = Follow(follower_id = current_user, following_id = user_profile.id)
+        new_follow = Follow(follower_id = current_user_profile.id, following_id = user_profile.id)
         
-        UserProfile.query.filter_by(id=current_user).update({'following_count': UserProfile.following_count + 1}, synchronize_session=False)
+        UserProfile.query.filter_by(id=current_user_profile.id).update({'following_count': UserProfile.following_count + 1}, synchronize_session=False)
         UserProfile.query.filter_by(id=user_profile.id).update({'follower_count': UserProfile.follower_count + 1}, synchronize_session=False)
 
         db.session.add(new_follow)
@@ -50,7 +40,7 @@ def follow_profile(id):
                             'id': user_profile.id,
                             'follower_count': user_profile.follower_count
                         },
-                        'id': current_user,
+                        'id': current_user_profile.id,
                         'current_user_following': current_user_profile.following_count
                         }), 201
     except Exception:
@@ -61,28 +51,17 @@ def follow_profile(id):
 #UNFOLLOW A USER
 @follow_bp.route('/<string:id>/unfollow-profile', methods = ['DELETE'])
 @auth_required
-def unfollow_profile(id):
-    current_user = request.current_user.user.id
-    user_profile = UserProfile.query.get(id)
-    current_user_profile = UserProfile.query.get(current_user)
+@profile_both_check_banned_removed
+def unfollow_profile(id, user_profile, current_user_profile):
 
-    if not all([current_user_profile,user_profile]):
-        return jsonify({'error': 'Profile not found'}), 404
-    
-    if user_profile.is_deleted or current_user_profile.is_deleted:
-        return jsonify({'error': 'Profile does not exist'}), 404
-    
-    if user_profile.is_banned or current_user_profile.is_banned:
-        return jsonify({'error':'Profile unavailable'}),404
-
-    if user_profile.id == current_user:
+    if user_profile.id == current_user_profile.id:
         return jsonify({'error': 'Action not permitted'}), 409
     
     try:
-        deleted = Follow.query.filter_by(follower_id = current_user,
+        deleted = Follow.query.filter_by(follower_id = current_user_profile.id,
                                          following_id = user_profile.id).delete(synchronize_session=False)
         
-        UserProfile.query.filter_by(id = current_user).update({'following_count': UserProfile.following_count - 1}, synchronize_session=False)
+        UserProfile.query.filter_by(id = current_user_profile.id).update({'following_count': UserProfile.following_count - 1}, synchronize_session=False)
         UserProfile.query.filter_by(id = user_profile.id).update({'follower_count': UserProfile.follower_count - 1}, synchronize_session=False)
         
         if deleted == 0:
@@ -98,7 +77,7 @@ def unfollow_profile(id):
                             'id': user_profile.id,
                             'follower_count': user_profile.follower_count
                         },
-                        'id': current_user,
+                        'id': current_user_profile.id,
                         'current_user_following': current_user_profile.following_count
                         }), 200
     except Exception:
@@ -110,22 +89,11 @@ def unfollow_profile(id):
 #GET ALL FOLLOWERS OF A USER (PAGINATED)
 @follow_bp.route('/<string:id>/followers', methods = ['GET'])
 @auth_required
-def get_followers(id):
-    current_user = request.current_user.user.id
-    user_profile = UserProfile.query.get(id)
-    current_user_profile = UserProfile.query.get(current_user)
-
-    if not all([current_user_profile,user_profile]):
-        return jsonify({'error': 'Profile not found'}), 404
+@profile_both_check_banned_removed
+def get_followers(id, user_profile, current_user_profile):
     
-    if user_profile.is_deleted or current_user_profile.is_deleted:
-        return jsonify({'error': 'Profile does not exist'}), 404
-    
-    if user_profile.is_banned or current_user_profile.is_banned:
-        return jsonify({'error':'Profile unavailable'}),404
-    
-    if (current_user != user_profile.id) and (user_profile.is_private):
-        is_following = db.session.query(exists().where((Follow.follower_id == current_user) & (Follow.following_id == user_profile.id))).scalar()
+    if (current_user_profile.id != user_profile.id) and (user_profile.is_private):
+        is_following = db.session.query(exists().where((Follow.follower_id == current_user_profile.id) & (Follow.following_id == user_profile.id))).scalar()
         if not is_following:
             return jsonify({'error': 'Profile is private'}), 403
     
@@ -157,22 +125,11 @@ def get_followers(id):
 #GET LIST OF PEOPLE THE USER IS FOLLOWING(PAGINATED)
 @follow_bp.route('/<string:id>/following', methods = ['GET'])
 @auth_required
-def get_following(id):
-    current_user = request.current_user.user.id
-    user_profile = UserProfile.query.get(id)
-    current_user_profile = UserProfile.query.get(current_user)
-
-    if not all([current_user_profile,user_profile]):
-        return jsonify({'error': 'Profile not found'}), 404
+@profile_both_check_banned_removed
+def get_following(id, user_profile, current_user_profile):
     
-    if user_profile.is_deleted or current_user_profile.is_deleted:
-        return jsonify({'error': 'Profile does not exist'}), 404
-    
-    if user_profile.is_banned or current_user_profile.is_banned:
-        return jsonify({'error':'Profile unavailable'}),404
-    
-    if (current_user != user_profile.id) and (user_profile.is_private):
-        is_following = db.session.query(exists().where((Follow.follower_id == current_user) & (Follow.following_id == user_profile.id))).scalar()
+    if (current_user_profile.id != user_profile.id) and (user_profile.is_private):
+        is_following = db.session.query(exists().where((Follow.follower_id == current_user_profile.id) & (Follow.following_id == user_profile.id))).scalar()
         
         if not is_following:
             return jsonify({'error': 'Profile is private'}), 403

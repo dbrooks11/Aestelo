@@ -7,6 +7,7 @@ from models.followers_and_following import Follow
 from routes.auth_required_wrapper import auth_required
 from schemas.user_schema import UserProfileSchema, partial_schema
 from util.decorators import profile_active_not_permitted, profile_check_current__banned_removed
+
 block_bp = Blueprint('block', __name__, url_prefix='/block')
 
 
