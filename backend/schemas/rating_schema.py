@@ -17,4 +17,4 @@ class RatingSchema(ma.SQLAlchemyAutoSchema):
     rating_choice = fields.Int(validate=validate.Range(min=1, max=5))
 
 
-rating_schema = RatingSchema()
+rating_schema = RatingSchema(only = ('rating_choice'))

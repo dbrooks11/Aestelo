@@ -16,8 +16,6 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
     visit_count = fields.Int(dump_only=True)
     follower_count = fields.Int(dump_only=True)
     following_count = fields.Int(dump_only=True)
-    post_count = fields.Int(dump_only=True)
-    visit_count = fields.Int(dump_only=True)
     
     username = fields.Str(required=True,validate=[validate.Length(min=1, max=50),validate.Regexp(r'^[a-zA-Z0-9_]+$', error='Username can only contain letters, numbers, and underscores')])
     bio = fields.Str(validate=[validate.Length(max=150), validate.Regexp(r"^(?!.*<[^>]+>)")])
@@ -28,7 +26,7 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
     twitter_x= fields.Str(validate=validate.URL())
 
     is_prem_account = fields.Bool(dump_only=True)
-    spotify_track_id = fields.Str(dump_only=True)
+    music_track_id = fields.Str()
 
 
     @pre_load
@@ -58,7 +56,7 @@ class UserInfoSchema(ma.SQLAlchemyAutoSchema):
     
     # System-managed
     user_profile_id = fields.UUID(dump_only=True)
-    age = fields.Int(dump_only=True)
+    age = fields.Int()
     first_name = fields.Str(validate=[validate.Length(max=30), validate.Regexp(r"^[a-zA-Z\s'-]+$",error="Name can only contain letters, spaces, apostrophe, and hyphen")])
     last_name = fields.Str(validate=[validate.Length(max=30), validate.Regexp(r"^[a-zA-Z\s'-]+$",error="Name can only contain letters, spaces, apostrophe, and hyphen")])
     email = fields.Email(required=False, validate=validate.Length(max=150))
@@ -151,6 +149,7 @@ class UserSettingsSchema(ma.SQLAlchemyAutoSchema):
     
     user_profile_id = fields.UUID(dump_only=True)
     langauge_preference = fields.Str(validate=validate.OneOf(['english', 'spanish']))
+    
 
 
 class UserSubscriptionSchema(ma.SQLAlchemyAutoSchema):
@@ -174,6 +173,6 @@ class UserSubscriptionSchema(ma.SQLAlchemyAutoSchema):
 
 user_profile_schema = UserProfileSchema()
 partial_schema = UserProfileSchema(only = ('id','banner_theme','username','profile_photo'))
-user_info_schema = UserInfoSchema()
+user_info_schema = UserInfoSchema(only = ('age','first_name','last_name','email','date_of_birth','gender','height_ft','height_in'))
 user_settings_schema = UserSettingsSchema()
 user_subscription_schema = UserSubscriptionSchema()

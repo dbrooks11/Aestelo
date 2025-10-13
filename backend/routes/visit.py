@@ -391,7 +391,7 @@ def create_visit(post_id):
         return({'error':'Visit was not made at post location'}), 500
     
 
-    spotify_song = data.get('spotify_track_id')
+    music_song = data.get('music_track_id')
     caption = data.get('caption')
     hashtags = data.get('hashtags', [])
     photos = data.get('photos', [])
@@ -403,7 +403,7 @@ def create_visit(post_id):
             #Load visit data to verify and create visit
             data_to_load = { 
                 'refined_location': avg_location,
-                'spotify_track_id': spotify_song,
+                'music_track_id': music_song,
                 'caption': caption,
                 'hashtags': hashtags,
                 'total_num_of_photos': num_of_photos 
@@ -416,7 +416,7 @@ def create_visit(post_id):
             post_id = post.post_id,
             user_profile_id = current_user_profile.id,
             refined_location = valid_visit_data.get('refined_location', {}),
-            spotify_track_id = valid_visit_data.get('spotify_track_id'),
+            music_track_id = valid_visit_data.get('music_track_id'),
             caption = valid_visit_data.get('caption'),
             total_num_of_photos = valid_visit_data.get('total_num_of_photos'),
             hashtags = valid_visit_data.get('hashtags', [])

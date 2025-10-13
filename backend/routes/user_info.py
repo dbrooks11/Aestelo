@@ -13,24 +13,29 @@ def get_info():
     current_user = request.current_user.user.id
     current_user_profile = UserProfile.query.get(current_user)
 
-    if not current_user_profile or current_user_profile.is_banned:
-        return jsonify({'error':'Profile does not exist'}), 404
+    if current_user_profile is None:
+        return jsonify({'error': 'Profile not found'}), 404
+    
+    if current_user_profile.is_deleted:
+        return jsonify({'error': 'Profile does not exist'}), 404
+    
+    if current_user_profile.is_banned:
+        return jsonify({'error':'Profile unavailable'}),404
 
     try:
-        user_info = UserInfo.query.filter_by(user_profile_id = current_user_profile.id)
+        user_info = UserInfo.query.filter_by(user_profile_id = current_user_profile.id).first()
 
         if not user_info:
-            return jsonify({'error': 'Settings not found'}), 404
-
+            return jsonify({'error': 'Information not found'}), 404
 
         result = user_info_schema.dump(user_info)
 
         return jsonify({
-            "Info": result
+            "information": result
         }), 200
     
     except Exception:
-        return jsonify({'error': 'Failed to fetch info'}), 500
+        return jsonify({'error': 'Failed to fetch information'}), 500
     
 
 @user_info_bp.route('/me/edit', methods = ['PATCH'])
@@ -43,15 +48,9 @@ def edit_info():
         data = request.get_json()
 
         try:
-            user_info_schema.load(data, partial = True)
+            user_info_schema.load(data,instance=user_info, partial = True, session=db.session)
         except ValidationError as error:
             return jsonify({"error": error.messages}), 400
-
-        can_edit = ('first_name','last_name','email','date_of_birth','age','gender','height_ft','height_in', 'state','city')
-
-        for field in can_edit:
-            if field in data:
-                setattr(user_info, field, data[field])
                 
         db.session.commit()
         return jsonify({'message':'Info updated successfully',

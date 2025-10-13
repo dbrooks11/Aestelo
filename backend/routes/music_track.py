@@ -2,19 +2,19 @@ from flask import Blueprint, request, jsonify
 from app import db
 from models.user import UserProfile, UserInfo, UserSettings, UserRole
 from models.visit import Visit
-from models.spotify_track import SpotifyTrack
+from models.music_track import MusicTrack
 from exstensions import supabase
 from routes.auth_required_wrapper import auth_required
 from schemas.user_schema import user_profile_schema, ValidationError
-from schemas.spotify_schema import spotify_track_schema
-from util.spotify_track import search_track, select_track
+from schemas.music_schema import music_track_schema
+from util.music_track import search_track, select_track
 from datetime import datetime, timezone
 
 
-spotify_bp = Blueprint('spotify',__name__, url_prefix='/spotify')
+music_bp = Blueprint('music',__name__, url_prefix='/music')
 
 
-@spotify_bp.route('/search', route = ['GET'])
+@music_bp.route('/search', route = ['GET'])
 @auth_required
 def search_song_visit():
 
@@ -36,7 +36,7 @@ def search_song_visit():
         return jsonify({'error':'Failed to fetch tracks'}), 500         
        
     
-@spotify_bp.route('/visit/<int:visit_id>/add-track', methods = ['POST'])
+@music_bp.route('/visit/<int:visit_id>/add-track', methods = ['POST'])
 @auth_required
 def add_track_visit(visit_id):
     current_user = request.current_user.user.id
@@ -50,64 +50,51 @@ def add_track_visit(visit_id):
         return({'error':'Invalid track selected'}), 404
         
     try:
-        track = SpotifyTrack.query.filter_by(spotify_track_id = track_data['id']).first()
+        track = MusicTrack.query.filter_by(music_track_id = track_data['id']).first()
 
         if track:
             track.times_used += 1
-            visit.spotify_track_id = track.spotify_track_id
+            visit.music_track_id = track.music_track_id
             db.session.commit()
             return jsonify({'message':'Track successfully added',
-                            'track': spotify_track_schema.dump(track)}), 200
+                            'track': music_track_schema.dump(track)}), 200
         else:
             duration_ms = track_data['duration_ms']
             minutes = duration_ms // 60000
             seconds = (duration_ms % 60000) // 1000
             duration_formatted = f"{minutes}:{seconds:02d}"
             
-            new_track = SpotifyTrack(
-                spotify_track_id = track_data['id'],
+            new_track = MusicTrack(
+                music_track_id = track_data['id'],
                 track_name = track_data['name'],
                 artist_name = track_data['artists'][0]['name'],
                 album_name = track_data['album']['name'],
                 album_art_url = track_data['album']['images'][0]['url'] if track_data['album']['images'] else None,
                 preview_url =  track_data.get('preview_url'),
-                spotify_url = track_data['external_urls']['spotify'],
+                music_url = track_data['external_urls']['music'],
                 duration_ms = duration_ms,
                 duration_formatted = duration_formatted,
                 release_date = track_data['album']['release_date'],
                 times_used = 1
             )
 
-            visit.spotify_track_id = new_track.spotify_track_id
+            visit.music_track_id = new_track.music_track_id
             new_track.times_used += 1
 
             db.session.add(new_track)
             db.session.commit()
             return jsonify({'message':'Track successfully added',
-                            'track': spotify_track_schema.dump(new_track)}), 201
+                            'track': music_track_schema.dump(new_track)}), 201
     except Exception:
         return jsonify({'error':'Failed to add track'}), 500
         
 
-
-@spotify_bp.route('/search/profile-me', methods = ['POST'])
-@auth_required 
-def search_song_profile():
-    current_user = request.current_user.user.id
-    current_user_profile = UserProfile.query.get(current_user)
-
-    if not current_user_profile or current_user_profile.is_banned:
-        return jsonify({'error':'Profile does not exist'}), 404
-
-    if current_user_profile.is_prem_account:
-        
-
-@spotify_bp.route('/track/<string:spotify_track_id>', methods = ['GET'])
+@music_bp.route('/track/<string:music_track_id>', methods = ['GET'])
 @auth_required
-def get_track(spotify_track_id):
-    spotify_track = SpotifyTrack.get(spotify_track_id)
+def get_track(music_track_id):
+    music_track = MusicTrack.get(music_track_id)
 
-    if not spotify_track:
+    if not music_track:
         return jsonify({'error':'Track does not exist'}), 404
     
     data = request.get_json()

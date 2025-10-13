@@ -31,5 +31,5 @@ follow_schema = 'public'
 #* BLOCK PROFILE
 block_profile_schema = 'public'
 
-#* SPOTIFY TRACK
-spotify_track_schema = 'public'
+#* music TRACK
+music_track_schema = 'public'

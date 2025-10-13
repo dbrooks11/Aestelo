@@ -22,7 +22,7 @@ class Visit(db.Model):
     
     refined_location = Column(JSONB, nullable=False)
 
-    spotify_track_id = Column(String(50), ForeignKey(f'{spotify_track_schema}.spotify_track.spotify_track_id'))
+    music_track_id = Column(String(50), ForeignKey(f'{music_track_schema}.music_track.music_track_id'))
     caption = Column(String(250))
     hashtags = Column(ARRAY(String))
     date_posted = Column(DateTime, default=datetime.now(timezone.utc))
@@ -38,7 +38,7 @@ class Visit(db.Model):
     num_reports = Column(Integer, default=0)
     is_removed = Column(Boolean, default=False) #removed due to moderaters, admin, etc (does NOT mean deleted by user_profile)
 
-    spotify_track = relationship('SpotifyTrack', backref='visit', lazy=True)
+    music_track = relationship('musicTrack', backref='visit', lazy=True)
 
     def to_dict(self):
         return {
@@ -46,7 +46,7 @@ class Visit(db.Model):
             "post_id": self.post_id,
             "user_profile_id": self.user_profile_id,
             "location_id": self.location_id,
-            'spotify_track_id':self.spotify_track_id,
+            'music_track_id':self.music_track_id,
             "caption": self.caption,
             "hashtags": self.hashtags,
             "date_posted": self.date_posted,

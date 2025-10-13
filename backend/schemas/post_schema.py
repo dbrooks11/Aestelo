@@ -11,15 +11,15 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('is_deleted','deleted_at','num_reports','is_removed','removed_at')
 
     post_id = fields.Integer(dump_only=True)
-    refined_location = fields.Dict(dump_only=True)
+    refined_location = fields.Dict()
     date_posted = fields.DateTime(dump_only=True, format='%b %d, %Y')
-    total_num_of_photos = fields.Integer(validate=[(validate.Range(min=0,max=5))], dump_only=True)
+    total_num_of_photos = fields.Integer(validate=[(validate.Range(min=0,max=5))])
     average_rating = fields.Float(validate=[(validate.Range(min=0.0, max=5.0))], dump_only=True)
     total_num_of_ratings = fields.Integer(validate=[(validate.Range(min=0))], dump_only=True)
     last_rated_at = fields.DateTime(dump_only=True)
     save_count = fields.Integer(validate=[(validate.Range(min=0))], dump_only=True)
     share_count = fields.Integer(validate=[(validate.Range(min=0))], dump_only=True)
-    num_of_edits = fields.Int(dump_only=True, validate=validate.Range(max=1, error='Post can only be edited once'))
+    num_of_edits = fields.Int(validate=validate.Range(max=1, error='Post can only be edited once'))
     trending_score = fields.Integer(validate=[(validate.Range(min=0))], dump_only=True)
 
 
@@ -72,13 +72,13 @@ class PostMediaSchema(ma.SQLAlchemyAutoSchema):
         
     post_media_id = fields.Int(dump_only=True)
 
-    thumbnail_url = fields.Str(dump_only=True)
-    thumb_media_type = fields.Str(dump_only=True)
-    index = fields.Int(dump_only=True, validate=validate.Range(min=1))
-    media_url = fields.Str(dump_only=True)
-    media_type = fields.Str(dump_only=True)
-    width = fields.Int(validate=validate.Range(min=600, max=1080), dump_only=True)
-    height = fields.Int(validate=validate.Range(min=600, max=1350), dump_only=True)
+    thumbnail_url = fields.URL()
+    thumb_media_type = fields.Str()
+    index = fields.Int(validate=validate.Range(min=1))
+    media_url = fields.URL()
+    media_type = fields.Str()
+    width = fields.Int(validate=validate.Range(min=600, max=1080))
+    height = fields.Int(validate=validate.Range(min=600, max=1350))
 
     @validates('media_type')
     def validate_media_type(self, value):

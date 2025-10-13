@@ -13,12 +13,17 @@ def get_settings():
     current_user = request.current_user.user.id
     current_user_profile = UserProfile.query.get(current_user)
 
-    if not current_user_profile or current_user_profile.is_banned:
-        return jsonify({'error':'Profile does not exist'}), 404
+    if current_user_profile is None:
+        return jsonify({'error': 'Profile not found'}), 404
+    
+    if current_user_profile.is_deleted:
+        return jsonify({'error': 'Profile does not exist'}), 404
+    
+    if current_user_profile.is_banned:
+        return jsonify({'error':'Profile unavailable'}),404
 
     try:
-        user_settings = UserSettings.query.filter_by(user_profile_id = current_user)
-
+        user_settings = UserSettings.query.filter_by(user_profile_id = current_user).first()
 
         result = user_settings_schema.dump(user_settings)
 
@@ -37,22 +42,12 @@ def edit_settings():
     user_settings = UserSettings.query.filter_by(user_profile_id = current_user).first()
 
     try:
-
         data = request.get_json()
 
         try:
-            user_settings_schema.load(data, partial = True)
+            user_settings_schema.load(data, instance=user_settings, partial = True, session=db.session)
         except ValidationError as error:
             return jsonify({"error": error.messages}), 400
-
-        can_edit = ('language_preference','email_notifications',
-                    'push_notifications','location_sharing',
-                    'data_usage_consent','marketing_consent',
-                    'theme_preference')
-
-        for field in can_edit:
-            if field in data:
-                setattr(user_settings,field,data[field])
 
         db.session.commit()
         return jsonify({'message':'Settings updated successfully',

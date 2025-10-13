@@ -47,7 +47,7 @@ def create_app():
     CORS(app, 
      origins=["http://localhost:5173", "http://127.0.0.1:5173", "null"],
      allow_headers=["Content-Type", "Authorization"],
-     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
      supports_credentials=True)
     
     
@@ -60,8 +60,8 @@ def create_app():
     from routes.visit import visit_bp
     from routes.user_info import user_info_bp
     from routes.user_settings import user_settings_bp
-    from routes.spotify_track import spotify_bp
-    from models import (location, user, post, rating, visit, report,followers_and_following, block_profile, spotify_track)
+    from routes.music_track import music_bp
+    from models import (location, user, post, rating, visit, report,followers_and_following, block_profile, music_track)
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(profile_bp)
@@ -71,7 +71,7 @@ def create_app():
     app.register_blueprint(visit_bp)
     app.register_blueprint(user_info_bp)
     app.register_blueprint(user_settings_bp)
-    app.register_blueprint(spotify_bp)
+    app.register_blueprint(music_bp)
 
     # Create tables
     with app.app_context():
@@ -100,7 +100,6 @@ def register_global_error_handler(app):
         for endpoint, func in app.view_functions.items():
             if endpoint not in ('static',): 
                 app.view_functions[endpoint] = handle_errors(func)
-
 
 
 if __name__ == '__main__':
