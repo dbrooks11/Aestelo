@@ -15,34 +15,26 @@ profile_bp = Blueprint('profile',__name__, url_prefix='/profile')
 @auth_required
 def profile_me():
     current_user = request.current_user.user.id
+    current_user_profile = UserProfile.query.get(current_user)
 
-    my_profile = UserProfile.query.get(current_user)
-
-    if my_profile is None:
+    if current_user_profile is None:
         return jsonify({'error': 'Profile not found'}), 404
     
     if request.method == 'GET':
         try:
-            return jsonify({'my_profile': user_profile_schema.dump(my_profile)}), 200
-        except ValidationError as e:
-            return jsonify({'error': e.messages}), 400
+            return jsonify({'my_profile': user_profile_schema.dump(current_user_profile)}), 200
         except Exception:
             return jsonify({'error': 'Failed to fetch profile'}), 500
     
     if request.method == 'PATCH':
         try:
             try:
-                data = user_profile_schema.load(request.get_json(), partial=True)
+                user_profile_schema.load(request.get_json(), instance=current_user_profile,session=db.session, partial=True)
             except ValidationError as e:
                 return jsonify({'error': e.messages}),400
-
-            # Update fields (schema already filtered dump_only fields)
-            for field, value in data.items():
-                setattr(my_profile, field, value)
             
             db.session.commit()
-            return user_profile_schema.dump(my_profile), 200
-        
+            return jsonify({'updated_profile':user_profile_schema.dump(current_user_profile)}), 200
         except Exception:
             db.session.rollback()
             return jsonify({'error': 'Failed to update profile'}), 500

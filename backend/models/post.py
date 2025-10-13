@@ -34,7 +34,7 @@ class Post(db.Model):
     
     name = Column(String(100))
     refined_location = Column(JSONB, nullable=False)
-    date_posted = Column(DateTime, default=datetime.now(timezone.utc))
+    date_posted = Column(DateTime)
     description = Column(String(200))
     total_num_of_photos = Column(Integer)
 

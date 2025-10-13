@@ -1,9 +1,11 @@
-from flask import Blueprint, request, jsonify
+
 from app import db
-from models.user import UserProfile, UserInfo, UserSettings, UserRole
 from exstensions import supabase
+from flask import Blueprint, request, jsonify
 from routes.auth_required_wrapper import auth_required
 from schemas.user_schema import user_profile_schema, ValidationError
+from models.user import UserProfile, UserInfo, UserSettings, UserRole
+
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -19,7 +21,6 @@ def signup():
 
     id = user.user.id
     email = user.user.email
-    phone_number = user.user.phone
 
     if UserProfile.query.get(id):
         return jsonify({'error': 'Profile already exists'}), 400
@@ -29,8 +30,7 @@ def signup():
         db.session.add(new_user)
 
         new_user_info = UserInfo(user_profile_id = id ,
-                                email = email if email else None, 
-                                phone_number = phone_number if phone_number else None)
+                                email = email if email else None)
         db.session.add(new_user_info)
 
         new_user_settings = UserSettings(user_profile_id = id)
@@ -45,27 +45,26 @@ def signup():
         db.session.rollback()
         return jsonify({'error': 'Profile could not be created'}), 500
     
-    
+   
 
 @auth_bp.route('/complete-profile', methods = ['PATCH'])
 @auth_required
 def complete_profile():
 
-    user_id = request.current_user.user.id
-    user_profile_finish = UserProfile.query.get(user_id)
+    current_user = request.current_user.user.id
+    user_profile_finish = UserProfile.query.get(current_user)
 
-    if not user_id:
+    if current_user is None:
         return jsonify({'error': 'Profile does not exist'}), 404
     
     try:
-        validate = user_profile_schema.load(request.get_json(), partial = True)
+        data = request.get_json()
+
+        user_profile_schema.load(data, instance=user_profile_finish, partial =True, session=db.session)
     except ValidationError as error:
         return jsonify({"error": error.messages}), 400
 
-    try:
-        for field, value in validate.items():
-            setattr(user_profile_finish, field, value)
-        
+    try: 
         db.session.commit()
         return user_profile_schema.dump(user_profile_finish), 200
     except Exception:

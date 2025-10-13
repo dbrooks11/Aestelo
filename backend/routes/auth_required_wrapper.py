@@ -1,7 +1,8 @@
-from flask import request, jsonify
-from exstensions import supabase
 from functools import wraps
+from exstensions import supabase
 from models.user import UserRole
+from flask import request, jsonify
+
 
 
 def auth_required(func):

@@ -104,3 +104,4 @@ class PostMediaSchema(ma.SQLAlchemyAutoSchema):
 
 post_schema = PostSchema()
 post_media_schema = PostMediaSchema()
+partial_schema = PostSchema(only =('name','description','hashtags','accessibility'))

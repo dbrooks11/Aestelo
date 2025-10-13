@@ -1,5 +1,5 @@
-from flask import Blueprint, request, jsonify
 from app import db
+from flask import Blueprint, request, jsonify
 from models.user import UserProfile
 from models.block_profile import BlockProfile
 from models.post import Post, PostMedia
@@ -7,7 +7,7 @@ from models.followers_and_following import Follow
 from models.location import Location
 from routes.auth_required_wrapper import auth_required, admin_required
 from datetime import datetime, timezone
-from schemas.post_schema import post_schema,post_media_schema, ValidationError
+from schemas.post_schema import post_schema,post_media_schema, ValidationError, partial_schema
 from schemas.location_schema import location_schema
 from util.photo_processing import photo_processing, get_decimal_coordinates
 from util.validation import photo_validation
@@ -17,29 +17,33 @@ from util.outlier_coords import average_location
 post_bp = Blueprint('post', __name__, url_prefix='/post')
 
 
-@post_bp.route('/<string:username>/profile-posts', methods = ['GET'])
+@post_bp.route('/<string:id>/profile-post/all', methods = ['GET'])
 @auth_required
-def get_profile_post_all(username):
+def get_profile_post_all(id):
     current_user = request.current_user.user.id
-    user_profile = UserProfile.query.filter_by(username = username).first()
+    user_profile = UserProfile.query.get(id)
+    current_user_profile = UserProfile.query.get(current_user)
 
-    if not user_profile:
+    if not all([current_user_profile,user_profile]):
         return jsonify({'error': 'Profile not found'}), 404
     
-    if user_profile.is_banned:
+    if user_profile.is_deleted or current_user_profile.is_deleted:
+        return jsonify({'error': 'Profile does not exist'}), 404
+    
+    if user_profile.is_banned or current_user_profile.is_banned:
         return jsonify({'error':'Profile unavailable'}),404
     
     is_blocked = BlockProfile.query.filter_by(blocker_id = user_profile.id,
-                                              blocked_id = current_user).first()
+                                              blocked_id = current_user).exists()
     is_current_user_blocking = BlockProfile.query.filter_by(blocker_id = current_user,
-                                                            blocked_id = user_profile.id).first()
+                                                            blocked_id = user_profile.id).exists()
 
     if is_blocked or is_current_user_blocking:
         return jsonify({'error': 'Profile unavailable'}), 404
     
     if (current_user != user_profile.id) and (user_profile.is_private):
         is_following = Follow.query.filter_by(follower_id = current_user,
-                                        following_id = user_profile.id).first()
+                                        following_id = user_profile.id).exists()
         if not is_following:
             return jsonify({'error': 'Profile is private'}), 403
     
@@ -47,7 +51,7 @@ def get_profile_post_all(username):
         page = request.args.get('page', default=1, type=int)
         per_page = request.args.get('per_page', default=20, type=int)
 
-        post_query = Post.active().filter_by(user_profile_id = user_profile.id)
+        post_query = Post.query.filter_by(user_profile_id = user_profile.id)
 
         paginated_post = post_query.paginate(
             page = page,
@@ -67,29 +71,33 @@ def get_profile_post_all(username):
         return jsonify({'error': 'Failed to fetch post'}), 500
 
 
-@post_bp.route('/<string:username>/profile-post/<int:post_id>', methods = ['GET'])
+@post_bp.route('/<string:id>/profile-post/<int:post_id>', methods = ['GET'])
 @auth_required
-def get_profile_post(username, post_id):
+def get_profile_post(id, post_id):
     current_user = request.current_user.user.id
-    user_profile = UserProfile.query.filter_by(username = username).first()
+    user_profile = UserProfile.query.get(id)
+    current_user_profile = UserProfile.query.get(current_user)
     
-    if not user_profile:
+    if not all([current_user_profile,user_profile]):
         return jsonify({'error': 'Profile not found'}), 404
     
-    if user_profile.is_banned:
+    if user_profile.is_deleted or current_user_profile.is_deleted:
+        return jsonify({'error': 'Profile does not exist'}), 404
+    
+    if user_profile.is_banned or current_user_profile.is_banned:
         return jsonify({'error':'Profile unavailable'}),404
     
     is_blocked = BlockProfile.query.filter_by(blocker_id = user_profile.id,
-                                              blocked_id = current_user).first()
+                                              blocked_id = current_user).exists()
     is_current_user_blocking = BlockProfile.query.filter_by(blocker_id = current_user,
-                                                            blocked_id = user_profile.id).first()
+                                                            blocked_id = user_profile.id).exists()
 
     if is_blocked or is_current_user_blocking:
         return jsonify({'error': 'Profile unavailable'}), 404
     
     if (current_user != user_profile.id) and (user_profile.is_private):
         is_following = Follow.query.filter_by(follower_id = current_user,
-                                        following_id = user_profile.id).first()
+                                        following_id = user_profile.id).exists()
         if not is_following:
             return jsonify({'error': 'Profile is private'}), 403
         
@@ -108,38 +116,46 @@ def get_profile_post(username, post_id):
 @auth_required
 def edit_post(post_id):
     current_user = request.current_user.user.id
-    my_profile = UserProfile.query.get(current_user)
-    post = Post.active().filter_by(user_profile_id = current_user, post_id = post_id).first()
-
-    if not my_profile:
+    current_user_profile = UserProfile.query.get(current_user)
+    post = Post.query.get(post_id)
+    
+    if current_user_profile is None:
         return jsonify({'error': 'Profile not found'}), 404
     
-    if not post:
-        return jsonify({'error': 'You cannot edit this post'}), 403
+    if current_user_profile.is_deleted:
+        return jsonify({'error': 'Profile does not exist'}), 404
+    
+    if current_user_profile.is_banned:
+        return jsonify({'error':'Profile unavailable'}),404
+    
+    if post.user_profile_id != current_user:
+        return jsonify({'error': 'Action not permitted'}), 403
+    
+    if post is None or post.is_deleted or post.is_removed:
+        return jsonify({'error': 'Post not found'}), 404
+    
+    edit_limit = 3
+    if post.num_of_edits >= edit_limit:
+        return jsonify({'error': f'Post edit limit reached. Cannot edit a post more than {edit_limit} times.'}), 403
 
     try:
         data = request.get_json()
-        post.num_of_edits += 1
-        
+
         try:
-            post_schema.load(data, partial = True)
+            partial_schema.load(data, instance=post, partial = True, session=db.session)
         except ValidationError as error:
             return jsonify({"error": error.messages}), 400
-
-        can_edit = ('description','name', 'accessibility')
-
-        for edit_field in can_edit:
-            if edit_field in data:
-                setattr(post, edit_field, data[edit_field])
         
-        
+        Post.query.filter_by(user_profile_id = current_user, post_id = post_id).update({'num_of_edits': Post.num_of_edits + 1}, synchronize_session=False)
+
         db.session.commit()
+        post.num_of_edits += 1
         return jsonify({'message':'Post updated successfully',
                         'updated_post': post_schema.dump(post)}), 200
     except Exception as e:
         db.session.rollback()
         error = getattr(e,'messages', str(e))
-        return jsonify({'error': error}), 500
+        return jsonify({'Failed to edit post': error}), 500
 
 
 @post_bp.route('/profile-post/<int:post_id>/delete', methods = ['DELETE'])
@@ -147,16 +163,22 @@ def edit_post(post_id):
 def delete_post(post_id):
     current_user = request.current_user.user.id
     current_user_profile = UserProfile.query.get(current_user)
-    post = Post.active().filter_by(user_profile_id = current_user, post_id =post_id).first()
+    post = Post.query.get(post_id)
 
-    if not current_user_profile:
-        return jsonify({'error':'Profile not found'}), 404
-
-    if current_user_profile.is_banned:
-        return jsonify({'error':'Profile does not exist'}), 404
+    if current_user_profile is None:
+        return jsonify({'error': 'Profile not found'}), 404
     
-    if (not post) or post.is_deleted or post.is_removed:
-        return jsonify({'error':'Post does not exist'}), 404
+    if current_user_profile.is_deleted:
+        return jsonify({'error': 'Profile does not exist'}), 404
+    
+    if current_user_profile.is_banned:
+        return jsonify({'error':'Profile unavailable'}),404
+    
+    if post is None or post.is_deleted or post.is_removed:
+        return jsonify({'error': 'Post not found'}), 404
+    
+    if post.user_profile_id != current_user:
+        return jsonify({'error': 'Action not permitted'}), 403
     
     try:
         post.is_deleted = True
@@ -168,16 +190,25 @@ def delete_post(post_id):
         return jsonify({'error':'Failed to delete post'}), 500
     
 
-
 @post_bp.route('admin/profile-post/<int:post_id>/remove', methods = ['DELETE'])
 @auth_required
 @admin_required
 def remove_post_admin(post_id):
     current_user = request.current_user.user.id
-    post = Post.active().filter_by(user_profile_id = current_user, post_id = post_id).first()
+    current_user_profile = UserProfile.query.get(current_user)
+    post = Post.query.get(post_id)
     
-    if not post:
-        return jsonify({'error': 'Post unavailable'}), 404
+    if current_user_profile is None:
+        return jsonify({'error': 'Profile not found'}), 404
+    
+    if current_user_profile.is_deleted:
+        return jsonify({'error': 'Profile does not exist'}), 404
+    
+    if current_user_profile.is_banned:
+        return jsonify({'error':'Profile unavailable'}),404
+
+    if post is None or post.is_deleted or post.is_removed:
+        return jsonify({'error': 'Post not found'}), 404
     
     try:
         post.is_removed = True
@@ -214,7 +245,7 @@ def upload_photos():
     if status != 200:
         return jsonify(result), status
 
-    uploaded_photos = []
+    proccessed_photos = []
     failed_photos = []
     gps_coords = []
     errors = []
@@ -225,27 +256,30 @@ def upload_photos():
             pht_count +=1
             
             gps = pht_data['gps']
-            if gps:
-                lat,long,alt = get_decimal_coordinates(gps)
-                if lat and long:
-                    gps_coords.append({
-                        'latitude': lat,
-                        'longitude': long,
-                        'altitude': alt})
-                else:
-                    failed_photo_url = upload_to_r2(pht_data['photo'], current_user, folder='failed_photos')
-                    failed_photos.append({'failed_photo_url': failed_photo_url,
-                                          'reason':'No metadata found',
-                                          'photo_number': pht_count})
-                    errors.append(f'Failed to get metadata of photo {pht_count}')
-                    continue
+            if not gps:
+                lat, long, alt = None, None, None
+            else:
+                lat, long, alt = get_decimal_coordinates(gps)
+
+            if not lat or not long:
+                failed_photo_url = upload_to_r2(pht_data['photo'], current_user, folder='failed_photos')
+                failed_photos.append({
+                    'failed_photo_url': failed_photo_url,
+                    'reason': 'No GPS metadata found',
+                    'photo_number': pht_count
+                })
+                errors.append(f'Photo {pht_count}: No GPS metadata found')
+                continue
+
+            gps_coords.append({
+                'latitude': lat,
+                'longitude': long,
+                'altitude': alt
+            })
             
-            photo_url = upload_to_r2(pht_data['photo'], current_user, folder='posts')
-            thumb_url = upload_photos(pht_data['thumbnail'], current_user, folder = 'post_thumbnails')
-                
-            uploaded_photos.append({
-                'photo_url': photo_url,
-                'thumbnail_url': thumb_url,
+            proccessed_photos.append({
+                'photo_bytes': pht_data['photo'],
+                'thumbnail_bytes': pht_data['thumbnail'],
                 'width': pht_data['width'],
                 'height': pht_data['height'],
                 'latitude': lat,
@@ -254,6 +288,9 @@ def upload_photos():
                 'gps': gps,
                 'order': pht_count
             })
+        
+        if not proccessed_photos:
+            return jsonify({'error':'No valid photos submitted'})
 
         max_meter_distance = 30
         avg_location = average_location(gps_coords)
@@ -264,9 +301,27 @@ def upload_photos():
                 'suggestion': 'Please select photos taken at the same place, or create separate posts for different locations.'
             }), 400
         
+        uploaded_photos = []
+        for pht_data_r2 in proccessed_photos:
+            photo_url = upload_to_r2(pht_data_r2['photo_bytes'], current_user, folder='posts')
+            thumb_url = upload_to_r2(pht_data_r2['thumbnail_bytes'], current_user, folder = 'post_thumbnails')
+
+            uploaded_photos.append({
+                'photo_url': photo_url,
+                'thumbnail_url': thumb_url,
+                'width': pht_data_r2['width'],
+                'height': pht_data_r2['height'],
+                'latitude': pht_data_r2['latitude'],
+                'longitude':pht_data_r2['longitude'],
+                'altitude': pht_data_r2['altitude'],
+                'gps': pht_data_r2['gps'],
+                'order': pht_data_r2['order']
+            })
+                
+        
         if errors:
             return jsonify({
-                'message': f'{len(upload_photos)}/{len(files)} photos were uploaded successfully',
+                'message': f'{len(uploaded_photos)}/{len(files)} photos were uploaded successfully',
                 'uploaded_photos': uploaded_photos,
                 'failed_photos': failed_photos,
                 'location': avg_location,
@@ -275,7 +330,7 @@ def upload_photos():
             }), 200
         else:
             return jsonify({
-                'message': 'photos uploaded successfully',
+                'message': 'Photos uploaded successfully',
                 'photos': uploaded_photos,
                 'location': avg_location,
                 'photo_count': len(uploaded_photos)
@@ -291,21 +346,28 @@ def create_post():
     current_user = request.current_user.user.id
     current_user_profile = UserProfile.query.get(current_user)
 
-    if not current_user_profile:
-        return jsonify({'error':'Profile does not exist'})
+    if current_user_profile is None:
+        return jsonify({'error': 'Profile not found'}), 404
+    
+    if current_user_profile.is_deleted:
+        return jsonify({'error': 'Profile does not exist'}), 404
+    
+    if current_user_profile.is_banned:
+        return jsonify({'error':'Profile unavailable'}),404
 
     data = request.get_json()
 
-    if not (data.get('photos') or data.get('location') or data.get('photo_count')):
+    if data.get('photos') is None or data.get('location') is None or data.get('photo_count') is None:
         return jsonify({'error':'Invalid data provided'}), 400
+    
 
     post_name = data.get('name')
     post_description = data.get('description')
     accessibility = data.get('accessibility')
     hashtags = data.get('hashtags', [])
-    photos = data['photos']
-    avg_location = data['location']
-    num_of_photos = data['photo_count']
+    photos = data.get('photos')
+    avg_location = data.get('location')
+    num_of_photos = data.get('photo_count')
 
     try:
 
@@ -314,37 +376,38 @@ def create_post():
                 "name": post_name, 
                 "refined_location": avg_location,
                 "description": post_description,
-                "total_num_of_photos": num_of_photos, 
+                "total_num_of_photos": num_of_photos,
+                "accessibility": accessibility, 
                 "hashtags": hashtags
             }
-            post_schema.load(data_to_load, partial = True)
+            valid_post_data = post_schema.load(data_to_load, partial = True)
         except ValidationError as error:
             return jsonify({"error": error.messages}), 400
 
         new_post = Post(
             user_profile_id=current_user_profile.id,
-            name=post_name,
-            refined_location = avg_location,
-            description=post_description,
-            total_num_of_photos= num_of_photos,
-            accessibility=accessibility,
-            hashtags=hashtags
+            name=valid_post_data.get('name'),
+            refined_location = valid_post_data.get('refined_location'),
+            description= valid_post_data.get('description'),
+            total_num_of_photos= valid_post_data.get('total_num_of_photos'),
+            accessibility= valid_post_data.get('accessibility'),
+            hashtags=valid_post_data.get('hashtags')
         )
         db.session.add(new_post)
         db.session.flush()
 
-        for position, pht_data in enumerate(photos, start=1):
 
+        for position, pht_data in enumerate(photos, start=1):
             media_data_to_load = {
-                "thumbnail_url": pht_data['thumbnail_url'],
+                "thumbnail_url": pht_data.get('thumbnail_url'),
                 "thumb_media_type": 'photo',
-                "media_url": pht_data['photo_url'],
+                "media_url": pht_data.get('photo_url'),
                 "media_type": 'photo',
-                "width": pht_data['width'],
-                "height": pht_data['height']
+                "width": pht_data.get('width'),
+                "height": pht_data.get('height')
             }
             try:
-                post_media_schema.load(media_data_to_load, partial = True)
+                valid_media_data = post_media_schema.load(media_data_to_load, partial = True)
             except ValidationError as error:
                 return jsonify({"error": error.messages}), 400
 
@@ -352,12 +415,12 @@ def create_post():
                 post_id=new_post.post_id,
                 uploaded_by=current_user_profile.id,
                 index = position,
-                media_url=pht_data['photo_url'],     
-                thumbnail_url=pht_data['thumbnail_url'],
+                media_url=valid_media_data.get('photo_url'),     
+                thumbnail_url=valid_media_data.get('thumbnail_url'),
                 media_type='photo',
                 thumb_media_type='photo',
-                width=pht_data['width'],
-                height=pht_data['height'],
+                width=valid_media_data.get('width'),
+                height=valid_media_data.get('height'),
             )
             db.session.add(post_media)
             db.session.flush()
@@ -365,25 +428,26 @@ def create_post():
             try:
 
                 location_data_to_load = {
-                    "latitude": pht_data['latitude'],
-                    "longitude": pht_data['longitude'],
+                    "latitude": pht_data.get('latitude'),
+                    "longitude": pht_data.get('longitude'),
                     "altitude": pht_data.get('altitude') 
                 }
-                location_schema.load(location_data_to_load, partial = True)
+                valid_location_data = location_schema.load(location_data_to_load, partial = True)
             except ValidationError as error:
                 return jsonify({"error": error.messages}), 400
 
             location = Location(
                 post_media_id=post_media.post_media_id,
-                latitude=pht_data['latitude'],
-                longitude=pht_data['longitude'],
-                altitude=pht_data.get('altitude'),
+                latitude=valid_location_data.get('latitude'),
+                longitude=valid_location_data.get('longitude'),
+                altitude=valid_location_data.get('altitude'),
             )
             db.session.add(location)
 
-        current_user_profile.post_count += 1
+        UserProfile.query.filter_by(id = current_user_profile.id).update({'post_count': UserProfile.post_count + 1}, synchronize_session=False)
+        
         db.session.commit()
-
+        current_user_profile.post_count += 1
         return post_schema.dump(new_post), 201
     except Exception as e:
         db.session.rollback()

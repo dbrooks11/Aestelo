@@ -173,6 +173,7 @@ class UserSubscriptionSchema(ma.SQLAlchemyAutoSchema):
 
 
 user_profile_schema = UserProfileSchema()
+partial_schema = UserProfileSchema(only = ('id','banner_theme','username','profile_photo'))
 user_info_schema = UserInfoSchema()
 user_settings_schema = UserSettingsSchema()
 user_subscription_schema = UserSubscriptionSchema()
