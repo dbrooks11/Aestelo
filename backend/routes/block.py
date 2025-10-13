@@ -1,34 +1,21 @@
 from app import db
 from models.user import UserProfile
+from sqlalchemy import exists
 from flask import Blueprint, request, jsonify
 from models.block_profile import BlockProfile
 from models.followers_and_following import Follow
 from routes.auth_required_wrapper import auth_required
 from schemas.user_schema import UserProfileSchema, partial_schema
-
+from util.decorators import profile_active_not_permitted, profile_check_current__banned_removed
 block_bp = Blueprint('block', __name__, url_prefix='/block')
 
 
 @block_bp.route('/<string:id>/block-profile', methods = ['POST'])
 @auth_required
-def block_profile(id):
-    current_user = request.current_user.user.id
-    user_profile = UserProfile.query.get(id)
+@profile_active_not_permitted
+def block_profile(id, user_profile, current_user):
 
-    if user_profile is None:
-        return jsonify({'error': 'Profile not found'}), 404
-    
-    if user_profile.is_deleted:
-        return jsonify({'error': 'Profile does not exist'}), 404
-    
-    if user_profile.is_banned:
-        return jsonify({'error':'Profile unavailable'}),404
-    
-    if current_user == user_profile.id:
-        return jsonify({'error': 'Action not permitted'}), 409
-    
-    is_blocked = BlockProfile.query.filter_by(blocker_id = current_user,
-                                              blocked_id = user_profile.id).exists()
+    is_blocked = db.session.query(exists().where((BlockProfile.blocker_id == current_user) & (BlockProfile.blocked_id == user_profile.id))).scalar()
     if is_blocked:
         return jsonify({'error': 'Profile already blocked'}), 409 
     
@@ -66,22 +53,8 @@ def block_profile(id):
        
 @block_bp.route('/<string:id>/unblock-profile', methods = ['DELETE'])
 @auth_required
-def unblock_profile(username):
-    current_user = request.current_user.user.id
-    user_profile = UserProfile.query.filter_by(username = username).first()
-
-    if user_profile is None:
-        return jsonify({'error': 'Profile not found'}), 404
-    
-    if user_profile.is_deleted:
-        return jsonify({'error': 'Profile does not exist'}), 404
-    
-    if user_profile.is_banned:
-        return jsonify({'error':'Profile unavailable'}),404
-    
-    if current_user == user_profile.id:
-        return jsonify({'error': 'Action not permitted'}), 409
-    
+@profile_active_not_permitted
+def unblock_profile(id, user_profile, current_user):
     is_blocked = BlockProfile.query.filter_by(blocker_id = current_user,
                                               blocked_id = user_profile.id).first()
     if is_blocked is None:
@@ -98,26 +71,15 @@ def unblock_profile(username):
 
 @block_bp.route('/me/show-blocked-profiles', methods = ['GET'])
 @auth_required
-def get_blocked_profiles():
-    current_user = request.current_user.user.id
-    current_user_profile = UserProfile.query.get(current_user)
-
-    if current_user_profile is None:
-        return jsonify({'error': 'Profile not found'}), 404
-    
-    if current_user_profile.is_deleted:
-        return jsonify({'error': 'Profile does not exist'}), 404
-    
-    if current_user_profile.is_banned:
-        return jsonify({'error':'Profile unavailable'}),404
-
+@profile_check_current__banned_removed
+def get_blocked_profiles(current_user, user_profile):
     try:
         page = request.args.get('page', default=1, type=int)
         per_page = request.args.get('per_page', default=50, type=int)
         if per_page > 50:
             per_page = 50
 
-        block_query = db.session.query(UserProfile).join(BlockProfile, BlockProfile.blocked_id == UserProfile.id).filter(BlockProfile.blocker_id == current_user)
+        block_query = db.session.query(UserProfile).join(BlockProfile, BlockProfile.blocked_id == UserProfile.id).filter(BlockProfile.blocker_id == user_profile)
 
         paginated_blocks = block_query.paginate(
             page = page,

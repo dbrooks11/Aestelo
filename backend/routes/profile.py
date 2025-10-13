@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from sqlalchemy import exists
 from app import db
 from models.user import UserProfile
 from models.block_profile import BlockProfile
@@ -56,10 +57,9 @@ def user_profile(username):
     if user_profile.is_banned:
         return jsonify({'error':'Profile unavailable'}),404
     
-    is_blocked = BlockProfile.query.filter_by(blocker_id = user_profile.id,
-                                              blocked_id = current_user).exists()
-    is_current_user_blocking = BlockProfile.query.filter_by(blocker_id = current_user,
-                                                            blocked_id = user_profile.id).exists()
+    is_blocked = db.session.query(exists().where((BlockProfile.blocker_id ==user_profile.id) & (BlockProfile.blocked_id == current_user))).scalar()
+
+    is_current_user_blocking = db.session.query(exists().where((BlockProfile.blocker_id == current_user) & (BlockProfile.blocked_id == user_profile.id))).scalar()
     
     if is_blocked or is_current_user_blocking:
         return jsonify({'error': 'Profile unavailable'}), 404
@@ -72,8 +72,7 @@ def user_profile(username):
             return jsonify({'error': 'Failed to fetch profile'}), 500
     
     #check if current user is a follower of the person's profile they are trying to view
-    is_following = Follow.query.filter_by(follower_id = current_user,
-                                          following_id = user_profile.id).exists()
+    is_following = db.session.query(exists().where((Follow.follower_id == current_user) & (Follow.following_id == user_profile.id))).scalar()
 
     #if user profile is private, check if the person that is trying to view it is following them
     if user_profile.is_private and not is_following:

@@ -1,5 +1,6 @@
 from app import db
 from flask import Blueprint, request, jsonify
+from sqlalchemy import exists
 from models.user import UserProfile
 from models.block_profile import BlockProfile
 from models.post import Post, PostMedia
@@ -33,17 +34,15 @@ def get_profile_post_all(id):
     if user_profile.is_banned or current_user_profile.is_banned:
         return jsonify({'error':'Profile unavailable'}),404
     
-    is_blocked = BlockProfile.query.filter_by(blocker_id = user_profile.id,
-                                              blocked_id = current_user).exists()
-    is_current_user_blocking = BlockProfile.query.filter_by(blocker_id = current_user,
-                                                            blocked_id = user_profile.id).exists()
+    is_blocked = db.session.query(exists().where((BlockProfile.blocker_id ==user_profile.id) & (BlockProfile.blocked_id == current_user))).scalar()
 
+    is_current_user_blocking = db.session.query(exists().where((BlockProfile.blocker_id == current_user) & (BlockProfile.blocked_id == user_profile.id))).scalar()
+    
     if is_blocked or is_current_user_blocking:
         return jsonify({'error': 'Profile unavailable'}), 404
     
     if (current_user != user_profile.id) and (user_profile.is_private):
-        is_following = Follow.query.filter_by(follower_id = current_user,
-                                        following_id = user_profile.id).exists()
+        is_following = db.session.query(exists().where((Follow.follower_id == current_user) & (Follow.following_id == user_profile.id))).scalar()
         if not is_following:
             return jsonify({'error': 'Profile is private'}), 403
     
@@ -87,17 +86,15 @@ def get_profile_post(id, post_id):
     if user_profile.is_banned or current_user_profile.is_banned:
         return jsonify({'error':'Profile unavailable'}),404
     
-    is_blocked = BlockProfile.query.filter_by(blocker_id = user_profile.id,
-                                              blocked_id = current_user).exists()
-    is_current_user_blocking = BlockProfile.query.filter_by(blocker_id = current_user,
-                                                            blocked_id = user_profile.id).exists()
+    is_blocked = db.session.query(exists().where((BlockProfile.blocker_id ==user_profile.id) & (BlockProfile.blocked_id == current_user))).scalar()
+
+    is_current_user_blocking = db.session.query(exists().where((BlockProfile.blocker_id == current_user) & (BlockProfile.blocked_id == user_profile.id))).scalar()
 
     if is_blocked or is_current_user_blocking:
         return jsonify({'error': 'Profile unavailable'}), 404
     
     if (current_user != user_profile.id) and (user_profile.is_private):
-        is_following = Follow.query.filter_by(follower_id = current_user,
-                                        following_id = user_profile.id).exists()
+        is_following = db.session.query(exists().where((Follow.follower_id == current_user) & (Follow.following_id == user_profile.id))).scalar()
         if not is_following:
             return jsonify({'error': 'Profile is private'}), 403
         

@@ -1,5 +1,6 @@
 from app import db
 from models.user import UserProfile
+from sqlalchemy import exists
 from flask import Blueprint, request, jsonify
 from models.followers_and_following import Follow
 from routes.auth_required_wrapper import auth_required
@@ -28,8 +29,8 @@ def follow_profile(id):
     if user_profile.id == current_user:
         return jsonify({'error': 'Cannot follow yourself'}), 409
     
-    is_following = Follow.query.filter_by(follower_id = current_user,
-                                          following_id = user_profile.id).exists()
+    is_following = db.session.query(exists().where((Follow.follower_id == current_user) & (Follow.following_id == user_profile.id))).scalar()
+    
     if is_following:
         return jsonify({'error': 'Profile already followed'}), 409
 
@@ -124,8 +125,7 @@ def get_followers(id):
         return jsonify({'error':'Profile unavailable'}),404
     
     if (current_user != user_profile.id) and (user_profile.is_private):
-        is_following = Follow.query.filter_by(follower_id = current_user,
-                                        following_id = user_profile.id).exists()
+        is_following = db.session.query(exists().where((Follow.follower_id == current_user) & (Follow.following_id == user_profile.id))).scalar()
         if not is_following:
             return jsonify({'error': 'Profile is private'}), 403
     
@@ -172,8 +172,8 @@ def get_following(id):
         return jsonify({'error':'Profile unavailable'}),404
     
     if (current_user != user_profile.id) and (user_profile.is_private):
-        is_following = Follow.query.filter_by(follower_id = current_user,
-                                        following_id = user_profile.id).exists()
+        is_following = db.session.query(exists().where((Follow.follower_id == current_user) & (Follow.following_id == user_profile.id))).scalar()
+        
         if not is_following:
             return jsonify({'error': 'Profile is private'}), 403
         
