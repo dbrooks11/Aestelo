@@ -5,7 +5,7 @@ from flask import Blueprint, request, jsonify
 from models.followers_and_following import Follow
 from routes.auth_required_wrapper import auth_required
 from util.decorators import profile_both_check_banned_removed
-from schemas.user_schema import UserProfileSchema, partial_schema
+from schemas.user_schema import partial_schema
 
 follow_bp = Blueprint('follow', __name__, url_prefix='/profile/follow')
 

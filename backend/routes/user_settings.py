@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app import db
-from models.user import UserProfile, UserSettings
+from models.user import UserSettings
 from schemas.user_schema import user_settings_schema, ValidationError
 from routes.auth_required_wrapper import auth_required
 from util.decorators import profile_check_current__banned_removed

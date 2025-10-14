@@ -1,7 +1,6 @@
 from flask import Blueprint, request, jsonify
 from sqlalchemy import exists
 from app import db
-from models.user import UserProfile
 from models.block_profile import BlockProfile
 from models.followers_and_following import Follow
 from models.music_track import MusicTrack

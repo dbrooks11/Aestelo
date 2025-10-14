@@ -1,10 +1,7 @@
 from app import db
 from flask import Blueprint, request, jsonify
-from sqlalchemy import exists
 from models.user import UserProfile
-from models.block_profile import BlockProfile
 from models.post import Post, PostMedia
-from models.followers_and_following import Follow
 from models.location import Location
 from routes.auth_required_wrapper import auth_required, admin_required
 from datetime import datetime, timezone
