@@ -11,8 +11,8 @@ dictConfig({
     "version": 1,
     "formatters": {
         "default": {
-            "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
-            "datefmt": "%B %d, %Y %I:%M:%S %p",
+            "format": "[%(asctime)s] %(levelname)s in %(module)s - %(message)s",
+            "datefmt": "%B %d, %Y | %I:%M:%S %p",
         }
     },
     "handlers": {

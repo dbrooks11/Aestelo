@@ -44,3 +44,5 @@ gitignore
 
 config.js
 frontend/config.js
+.log
+app_logs.log
