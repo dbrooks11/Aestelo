@@ -49,7 +49,7 @@ def profile_check_current__banned_removed(func):
         if user_profile.is_banned:
             return jsonify({'error':'Profile unavailable'}),404
         
-        kwargs['user_profile']
+        kwargs['user_profile'] = user_profile
         return func(*args, **kwargs)
     return decorator
 

@@ -9,21 +9,18 @@ from schemas.music_schema import music_track_schema
 from schemas.user_schema import user_profile_schema, ValidationError
 from routes.auth_required_wrapper import auth_required
 from util.music_track import set_track
+from util.decorators import profile_check_current__banned_removed
 
 profile_bp = Blueprint('profile',__name__, url_prefix='/profile')
 
 @profile_bp.route('/profile/me', methods = ['GET','PATCH'])
 @auth_required
-def profile_me():
-    current_user = request.current_user.user.id
-    current_user_profile = UserProfile.query.get(current_user)
-
-    if current_user_profile is None:
-        return jsonify({'error': 'Profile not found'}), 404
+@profile_check_current__banned_removed
+def profile_me(user_profile):
     
     if request.method == 'GET':
         try:
-            return jsonify({'my_profile': user_profile_schema.dump(current_user_profile)}), 200
+            return jsonify({'my_profile': user_profile_schema.dump(user_profile)}), 200
         except Exception:
             return jsonify({'error': 'Failed to fetch profile'}), 500
     
@@ -31,48 +28,38 @@ def profile_me():
         try:
             try:
                 data = request.get_json()
-                user_profile_schema.load(data, instance=current_user_profile,session=db.session, partial=True)
+                user_profile_schema.load(data, instance=user_profile,session=db.session, partial=True)
             except ValidationError as e:
                 return jsonify({'error': e.messages}),400
             
             db.session.commit()
-            return jsonify({'updated_profile':user_profile_schema.dump(current_user_profile)}), 200
+            return jsonify({'updated_profile':user_profile_schema.dump(user_profile)}), 200
         except Exception:
             db.session.rollback()
             return jsonify({'error': 'Failed to update profile'}), 500
 
 
-@profile_bp.route('/profile/<string:username>', methods = ['GET'])
+@profile_bp.route('/profile/<string:id>', methods = ['GET'])
 @auth_required
-def user_profile(username):
-    user_profile = UserProfile.query.filter_by(username = username).first()
-    current_user = request.current_user.user.id
+@profile_check_current__banned_removed
+def user_profile(id, user_profile):
+    
+    is_blocked = db.session.query(exists().where((BlockProfile.blocker_id ==user_profile.id) & (BlockProfile.blocked_id == user_profile.id))).scalar()
 
-    if user_profile is None:
-        return jsonify({'error': 'Profile not found'}), 404
-    
-    if user_profile.is_deleted:
-        return jsonify({'error': 'Profile does not exist'}), 404
-    
-    if user_profile.is_banned:
-        return jsonify({'error':'Profile unavailable'}),404
-    
-    is_blocked = db.session.query(exists().where((BlockProfile.blocker_id ==user_profile.id) & (BlockProfile.blocked_id == current_user))).scalar()
-
-    is_current_user_blocking = db.session.query(exists().where((BlockProfile.blocker_id == current_user) & (BlockProfile.blocked_id == user_profile.id))).scalar()
+    is_current_user_blocking = db.session.query(exists().where((BlockProfile.blocker_id == user_profile.id) & (BlockProfile.blocked_id == user_profile.id))).scalar()
     
     if is_blocked or is_current_user_blocking:
         return jsonify({'error': 'Profile unavailable'}), 404
     
     #checks if the profile the user is veiwing is themselves
-    if user_profile.id == current_user:
+    if user_profile.id == request.current_user.user.id:
         try:
             return jsonify({'me': user_profile_schema.dump(user_profile)}), 200
         except Exception:
             return jsonify({'error': 'Failed to fetch profile'}), 500
     
     #check if current user is a follower of the person's profile they are trying to view
-    is_following = db.session.query(exists().where((Follow.follower_id == current_user) & (Follow.following_id == user_profile.id))).scalar()
+    is_following = db.session.query(exists().where((Follow.follower_id == user_profile.id) & (Follow.following_id == user_profile.id))).scalar()
 
     #if user profile is private, check if the person that is trying to view it is following them
     if user_profile.is_private and not is_following:
@@ -86,20 +73,10 @@ def user_profile(username):
         
 @profile_bp.route('/add-track', methods = ['POST'])
 @auth_required
-def add_track_profile():
-    current_user = request.current_user.user.id
-    current_user_profile = UserProfile.query.get(current_user)
-
-    if current_user_profile is None:
-        return jsonify({'error': 'Profile not found'}), 404
+@profile_check_current__banned_removed
+def add_track_profile(user_profile):
     
-    if current_user_profile.is_deleted:
-        return jsonify({'error': 'Profile does not exist'}), 404
-    
-    if current_user_profile.is_banned:
-        return jsonify({'error':'Profile unavailable'}),404
-    
-    if not current_user_profile.is_prem_account:
+    if not user_profile.is_prem_account:
         return jsonify({'message':'Premium account required'}), 403
     
     track_data = request.get_json()
@@ -112,10 +89,10 @@ def add_track_profile():
 
         if track:
             track.times_used += 1
-            current_user_profile.music_track_id = track.music_track_id
+            user_profile.music_track_id = track.music_track_id
         else:
             new_track = set_track(track_data=track_data)
-            current_user_profile.music_track_id = new_track.music_track_id
+            user_profile.music_track_id = new_track.music_track_id
             db.session.add(new_track)
         
         result = music_track_schema.dump(track) if track else music_track_schema.dump(new_track)
@@ -129,27 +106,16 @@ def add_track_profile():
 
 @profile_bp.route('/remove-track', methods = ['DELETE'])
 @auth_required
-def remove_track_profile():
-    current_user = request.current_user.user.id
-    current_user_profile = UserProfile.query.get(current_user)
-
-    if current_user_profile is None:
-        return jsonify({'error': 'Profile not found'}), 404
-    
-    if current_user_profile.is_deleted:
-        return jsonify({'error': 'Profile does not exist'}), 404
-    
-    if current_user_profile.is_banned:
-        return jsonify({'error':'Profile unavailable'}),404
-    
-    if not current_user_profile.is_prem_account:
+@profile_check_current__banned_removed
+def remove_track_profile(user_profile):
+    if not user_profile.is_prem_account:
         return jsonify({'message':'Premium account required'}), 403
     
-    if current_user_profile.music_track_id is None:
+    if user_profile.music_track_id is None:
         return jsonify({'message':'No track playing on your profile. Please add a track first.'}), 400
 
     try:
-        current_user_profile.music_track_id = None
+        user_profile.music_track_id = None
         db.session.commit()
         return jsonify({'message':'Track removed successfully'}), 200
     except Exception as e:
