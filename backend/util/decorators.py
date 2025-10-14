@@ -77,6 +77,7 @@ def profile_both_check_banned_removed(func):
     
     return decorator
 
+
 def block_and_follow_check(func):
     @wraps(func)
     def decorator(*args, **kwargs):
@@ -96,6 +97,7 @@ def block_and_follow_check(func):
                 return jsonify({'error': 'Profile is private'}), 403
     
     return decorator
+
 
 def profile_current_check_post(func):
     @wraps
@@ -125,3 +127,31 @@ def profile_current_check_post(func):
         return func(*args, **kwargs)
     return decorator
     
+    
+def profile_current_check_visit(func):
+    @wraps
+    def decorator(*args, **kwargs):
+        current_user = request.current_user.user.id
+        current_user_profile = UserProfile.query.get(current_user)
+        visit_id = kwargs.get('visit_id')
+        visit = Visit.query.get(visit_id)
+
+        if current_user_profile is None:
+            return jsonify({'error': 'Profile not found'}), 404
+        
+        if current_user_profile.is_deleted:
+            return jsonify({'error': 'Profile does not exist'}), 404
+        
+        if current_user_profile.is_banned:
+            return jsonify({'error':'Profile unavailable'}),404
+        
+        if visit.user_profile_id != current_user:
+            return jsonify({'error': 'Action not permitted'}), 403
+        
+        if visit is None or visit.is_deleted or visit.is_removed:
+            return jsonify({'error': 'Visit not found'}), 404
+        
+        kwargs['current_user_profile'] = current_user_profile
+        kwargs['visit'] = visit
+        return func(*args, **kwargs)
+    return decorator

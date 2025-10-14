@@ -15,37 +15,17 @@ from util.photo_processing import photo_processing, get_decimal_coordinates
 from util.validation import photo_validation
 from util.storage import upload_to_r2
 from util.outlier_coords import average_location
+from util.decorators import (profile_both_check_banned_removed, block_and_follow_check, profile_current_check_visit, 
+                             profile_check_current__banned_removed)
 
 
 visit_bp = Blueprint('visit', __name__, url_prefix='/visit')
 
 @visit_bp.route('/<string:id>/profile-visits', methods = ['GET'])
 @auth_required
-def get_profile_visit_all(id):
-    current_user = request.current_user.user.id
-    user_profile = UserProfile.query.get(id)
-    current_user_profile = UserProfile.query.get(current_user)
-
-    if not all([current_user_profile,user_profile]):
-        return jsonify({'error': 'Profile not found'}), 404
-    
-    if user_profile.is_deleted or current_user_profile.is_deleted:
-        return jsonify({'error': 'Profile does not exist'}), 404
-    
-    if user_profile.is_banned or current_user_profile.is_banned:
-        return jsonify({'error':'Profile unavailable'}),404
-    
-    is_blocked = db.session.query(exists().where((BlockProfile.blocker_id ==user_profile.id) & (BlockProfile.blocked_id == current_user))).scalar()
-
-    is_current_user_blocking = db.session.query(exists().where((BlockProfile.blocker_id == current_user) & (BlockProfile.blocked_id == user_profile.id))).scalar()
-
-    if is_blocked or is_current_user_blocking:
-        return jsonify({'error': 'Profile unavailable'}), 404
-    
-    if (current_user != user_profile.id) and (user_profile.is_private):
-        is_following = db.session.query(exists().where((Follow.follower_id == current_user) & (Follow.following_id == user_profile.id))).scalar()
-        if not is_following:
-            return jsonify({'error': 'Profile is private'}), 403
+@profile_both_check_banned_removed
+@block_and_follow_check
+def get_profile_visit_all(id, user_profile, current_user_profile):
         
     try:
         page = request.args.get('page', default=1, type=int)
@@ -74,31 +54,9 @@ def get_profile_visit_all(id):
 
 @visit_bp.route('/<string:id>/profile-visit/<int:visit_id>', methods = ['GET'])
 @auth_required
-def get_profile_visit(id, visit_id):
-    current_user = request.current_user.user.id
-    user_profile = UserProfile.query.get(id)
-    current_user_profile = UserProfile.query.get(current_user)
-    
-    if not all([current_user_profile,user_profile]):
-        return jsonify({'error': 'Profile not found'}), 404
-    
-    if user_profile.is_deleted or current_user_profile.is_deleted:
-        return jsonify({'error': 'Profile does not exist'}), 404
-    
-    if user_profile.is_banned or current_user_profile.is_banned:
-        return jsonify({'error':'Profile unavailable'}),404
-    
-    is_blocked = db.session.query(exists().where((BlockProfile.blocker_id ==user_profile.id) & (BlockProfile.blocked_id == current_user))).scalar()
-
-    is_current_user_blocking = db.session.query(exists().where((BlockProfile.blocker_id == current_user) & (BlockProfile.blocked_id == user_profile.id))).scalar()
-
-    if is_blocked or is_current_user_blocking:
-        return jsonify({'error': 'Profile unavailable'}), 404
-    
-    if (current_user != user_profile.id) and (user_profile.is_private):
-        is_following = db.session.query(exists().where((Follow.follower_id == current_user) & (Follow.following_id == user_profile.id))).scalar()
-        if not is_following:
-            return jsonify({'error': 'Profile is private'}), 403
+@profile_both_check_banned_removed
+@block_and_follow_check
+def get_profile_visit(id, visit_id, user_profile, current_user_profile):
 
     try:
         visit = Visit.active().filter_by(user_profile_id = user_profile.id, visit_id = visit_id).first()
@@ -115,25 +73,8 @@ def get_profile_visit(id, visit_id):
 
 @visit_bp.route('/profile_visit/<int:visit_id>/edit', methods = ['PATCH'])
 @auth_required
-def edit_visit(visit_id):
-    current_user = request.current_user.user.id
-    current_user_profile = UserProfile.query.get(current_user)
-    visit = Visit.query.get(visit_id)
-
-    if current_user_profile is None:
-        return jsonify({'error': 'Profile not found'}), 404
-    
-    if current_user_profile.is_deleted:
-        return jsonify({'error': 'Profile does not exist'}), 404
-    
-    if current_user_profile.is_banned:
-        return jsonify({'error':'Profile unavailable'}),404
-    
-    if visit.user_profile_id != current_user:
-        return jsonify({'error': 'Action not permitted'}), 403
-    
-    if visit is None or visit.is_deleted or visit.is_removed:
-        return jsonify({'error': 'Visit not found'}), 404
+@profile_current_check_visit
+def edit_visit(visit_id, visit, current_user_profile):
     
     edit_limit = 3
     if visit.num_of_edits >= edit_limit:
@@ -162,27 +103,8 @@ def edit_visit(visit_id):
 
 visit_bp.route('/profile-visit/<int:visit_id>/delete', methods = ['DELETE'])
 @auth_required
-def delete_visit(visit_id):
-    current_user = request.current_user.user.id
-    current_user_profile = UserProfile.query.get(current_user)
-    visit = Visit.active().filter_by(user_profile_id = current_user, visit_id = visit_id).first()
-
-    if current_user_profile is None:
-        return jsonify({'error': 'Profile not found'}), 404
-    
-    if current_user_profile.is_deleted:
-        return jsonify({'error': 'Profile does not exist'}), 404
-    
-    if current_user_profile.is_banned:
-        return jsonify({'error':'Profile unavailable'}),404
-    
-    if visit is None or visit.is_deleted or visit.is_removed:
-        return jsonify({'error': 'Post not found'}), 404
-    
-    if visit.user_profile_id != current_user:
-        return jsonify({'error': 'Action not permitted'}), 403
-    
-
+@profile_current_check_visit
+def delete_visit(visit_id, visit, current_user_profile):
     try:
         visit.is_deleted = True
         visit.deleted_at = datetime.now(timezone.utc)
@@ -201,20 +123,9 @@ def delete_visit(visit_id):
 @visit_bp.route('admin/<string:id>/profile-visit/<int:visit_id>/remove', methods = ['DELETE'])
 @auth_required
 @admin_required
-def remove_post_admin(id,visit_id):
-    current_user = request.current_user.user.id
-    current_user_profile = UserProfile.query.get(current_user)
-    user_profile = UserProfile.query.get(id)
+@profile_both_check_banned_removed
+def remove_post_admin(id,visit_id, user_profile, current_user_profile):
     visit = Visit.query.get(visit_id)
-    
-    if current_user_profile is None or user_profile is None:
-        return jsonify({'error': 'Profile not found'}), 404
-    
-    if current_user_profile.is_deleted or user_profile.is_deleted:
-        return jsonify({'error': 'Profile does not exist'}), 404
-    
-    if current_user_profile.is_banned or user_profile.is_banned:
-        return jsonify({'error':'Profile unavailable'}),404
     
     if visit is None or visit.is_deleted or visit.is_removed:
         return jsonify({'error': 'Visit not found'}), 404
@@ -356,19 +267,9 @@ def upload_photos():
 
 @visit_bp.route('/create/under-post/<int:post_id>', methods = ['POST'])
 @auth_required
-def create_visit(post_id):
-    current_user = request.current_user.user.id
-    current_user_profile = UserProfile.query.get(current_user)
+@profile_check_current__banned_removed
+def create_visit(post_id, user_profile):
     post = Post.query.get(post_id)
-
-    if current_user_profile is None:
-        return jsonify({'error': 'Profile not found'}), 404
-    
-    if current_user_profile.is_deleted:
-        return jsonify({'error': 'Profile does not exist'}), 404
-    
-    if current_user_profile.is_banned:
-        return jsonify({'error':'Profile unavailable'}),404
     
     if post is None or post.is_deleted or post.is_removed:
         return jsonify({'error': 'Post does not exist'}), 404
@@ -411,7 +312,7 @@ def create_visit(post_id):
         
         new_visit = Visit(
             post_id = post.post_id,
-            user_profile_id = current_user_profile.id,
+            user_profile_id = user_profile.id,
             refined_location = valid_visit_data.get('refined_location', {}),
             music_track_id = valid_visit_data.get('music_track_id'),
             caption = valid_visit_data.get('caption'),
@@ -439,7 +340,7 @@ def create_visit(post_id):
             
             new_visit_media = VisitMedia(
                 visit_id = new_visit.visit_id,
-                uploaded_by = current_user_profile.id,
+                uploaded_by = user_profile.id,
                 index = position,
                 media_url = valid_media_data.get('photo_url'),
                 media_type = 'photo',
@@ -472,10 +373,10 @@ def create_visit(post_id):
             )
             db.session.add(location)
 
-        UserProfile.query.filter_by(id = current_user_profile.id).update({'visit_count': UserProfile.visit_count + 1}, synchronize_session=False)
+        UserProfile.query.filter_by(id = user_profile.id).update({'visit_count': UserProfile.visit_count + 1}, synchronize_session=False)
 
         db.session.commit()
-        current_user_profile.visit_count += 1
+        user_profile.visit_count += 1
 
         return visit_schema.dump(new_visit), 201
     except Exception as e:
