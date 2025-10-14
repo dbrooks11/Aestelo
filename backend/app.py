@@ -1,10 +1,10 @@
 from flask import Flask
 from flask_cors import CORS
 from config import Config
+from colorama import init
 from exstensions import db, ma, jwt, limiter,mg, toolbar
 from logging.config import dictConfig
 from routes.logging_wrapper import handle_errors
-from flask_sqlalchemy import get_debug_queries
 
 
 dictConfig({
@@ -34,6 +34,7 @@ def create_app():
     app.config.from_object(Config)
     register_global_error_handler(app)
     app.config['DEBUG_TB_ENABLED'] = True
+    init(autoreset=True)
     
     toolbar.init_app(app)
     db.init_app(app)
@@ -52,6 +53,7 @@ def create_app():
     
     
     # Register blueprints
+    from models import (user, post, location, music_track, rating, visit, report,followers_and_following, block_profile)
     from routes.auth import auth_bp
     from routes.profile import profile_bp
     from routes.follow import follow_bp
@@ -61,7 +63,7 @@ def create_app():
     from routes.user_info import user_info_bp
     from routes.user_settings import user_settings_bp
     from routes.music_track import music_bp
-    from models import (location, user, post, rating, visit, report,followers_and_following, block_profile, music_track)
+    
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(profile_bp)
@@ -83,14 +85,14 @@ def create_app():
             return {'status': 'healthy', 'message': 'Aestelo API is running'}
         
     
-        @app.after_request
-        def log_queries(response):
-            queries = get_debug_queries()
-            if len(queries) > 10:  
-                print(f"WARNING: {len(queries)} queries executed")
-                for query in queries:
-                    print(f"{query.duration:.4f}s: {query.statement}")
-            return response
+        # @app.after_request
+        # def log_queries(response):
+        #     queries = get_debug_queries()
+        #     if len(queries) > 10:  
+        #         print(f"WARNING: {len(queries)} queries executed")
+        #         for query in queries:
+        #             print(f"{query.duration:.4f}s: {query.statement}")
+        #     return response
         
 
         return app

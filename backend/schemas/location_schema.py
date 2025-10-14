@@ -1,5 +1,5 @@
 from marshmallow import (fields, validate)
-from app import ma
+from exstensions import ma
 from models.location import Location, BusinessLocationDetails
 
 class LocationSchema(ma.SQLAlchemyAutoSchema):
@@ -7,7 +7,7 @@ class LocationSchema(ma.SQLAlchemyAutoSchema):
         model = Location
         load_instance = True
         include_fk = True
-        exclude = ('verified_status', 'is_long_lat')
+
     latitude = fields.Float(required=True, validate=[(validate.Range(min=-90, max=90))])
     longitude = fields.Float(required=True, validate=[(validate.Range(min=-180.0, max=180.0))])
     created_on = fields.DateTime(dump_only=True)

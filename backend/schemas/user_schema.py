@@ -1,5 +1,5 @@
 # schemas/user.py
-from app import ma
+from exstensions import ma
 from models.user import UserProfile, UserInfo, UserRole, UserSettings, UserSubscription
 from marshmallow import validates, ValidationError, fields, validate,pre_load
 from datetime import datetime

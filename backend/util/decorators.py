@@ -100,7 +100,7 @@ def block_and_follow_check(func):
 
 
 def profile_current_check_post(func):
-    @wraps
+    @wraps(func)
     def decorator(*args, **kwargs):
         current_user = request.current_user.user.id
         current_user_profile = UserProfile.query.get(current_user)
@@ -129,7 +129,7 @@ def profile_current_check_post(func):
     
     
 def profile_current_check_visit(func):
-    @wraps
+    @wraps(func)
     def decorator(*args, **kwargs):
         current_user = request.current_user.user.id
         current_user_profile = UserProfile.query.get(current_user)

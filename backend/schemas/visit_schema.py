@@ -1,8 +1,7 @@
 # schemas/visit.py
-from app import ma
+from exstensions import ma
 from models.visit import Visit, VisitMedia
 from marshmallow import validates, ValidationError, fields, validate, pre_load
-
 class VisitSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Visit
@@ -23,7 +22,7 @@ class VisitSchema(ma.SQLAlchemyAutoSchema):
     # Required fields
     post_id = fields.Int(required=True)
   
-    caption = fields.Str(validate=validate.Length(max=250))
+    caption = fields.Str(validate=[validate.Length(max=250), validate.Regexp(r"^(?!.*<[^>]+>)[a-zA-Z0-9\s.,;:'\"?!()\[\]\{\}@#$%^&*_\-+=~`]+$")])
     hashtags = fields.List(
         fields.Str(validate=validate.Regexp(r'^[a-zA-Z0-9_#]+$', error="Hashtags can only contain letters, numbers, and underscores")),
         validate=validate.Length(max=20)

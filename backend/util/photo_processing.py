@@ -1,4 +1,5 @@
-from PIL import photoOps, ExifTags
+from PIL import ExifTags, ImageOps
+
 import io
 
 
@@ -69,7 +70,7 @@ def photo_processing(*photos):
 
             exif = im.getexif()
             gps = exif.get_ifd(ExifTags.IFD.GPSInfo)
-            im = photoOps.exif_transpose(im)
+            im = ImageOps.exif_transpose(im)
 
             width, height = im.size
             if width < min_width or height < min_height:

@@ -1,5 +1,6 @@
-from app import db
+from exstensions import db
 from sqlalchemy import Column, String, DateTime, Integer, BigInteger
+from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 
 class MusicTrack(db.Model):
@@ -23,6 +24,9 @@ class MusicTrack(db.Model):
     duration_formatted = Column(String(10))
     release_date = Column(String(20))   
     times_used = Column(Integer, default=0)
+
+    visit = relationship('Visit', backref='music_track', lazy=True)
+    user_profile = relationship('UserProfile', backref='music_track', lazy=True)
 
     def to_dict(self):
         return {

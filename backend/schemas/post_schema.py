@@ -1,4 +1,4 @@
-from app import ma
+from exstensions import ma
 from marshmallow import (fields, validates, 
                          ValidationError, validate, pre_load)
 from models.post import Post,PostMedia
@@ -10,6 +10,7 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
         include_fk = True
         exclude = ('is_deleted','deleted_at','num_reports','is_removed','removed_at')
 
+    user_profile_id = fields.UUID(dump_only=True)
     post_id = fields.Integer(dump_only=True)
     refined_location = fields.Dict()
     date_posted = fields.DateTime(dump_only=True, format='%b %d, %Y')
@@ -24,7 +25,7 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
 
 
     name = fields.Str(validate= [validate.Regexp(r"^[a-zA-Z\s]+$",error="Name can only contain letters")])
-    description = fields.Str(validate=[validate.Regexp(r"^(?!.*<[^>]+>)[\p{L}\p{N}\p{P}\p{Zs}\n\r\t]$")])
+    description = fields.Str(validate=[validate.Regexp(r"^(?!.*<[^>]+>)[a-zA-Z0-9\s.,;:'\"?!()\[\]\{\}@#$%^&*_\-+=~`]+$")])
 
     hashtags = fields.List(
         fields.Str(validate=validate.Regexp(r'^[a-zA-Z0-9_#]+$', error="Hashtags can only contain letters, numbers, and underscores")),

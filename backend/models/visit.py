@@ -18,11 +18,10 @@ class Visit(db.Model):
     
     post_id = Column(BigInteger, ForeignKey(f'{post_schema}.post.post_id'), nullable=False, index=True)
     user_profile_id = Column(UUID(as_uuid=True),  ForeignKey(f'{user_profile_schema}.user_profile.id'), nullable=False, index=True)
-    location_id = relationship('Location', backref='post', lazy=True)
     
     refined_location = Column(JSONB, nullable=False)
 
-    music_track_id = Column(String(50), ForeignKey(f'{music_track_schema}.music_track.music_track_id'))
+    music_track_id = Column(String(50), ForeignKey(f'{music_track_schema}.music_track.music_track_id'), index=True)
     caption = Column(String(250))
     hashtags = Column(ARRAY(String))
     date_posted = Column(DateTime, default=datetime.now(timezone.utc))
@@ -38,14 +37,13 @@ class Visit(db.Model):
     num_reports = Column(Integer, default=0)
     is_removed = Column(Boolean, default=False) #removed due to moderaters, admin, etc (does NOT mean deleted by user_profile)
 
-    music_track = relationship('musicTrack', backref='visit', lazy=True)
+    
 
     def to_dict(self):
         return {
             "visit_id": self.visit_id,
             "post_id": self.post_id,
             "user_profile_id": self.user_profile_id,
-            "location_id": self.location_id,
             'music_track_id':self.music_track_id,
             "caption": self.caption,
             "hashtags": self.hashtags,
@@ -89,14 +87,12 @@ class VisitMedia(db.Model):
         return {
             "visit_id": self.visit_id,
             "uploaded_by": self.uploaded_by,
-            "location_id": self.location_id,
             "visit_media_id": self.visit_media_id,
             "media_url": self.media_url,
             "media_type": self.media_type,
             "width": self.width,
             "height": self.height,
             "upload_date": self.upload_date,
-            "verified_status": self.verified_status,
             "is_primary": self.is_primary
         }
     

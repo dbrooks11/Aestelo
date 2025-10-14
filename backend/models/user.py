@@ -23,7 +23,7 @@ class UserProfile(db.Model):
     id = Column(UUID(as_uuid=True), primary_key=True)
     banner_theme = Column(String(30))
 
-    music_track_id = Column(String(50), ForeignKey(f'{music_track_schema}.music_track.music_track_id'))
+    music_track_id = Column(String(50), ForeignKey(f'{music_track_schema}.music_track.music_track_id'), index=True)
 
     username = Column(String(50), unique=True)
     profile_photo = Column(Text)
@@ -75,8 +75,8 @@ class UserProfile(db.Model):
     visit_media = relationship('VisitMedia', backref='user_profile', lazy=True)
     rating = relationship('Rating', backref='user_profile', lazy=True)
     report = relationship('Report', backref='user_profile', lazy=True)
-    follow = relationship('Follow', backref='user_profile', lazy='dynamic')
-    music_track = relationship('musicTrack', backref='user_profile', lazy='joined')
+    follower = relationship('Follow',primaryjoin='UserProfile.id == Follow.follower_id',backref='follower', lazy='dynamic')
+    following = relationship('Follow',primaryjoin='UserProfile.id == Follow.following_id',backref='following', lazy='dynamic')
     
     def to_dict(self):
         return {

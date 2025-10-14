@@ -45,7 +45,7 @@ class Post(db.Model):
 
     save_count = Column(Integer, default=0)
     share_count = Column(Integer, default=0)
-    trending_score = ColumnProperty() #will be used to calculate a score for trending post to keep track of which post is trending
+    trending_score = ColumnProperty((4 * share_count)+(2*save_count)+((1 * average_rating ) + (1.5 * total_num_of_ratings))) #will be used to calculate a score for trending post to keep track of which post is trending
     hashtags = Column(ARRAY(String)) #different from hastags, can put tags on post like ('graffiti', 'red', 'streetwear','dark')
 
     #* Color pallete willl be added later
@@ -121,14 +121,11 @@ class PostMedia(db.Model):
         return {
             "post_id": self.post_id,
             "uploaded_by": self.uploaded_by,
-            "location_id": self.location_id,
             "post_media_id": self.post_media_id,
             "media_url": self.media_url,
             "media_type": self.media_type,
             "width": self.width,
             "height": self.height,
-            "upload_date": self.upload_date,
-            "verified_status": self.verified_status,
             "is_primary": self.is_primary
     }
 

@@ -7,14 +7,14 @@ from exstensions import supabase
 from routes.auth_required_wrapper import auth_required
 from schemas.user_schema import user_profile_schema, ValidationError
 from schemas.music_schema import music_track_schema
-from util.music_track import search_track, select_track
+from util.music_track import search_track, set_track
 from datetime import datetime, timezone
 
 
 music_bp = Blueprint('music',__name__, url_prefix='/music')
 
 
-@music_bp.route('/search', route = ['GET'])
+@music_bp.route('/search', methods = ['GET'])
 @auth_required
 def search_song_visit():
 
@@ -89,15 +89,15 @@ def add_track_visit(visit_id):
         return jsonify({'error':'Failed to add track'}), 500
         
 
-@music_bp.route('/track/<string:music_track_id>', methods = ['GET'])
-@auth_required
-def get_track(music_track_id):
-    music_track = MusicTrack.get(music_track_id)
+# @music_bp.route('/track/<string:music_track_id>', methods = ['GET'])
+# @auth_required
+# def get_track(music_track_id):
+#     music_track = MusicTrack.get(music_track_id)
 
-    if not music_track:
-        return jsonify({'error':'Track does not exist'}), 404
+#     if not music_track:
+#         return jsonify({'error':'Track does not exist'}), 404
     
-    data = request.get_json()
+#     data = request.get_json()
 
     
 

@@ -42,16 +42,13 @@ class Location(db.Model):
     
     def to_dict(self):
         return {
-            "post_id": self.post_id,
-            "visit_id": self.visit_id, 
+            "post_id": self.post_media_id,
+            "visit_id": self.visit_media_id, 
             "location_id": self.location_id,
-            "is_visit": self.is_visit,
             "longitude": self.longitude,
             "latitude": self.latitude,  # fixed typo: lagitude → latitude
-            "is_long_lat": self.is_long_lat,
             "altitude": self.altitude,
             "created_on": self.created_on,
-            "verified_status": self.verified_status
     }
 
     def save(self):

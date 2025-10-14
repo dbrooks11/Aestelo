@@ -16,7 +16,9 @@ def get_r2_client():
 
 
 
-def upload_to_r2(file_obj, user_id, folder='posts', bucket = current_app.config['R2_BUCKET_NAME']):
+def upload_to_r2(file_obj, user_id, folder='posts', bucket = None):
+
+    bucket = current_app.config['R2_BUCKET_NAME']
     
     try:
         timestamp = datetime.now(timezone.utc).strftime('%d%m%Y_%H%M%S')
