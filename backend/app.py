@@ -1,32 +1,32 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 from config import Config
 from colorama import init
 from exstensions import db, ma, jwt, limiter,mg, toolbar
-from logging.config import dictConfig
+# from logging.config import dictConfig
 from routes.logging_wrapper import handle_errors
 
 
-dictConfig({
-    "version": 1,
-    "formatters": {
-        "default": {
-            "format": "[%(asctime)s] %(levelname)s in %(module)s - %(message)s",
-            "datefmt": "%B %d, %Y | %I:%M:%S %p",
-        }
-    },
-    "handlers": {
-        "file": {
-            "class": "logging.FileHandler",
-            "filename": "app_logs.log",
-            "formatter": "default",
-        },
-    },
-    "root": {
-        "level": "DEBUG",  
-        "handlers": ["file"],  
-    },
-})
+# dictConfig({
+#     "version": 1,
+#     "formatters": {
+#         "default": {
+#             "format": "[%(asctime)s] %(levelname)s in %(module)s - %(message)s",
+#             "datefmt": "%B %d, %Y | %I:%M:%S %p",
+#         }
+#     },
+#     "handlers": {
+#         "file": {
+#             "class": "logging.FileHandler",
+#             "filename": "app_logs.log",
+#             "formatter": "default",
+#         },
+#     },
+#     "root": {
+#         "level": "DEBUG",  
+#         "handlers": ["file"],  
+#     },
+# })
 
 
 def create_app():
@@ -35,6 +35,7 @@ def create_app():
     register_global_error_handler(app)
     app.config['DEBUG_TB_ENABLED'] = True
     init(autoreset=True)
+    app.json.sort_keys = False
     
     toolbar.init_app(app)
     db.init_app(app)
@@ -77,23 +78,34 @@ def create_app():
 
     # Create tables
     with app.app_context():
-        db.drop_all()   #todo: TEMPORARY for testing
+        # db.drop_all()   #todo: TEMPORARY for testing
         db.create_all()
+
+
+        @jwt.expired_token_loader
+        def expired_token_callback(jwt_header, jwt_data):
+            return jsonify({
+                "error": "expired",
+                "message": "Session has expired"
+            }), 401
+
+        @jwt.invalid_token_loader
+        def invalid_token_callback(error):
+            return jsonify({
+                "error": "invalid",
+                "message": "Verification failed"
+            }), 401
+
+        @jwt.unauthorized_loader
+        def missing_token_callback(error):
+            return jsonify({
+                "error": "authorization required",
+                "message": "Request does not contain a valid token"
+            }), 401
 
         @app.route('/')
         def health_check():
-            return {'status': 'healthy', 'message': 'Aestelo API is running'}
-        
-    
-        # @app.after_request
-        # def log_queries(response):
-        #     queries = get_debug_queries()
-        #     if len(queries) > 10:  
-        #         print(f"WARNING: {len(queries)} queries executed")
-        #         for query in queries:
-        #             print(f"{query.duration:.4f}s: {query.statement}")
-        #     return response
-        
+            return {'status': 'healthy', 'message': 'Aestelo API is running'}   
 
         return app
     

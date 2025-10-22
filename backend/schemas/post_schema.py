@@ -33,7 +33,7 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
     )
 
     @validates('hashtags')
-    def validate_hashtags(self, value):
+    def validate_hashtags(self, value, **kwargs):
         if value:
             for hashtag in value:
                 if len(hashtag) > 100:
@@ -45,7 +45,7 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
         return value
 
     @validates('name')
-    def validate_first_name(self, value):
+    def validate_first_name(self, value, **kwargs):
         if not value or value.strip() == '':
             return value
         
@@ -82,14 +82,14 @@ class PostMediaSchema(ma.SQLAlchemyAutoSchema):
     height = fields.Int(validate=validate.Range(min=600, max=1350))
 
     @validates('media_type')
-    def validate_media_type(self, value):
+    def validate_media_type(self, value, **kwargs):
         allowed = ['photo']
         if value not in allowed:
             raise ValidationError(f"Media type must be: {allowed}")
         return value
     
     @validates('thumb_media_type')
-    def validate_thumb_type(self, value):
+    def validate_thumb_type(self, value, **kwargs):
         allowed = ['photo']
         if value not in allowed:
             raise ValidationError(f"Thumbnail Media type must be: {allowed}")

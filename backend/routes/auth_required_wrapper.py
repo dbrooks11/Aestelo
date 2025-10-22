@@ -1,27 +1,13 @@
 from functools import wraps
-from exstensions import supabase
+from flask_jwt_extended import get_jwt_identity
 from models.user import UserRole
 from flask import request, jsonify
 
 
-
-def auth_required(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        token = request.headers.get('Authorization', '').replace('Bearer ', '')
-        try:
-            user = supabase.auth.get_user(token)
-            request.current_user = user
-            return func(*args, **kwargs)
-        except Exception:
-            return jsonify({'error': 'Unauthorized'}), 401
-            
-    return wrapper
-
 def admin_required(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        current_user = request.current_user.user.id
+        current_user = get_jwt_identity()
         user_role = UserRole.query.get(current_user)
         try:
             if not user_role:

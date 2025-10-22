@@ -16,7 +16,7 @@ mg = Migrate()
 toolbar = DebugToolbarExtension()
 limiter = Limiter(
     get_remote_address,
-    default_limits=["100 per day", "30 per hour"],
+    default_limits=["10000 per day", "10000 per hour"],
     storage_uri="memory://", #This URI is only meant for testing/development and 
                             #should be replaced with an appropriate storage of your choice before moving to production.
     )

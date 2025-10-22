@@ -26,5 +26,5 @@ def handle_errors(func):
 
         # Catch-all for anything else
         except Exception as e:
-            logging.error(f"Unhandled Error: {e}\n{traceback.format_exc()}")
+            logging.error(f"Error: {e}\n{traceback.format_exc()}")
     return wrapper

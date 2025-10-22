@@ -1,9 +1,10 @@
 from app import db
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required
 from models.user import UserProfile
 from models.post import Post, PostMedia
 from models.location import Location
-from routes.auth_required_wrapper import auth_required, admin_required
+from routes.auth_required_wrapper import admin_required
 from datetime import datetime, timezone
 from schemas.post_schema import post_schema,post_media_schema, ValidationError, partial_schema
 from schemas.location_schema import location_schema
@@ -18,7 +19,7 @@ post_bp = Blueprint('post', __name__, url_prefix='/post')
 
 
 @post_bp.route('/<string:id>/profile-post/all', methods = ['GET'])
-@auth_required
+@jwt_required()
 @profile_both_check_banned_removed
 @block_and_follow_check
 def get_profile_post_all(id, user_profile, current_user_profile):
@@ -48,7 +49,7 @@ def get_profile_post_all(id, user_profile, current_user_profile):
 
 
 @post_bp.route('/<string:id>/profile-post/<int:post_id>', methods = ['GET'])
-@auth_required
+@jwt_required()
 @profile_both_check_banned_removed
 @block_and_follow_check
 def get_profile_post(id, post_id, user_profile, current_user_profile):
@@ -67,7 +68,7 @@ def get_profile_post(id, post_id, user_profile, current_user_profile):
     
 
 @post_bp.route('/profile-post/<int:post_id>/edit', methods = ['PATCH'])
-@auth_required
+@jwt_required()
 @profile_current_check_post
 def edit_post(post_id, current_user_profile, post):
     
@@ -96,7 +97,7 @@ def edit_post(post_id, current_user_profile, post):
 
 
 @post_bp.route('/profile-post/<int:post_id>/delete', methods = ['DELETE'])
-@auth_required
+@jwt_required()
 @profile_current_check_post
 def delete_post(post_id, current_user_profile, post):
 
@@ -115,7 +116,7 @@ def delete_post(post_id, current_user_profile, post):
     
 
 @post_bp.route('admin/<string:id>/profile-post/<int:post_id>/remove', methods = ['DELETE'])
-@auth_required
+@jwt_required()
 @admin_required
 @profile_current_check_post
 def remove_post_admin(id, post_id, current_user_profile, post):
@@ -137,7 +138,7 @@ def remove_post_admin(id, post_id, current_user_profile, post):
     
 
 @post_bp.route('/upload-photos', methods=['POST'])
-@auth_required
+@jwt_required()
 def upload_photos():
     current_user = request.current_user.user.id
 
@@ -256,7 +257,7 @@ def upload_photos():
     
 
 @post_bp.route('/create', methods = ['POST'])
-@auth_required
+@jwt_required()
 def create_post():
     current_user = request.current_user.user.id
     current_user_profile = UserProfile.query.get(current_user)

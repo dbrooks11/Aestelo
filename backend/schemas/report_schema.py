@@ -47,7 +47,7 @@ class ReportSchema(ma.SQLAlchemyAutoSchema):
         validate=validate.Length(max=500))
     
     @validates('reported_id')
-    def validate_reported_id(self, value):
+    def validate_reported_id(self, value, **kwargs):
         if not value or value.strip() == '':
             raise ValidationError("reported_id cannot be empty")
         return value

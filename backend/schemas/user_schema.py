@@ -1,12 +1,13 @@
 # schemas/user.py
-from exstensions import ma
+from exstensions import ma, db
 from models.user import UserProfile, UserInfo, UserRole, UserSettings, UserSubscription
-from marshmallow import validates, ValidationError, fields, validate,pre_load
+from marshmallow import validates, ValidationError, fields, validate
+from sqlalchemy import exists
 from datetime import datetime
+    
 class UserProfileSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserProfile
-        load_instance = True
         include_fk = True
         exclude = ('is_banned', 'banned_at', 'banned_by', 'banned_reason','num_reports_made','num_reports', 'is_deleted','deleted_at')  # Hide ban info from users
 
@@ -18,7 +19,7 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
     following_count = fields.Int(dump_only=True)
     
     username = fields.Str(required=True,validate=[validate.Length(min=1, max=50),validate.Regexp(r'^[a-zA-Z0-9_]+$', error='Username can only contain letters, numbers, and underscores')])
-    bio = fields.Str(validate=[validate.Length(max=150), validate.Regexp(r"^(?!.*<[^>]+>)")])
+    bio = fields.Str(validate=[validate.Length(max=150)])
     profile_photo= fields.Str(validate=validate.URL())
     instagram= fields.Str(validate=validate.URL())
     facebook= fields.Str(validate=validate.URL())
@@ -28,37 +29,34 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
     is_prem_account = fields.Bool(dump_only=True)
     music_track_id = fields.Str()
 
-
-    @pre_load
-    def strip_strings(self, data, **kwargs):
-        for key, value in data.items():
-            if isinstance(value, str):
-                data[key] = value.strip()
-        return data
         
     @validates('username')
-    def validate_username(self, value):
-        existing_user = UserProfile.query.filter_by(username=value).first()
-        current_user = self.context.get('instance')
+    def validate_username(self, value, **kwargs):
+        existing_user = db.session.query(exists().where(UserProfile.username == value)).scalar()
         
-        # If username exists AND it's not the current user's username
-        if existing_user and (not current_user or existing_user.id != current_user.id):
+        if existing_user:
             raise ValidationError('Username already exists')
         
+        return value.strip()
+    
+    @validates('bio')
+    def validate_bio(self,value, **kwargs):
+        if '\x00' in value:
+            raise ValidationError('Bio contains invalid characters')
         return value
+        
 
 
 class UserInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserInfo
-        load_instance = True
         include_fk = True
     
     # System-managed
     user_profile_id = fields.UUID(dump_only=True)
     age = fields.Int()
-    first_name = fields.Str(validate=[validate.Length(max=30), validate.Regexp(r"^[a-zA-Z\s'-]+$",error="Name can only contain letters, spaces, apostrophe, and hyphen")])
-    last_name = fields.Str(validate=[validate.Length(max=30), validate.Regexp(r"^[a-zA-Z\s'-]+$",error="Name can only contain letters, spaces, apostrophe, and hyphen")])
+    first_name = fields.Str(validate=[validate.Length(max=30), validate.Regexp(r"^[A-Z][a-zA-Z '.-]*[A-Za-z][^-' ]+$",error="Name can only contain letters, spaces, apostrophe, and hyphen")])
+    last_name = fields.Str(validate=[validate.Length(max=30), validate.Regexp(r"^[A-Z][a-zA-Z '.-]*[A-Za-z][^-' ]+$",error="Name can only contain letters, spaces, apostrophe, and hyphen")])
     email = fields.Email(required=False, validate=validate.Length(max=150))
     date_of_birth = fields.DateTime()
     gender = fields.Str(
@@ -71,7 +69,7 @@ class UserInfoSchema(ma.SQLAlchemyAutoSchema):
     height_in = fields.Int(validate=[(validate.Range(min=0, max=11))])
 
     @validates('first_name')
-    def validate_first_name(self, value):
+    def validate_first_name(self, value, **kwargs):
         if not value or value.strip() == '':
             return value
         
@@ -92,7 +90,7 @@ class UserInfoSchema(ma.SQLAlchemyAutoSchema):
         return value.strip()
     
     @validates('last_name')
-    def validate_last_name(self, value):
+    def validate_last_name(self, value, **kwargs):
         if not value or value.strip() == '':
             return value
         
@@ -112,25 +110,17 @@ class UserInfoSchema(ma.SQLAlchemyAutoSchema):
         return value.strip()
 
     @validates('date_of_birth')
-    def validate_dob(self, value):
+    def validate_dob(self, value, **kwargs):
         if value and value > datetime.now():
             raise ValidationError("Date of birth cannot be in the future")
         min_age_date = datetime.now().replace(year=datetime.now().year - 13)
         if value and value > min_age_date:
             raise ValidationError("You must be at least 13 years old")
         return value
-    
-    @pre_load
-    def strip_strings(self, data, **kwargs):
-        for key, value in data.items():
-            if isinstance(value, str):
-                data[key] = value.strip()
-        return data
    
 class UserRoleSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserRole
-        load_instance = True
         include_fk = True
 
     user_profile_id = fields.UUID(dump_only=True)
@@ -144,18 +134,16 @@ class UserRoleSchema(ma.SQLAlchemyAutoSchema):
 class UserSettingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserSettings
-        load_instance = True
         include_fk = True
     
     user_profile_id = fields.UUID(dump_only=True)
-    langauge_preference = fields.Str(validate=validate.OneOf(['english', 'spanish']))
+    language_preference = fields.Str(validate=validate.OneOf(['English', 'Spanish']))
     
 
 
 class UserSubscriptionSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserSubscription
-        load_instance = True
         include_fk = True
  
     user_profile_id = fields.UUID(dump_only=True)
@@ -172,7 +160,10 @@ class UserSubscriptionSchema(ma.SQLAlchemyAutoSchema):
 
 
 user_profile_schema = UserProfileSchema()
+username_only = UserProfileSchema(only = ('username', 'profile_photo'))
+profile_can_edit = UserProfileSchema(only = ('username','bio','banner_theme','profile_photo', 'instagram','facebook','tiktok','twitter_x','music_track_id'))
+profile_viewing = UserProfileSchema(only = ('username','bio','banner_theme','profile_photo','post_count','visit_count','follower_count','following_count', 'instagram','facebook','tiktok','twitter_x','music_track_id'))
 partial_schema = UserProfileSchema(only = ('id','banner_theme','username','profile_photo'))
-user_info_schema = UserInfoSchema(only = ('age','first_name','last_name','email','date_of_birth','gender','height_ft','height_in'))
+user_info_schema = UserInfoSchema(only = ('age','first_name','last_name','date_of_birth','gender','height_ft','height_in'))
 user_settings_schema = UserSettingsSchema()
 user_subscription_schema = UserSubscriptionSchema()

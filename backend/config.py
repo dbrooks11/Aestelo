@@ -14,13 +14,13 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_size': 15,
+        'pool_recycle': 3600,
         'pool_pre_ping': True,
     }
     
     # JWT
-    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)  # 1 hour
-    JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=14)  # 14 days
+    JWT_SECRET_KEY = os.environ.get('SUPABASE_JWT_SECRET')
     JWT_ALGORITHM = 'HS256'
     
     # CORS

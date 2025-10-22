@@ -1,15 +1,16 @@
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required
 from app import db
 from models.user import UserSettings
 from schemas.user_schema import user_settings_schema, ValidationError
-from routes.auth_required_wrapper import auth_required
+
 from util.decorators import profile_check_current__banned_removed
 
 user_settings_bp = Blueprint('user_settings', __name__, url_prefix='/profile/settings')
 
-
+#done route testing
 @user_settings_bp.route('/me', methods = ['GET'])
-@auth_required
+@jwt_required()
 @profile_check_current__banned_removed
 def get_settings(user_profile):
     try:
@@ -24,9 +25,9 @@ def get_settings(user_profile):
     except Exception:
         return jsonify({'error': 'Failed to fetch settings'}), 500
     
-
+#done route testing
 @user_settings_bp.route('/me/edit', methods = ['PATCH'])
-@auth_required
+@jwt_required()
 @profile_check_current__banned_removed
 def edit_settings(user_profile):
     
@@ -36,13 +37,16 @@ def edit_settings(user_profile):
         data = request.get_json()
 
         try:
-            user_settings_schema.load(data, instance=user_settings, partial = True, session=db.session)
+            valid = user_settings_schema.load(data, partial = True)
         except ValidationError as error:
             return jsonify({"error": error.messages}), 400
 
+        for key, value in valid.items():
+            setattr(user_settings,key, value)
+
         db.session.commit()
         return jsonify({'message':'Settings updated successfully',
-                        'updated_settings': user_settings_schema.dump(user_settings)}), 200
+                        'updated_settings': valid}), 200
     except Exception as e:
         db.session.rollback()
         error = getattr(e,'messages', str(e))

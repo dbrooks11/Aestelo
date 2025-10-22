@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required
 from datetime import datetime, timezone
 from app import db
 from models.user import UserProfile
@@ -7,7 +8,7 @@ from models.post import Post
 from models.location import Location
 from schemas.visit_schema import visit_schema, visit_media_schema,partial_schema,ValidationError
 from schemas.location_schema import location_schema
-from routes.auth_required_wrapper import auth_required, admin_required
+from routes.auth_required_wrapper import admin_required
 from util.photo_processing import photo_processing, get_decimal_coordinates
 from util.validation import photo_validation
 from util.storage import upload_to_r2
@@ -19,7 +20,7 @@ from util.decorators import (profile_both_check_banned_removed, block_and_follow
 visit_bp = Blueprint('visit', __name__, url_prefix='/visit')
 
 @visit_bp.route('/<string:id>/profile-visits', methods = ['GET'])
-@auth_required
+@jwt_required()
 @profile_both_check_banned_removed
 @block_and_follow_check
 def get_profile_visit_all(id, user_profile, current_user_profile):
@@ -50,7 +51,7 @@ def get_profile_visit_all(id, user_profile, current_user_profile):
 
 
 @visit_bp.route('/<string:id>/profile-visit/<int:visit_id>', methods = ['GET'])
-@auth_required
+@jwt_required()
 @profile_both_check_banned_removed
 @block_and_follow_check
 def get_profile_visit(id, visit_id, user_profile, current_user_profile):
@@ -69,7 +70,7 @@ def get_profile_visit(id, visit_id, user_profile, current_user_profile):
 
 
 @visit_bp.route('/profile_visit/<int:visit_id>/edit', methods = ['PATCH'])
-@auth_required
+@jwt_required()
 @profile_current_check_visit
 def edit_visit(visit_id, visit, current_user_profile):
     
@@ -99,7 +100,7 @@ def edit_visit(visit_id, visit, current_user_profile):
 
 
 visit_bp.route('/profile-visit/<int:visit_id>/delete', methods = ['DELETE'])
-@auth_required
+@jwt_required()
 @profile_current_check_visit
 def delete_visit(visit_id, visit, current_user_profile):
     try:
@@ -118,7 +119,7 @@ def delete_visit(visit_id, visit, current_user_profile):
     
 
 @visit_bp.route('admin/<string:id>/profile-visit/<int:visit_id>/remove', methods = ['DELETE'])
-@auth_required
+@jwt_required()
 @admin_required
 @profile_both_check_banned_removed
 def remove_post_admin(id,visit_id, user_profile, current_user_profile):
@@ -143,7 +144,7 @@ def remove_post_admin(id,visit_id, user_profile, current_user_profile):
 
 
 visit_bp.route('/upload-photos', methods = ['POST'])
-@auth_required
+@jwt_required()
 def upload_photos():
     current_user = request.current_user.user.id
 
@@ -263,7 +264,7 @@ def upload_photos():
 
 
 @visit_bp.route('/create/under-post/<int:post_id>', methods = ['POST'])
-@auth_required
+@jwt_required()
 @profile_check_current__banned_removed
 def create_visit(post_id, user_profile):
     post = Post.query.get(post_id)

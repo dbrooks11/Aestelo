@@ -2,18 +2,19 @@ from app import db
 from models.user import UserProfile
 from sqlalchemy import exists
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required
 from models.followers_and_following import Follow
-from routes.auth_required_wrapper import auth_required
-from util.decorators import profile_both_check_banned_removed
+from util.decorators import profile_both_check_banned_removed, block_and_follow_check
 from schemas.user_schema import partial_schema
 
 follow_bp = Blueprint('follow', __name__, url_prefix='/profile/follow')
 
-
+#done latency route test
 #FOLLOW A USER
 @follow_bp.route('/<string:id>/follow-profile', methods = ['POST'])
-@auth_required
+@jwt_required()
 @profile_both_check_banned_removed
+@block_and_follow_check
 def follow_profile(id, user_profile, current_user_profile):
 
     if user_profile.id == current_user_profile.id:
@@ -28,13 +29,12 @@ def follow_profile(id, user_profile, current_user_profile):
         new_follow = Follow(follower_id = current_user_profile.id, following_id = user_profile.id)
         
         UserProfile.query.filter_by(id=current_user_profile.id).update({'following_count': UserProfile.following_count + 1}, synchronize_session=False)
+        
         UserProfile.query.filter_by(id=user_profile.id).update({'follower_count': UserProfile.follower_count + 1}, synchronize_session=False)
+
 
         db.session.add(new_follow)
         db.session.commit()
-
-        current_user_profile.following_count += 1
-        user_profile.follower_count += 1
         return jsonify({'message': 'Profile successfully followed',
                         'profile_followed': {
                             'id': user_profile.id,
@@ -47,10 +47,10 @@ def follow_profile(id, user_profile, current_user_profile):
         db.session.rollback()
         return jsonify({'error': 'Failed to follow profile'}), 500
 
-
+#done latency route test
 #UNFOLLOW A USER
 @follow_bp.route('/<string:id>/unfollow-profile', methods = ['DELETE'])
-@auth_required
+@jwt_required()
 @profile_both_check_banned_removed
 def unfollow_profile(id, user_profile, current_user_profile):
 
@@ -61,17 +61,14 @@ def unfollow_profile(id, user_profile, current_user_profile):
         deleted = Follow.query.filter_by(follower_id = current_user_profile.id,
                                          following_id = user_profile.id).delete(synchronize_session=False)
         
-        UserProfile.query.filter_by(id = current_user_profile.id).update({'following_count': UserProfile.following_count - 1}, synchronize_session=False)
-        UserProfile.query.filter_by(id = user_profile.id).update({'follower_count': UserProfile.follower_count - 1}, synchronize_session=False)
-        
         if deleted == 0:
             db.session.rollback() 
             return jsonify({'error': 'You are not following this profile'}), 409
         
+        UserProfile.query.filter_by(id = current_user_profile.id).update({'following_count': UserProfile.following_count - 1}, synchronize_session=False)
+        UserProfile.query.filter_by(id = user_profile.id).update({'follower_count': UserProfile.follower_count - 1}, synchronize_session=False)
+        
         db.session.commit()
-
-        current_user_profile.following_count -= 1
-        user_profile.follower_count -= 1
         return jsonify({'message': 'Profile successfully unfollowed',
                         'profile_unfollowed': {
                             'id': user_profile.id,
@@ -85,10 +82,10 @@ def unfollow_profile(id, user_profile, current_user_profile):
         return jsonify({'error': 'Could not unfollow profile'}), 500
 
 
-
+#done latency test
 #GET ALL FOLLOWERS OF A USER (PAGINATED)
 @follow_bp.route('/<string:id>/followers', methods = ['GET'])
-@auth_required
+@jwt_required()
 @profile_both_check_banned_removed
 def get_followers(id, user_profile, current_user_profile):
     
@@ -108,7 +105,6 @@ def get_followers(id, user_profile, current_user_profile):
             per_page = per_page
         )
 
-
         followers_list = partial_schema.dump(paginated_followers.items, many = True)
 
         return jsonify({
@@ -124,7 +120,7 @@ def get_followers(id, user_profile, current_user_profile):
 
 #GET LIST OF PEOPLE THE USER IS FOLLOWING(PAGINATED)
 @follow_bp.route('/<string:id>/following', methods = ['GET'])
-@auth_required
+@jwt_required()
 @profile_both_check_banned_removed
 def get_following(id, user_profile, current_user_profile):
     

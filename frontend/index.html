@@ -73,7 +73,7 @@
                 const result = await response.json()
                 
                 if (response.ok) {
-                    resultDiv.innerHTML = `<p class="success">Success! ${result.message}</p>`
+                    resultDiv.innerHTML = `<p class="success">Success! ${result.message}. Token ${token}</p>`
                 } else {
                     resultDiv.innerHTML = `<p class="error">Backend error: ${result.error}</p>`
                 }
@@ -99,7 +99,7 @@
                     return
                 }
                 
-                resultDiv.innerHTML = `<p class="success">Signed in! Token: ${data.session.access_token.substring(0, 20)}...</p>`
+                resultDiv.innerHTML = `<p class="success">Signed in! Token: ${data.session.access_token}...</p>`
                 
             } catch (err) {
                 resultDiv.innerHTML = `<p class="error">Error: ${err.message}</p>`

@@ -1,10 +1,10 @@
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required
 from app import db
 from models.user import UserProfile, UserInfo, UserSettings, UserRole
 from models.visit import Visit
 from models.music_track import MusicTrack
 from exstensions import supabase
-from routes.auth_required_wrapper import auth_required
 from schemas.user_schema import user_profile_schema, ValidationError
 from schemas.music_schema import music_track_schema
 from util.music_track import search_track, set_track
@@ -15,7 +15,7 @@ music_bp = Blueprint('music',__name__, url_prefix='/music')
 
 
 @music_bp.route('/search', methods = ['GET'])
-@auth_required
+@jwt_required()
 def search_song_visit():
 
     try:
@@ -37,7 +37,7 @@ def search_song_visit():
        
     
 @music_bp.route('/visit/<int:visit_id>/add-track', methods = ['POST'])
-@auth_required
+@jwt_required()
 def add_track_visit(visit_id):
     current_user = request.current_user.user.id
     visit = Visit.query.filter_by(user_profile_id = current_user, visit_id=visit_id).first()

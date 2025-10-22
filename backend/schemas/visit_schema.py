@@ -30,7 +30,7 @@ class VisitSchema(ma.SQLAlchemyAutoSchema):
     
     
     @validates('hashtags')
-    def validate_hashtags(self, value):
+    def validate_hashtags(self, value, **kwargs):
         if value:
             for hashtag in value:
                 if len(hashtag) > 100:
@@ -42,7 +42,7 @@ class VisitSchema(ma.SQLAlchemyAutoSchema):
         return value
     
     @validates('num_of_edits')
-    def validate_edit_count(self, value):
+    def validate_edit_count(self, value, **kwargs):
         if value > 3:
             raise ValidationError("Maximum 3 edits allowed per visit")
         return value
@@ -73,14 +73,14 @@ class VisitMediaSchema(ma.SQLAlchemyAutoSchema):
     height = fields.Int(validate=validate.Range(min=500, max=1350), dump_only=True)
     
     @validates('media_type')
-    def validate_media_type(self, value):
+    def validate_media_type(self, value, **kwargs):
         allowed = ['photo']
         if value not in allowed:
             raise ValidationError(f"Media type must be one of: {allowed}")
         return value
 
     @validates('verified_status')
-    def validate_status(self, value):
+    def validate_status(self, value, **kwargs):
         allowed = ['pending', 'verified', 'rejected']
         if value not in allowed:
             raise ValidationError(f"Status must be one of: {allowed}")

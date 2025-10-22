@@ -2,17 +2,17 @@ from app import db
 from models.user import UserProfile
 from sqlalchemy import exists
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required
 from models.block_profile import BlockProfile
 from models.followers_and_following import Follow
-from routes.auth_required_wrapper import auth_required
 from schemas.user_schema import partial_schema
 from util.decorators import profile_active_not_permitted, profile_check_current__banned_removed
 
 block_bp = Blueprint('block', __name__, url_prefix='/block')
 
-
+#done latency route test
 @block_bp.route('/<string:id>/block-profile', methods = ['POST'])
-@auth_required
+@jwt_required()
 @profile_active_not_permitted
 def block_profile(id, user_profile, current_user):
 
@@ -23,37 +23,36 @@ def block_profile(id, user_profile, current_user):
     try:
         new_blocked = BlockProfile(
             blocker_id = current_user,
-            blocked_id = user_profile.id
-        )
-        db.session.add(new_blocked)
+            blocked_id = user_profile.id)
+        
         
         is_following_user = Follow.query.filter_by(follower_id = current_user,
                                               following_id = user_profile.id).first()
         is_user_follow_them = Follow.query.filter_by(follower_id = user_profile.id,
                                                      following_id = current_user).first()
-        
-        current_user_profile = UserProfile.query.get(current_user)
 
+        current_user = UserProfile.query.get(current_user)
         if is_following_user:
             db.session.delete(is_following_user)
-            current_user_profile.following_count -= 1
+            current_user.following_count -= 1
             user_profile.follower_count -= 1
         
         if is_user_follow_them:
             db.session.delete(is_user_follow_them)
-            current_user_profile.follower_count -= 1
+            current_user.follower_count -= 1
             user_profile.following_count -= 1
             
-        
+        db.session.add(new_blocked)
         db.session.commit()
-        return jsonify({'message':'Profile blocked successfully'}), 201
+        return jsonify({'message':'Profile blocked successfully',
+                        'profile_blocked': partial_schema.dump(user_profile)}), 201
     except Exception:
         db.session.rollback()
-        return jsonify({'error':'Failed to block profile'}), 500
+        return jsonify({'error': 'Failed to block profile'}), 409 
 
-       
+#done latency route test       
 @block_bp.route('/<string:id>/unblock-profile', methods = ['DELETE'])
-@auth_required
+@jwt_required()
 @profile_active_not_permitted
 def unblock_profile(id, user_profile, current_user):
     is_blocked = BlockProfile.query.filter_by(blocker_id = current_user,
@@ -69,18 +68,18 @@ def unblock_profile(id, user_profile, current_user):
         db.session.rollback()
         return jsonify({'error':'Failed to unblock profile'}), 500
     
-
+#done latency route test
 @block_bp.route('/me/show-blocked-profiles', methods = ['GET'])
-@auth_required
+@jwt_required()
 @profile_check_current__banned_removed
-def get_blocked_profiles(current_user, user_profile):
+def get_blocked_profiles(user_profile):
     try:
         page = request.args.get('page', default=1, type=int)
         per_page = request.args.get('per_page', default=50, type=int)
         if per_page > 50:
             per_page = 50
 
-        block_query = db.session.query(UserProfile).join(BlockProfile, BlockProfile.blocked_id == UserProfile.id).filter(BlockProfile.blocker_id == user_profile)
+        block_query = db.session.query(UserProfile).join(BlockProfile, BlockProfile.blocked_id == UserProfile.id).filter(BlockProfile.blocker_id == user_profile.id)
 
         paginated_blocks = block_query.paginate(
             page = page,

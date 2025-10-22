@@ -1,17 +1,19 @@
 from functools import wraps
 from flask import jsonify, request
+from flask_jwt_extended import get_jwt_identity
 from models.user import UserProfile
 from models.post import Post
 from models.visit import Visit
 from models.followers_and_following import Follow
 from models.block_profile import BlockProfile
-from sqlalchemy import exists
+from sqlalchemy import exists, and_, or_
 from exstensions import db
+import time
 
 def profile_active_not_permitted(func):
     @wraps(func)
     def decorator(*args, **kwargs):
-        current_user = request.current_user.user.id
+        current_user = request.current_user['id']
         profile_id = kwargs.get('id')
         user_profile = UserProfile.query.get(profile_id)
 
@@ -29,6 +31,7 @@ def profile_active_not_permitted(func):
         
         kwargs['user_profile'] = user_profile
         kwargs['current_user'] = current_user
+        
         return func(*args, **kwargs)
     return decorator
 
@@ -36,10 +39,14 @@ def profile_active_not_permitted(func):
 def profile_check_current__banned_removed(func):
     @wraps(func)
     def decorator(*args, **kwargs):
-        current_user = request.current_user.user.id
+        
+        current_user = get_jwt_identity()
         profile_id = kwargs.get('id', None)
+        
+        auth_start = time.time()
         user_profile = UserProfile.query.get(profile_id if profile_id else current_user)
-
+        print(f'Query time: {(time.time() - auth_start) * 1000}')
+        
         if user_profile is None:
             return jsonify({'error': 'Profile not found'}), 404
         
@@ -57,7 +64,8 @@ def profile_check_current__banned_removed(func):
 def profile_both_check_banned_removed(func):
     @wraps(func)
     def decorator(*args, **kwargs):
-        current_user = request.current_user.user.id
+        auth_start = time.time()
+        current_user = get_jwt_identity()
         profile_id = kwargs.get('id')
         user_profile = UserProfile.query.get(profile_id)
         current_user_profile = UserProfile.query.get(current_user)
@@ -73,6 +81,7 @@ def profile_both_check_banned_removed(func):
         
         kwargs['user_profile'] = user_profile
         kwargs['current_user_profile'] = current_user_profile
+        print(f'Query time: {(time.time() - auth_start) * 1000}')
         return func(*args, **kwargs)
     
     return decorator
@@ -84,25 +93,23 @@ def block_and_follow_check(func):
         user_profile = kwargs.get('user_profile')
         current_user_profile = kwargs.get('current_user_profile')
 
-        is_blocked = db.session.query(exists().where((BlockProfile.blocker_id ==user_profile.id) & (BlockProfile.blocked_id == current_user_profile.id))).scalar()
-
-        is_current_user_blocking = db.session.query(exists().where((BlockProfile.blocker_id == current_user_profile.id) & (BlockProfile.blocked_id == user_profile.id))).scalar()
+        is_blocked = db.session.query(exists().where(or_(and_(BlockProfile.blocker_id ==user_profile.id, BlockProfile.blocked_id == current_user_profile.id), and_(BlockProfile.blocker_id == current_user_profile.id, BlockProfile.blocked_id == user_profile.id)))).scalar()
         
-        if is_blocked or is_current_user_blocking:
+        if is_blocked:
             return jsonify({'error': 'Profile unavailable'}), 404
         
         if (current_user_profile.id != user_profile.id) and (user_profile.is_private):
             is_following = db.session.query(exists().where((Follow.follower_id == current_user_profile.id) & (Follow.following_id == user_profile.id))).scalar()
             if not is_following:
                 return jsonify({'error': 'Profile is private'}), 403
-    
+        return func(*args, **kwargs)
     return decorator
 
 
 def profile_current_check_post(func):
     @wraps(func)
     def decorator(*args, **kwargs):
-        current_user = request.current_user.user.id
+        current_user = get_jwt_identity()
         current_user_profile = UserProfile.query.get(current_user)
         post_id = kwargs.get('post_id')
         post = Post.query.get(post_id)
@@ -131,7 +138,7 @@ def profile_current_check_post(func):
 def profile_current_check_visit(func):
     @wraps(func)
     def decorator(*args, **kwargs):
-        current_user = request.current_user.user.id
+        current_user = get_jwt_identity()
         current_user_profile = UserProfile.query.get(current_user)
         visit_id = kwargs.get('visit_id')
         visit = Visit.query.get(visit_id)
