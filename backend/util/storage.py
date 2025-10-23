@@ -30,7 +30,7 @@ def upload_to_r2(file_obj, user_id, folder='posts', bucket = None):
         file_obj.seek(0)
         
         # Upload
-        s3_client.upload_to_r2(
+        s3_client.upload_fileobj(
             file_obj,
             bucket,
             unique_filename,
@@ -39,7 +39,7 @@ def upload_to_r2(file_obj, user_id, folder='posts', bucket = None):
             }
         )
        
-        public_url = f"{current_app.config['R2_PUBLIC_URL']}/{unique_filename}"
+        public_url = f"{current_app.config['R2_PUBLIC_URL']}/{bucket}/{unique_filename}"
         
         return public_url
         

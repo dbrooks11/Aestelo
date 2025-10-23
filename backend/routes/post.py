@@ -1,6 +1,6 @@
 from app import db
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.user import UserProfile
 from models.post import Post, PostMedia
 from models.location import Location
@@ -17,7 +17,7 @@ from util.decorators import (profile_both_check_banned_removed, block_and_follow
 
 post_bp = Blueprint('post', __name__, url_prefix='/post')
 
-
+#done latency route test
 @post_bp.route('/<string:id>/profile-post/all', methods = ['GET'])
 @jwt_required()
 @profile_both_check_banned_removed
@@ -28,7 +28,7 @@ def get_profile_post_all(id, user_profile, current_user_profile):
         page = request.args.get('page', default=1, type=int)
         per_page = request.args.get('per_page', default=20, type=int)
 
-        post_query = Post.query.filter_by(user_profile_id = user_profile.id)
+        post_query = Post.active().filter_by(user_profile_id = user_profile.id)
 
         paginated_post = post_query.paginate(
             page = page,
@@ -47,7 +47,7 @@ def get_profile_post_all(id, user_profile, current_user_profile):
     except Exception:
         return jsonify({'error': 'Failed to fetch post'}), 500
 
-
+#done latency route test
 @post_bp.route('/<string:id>/profile-post/<int:post_id>', methods = ['GET'])
 @jwt_required()
 @profile_both_check_banned_removed
@@ -66,7 +66,7 @@ def get_profile_post(id, post_id, user_profile, current_user_profile):
     except Exception:
         return jsonify({'error':'Failed to fetch post'}), 500
     
-
+#done latency test route
 @post_bp.route('/profile-post/<int:post_id>/edit', methods = ['PATCH'])
 @jwt_required()
 @profile_current_check_post
@@ -80,22 +80,23 @@ def edit_post(post_id, current_user_profile, post):
         data = request.get_json()
 
         try:
-            partial_schema.load(data, instance=post, partial = True, session=db.session)
+            valid = partial_schema.load(data, partial = True)
         except ValidationError as error:
             return jsonify({"error": error.messages}), 400
         
-        Post.query.filter_by(user_profile_id = current_user_profile.id, post_id = post_id).update({'num_of_edits': Post.num_of_edits + 1}, synchronize_session=False)
+        for key,value in valid.items():
+            setattr(post,key,value)
 
-        db.session.commit()
         post.num_of_edits += 1
+        db.session.commit()
         return jsonify({'message':'Post updated successfully',
-                        'updated_post': post_schema.dump(post)}), 200
+                        'updated_post_fields': valid}), 200
     except Exception as e:
         db.session.rollback()
         error = getattr(e,'messages', str(e))
         return jsonify({'Failed to edit post': error}), 500
 
-
+#done latency test route
 @post_bp.route('/profile-post/<int:post_id>/delete', methods = ['DELETE'])
 @jwt_required()
 @profile_current_check_post
@@ -103,12 +104,10 @@ def delete_post(post_id, current_user_profile, post):
 
     try:
         post.is_deleted = True
-        post.deleted_at = datetime.now(timezone.utc).strftime('%b %d, %Y')
+        post.deleted_at = datetime.now(timezone.utc)
 
-        UserProfile.query.filter_by(id = current_user_profile.id).update({'post_count': UserProfile.post_count - 1}, synchronize_session=False)
-        
-        db.session.commit()
         current_user_profile.post_count -= 1
+        db.session.commit()
         return jsonify({'message':'Post deleted successfully'}), 200
     except Exception:
         db.session.rollback()
@@ -136,13 +135,13 @@ def remove_post_admin(id, post_id, current_user_profile, post):
         return jsonify({'error':'Failed to remove Post'}), 500
     
     
-
+#done latency test route
 @post_bp.route('/upload-photos', methods=['POST'])
 @jwt_required()
-def upload_photos():
-    current_user = request.current_user.user.id
+def upload_photos():  
+    current_user = get_jwt_identity()
 
-    files = request.files.getlist('photos')
+    files = request.files.getlist('photo')
     
     if not files or len(files) == 0:
         return jsonify({'error': 'No photos provided'}), 400
@@ -153,11 +152,11 @@ def upload_photos():
     
     photo_bytes = [pht.read() for pht in files]
 
-    validated_bytes, errors = photo_validation(*photo_bytes)
-    if errors:
-        return jsonify({'error': 'photos rejected', 'details': errors}), 400
+    # validated_bytes, errors = photo_validation(*photo_bytes)
+    # if errors:
+    #     return jsonify({'error': 'photos rejected', 'details': errors}), 400
     
-    result, status = photo_processing(*validated_bytes)
+    result, status = photo_processing(*photo_bytes)
     if status != 200:
         return jsonify(result), status
 
@@ -170,13 +169,10 @@ def upload_photos():
     try:
         for pht_data in result['photos']:
             pht_count +=1
-            
-            gps = pht_data['gps']
-            if not gps:
-                lat, long, alt = None, None, None
-            else:
-                lat, long, alt = get_decimal_coordinates(gps)
+            lat, long, alt = None, None, None
 
+            gps = pht_data['gps']
+            lat, long, alt = get_decimal_coordinates(gps)
             if not lat or not long:
                 failed_photo_url = upload_to_r2(pht_data['photo'], current_user, folder='failed_photos')
                 failed_photos.append({
@@ -221,7 +217,7 @@ def upload_photos():
         for pht_data_r2 in proccessed_photos:
             photo_url = upload_to_r2(pht_data_r2['photo_bytes'], current_user, folder='posts')
             thumb_url = upload_to_r2(pht_data_r2['thumbnail_bytes'], current_user, folder = 'post_thumbnails')
-
+            
             uploaded_photos.append({
                 'photo_url': photo_url,
                 'thumbnail_url': thumb_url,
@@ -230,7 +226,6 @@ def upload_photos():
                 'latitude': pht_data_r2['latitude'],
                 'longitude':pht_data_r2['longitude'],
                 'altitude': pht_data_r2['altitude'],
-                'gps': pht_data_r2['gps'],
                 'order': pht_data_r2['order']
             })
                 
@@ -252,14 +247,17 @@ def upload_photos():
                 'photo_count': len(uploaded_photos)
             }), 200
     
-    except Exception:
-        return jsonify({'error':'Failed to upload photos'}), 500
+    except Exception as e:
+        error = getattr(e,'messages', str(e))
+        return jsonify({'error': error}), 500
+        # return jsonify({'error':'Failed to upload photos'}), 500
     
 
+#done latency test route
 @post_bp.route('/create', methods = ['POST'])
 @jwt_required()
 def create_post():
-    current_user = request.current_user.user.id
+    current_user = get_jwt_identity()
     current_user_profile = UserProfile.query.get(current_user)
 
     if current_user_profile is None:
@@ -272,6 +270,9 @@ def create_post():
         return jsonify({'error':'Profile unavailable'}),404
 
     data = request.get_json()
+    if not isinstance(data, dict):
+    # This handles None (no data) or a string (malformed data)
+        return jsonify({'error': 'Invalid or malformed JSON data provided'}), 400
 
     if data.get('photos') is None or data.get('location') is None or data.get('photo_count') is None:
         return jsonify({'error':'Invalid data provided'}), 400
@@ -307,7 +308,8 @@ def create_post():
             description= valid_post_data.get('description'),
             total_num_of_photos= valid_post_data.get('total_num_of_photos'),
             accessibility= valid_post_data.get('accessibility'),
-            hashtags=valid_post_data.get('hashtags')
+            hashtags=valid_post_data.get('hashtags'),
+            date_posted = datetime.now(timezone.utc)
         )
         db.session.add(new_post)
         db.session.flush()
@@ -317,8 +319,8 @@ def create_post():
             media_data_to_load = {
                 "thumbnail_url": pht_data.get('thumbnail_url'),
                 "thumb_media_type": 'photo',
-                "media_url": pht_data.get('photo_url'),
-                "media_type": 'photo',
+                "photo_url": pht_data.get('photo_url'),
+                "photo_type": 'photo',
                 "width": pht_data.get('width'),
                 "height": pht_data.get('height')
             }
@@ -331,9 +333,9 @@ def create_post():
                 post_id=new_post.post_id,
                 uploaded_by=current_user_profile.id,
                 index = position,
-                media_url=valid_media_data.get('photo_url'),     
+                photo_url=valid_media_data.get('photo_url'),     
                 thumbnail_url=valid_media_data.get('thumbnail_url'),
-                media_type='photo',
+                photo_type='photo',
                 thumb_media_type='photo',
                 width=valid_media_data.get('width'),
                 height=valid_media_data.get('height'),
@@ -359,11 +361,9 @@ def create_post():
                 altitude=valid_location_data.get('altitude'),
             )
             db.session.add(location)
-
-        UserProfile.query.filter_by(id = current_user_profile.id).update({'post_count': UserProfile.post_count + 1}, synchronize_session=False)
-        
-        db.session.commit()
         current_user_profile.post_count += 1
+        db.session.commit()
+        
         return post_schema.dump(new_post), 201
     except Exception as e:
         db.session.rollback()

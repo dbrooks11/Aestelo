@@ -1,11 +1,12 @@
 import requests
 import json
 import os 
+import io
 
 def photo_validation(*photos):
 
   params = {
-    'models': os.environ.get('WORKFLOW_ID'),
+    'workflow': os.environ.get('WORKFLOW_ID'),
     'api_user': os.environ.get('SIGHTENGINE_API_USER'),
     'api_secret': os.environ.get('SIGHTENGINE_API_SECRET')
   }
@@ -17,7 +18,6 @@ def photo_validation(*photos):
     pht_count = 0
     for photo in photos:
       pht_count += 1
-
       files = {'media': ('photo.jpg', photo, 'photo/jpeg')}
       r = requests.post('https://api.sightengine.com/1.0/check-workflow.json', files=files, data=params)
 
@@ -38,6 +38,5 @@ def photo_validation(*photos):
 
   except Exception as e:
     errors.append(f"photo {pht_count}: Error - {str(e)}")
-
 
   return valid_photos, errors

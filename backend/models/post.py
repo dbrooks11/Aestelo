@@ -107,8 +107,8 @@ class PostMedia(db.Model):
     thumbnail_url = Column(Text)
     thumb_media_type = Column(String(15), default = 'photo')
 
-    media_url = Column(Text)
-    media_type = Column(String(15), default = 'photo') #stores what type of media is uploaed, photo, video, 360 video, etc
+    photo_url = Column(Text)
+    photo_type = Column(String(15), default = 'photo') #stores what type of media is uploaed, photo, video, 360 video, etc
     width =  Column(Integer)
     height = Column(Integer)
 
@@ -122,8 +122,8 @@ class PostMedia(db.Model):
             "post_id": self.post_id,
             "uploaded_by": self.uploaded_by,
             "post_media_id": self.post_media_id,
-            "media_url": self.media_url,
-            "media_type": self.media_type,
+            "photo_url": self.photo_url,
+            "photo_type": self.photo_type,
             "width": self.width,
             "height": self.height,
             "is_primary": self.is_primary

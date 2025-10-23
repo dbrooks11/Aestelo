@@ -1,4 +1,4 @@
-from PIL import ExifTags, ImageOps
+from PIL import ExifTags, ImageOps, Image
 
 import io
 
@@ -12,13 +12,13 @@ def get_decimal_coordinates(gps_info):
         if ref in ['S','W']:
             decimal = -decimal
 
-        return f'{decimal:.6f}'
+        return float(f'{decimal:.6f}')
     
     def get_altitude(alt_meters, alt_ref):
         if alt_ref == 1:
             alt_meters = -alt_meters
 
-        return alt_meters
+        return float(alt_meters)
     
 
     photo_lat = gps_info.get(2)
@@ -30,6 +30,7 @@ def get_decimal_coordinates(gps_info):
     photo_alt = gps_info.get(6)
     photo_alt_ref = gps_info.get(5)
 
+    latitude, longitude, altitude = None, None, None
     
     if photo_lat and photo_long:
         latitude = dms_to_decimal(photo_lat, photo_lat_ref)
@@ -40,15 +41,15 @@ def get_decimal_coordinates(gps_info):
             return latitude, longitude, altitude
         return latitude, longitude, None
 
-    return None, None, None
+    return latitude,longitude,altitude
 
 
 
 
 def photo_processing(*photos):
-    min_width = 600
+    min_width = 500
     max_width = 1080 
-    min_height = 600 
+    min_height = 500 
     max_height = 1350
 
     if not photos:
@@ -61,7 +62,7 @@ def photo_processing(*photos):
     for photo in photos:
         pht_count += 1
         try:
-            im = photo.open(io.BytesIO(photo))
+            im = Image.open(io.BytesIO(photo))
             
             # Check format
             if im.format not in ['JPEG', 'PNG', 'HEIF']:
@@ -78,12 +79,12 @@ def photo_processing(*photos):
                 continue
 
             if width > max_width or height > max_height:
-                im.thumbnail((max_width, max_height), photo.Resampling.LANCZOS)
+                im.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
 
             # Check color mode
             if im.mode not in ['RGB']:
                 if im.mode == 'RGBA':
-                    background = photo.new('RGB', im.size, (255,255,255))
+                    background = Image.new('RGB', im.size, (255,255,255))
                     background.paste(im, mask=im.split()[3])
                     im = background
                 else:
@@ -92,14 +93,15 @@ def photo_processing(*photos):
 
 
             thumbnail = im.copy()
-            thumbnail.thumbnail((600,600), photo.Resampling.LANCZOS)
+            thumbnail.thumbnail((500,500), Image.Resampling.LANCZOS)
 
             output = io.BytesIO()
+            im = im.resize((1000, 1350), Image.Resampling.LANCZOS)
             im.save(output, format='JPEG', quality = 85, optimize = True, exif = b'')
             output.seek(0)
 
             thumbnail_output = io.BytesIO()
-            thumbnail.save(thumbnail_output, format='JPEG', quality = 90, optimize = True, exif = b'')
+            thumbnail.save(thumbnail_output, format='JPEG', quality = 80, optimize = True, exif = b'')
             thumbnail_output.seek(0)
             
             processed_photos.append({
@@ -111,7 +113,7 @@ def photo_processing(*photos):
                 'width': im.size[0],
                 'height': im.size[1],
                 'is_primary': False,
-                'media_type': 'photo',
+                'photo_type': 'photo' if im.format in ['JPEG', 'PNG', 'HEIF'] else None
             })
         
         except OSError:

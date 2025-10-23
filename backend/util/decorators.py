@@ -65,10 +65,17 @@ def profile_both_check_banned_removed(func):
     @wraps(func)
     def decorator(*args, **kwargs):
         auth_start = time.time()
+
         current_user = get_jwt_identity()
         profile_id = kwargs.get('id')
-        user_profile = UserProfile.query.get(profile_id)
-        current_user_profile = UserProfile.query.get(current_user)
+
+        profiles = UserProfile.query.filter(
+            UserProfile.id.in_([current_user, profile_id])
+        ).all()
+
+        profile_map = {str(profile.id): profile for profile in profiles}
+        current_user_profile = profile_map.get(current_user)
+        user_profile = profile_map.get(profile_id)
 
         if user_profile is None or current_user_profile is None:
             return jsonify({'error': 'Profile not found'}), 404
@@ -81,6 +88,7 @@ def profile_both_check_banned_removed(func):
         
         kwargs['user_profile'] = user_profile
         kwargs['current_user_profile'] = current_user_profile
+
         print(f'Query time: {(time.time() - auth_start) * 1000}')
         return func(*args, **kwargs)
     
@@ -109,6 +117,8 @@ def block_and_follow_check(func):
 def profile_current_check_post(func):
     @wraps(func)
     def decorator(*args, **kwargs):
+        auth_start = time.time()
+
         current_user = get_jwt_identity()
         current_user_profile = UserProfile.query.get(current_user)
         post_id = kwargs.get('post_id')
@@ -123,7 +133,7 @@ def profile_current_check_post(func):
         if current_user_profile.is_banned:
             return jsonify({'error':'Profile unavailable'}),404
         
-        if post.user_profile_id != current_user:
+        if str(post.user_profile_id) != current_user:
             return jsonify({'error': 'Action not permitted'}), 403
         
         if post is None or post.is_deleted or post.is_removed:
@@ -131,6 +141,8 @@ def profile_current_check_post(func):
 
         kwargs['current_user_profile'] = current_user_profile
         kwargs['post'] = post
+        
+        print(f'Query time: {(time.time() - auth_start) * 1000}')
         return func(*args, **kwargs)
     return decorator
     

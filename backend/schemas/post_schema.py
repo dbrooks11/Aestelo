@@ -6,14 +6,13 @@ from models.post import Post,PostMedia
 class PostSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Post
-        load_instance = True
         include_fk = True
         exclude = ('is_deleted','deleted_at','num_reports','is_removed','removed_at')
 
     user_profile_id = fields.UUID(dump_only=True)
     post_id = fields.Integer(dump_only=True)
     refined_location = fields.Dict()
-    date_posted = fields.DateTime(dump_only=True, format='%b %d, %Y')
+    date_posted = fields.DateTime(dump_only=True)
     total_num_of_photos = fields.Integer(validate=[(validate.Range(min=0,max=5))])
     average_rating = fields.Float(validate=[(validate.Range(min=0.0, max=5.0))], dump_only=True)
     total_num_of_ratings = fields.Integer(validate=[(validate.Range(min=0))], dump_only=True)
@@ -68,7 +67,6 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
 class PostMediaSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = PostMedia
-        load_instance = True
         include_fk = True
         
     post_media_id = fields.Int(dump_only=True)
@@ -76,16 +74,16 @@ class PostMediaSchema(ma.SQLAlchemyAutoSchema):
     thumbnail_url = fields.URL()
     thumb_media_type = fields.Str()
     index = fields.Int(validate=validate.Range(min=1))
-    media_url = fields.URL()
-    media_type = fields.Str()
-    width = fields.Int(validate=validate.Range(min=600, max=1080))
-    height = fields.Int(validate=validate.Range(min=600, max=1350))
+    photo_url = fields.URL()
+    photo_type = fields.Str()
+    width = fields.Int(validate=validate.Range(min=500, max=1080))
+    height = fields.Int(validate=validate.Range(min=500, max=1350))
 
-    @validates('media_type')
-    def validate_media_type(self, value, **kwargs):
+    @validates('photo_type')
+    def validate_photo_type(self, value, **kwargs):
         allowed = ['photo']
         if value not in allowed:
-            raise ValidationError(f"Media type must be: {allowed}")
+            raise ValidationError(f"Photo type must be: {allowed}")
         return value
     
     @validates('thumb_media_type')
