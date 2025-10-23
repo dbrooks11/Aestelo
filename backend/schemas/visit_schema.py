@@ -5,24 +5,23 @@ from marshmallow import validates, ValidationError, fields, validate, pre_load
 class VisitSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Visit
-        load_instance = True
         include_fk = True
         exclude = ('is_deleted', 'deleted_at', 'is_removed', 'num_reports', 'deleted_by')  
    
     visit_id = fields.Int(dump_only=True)
-    refined_location = fields.Dict(dump_only=True)
+    refined_location = fields.Dict(required=True)
     date_posted = fields.DateTime(dump_only=True)
     like_count = fields.Int(dump_only=True)
     share_count = fields.Int(dump_only=True)
     num_of_edits = fields.Int(validate=validate.Range(max=3, error='Visit can only be edited 3 times'))
     user_profile_id = fields.UUID(dump_only=True) 
-    music_track_id = fields.Str()
+    music_track_id = fields.Str(allow_none=True)
     total_num_of_photos = fields.Int()
     
     # Required fields
     post_id = fields.Int(required=True)
   
-    caption = fields.Str(validate=[validate.Length(max=250), validate.Regexp(r"^(?!.*<[^>]+>)[a-zA-Z0-9\s.,;:'\"?!()\[\]\{\}@#$%^&*_\-+=~`]+$")])
+    caption = fields.Str(validate=[validate.Length(max=200)])
     hashtags = fields.List(
         fields.Str(validate=validate.Regexp(r'^[a-zA-Z0-9_#]+$', error="Hashtags can only contain letters, numbers, and underscores")),
         validate=validate.Length(max=20)
@@ -47,6 +46,12 @@ class VisitSchema(ma.SQLAlchemyAutoSchema):
             raise ValidationError("Maximum 3 edits allowed per visit")
         return value
     
+    @validates('caption')
+    def validate_bio(self,value, **kwargs):
+        if '\x00' in value:
+            raise ValidationError('Caption contains invalid characters')
+        return value
+    
     @pre_load
     def strip_strings(self, data, **kwargs):
         for key, value in data.items():
@@ -57,33 +62,26 @@ class VisitSchema(ma.SQLAlchemyAutoSchema):
 class VisitMediaSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = VisitMedia
-        load_instance = True
         include_fk = True
  
     visit_media_id = fields.Int(dump_only=True)
-    upload_date = fields.DateTime(dump_only=True, format='%b %d, %Y')
+    upload_date = fields.DateTime(dump_only=True)
     uploaded_by = fields.UUID() 
     visit_id = fields.Int(required=True, dump_only=True)
 
-    media_url = fields.Str( validate=validate.URL())  
+    thumbnail_url = fields.Str(validate=validate.URL())
+    photo_url = fields.Str( validate=validate.URL())  
     total_num_of_photos = fields.Int()
-    index = fields.Int(dump_only=True, validate=validate.Range(min=1))
+    index = fields.Int( validate=validate.Range(min=1))
     location_id = fields.Int()
-    width = fields.Int(validate=validate.Range(min=500, max=1080), dump_only=True)
-    height = fields.Int(validate=validate.Range(min=500, max=1350), dump_only=True)
+    width = fields.Int(validate=validate.Range(min=500, max=1080))
+    height = fields.Int(validate=validate.Range(min=500, max=1350))
     
-    @validates('media_type')
+    @validates('photo_type')
     def validate_media_type(self, value, **kwargs):
         allowed = ['photo']
         if value not in allowed:
-            raise ValidationError(f"Media type must be one of: {allowed}")
-        return value
-
-    @validates('verified_status')
-    def validate_status(self, value, **kwargs):
-        allowed = ['pending', 'verified', 'rejected']
-        if value not in allowed:
-            raise ValidationError(f"Status must be one of: {allowed}")
+            raise ValidationError(f"Photo type must be one of: {allowed}")
         return value
     
     @pre_load

@@ -106,7 +106,8 @@ def delete_post(post_id, current_user_profile, post):
         post.is_deleted = True
         post.deleted_at = datetime.now(timezone.utc)
 
-        current_user_profile.post_count -= 1
+        UserProfile.query.filter_by(id = current_user_profile.id).update({'post_count': UserProfile.post_count - 1}, synchronize_session=False)
+
         db.session.commit()
         return jsonify({'message':'Post deleted successfully'}), 200
     except Exception:
@@ -117,18 +118,19 @@ def delete_post(post_id, current_user_profile, post):
 @post_bp.route('admin/<string:id>/profile-post/<int:post_id>/remove', methods = ['DELETE'])
 @jwt_required()
 @admin_required
-@profile_current_check_post
-def remove_post_admin(id, post_id, current_user_profile, post):
-    user_profile = UserProfile.query.get(id)
-    
+@profile_both_check_banned_removed
+def remove_post_admin(id, post_id, user_profile,current_user_profile):
+    post = Post.query.get(post_id)
+
+    if post is None or post.is_deleted or post.is_removed:
+        return jsonify({'error': 'Post not found'}), 404
     try:
         post.is_deleted = True
         post.deleted_at = datetime.now(timezone.utc).strftime('%b %d, %Y')
 
-        UserProfile.query.filter_by(id = user_profile.id).update({'post_count': UserProfile.post_count - 1}, synchronize_session=False)
+        UserProfile.query.filter_by(id = id).update({'post_count': UserProfile.post_count - 1}, synchronize_session=False)
         
         db.session.commit()
-        user_profile.post_count -= 1
         return jsonify({'message':'Post removed by admin successfully'}), 200
     except Exception:
         db.session.rollback()
@@ -272,7 +274,7 @@ def create_post():
     data = request.get_json()
     if not isinstance(data, dict):
     # This handles None (no data) or a string (malformed data)
-        return jsonify({'error': 'Invalid or malformed JSON data provided'}), 400
+        return jsonify({'error': 'Invalid or malformed data provided'}), 400
 
     if data.get('photos') is None or data.get('location') is None or data.get('photo_count') is None:
         return jsonify({'error':'Invalid data provided'}), 400
@@ -308,7 +310,7 @@ def create_post():
             description= valid_post_data.get('description'),
             total_num_of_photos= valid_post_data.get('total_num_of_photos'),
             accessibility= valid_post_data.get('accessibility'),
-            hashtags=valid_post_data.get('hashtags'),
+            hashtags=valid_post_data.get('hashtags',[]),
             date_posted = datetime.now(timezone.utc)
         )
         db.session.add(new_post)
@@ -361,9 +363,11 @@ def create_post():
                 altitude=valid_location_data.get('altitude'),
             )
             db.session.add(location)
-        current_user_profile.post_count += 1
-        db.session.commit()
+
+
+        UserProfile.query.filter_by(id = current_user_profile.id).update({'post_count': UserProfile.post_count + 1}, synchronize_session=False)
         
+        db.session.commit()
         return post_schema.dump(new_post), 201
     except Exception as e:
         db.session.rollback()

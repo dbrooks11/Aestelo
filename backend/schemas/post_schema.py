@@ -14,6 +14,7 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
     refined_location = fields.Dict()
     date_posted = fields.DateTime(dump_only=True)
     total_num_of_photos = fields.Integer(validate=[(validate.Range(min=0,max=5))])
+    total_visits = fields.Integer(dump_only = True)
     average_rating = fields.Float(validate=[(validate.Range(min=0.0, max=5.0))], dump_only=True)
     total_num_of_ratings = fields.Integer(validate=[(validate.Range(min=0))], dump_only=True)
     last_rated_at = fields.DateTime(dump_only=True)
@@ -24,8 +25,7 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
 
 
     name = fields.Str(validate= [validate.Regexp(r"^[a-zA-Z\s]+$",error="Name can only contain letters")])
-    description = fields.Str(validate=[validate.Regexp(r"^(?!.*<[^>]+>)[a-zA-Z0-9\s.,;:'\"?!()\[\]\{\}@#$%^&*_\-+=~`]+$")])
-
+    description = fields.Str(validate=[validate.Length(max = 200)])
     hashtags = fields.List(
         fields.Str(validate=validate.Regexp(r'^[a-zA-Z0-9_#]+$', error="Hashtags can only contain letters, numbers, and underscores")),
         validate=validate.Length(max=20)
@@ -55,6 +55,12 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
             raise ValidationError("Name cannot start or end with apostrophe or hyphen")
         
         return value.strip()
+    
+    @validates('description')
+    def validate_bio(self,value, **kwargs):
+        if '\x00' in value:
+            raise ValidationError('Description contains invalid characters')
+        return value
 
     @pre_load
     def strip_strings(self, data, **kwargs):

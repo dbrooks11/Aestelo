@@ -93,15 +93,14 @@ def photo_processing(*photos):
 
 
             thumbnail = im.copy()
-            thumbnail.thumbnail((500,500), Image.Resampling.LANCZOS)
+            thumbnail.thumbnail((550,550), Image.Resampling.LANCZOS)
 
             output = io.BytesIO()
-            im = im.resize((1000, 1350), Image.Resampling.LANCZOS)
-            im.save(output, format='JPEG', quality = 85, optimize = True, exif = b'')
+            im.save(output, format='JPEG', quality = 90, exif = b'')
             output.seek(0)
 
             thumbnail_output = io.BytesIO()
-            thumbnail.save(thumbnail_output, format='JPEG', quality = 80, optimize = True, exif = b'')
+            thumbnail.save(thumbnail_output, format='JPEG', quality = 85, exif = b'')
             thumbnail_output.seek(0)
             
             processed_photos.append({

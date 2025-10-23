@@ -21,8 +21,8 @@ class Visit(db.Model):
     
     refined_location = Column(JSONB, nullable=False)
 
-    music_track_id = Column(String(50), ForeignKey(f'{music_track_schema}.music_track.music_track_id'), index=True)
-    caption = Column(String(250))
+    music_track_id = Column(String(50), ForeignKey(f'{music_track_schema}.music_track.music_track_id'), index=True, nullable=True)
+    caption = Column(String(200))
     hashtags = Column(ARRAY(String))
     date_posted = Column(DateTime, default=datetime.now(timezone.utc))
     like_count = Column(BigInteger, default=0)
@@ -36,8 +36,8 @@ class Visit(db.Model):
     deleted_by = Column(UUID(as_uuid=True))
     num_reports = Column(Integer, default=0)
     is_removed = Column(Boolean, default=False) #removed due to moderaters, admin, etc (does NOT mean deleted by user_profile)
-
-    
+    removed_at = Column(DateTime)
+    removed_by = Column(UUID)
 
     def to_dict(self):
         return {
@@ -74,8 +74,10 @@ class VisitMedia(db.Model):
 
     visit_media_id =Column(BigInteger, primary_key=True)
     index = Column(Integer)
-    media_url = Column(Text)
-    media_type = Column(String(15), default = 'photo') #stores what type of media is uploaed, photo, video, 360 video, etc
+    thumbnail_url = Column(Text)
+    thumb_media_type = Column(String(15), default = 'photo')
+    photo_url = Column(Text)
+    photo_type = Column(String(15), default = 'photo') #stores what type of media is uploaed, photo, video, 360 video, etc
     width =  Column(Integer)
     height = Column(Integer)
     upload_date = Column(DateTime, default=datetime.now(timezone.utc))
@@ -88,8 +90,8 @@ class VisitMedia(db.Model):
             "visit_id": self.visit_id,
             "uploaded_by": self.uploaded_by,
             "visit_media_id": self.visit_media_id,
-            "media_url": self.media_url,
-            "media_type": self.media_type,
+            "media_url": self.photo_url,
+            "media_type": self.photo_type,
             "width": self.width,
             "height": self.height,
             "upload_date": self.upload_date,

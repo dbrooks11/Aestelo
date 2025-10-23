@@ -164,7 +164,7 @@ def profile_current_check_visit(func):
         if current_user_profile.is_banned:
             return jsonify({'error':'Profile unavailable'}),404
         
-        if visit.user_profile_id != current_user:
+        if str(visit.user_profile_id) != current_user:
             return jsonify({'error': 'Action not permitted'}), 403
         
         if visit is None or visit.is_deleted or visit.is_removed:
