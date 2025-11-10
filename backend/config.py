@@ -1,7 +1,12 @@
 import os
-from datetime import timedelta
-import boto3
+from dotenv import load_dotenv
 from botocore.client import Config
+
+load_dotenv('env_backend/.env.backend_cloudflare')
+load_dotenv('env_backend/.env.backend_supabase')
+load_dotenv('env_backend/.env.backend_sightengine')
+load_dotenv('env_backend/.env.backend_sendgrid')
+load_dotenv('env_backend/.env.development')
 
 class Config:
     # Flask
@@ -35,12 +40,9 @@ class Config:
     R2_PUBLIC_URL = os.environ.get('R2_PUBLIC_URL')
 
     #SIGHTENGINE
+    SIGHTENGINE_WORKFLOW_ID = os.environ.get('SIGHTENGINE_WORKFLOW_ID')
     SIGHTENGINE_API_USER = os.environ.get('SIGHTENGINE_API_USER')
     SIGHTENGINE_API_SECRET =os.environ.get('SIGHTENGINE_API_SECRET')
-
-    #SPOTIFY
-    SPOTIFY_CLIENT_ID = os.environ.get('SPOTIFY_CLIENT_ID')
-    SPOTIFY_CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET')
 
 class DevelopmentConfig(Config):
     DEBUG = True

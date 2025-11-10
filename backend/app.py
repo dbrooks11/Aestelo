@@ -2,7 +2,9 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from config import Config
 from colorama import init
+import models
 from exstensions import db, ma, jwt, limiter,mg, toolbar
+from routes import register_blueprints
 # from logging.config import dictConfig
 from routes.logging_wrapper import handle_errors
 
@@ -54,34 +56,14 @@ def create_app():
     
     
     # Register blueprints
-    from models import (user, post, location, music_track, rating, visit, report,followers_and_following, block_profile)
-    from routes.auth import auth_bp
-    from routes.profile import profile_bp
-    from routes.follow import follow_bp
-    from routes.block import block_bp
-    from routes.post import post_bp
-    from routes.visit import visit_bp
-    from routes.user_info import user_info_bp
-    from routes.user_settings import user_settings_bp
-    from routes.music_track import music_bp
-    
-
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(profile_bp)
-    app.register_blueprint(follow_bp)
-    app.register_blueprint(block_bp)
-    app.register_blueprint(post_bp)
-    app.register_blueprint(visit_bp)
-    app.register_blueprint(user_info_bp)
-    app.register_blueprint(user_settings_bp)
-    app.register_blueprint(music_bp)
+    register_blueprints(app)
 
     # Create tables
     with app.app_context():
         # db.drop_all()   #todo: TEMPORARY for testing
         db.create_all()
 
-
+        #jwt hanlders
         @jwt.expired_token_loader
         def expired_token_callback(jwt_header, jwt_data):
             return jsonify({

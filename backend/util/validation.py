@@ -1,14 +1,13 @@
 import requests
 import json
-import os 
-import io
+from flask import current_app
 
 def photo_validation(*photos):
 
   params = {
-    'workflow': os.environ.get('WORKFLOW_ID'),
-    'api_user': os.environ.get('SIGHTENGINE_API_USER'),
-    'api_secret': os.environ.get('SIGHTENGINE_API_SECRET')
+    'workflow': current_app.config['SIGHTENGINE_WORKFLOW_ID'],
+    'api_user': current_app.config['SIGHTENGINE_API_USER'],
+    'api_secret': current_app.config['SIGHTENGINE_API_SECRET']
   }
 
   valid_photos =[]

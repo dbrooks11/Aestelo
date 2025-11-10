@@ -7,7 +7,17 @@ env/
 .env
 .env.local
 .env.production
+.env.frontend_supabase
+.env.backend
 env
+/env
+env/
+env_frontend
+/env_frontend
+env_frontend/
+env_backend
+/env_backend
+env_backend/
 
 # Python
 __pycache__/
@@ -50,3 +60,6 @@ app_logs.log
 test/
 test
 /test
+
+
+secrepts.py
