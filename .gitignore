@@ -52,7 +52,7 @@ docker-compose.yml
 .gitignore
 gitignore
 
-config.js
+config.ts
 frontend/config.js
 .log
 app_logs.log
@@ -60,6 +60,7 @@ app_logs.log
 test/
 test
 /test
+
 
 saving_frontend
 secrepts.py
