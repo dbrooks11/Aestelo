@@ -1,4 +1,5 @@
 from . import (
+    auth,
     user, 
     post, 
     location, 

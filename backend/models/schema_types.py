@@ -1,4 +1,6 @@
 
+#AUTH
+auth_user_schema = "private"
 
 #*USER
 user_profile_schema = 'public'

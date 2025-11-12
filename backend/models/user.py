@@ -20,12 +20,12 @@ class UserProfile(db.Model):
     __tablename__ = "user_profile"
     __table_args__ = {'schema': user_profile_schema} 
     
-    id = Column(UUID(as_uuid=True), primary_key=True)
+    id = Column(UUID(as_uuid=True), ForeignKey(f'{auth_user_schema}.auth_user.id'), primary_key=True)
     banner_theme = Column(String(30))
 
     music_track_id = Column(String(50), ForeignKey(f'{music_track_schema}.music_track.music_track_id'), index=True)
 
-    username = Column(String(50), unique=True)
+    username = Column(String, ForeignKey(f'{auth_user_schema}.auth_user.username'))
     profile_photo = Column(Text)
     bio = Column(String(250))
 
@@ -78,9 +78,10 @@ class UserProfile(db.Model):
     follower = relationship('Follow',primaryjoin='UserProfile.id == Follow.follower_id',backref='follower', lazy='dynamic')
     following = relationship('Follow',primaryjoin='UserProfile.id == Follow.following_id',backref='following', lazy='dynamic')
     
+
     def to_dict(self):
         return {
-            'id': str(self.id),
+            'id': str(self.user_id),
             'banner_theme': self.banner_theme,
             'music_track_id':self.music_track_id,
             'username': self.username,
