@@ -11,8 +11,6 @@ from .exstensions import db, ma, jwt, limiter,mg, toolbar
 from .routes import register_blueprints
 # from logging.config import dictConfig
 from .routes.logging_wrapper import handle_errors
-from supabase import create_client
-import os
 
 
 # dictConfig({

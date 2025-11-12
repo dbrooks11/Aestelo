@@ -14,7 +14,7 @@ from flask_jwt_extended import(
     get_jwt_identity
 )
 from werkzeug.security import check_password_hash, generate_password_hash
-from ..schemas.user_schema import username_only,ValidationError
+from ..schemas.user_schema import ValidationError
 from ..schemas.auth_schema import username_pass_only,email_pass_only,email_pass_confirm_pass
 from ..models.user import UserProfile, UserInfo, UserSettings, UserRole, UserSubscription
 from ..models.token_blacklist import TokenBlackList
