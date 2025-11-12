@@ -1,6 +1,6 @@
-from exstensions import ma
+from ..exstensions import ma
 from marshmallow import (fields, validate)
-from models.rating import Rating
+from ..models.rating import Rating
 
 
 class RatingSchema(ma.SQLAlchemyAutoSchema):

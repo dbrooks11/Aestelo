@@ -1,6 +1,6 @@
 # schemas/visit.py
-from exstensions import ma
-from models.visit import Visit, VisitMedia
+from ..exstensions import ma
+from ..models.visit import Visit, VisitMedia
 from marshmallow import validates, ValidationError, fields, validate, pre_load
 class VisitSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

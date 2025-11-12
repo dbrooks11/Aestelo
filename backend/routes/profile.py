@@ -1,14 +1,15 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import exists
-from app import db
-from models.block_profile import BlockProfile
-from models.followers_and_following import Follow
-from models.music_track import MusicTrack
-from schemas.music_schema import music_track_schema
-from schemas.user_schema import user_profile_schema, profile_can_edit, partial_schema ,profile_viewing, ValidationError
-from util.music_track import set_track
-from util.decorators import profile_check_current__banned_removed
+from ..exstensions import db
+from ..models.block_profile import BlockProfile
+from ..models.followers_and_following import Follow
+from ..models.music_track import MusicTrack
+from ..models.auth import AuthUser
+from ..schemas.music_schema import music_track_schema
+from ..schemas.user_schema import user_profile_schema, profile_can_edit, partial_schema ,profile_viewing, ValidationError
+from ..util.music_track import set_track
+from ..util.decorators import profile_check_current__banned_removed
 
 profile_bp = Blueprint('profile',__name__, url_prefix='/profile')
 
@@ -17,6 +18,8 @@ profile_bp = Blueprint('profile',__name__, url_prefix='/profile')
 @jwt_required()
 @profile_check_current__banned_removed
 def profile_me(user_profile):
+    current_user = get_jwt_identity()
+
     if request.method == 'GET':
         try:
             return jsonify({'my_profile': user_profile_schema.dump(user_profile)}), 200
@@ -31,6 +34,10 @@ def profile_me(user_profile):
                 valid = profile_can_edit.load(data, partial=True)    
             except ValidationError as e:
                 return jsonify({'error': e.messages}),400
+            
+            if valid.get('username'):
+                auth_user = AuthUser.query.get(current_user)
+                auth_user.username = valid['username']
             
             for key, value in valid.items():
                 setattr(user_profile,key, value)

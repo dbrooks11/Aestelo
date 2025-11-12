@@ -1,13 +1,18 @@
+
+
+
 from flask import Flask, jsonify
 from flask_cors import CORS
-from config import Config
+from .config import Config
 from colorama import init
-import models
-from models.token_blacklist import TokenBlackList
-from exstensions import db, ma, jwt, limiter,mg, toolbar
-from routes import register_blueprints
+import backend.models
+from backend.models.token_blacklist import TokenBlackList
+from .exstensions import db, ma, jwt, limiter,mg, toolbar
+from .routes import register_blueprints
 # from logging.config import dictConfig
-from routes.logging_wrapper import handle_errors
+from .routes.logging_wrapper import handle_errors
+from supabase import create_client
+import os
 
 
 # dictConfig({
@@ -61,6 +66,8 @@ def create_app():
 
     # Create tables
     with app.app_context():
+        
+        
         # db.drop_all()   #todo: TEMPORARY for testing
         db.create_all()
 

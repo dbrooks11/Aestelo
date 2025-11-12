@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from botocore.client import Config
 from datetime import timedelta
 
+
 load_dotenv('env_backend/.env.backend_cloudflare')
 load_dotenv('env_backend/.env.backend_supabase')
 load_dotenv('env_backend/.env.backend_sightengine')
@@ -24,11 +25,15 @@ class Config:
         'pool_recycle': 3600,
         'pool_pre_ping': True,
     }
+
+    #SUPABASE
+    SUPABASE_URL=os.getenv("SUPABASE_URL")
+    SUPABASE_SERVICE_KEY=os.getenv("SUPABASE_SERVICE_KEY")
     
     # JWT
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=int(os.environ.get('JWT_ACCESS_TOKEN_EXPIRES')))
-    JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=int(os.environ.get('JWT_REFRESH_TOKEN_EXPIRES')))
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=600)
+    JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=7)
     JWT_ALG = os.environ.get('JWT_ALG')
     
     #COOKIES

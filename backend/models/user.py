@@ -1,4 +1,4 @@
-from exstensions import db
+from ..exstensions import db
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from sqlalchemy import (Column, ForeignKey, BigInteger, 
@@ -25,7 +25,7 @@ class UserProfile(db.Model):
 
     music_track_id = Column(String(50), ForeignKey(f'{music_track_schema}.music_track.music_track_id'), index=True)
 
-    username = Column(String, ForeignKey(f'{auth_user_schema}.auth_user.username'))
+    username = Column(String(50))
     profile_photo = Column(Text)
     bio = Column(String(250))
 
@@ -240,9 +240,9 @@ class UserSubscription(db.Model):
     __table_args__ = {'schema': user_subscription_schema} 
 
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'),primary_key=True, nullable=False)
-    tier = Column(String(10), default='premium') #free, premium, business
-    price = Column(Float, default=6.99)
-    started_at= Column(DateTime)
+    tier = Column(String(10), default='free') #free, premium, business
+    price = Column(Float, default=0.00)
+    started_at= Column(DateTime, default=datetime.now(timezone.utc))
     expires_at = Column(DateTime)
     auto_renew = Column(Boolean, default=False)
     payment_method_id = Column(UUID(as_uuid=True)) 

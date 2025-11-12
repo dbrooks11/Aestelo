@@ -1,18 +1,18 @@
-from app import db
+from ..exstensions import db
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models.user import UserProfile
-from models.post import Post, PostMedia
-from models.location import Location
-from routes.auth_required_wrapper import admin_required
+from ..models.user import UserProfile
+from ..models.post import Post, PostMedia
+from ..models.location import Location
+from ..routes.auth_required_wrapper import admin_required
 from datetime import datetime, timezone
-from schemas.post_schema import post_schema,post_media_schema, ValidationError, partial_schema
-from schemas.location_schema import location_schema
-from util.photo_processing import photo_processing, get_decimal_coordinates
-from util.validation import photo_validation
-from util.storage import upload_to_r2
-from util.outlier_coords import average_location
-from util.decorators import (profile_both_check_banned_removed, block_and_follow_check,
+from ..schemas.post_schema import post_schema,post_media_schema, ValidationError, partial_schema
+from ..schemas.location_schema import location_schema
+from ..util.photo_processing import photo_processing, get_decimal_coordinates
+from ..util.validation import photo_validation
+from ..util.storage import upload_to_r2
+from ..util.outlier_coords import average_location
+from ..util.decorators import (profile_both_check_banned_removed, block_and_follow_check,
                              profile_current_check_post)
 
 post_bp = Blueprint('post', __name__, url_prefix='/post')

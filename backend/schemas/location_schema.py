@@ -1,6 +1,6 @@
 from marshmallow import (fields, validate)
-from exstensions import ma
-from models.location import Location, BusinessLocationDetails
+from ..exstensions import ma
+from ..models.location import Location, BusinessLocationDetails
 
 class LocationSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

@@ -1,13 +1,12 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
-from app import db
-from models.user import UserProfile, UserInfo, UserSettings, UserRole
-from models.visit import Visit
-from models.music_track import MusicTrack
-from exstensions import supabase
-from schemas.user_schema import user_profile_schema, ValidationError
-from schemas.music_schema import music_track_schema
-from util.music_track import search_track, set_track
+from ..exstensions import db
+from ..models.user import UserProfile, UserInfo, UserSettings, UserRole
+from ..models.visit import Visit
+from ..models.music_track import MusicTrack
+from ..schemas.user_schema import user_profile_schema, ValidationError
+from ..schemas.music_schema import music_track_schema
+from ..util.music_track import search_track, set_track
 from datetime import datetime, timezone
 
 

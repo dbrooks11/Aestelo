@@ -1,6 +1,6 @@
 # schemas/user.py
-from exstensions import ma, db
-from models.user import UserProfile, UserInfo, UserRole, UserSettings, UserSubscription
+from ..exstensions import ma, db
+from ..models.user import UserProfile, UserInfo, UserRole, UserSettings, UserSubscription
 from marshmallow import validates, ValidationError, fields, validate
 from sqlalchemy import exists
 from datetime import datetime
@@ -57,7 +57,7 @@ class UserInfoSchema(ma.SQLAlchemyAutoSchema):
     age = fields.Int()
     first_name = fields.Str(validate=[validate.Length(max=30), validate.Regexp(r"^[A-Z][a-zA-Z '.-]*[A-Za-z][^-' ]+$",error="Name can only contain letters, spaces, apostrophe, and hyphen")])
     last_name = fields.Str(validate=[validate.Length(max=30), validate.Regexp(r"^[A-Z][a-zA-Z '.-]*[A-Za-z][^-' ]+$",error="Name can only contain letters, spaces, apostrophe, and hyphen")])
-    email = fields.Email(required=False, validate=validate.Length(max=150))
+    email = fields.Email(required=False, validate=[validate.Length(max=150), validate.Email])
     date_of_birth = fields.DateTime()
     gender = fields.Str(
         validate=validate.OneOf([

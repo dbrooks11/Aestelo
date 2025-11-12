@@ -20,7 +20,9 @@ limiter = Limiter(
     storage_uri="memory://", #This URI is only meant for testing/development and 
                             #should be replaced with an appropriate storage of your choice before moving to production.
     )
+
+
 supabase = create_client(
-    os.getenv("SUPABASE_URL"),
-    os.getenv("SUPABASE_SERVICE_KEY")
+    supabase_url=os.getenv("SUPABASE_URL"),
+    supabase_key=os.getenv("SUPABASE_SERVICE_KEY")
 )

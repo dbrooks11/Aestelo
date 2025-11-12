@@ -1,4 +1,4 @@
-from exstensions import db
+from ..exstensions import db
 from sqlalchemy import Column, ForeignKey, BigInteger, String, DateTime, UniqueConstraint, Index
 from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import UUID

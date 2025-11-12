@@ -1,4 +1,4 @@
-from exstensions import db
+from ..exstensions import db
 from sqlalchemy import (Column, ForeignKey, BigInteger, 
                      Index, UniqueConstraint)
 from sqlalchemy.dialects.postgresql import UUID

@@ -1,9 +1,10 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required
-from app import db
-from models.user import UserInfo
-from schemas.user_schema import user_info_schema, ValidationError
-from util.decorators import profile_check_current__banned_removed
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from ..exstensions import db
+from ..models.user import UserInfo
+from ..models.auth import AuthUser
+from ..schemas.user_schema import user_info_schema, ValidationError
+from ..util.decorators import profile_check_current__banned_removed
 
 user_info_bp = Blueprint('user_info', __name__, url_prefix='/profile/info')
 
@@ -32,6 +33,8 @@ def get_info(user_profile):
 @jwt_required()
 @profile_check_current__banned_removed
 def edit_info(user_profile):
+    current_user = get_jwt_identity()
+
     try:
         user_info = UserInfo.query.filter_by(user_profile_id = user_profile.id).first()
 
@@ -41,6 +44,10 @@ def edit_info(user_profile):
             valid = user_info_schema.load(data,partial = True)
         except ValidationError as error:
             return jsonify({"error": error.messages}), 400
+        
+        if valid.get('email'):
+            auth_user = AuthUser.query.get(current_user)
+            auth_user.email = valid['email']
         
         for key,value in valid.items():
             setattr(user_info,key,value)
