@@ -1,7 +1,6 @@
 from exstensions import db
-from sqlalchemy import Column, String, DateTime, Integer, BigInteger
+from sqlalchemy import Column, String, Integer, BigInteger
 from sqlalchemy.orm import relationship
-from datetime import datetime, timezone
 
 class MusicTrack(db.Model):
     __tablename__ = "music_track"

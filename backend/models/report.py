@@ -1,6 +1,5 @@
 from exstensions import db
-from sqlalchemy import Column, ForeignKey, BigInteger, String, Integer, Float, Text, DateTime, Boolean, UniqueConstraint, Index
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, ForeignKey, BigInteger, String, DateTime, UniqueConstraint, Index
 from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import UUID
 from .schema_types import *

@@ -3,6 +3,7 @@ from flask_cors import CORS
 from config import Config
 from colorama import init
 import models
+from models.token_blacklist import TokenBlackList
 from exstensions import db, ma, jwt, limiter,mg, toolbar
 from routes import register_blueprints
 # from logging.config import dictConfig
@@ -84,7 +85,14 @@ def create_app():
                 "error": "authorization required",
                 "message": "Request does not contain a valid token"
             }), 401
-
+        
+        @jwt.token_in_blocklist_loader
+        def token_in_blocklist_callback(jwt_header, jwt_data):
+            jti = jwt_data['jti']
+            token = db.session.query(TokenBlackList).filter(TokenBlackList.jti == jti).scalar()
+            return token is not None  # True => revoked
+        
+        
         @app.route('/')
         def health_check():
             return {'status': 'healthy', 'message': 'Aestelo API is running'}   

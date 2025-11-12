@@ -1,8 +1,7 @@
 from exstensions import db
 from sqlalchemy.orm import relationship
-from datetime import datetime, timezone
-from sqlalchemy import (Column, ForeignKey, BigInteger, 
-                        String, Integer, Float, Text, DateTime, Boolean)
+from sqlalchemy import (Column, 
+                        String, DateTime, Boolean)
 from sqlalchemy.dialects.postgresql import UUID
 from .schema_types import *
 

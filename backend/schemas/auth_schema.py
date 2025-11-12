@@ -15,9 +15,9 @@ class AuthUserSchema(ma.SQLAlchemyAutoSchema):
 
     id = fields.UUID(dump_only=True)
     username = fields.Str(required=True,validate=[validate.Length(min=1, max=50),validate.Regexp(r'^[a-zA-Z0-9_]+$', error='Username can only contain letters, numbers, and underscores')])
-    email = fields.Email(required=True, validate=[(validate.Length(min=5, max=150))])
+    email = fields.Email(required=True, validate=[(validate.Length(min=5, max=150), validate.Email)])
     password = fields.String(required=True, validate=[validate.Length(min=min_password_length,max=max_password_length, error = f"Password must be between {min_password_length} and {max_password_length} characters")], load_only=True)
-    confirm_password = fields.String(required=False, validate=[validate.Length(min=min_password_length,max=max_password_length, error = f"Password must be between {min_password_length} and {max_password_length} characters")], load_only=True)
+    confirm_password = fields.String(required=False, validate=[validate.Length(min=min_password_length,max=max_password_length, error = f"Confirmed Password must be between {min_password_length} and {max_password_length} characters")], load_only=True)
 
 
     @validates('username')
@@ -34,7 +34,7 @@ class AuthUserSchema(ma.SQLAlchemyAutoSchema):
         
     
     @validates_schema
-    def validate_password(self,data,**kwargs):
+    def validate_passwords(self,data,**kwargs):
         if data['password'] != data['confirm_password']:
             raise ValidationError("Passwords do not match", field_name= 'confirm_password')
         

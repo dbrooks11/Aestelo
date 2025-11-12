@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from botocore.client import Config
+from datetime import timedelta
 
 load_dotenv('env_backend/.env.backend_cloudflare')
 load_dotenv('env_backend/.env.backend_supabase')
@@ -25,9 +26,21 @@ class Config:
     }
     
     # JWT
-    JWT_SECRET_KEY = os.environ.get('SUPABASE_JWT_SECRET')
-    JWT_ALGORITHM = 'HS256'
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=int(os.environ.get('JWT_ACCESS_TOKEN_EXPIRES')))
+    JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=int(os.environ.get('JWT_REFRESH_TOKEN_EXPIRES')))
+    JWT_ALG = os.environ.get('JWT_ALG')
     
+    #COOKIES
+    JWT_TOKEN_LOCATION = ['cookies']
+    JWT_COOKIE_SECURE = False  # Only send over HTTPS (False in dev) #todo: set to True in production
+    JWT_COOKIE_HTTPONLY = True  
+    JWT_COOKIE_SAMESITE = 'Lax'  
+    JWT_COOKIE_CSRF_PROTECT = True  
+    JWT_REFRESH_COOKIE_PATH = os.environ.get('JWT_REFRESH_COOKIE_PATH')
+    JWT_ACCESS_COOKIE_PATH = os.environ.get('JWT_ACCESS_COOKIE_PATH')
+    JWT_SESSION_COOKIE = os.environ.get('JWT_SESSION_COOKIE')
+
     # CORS
     CORS_ORIGINS = ['http://localhost:5000', 'http://localhost:5173']  # Add your frontend URLs
 

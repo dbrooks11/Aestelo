@@ -2,7 +2,7 @@ from exstensions import db
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from sqlalchemy import (Column, ForeignKey, BigInteger, 
-                        String, Float, DateTime, Boolean, Index)
+                        String, Float, DateTime, Index)
 from .schema_types import *
 
 #todo: Come back to mapbox and google place id. 

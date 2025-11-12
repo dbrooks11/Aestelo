@@ -1,6 +1,9 @@
 
-#AUTH
+#*AUTH
 auth_user_schema = "private"
+
+#*TOKEN BLACKLIST
+token_blacklist_schema = 'private'
 
 #*USER
 user_profile_schema = 'public'

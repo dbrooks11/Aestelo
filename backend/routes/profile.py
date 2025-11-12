@@ -36,7 +36,7 @@ def profile_me(user_profile):
                 setattr(user_profile,key, value)
 
             db.session.commit() 
-            return jsonify({'updated_profile': valid}), 200
+            return jsonify({'updated_profile_fields': valid}), 200
         except Exception:
             db.session.rollback()
             return jsonify({'error': 'Failed to update profile'}), 500
