@@ -8,13 +8,12 @@ import SignupPage from './pages/SignupPage'
 function App() {
 
   return (
-    <>
       <Routes>
         <Route path='/' element={<HomePage />}/>
         <Route path="/signup" element={<SignupPage/>}/>
-        <Route path='/login-email' element={<LoginPage />}/>
+        <Route path='/login-email' element={<LoginPage isEmail={true} />}/>
+        <Route path='/login-username' element={<LoginPage isEmail={false} />}/>
       </Routes>
-    </>
   )
 }
 

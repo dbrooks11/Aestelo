@@ -14,10 +14,6 @@ export default function SignupPage(): JSX.Element {
         const password: FormDataEntryValue | null  = formData.get("password")
         const confirm_password: FormDataEntryValue | null  = formData.get("confirm_password")
 
-        if (!appConfig.API_URL) {
-                throw new Error('Api misconifgured')
-            }
-
         try{
             const response: Response = await fetch(`${appConfig.API_URL}/auth/signup`, {
                 method: 'POST',
