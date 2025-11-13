@@ -1,12 +1,13 @@
 import { useState, type JSX } from "react";
+import { AxisErrorHelper, signupInstance } from "../util/axios_api_helpers";
 import { useFormStatus } from "react-dom";
-import { useNavigate } from "react-router-dom";
-import { appConfig } from "../config";
+import { useNavigate, type NavigateFunction } from "react-router-dom";
+import type { AxiosResponse} from "axios";
 
 export default function SignupPage(): JSX.Element {
 
-    const navigate = useNavigate()
-    const [error, setError] = useState<string>("")
+    const navigate: NavigateFunction = useNavigate()
+    const [error, setError] = useState<string | null>("")
     
 
     async function signUp(formData: FormData): Promise<void>{
@@ -15,29 +16,21 @@ export default function SignupPage(): JSX.Element {
         const confirm_password: FormDataEntryValue | null  = formData.get("confirm_password")
 
         try{
-            const response: Response = await fetch(`${appConfig.API_URL}/auth/signup`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                credentials: 'omit',
-                body: JSON.stringify({
-                    email,
-                    password,
-                    confirm_password
-                })
+            const response: AxiosResponse = await signupInstance.post('/auth/signup', {
+                email,
+                password,
+                confirm_password
             })
 
-            const data = await response.json()
+            const data = response.data
 
-            if (response.ok){
+            if (response.status === 201){
                 console.log(data.message)
                 navigate('/login-email')
-            }else{
-                setError(data.error)
-                throw new Error(error)
             }
-        } catch (error){
-            console.log(error)
-        }
+        } catch (error: unknown){
+            AxisErrorHelper(error, setError, "Sign Up")
+      }
     }
 
     function SubmitButton(): JSX.Element{
@@ -55,10 +48,10 @@ export default function SignupPage(): JSX.Element {
             {error ? <span>{error}</span>: null}
             <form action={signUp} className="signup-form">
                 <label htmlFor="email">Email</label>
-                <input type="email" name="email" id="email" required></input>
+                <input type="email" name="email" id="email" autoComplete="email" required></input>
 
                 <label htmlFor="password">Password</label>
-                <input type="text" name="password" id="password" required></input>
+                <input type="password" name="password" id="password" required></input>
 
                 <label htmlFor="confirm_password">Confirm Password</label>
                 <input type="password" name="confirm_password" id="confirm_password" required></input>

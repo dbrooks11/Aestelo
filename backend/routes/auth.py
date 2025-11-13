@@ -28,7 +28,7 @@ def signup():
 
     data = request.get_json()
 
-    email = data.get('email', '').strip()
+    email = data.get('email', '')
     password = data.get('password')
     confirm_password = data.get('confirm_password', None)
 
@@ -36,12 +36,19 @@ def signup():
         return jsonify({'error': 'Email, Password, and Confirmed Password are required'}), 400
 
     if AuthUser.query.filter_by(email = email).first():
-        return jsonify({'error': 'Account already exist'}), 404
+        return jsonify({'error': 'Account already exist'}), 409
     
     try:
         validate_auth = email_pass_confirm_pass.load(data)
-    except ValidationError as err:
-        return jsonify('error', err.messages), 404
+    except ValidationError as error:
+        # return jsonify('error', err.messages), 404
+        error_messages = []
+        for field, messages in error.messages.items():
+            if isinstance(messages, list):
+                error_messages.extend(messages)
+            else:
+                error_messages.append(str(messages))
+        return jsonify({"error": ". ".join(error_messages)}), 400
 
     try:
         user_id = uuid.uuid4()
@@ -81,15 +88,13 @@ def signup():
 
         db.session.commit()
         return jsonify({'message':'Account created successfully'}), 201
-    except Exception as e:
+    except Exception:
         db.session.rollback()
-        msg = getattr(e, "messages", str(e))
-        return jsonify({'error': 'Profile could not be created',
-                         "err": msg}), 400
+        return jsonify({'error': 'Account could not be created'}), 400
     
 
 
-@auth_bp.route('/login-email', methods = ['GET'])
+@auth_bp.route('/login-email', methods = ['POST'])
 def login_email():
 
     data = request.get_json()
@@ -102,8 +107,14 @@ def login_email():
     
     try:
         validate_login = email_pass_only.load(data, partial = True)
-    except ValidationError as err:
-        return jsonify({'error': err.messages}), 404
+    except ValidationError as error:
+        error_messages = []
+        for field, messages in error.messages.items():
+            if isinstance(messages, list):
+                error_messages.extend(messages)
+            else:
+                error_messages.append(str(messages))
+        return jsonify({"error": ". ".join(error_messages)}), 400
 
     authenticate_user = AuthUser.query.filter_by(email = validate_login['email']).first()
 
@@ -129,7 +140,7 @@ def login_email():
     return response, 200
 
 
-@auth_bp.route('/login-username', methods = ['PATCH'])
+@auth_bp.route('/login-username', methods = ['POST'])
 def login_username():
 
     data = request.get_json()
@@ -142,8 +153,14 @@ def login_username():
     
     try:
         validate_login = username_pass_only.load(data)
-    except ValidationError as err:
-        return jsonify({'error': err.messages})
+    except ValidationError as error:
+        error_messages = []
+        for field, messages in error.messages.items():
+            if isinstance(messages, list):
+                error_messages.extend(messages)
+            else:
+                error_messages.append(str(messages))
+        return jsonify({"error": ". ".join(error_messages)}), 400
 
     authenticate_user = AuthUser.query.filter_by(username = validate_login['username']).first()
 
@@ -169,18 +186,21 @@ def login_username():
     return response, 200
     
 
-@auth_bp.route('/logout', methods = ['GET'])
+@auth_bp.route('/logout', methods = ['POST'])
 @jwt_required()
 def logout():
-    jwt = get_jwt()
-    jti = jwt['jti']
+    try: 
+        jwt = get_jwt()
+        jti = jwt['jti']
 
-    token_block = TokenBlackList(jti=jti)
-    token_block.save()
+        token_block = TokenBlackList(jti=jti)
+        token_block.save()
 
-    response = jsonify({'message': 'Logout successful'})
-    unset_jwt_cookies(response)
-    return response, 200
+        response = jsonify({'message': 'Logout successful'})
+        unset_jwt_cookies(response)
+        return response, 200
+    except Exception:
+        return jsonify({'error': 'Failed to logout'}), 400
 
 
 @auth_bp.route('/refresh', methods = ['POST'])

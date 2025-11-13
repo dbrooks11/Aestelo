@@ -1,6 +1,4 @@
 
-
-
 from flask import Flask, jsonify
 from flask_cors import CORS
 from .config import Config
@@ -53,9 +51,20 @@ def create_app():
     
     #todo: TEMPORARY CORS Attributes
     CORS(app, 
-     origins=["http://localhost:5173", "http://127.0.0.1:5173", "null"],
-     allow_headers=["Content-Type", "Authorization"],
-     methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
+     origins=["http://localhost:5176", 
+              "http://127.0.0.1:5176", 
+              "null"],
+     allow_headers=[
+              "Content-Type", 
+              "X-CSRF-TOKEN",
+              "X-CSRF-Token",  
+              "x-csrf-token"],
+     methods=["GET", 
+              "POST", 
+              "PUT", 
+              "DELETE", 
+              "PATCH", 
+              "OPTIONS"],
      supports_credentials=True)
     
     

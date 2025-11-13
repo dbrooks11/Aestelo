@@ -1,13 +1,14 @@
 import { useState, type JSX } from "react";
 import { useFormStatus } from "react-dom";
 import { useNavigate, type NavigateFunction } from "react-router-dom";
-import { appConfig } from "../config";
+import { AxisErrorHelper, loginInstance } from "../util/axios_api_helpers";
+
 
 export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
     const navigate: NavigateFunction = useNavigate()
 
     const [emailOrUsername, setEmailOrUsername] = useState<string | undefined>("")
-    const [error, setError] = useState<string>("")
+    const [error, setError] = useState<string | null>("")
 
     async function login(formData: FormData): Promise<void>{
         const email: FormDataEntryValue | null = formData.get('email') ? formData.get('email') : null
@@ -22,26 +23,17 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
         }
 
         try{ 
-            const response: Response = await fetch(`${appConfig.API_URL}/auth/login-${email ? "email" : "username"}`, {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                credentials: "include",
-                body: JSON.stringify(body)
-            })
+            const response = await loginInstance.post(`/auth/login-${email ? 'email' : 'username'}`, body)
 
-            const data = await response.json()
+            const data = response.data
 
-            if (response.ok){
+            if(response.status === 200){
                 console.log(data.message)
-                navigate('/') //todo: Set his to profile page (home page is only for testing)
-            }
-            else{
-                setError(data.error)
-                throw new Error(error)
+                navigate('/') //todo: change to profile page
             }
         }
-        catch(error){
-            console.error(error)
+        catch(error: unknown){
+            AxisErrorHelper(error, setError, "Log in")
         }
     }
 
