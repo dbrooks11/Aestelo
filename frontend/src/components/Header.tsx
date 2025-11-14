@@ -2,16 +2,17 @@
 import type { JSX } from "react";
 import { Link, useNavigate, type NavigateFunction } from "react-router-dom";
 import {AxisErrorHelperConsoleOnly, protectedInstance } from "../util/axios_api_helpers";
+import type { AxiosResponse } from "axios";
 
 
-export default function Header(): JSX.Element {
+export default function Header({isAuthenticated}: {isAuthenticated: boolean}): JSX.Element {
 
   const navigate: NavigateFunction = useNavigate()
 
   async function logout(): Promise<void>{
   
     try{
-      const response = await protectedInstance.post('auth/logout')
+      const response: AxiosResponse = await protectedInstance.post('auth/logout')
 
       const data = response.data
 
@@ -30,14 +31,23 @@ export default function Header(): JSX.Element {
     navigate('/login-email')
   }
 
+  function signupRouting(): void{
+    navigate('/signup')
+  }
+
   return (
     <header>
-        <nav>
+        {!isAuthenticated ? <nav>
             <Link to="/">Home</Link>
-            <Link to="/signup">SignUp</Link>
+            <button onClick={signupRouting}>SignUp</button>
             <button onClick={loginRouting}>Login</button>
+        </nav>: null}
+        {isAuthenticated ? <nav>
+            <Link to="/">Home</Link>
+            <Link to="/profile/me">Profile</Link>
+            <Link to="/post/feed">Feed</Link>
             <button onClick={logout}>Logout</button>
-        </nav>
+        </nav>: null}
     </header>
   )
 }

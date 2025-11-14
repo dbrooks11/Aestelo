@@ -29,7 +29,7 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
 
             if(response.status === 200){
                 console.log(data.message)
-                navigate('/') //todo: change to profile page
+                navigate('/profile/me') 
             }
         }
         catch(error: unknown){

@@ -1,4 +1,5 @@
 from ..exstensions import db
+from sqlalchemy import func
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..models.user import UserProfile
@@ -46,6 +47,34 @@ def get_profile_post_all(id, user_profile, current_user_profile):
     
     except Exception:
         return jsonify({'error': 'Failed to fetch post'}), 500
+    
+
+@post_bp.route('/feed', methods = ['GET'])
+@jwt_required()
+def feed():
+    try:
+        page = request.args.get('page', default = 1, type=int)
+        per_page = request.args.get('per_page', default=20, type=int)
+    
+        query = Post.active().order_by(func.random()).limit(20).all()
+
+        paginate_post = query.paginate(
+            page = page,
+            per_page = per_page
+        )
+
+        result = post_schema.dump(paginate_post.items, many=True)
+
+        return jsonify({
+            'posts': result,
+            'total': paginate_post.total,
+            'total_pages': paginate_post.pages,
+            'current_page': paginate_post.page
+        }), 200
+    
+    except Exception:
+        return jsonify({'error': 'Failed to fetch post'}), 500
+
 
 #done latency route test
 @post_bp.route('/<string:id>/profile-post/<int:post_id>', methods = ['GET'])

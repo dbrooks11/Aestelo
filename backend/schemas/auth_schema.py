@@ -17,8 +17,8 @@ class AuthUserSchema(ma.SQLAlchemyAutoSchema):
     username = fields.Str(
         required=True,
         validate=[
-            validate.Length(min=1, max=50),
-            validate.Regexp(r'^[a-zA-Z0-9_]+$', error='Username can only contain letters, numbers, and underscores')
+            validate.Length(min=1, max=30),
+            validate.Regexp(r'^(?!.*\.$)(?!^\.)[a-zA-Z0-9._]+$', error='Username can only contain letters, numbers, periods, and underscores')
     ])
     email = fields.Email(
         required=True, 

@@ -51,8 +51,8 @@ def create_app():
     
     #todo: TEMPORARY CORS Attributes
     CORS(app, 
-     origins=["http://localhost:5176", 
-              "http://127.0.0.1:5176", 
+     origins=["http://localhost:5175", 
+              "http://127.0.0.1:5175", 
               "null"],
      allow_headers=[
               "Content-Type", 

@@ -38,13 +38,11 @@ def profile_active_not_permitted(func):
 
 def profile_check_current__banned_removed(func):
     @wraps(func)
-    def decorator(*args, **kwargs):
-        
+    def decorator(*args, **kwargs):   
         current_user = get_jwt_identity()
-        profile_id = kwargs.get('id', None)
         
         auth_start = time.time()
-        user_profile = UserProfile.query.get(profile_id if profile_id else current_user)
+        user_profile = UserProfile.query.get(current_user)
         print(f'Query time: {(time.time() - auth_start) * 1000}')
         
         if user_profile is None:

@@ -13,7 +13,7 @@ class AuthUser(db.Model):
     __table_args__ = {'schema': auth_user_schema} 
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    username = Column(String(50), unique=True)
+    username = Column(String(30), unique=True)
     email = Column(String(150), unique=True, nullable=False)
     password_encrypted = Column(String(255), nullable=False)
 

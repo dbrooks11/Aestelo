@@ -18,7 +18,7 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
     follower_count = fields.Int(dump_only=True)
     following_count = fields.Int(dump_only=True)
     
-    username = fields.Str(required=True,validate=[validate.Length(min=1, max=50),validate.Regexp(r'^[a-zA-Z0-9_]+$', error='Username can only contain letters, numbers, and underscores')])
+    username = fields.Str(required=True,validate=[validate.Length(min=1, max=50),validate.Regexp(r'^(?!.*\.$)(?!^\.)[a-zA-Z0-9._]+$', error='Username can only contain letters, numbers, periods, and underscores')])
     bio = fields.Str(validate=[validate.Length(max=150)])
     profile_photo= fields.Str(validate=validate.URL())
     instagram= fields.Str(validate=validate.URL())

@@ -13,6 +13,8 @@ from flask_jwt_extended import(
     get_jwt, 
     get_jwt_identity
 )
+import random
+from sqlalchemy import exists, select
 from werkzeug.security import check_password_hash, generate_password_hash
 from ..schemas.user_schema import ValidationError
 from ..schemas.auth_schema import username_pass_only,email_pass_only,email_pass_confirm_pass
@@ -29,7 +31,7 @@ def signup():
     data = request.get_json()
 
     email = data.get('email', '')
-    password = data.get('password')
+    password = data.get('password', '')
     confirm_password = data.get('confirm_password', None)
 
     if email is None or password is None or confirm_password is None:
@@ -51,17 +53,31 @@ def signup():
         return jsonify({"error": ". ".join(error_messages)}), 400
 
     try:
+        username = ''
+        attempts = 0
+        while attempts < 3:
+            username = f'user{random.randint(1, 999999999999999999999999)}'
+            
+            username_exists = db.session.query(exists().where((AuthUser.username == username))).scalar()
+            
+            if not username_exists:
+                break
+    
+            attempts += 1
+
         user_id = uuid.uuid4()
 
         new_user = AuthUser(
             id = user_id,
+            username = username,
             email = validate_auth['email'],
             password_encrypted = generate_password_hash(validate_auth['password'])
         )
         db.session.add(new_user)
 
         new_user_profile = UserProfile(
-            id = user_id
+            id = user_id,
+            username = username
         )
         db.session.add(new_user_profile)
         db.session.flush()
@@ -88,8 +104,10 @@ def signup():
 
         db.session.commit()
         return jsonify({'message':'Account created successfully'}), 201
-    except Exception:
+    except Exception as e:
         db.session.rollback()
+        print(f"ERROR: {e}") 
+        print(f"Error type: {type(e)}")
         return jsonify({'error': 'Account could not be created'}), 400
     
 
@@ -212,3 +230,9 @@ def refresh():
     response = jsonify({'refresh': True})
     set_access_cookies(response, access_token)
     return response, 200
+
+
+@auth_bp.route('/verify', methods = ['GET'])
+@jwt_required()
+def verify():
+    return jsonify({'authenticated': True})

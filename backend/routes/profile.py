@@ -18,7 +18,6 @@ profile_bp = Blueprint('profile',__name__, url_prefix='/profile')
 @jwt_required()
 @profile_check_current__banned_removed
 def profile_me(user_profile):
-    current_user = get_jwt_identity()
 
     if request.method == 'GET':
         try:
@@ -36,7 +35,7 @@ def profile_me(user_profile):
                 return jsonify({'error': e.messages}),400
             
             if valid.get('username'):
-                auth_user = AuthUser.query.get(current_user)
+                auth_user = AuthUser.query.get(user_profile.id)
                 auth_user.username = valid['username']
             
             for key, value in valid.items():
@@ -47,6 +46,7 @@ def profile_me(user_profile):
         except Exception:
             db.session.rollback()
             return jsonify({'error': 'Failed to update profile'}), 500
+        
 
 #Partially done, test blocking and following functionality
 @profile_bp.route('/<string:id>', methods = ['GET'])
