@@ -21,7 +21,7 @@ export const signupInstance: AxiosInstance = axios.create({
     withCredentials: false
 })
 
-export const loginInstance = axios.create({
+export const loginInstance: AxiosInstance = axios.create({
     baseURL: appConfig.API_URL,
     timeout: 10000,
     headers: { 'Content-Type': 'application/json' },
@@ -77,7 +77,7 @@ protectedInstance.interceptors.response.use(
             )
 
             const newCsrfToken: string | undefined = csrfAccessToken()
-            if (newCsrfToken && ['post', 'put', 'patch', 'delete'].includes(config.method || '')) {
+            if (newCsrfToken && ['post', 'put', 'patch', 'delete', 'get'].includes(config.method || '')) {
                 config.headers['X-CSRF-TOKEN'] = newCsrfToken
             }
           return protectedInstance(config); 
@@ -94,7 +94,7 @@ protectedInstance.interceptors.response.use(
 )
 
 
-//axios error handler
+//axios error handlers
 
 export function AxisErrorHelper(error: AxiosError | unknown, setError: (err: string | null) => void, fallbackErrorName: string): void{
     const axiosError = error as AxiosError<{ error?: string, message?: string }>
