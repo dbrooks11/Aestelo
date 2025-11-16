@@ -1,13 +1,11 @@
 
 import type { JSX } from "react"
-import Header from "../components/Header"
 
 export default function HomePage(): JSX.Element {
   return (
-    <>
-      <Header/>
-      <div>HomePage</div>
-    </>
+   <div className="h-screen bg-bg-light-secondary dark:bg-charcoal">
+      <span> Home Page</span>
+    </div>
     
   )
 }
