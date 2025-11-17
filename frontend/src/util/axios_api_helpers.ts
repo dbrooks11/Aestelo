@@ -1,5 +1,4 @@
 import axios, { AxiosError, type AxiosInstance } from "axios";
-import { useNavigate, type NavigateFunction } from "react-router-dom";
 import { appConfig } from "../config";
 import Cookies from 'js-cookie'
 
@@ -52,45 +51,39 @@ protectedInstance.interceptors.request.use(
 
 protectedInstance.interceptors.response.use(
     (response) => response,
-    async (error) =>{
+    async (error) => {
         const {response, config} = error;
-        console.warn('API error', {
-            url: config?.url,
-            method: config?.method,
-            status: response?.status,
-        })
-       //Handle expired access token
-    if (response?.status === 401 && !config.__isRetry) {
-      config.__isRetry = true;
+        // Handle expired access token
+        if (response?.status === 401 && !config.__isRetry) {
+            config.__isRetry = true;
 
-      try {
-        console.log('token expired, refreshing...')
+            try {
+                console.log('token expired, refreshing...')
 
-        const refreshToken: string | undefined = csrfRefreshToken();
-        if (refreshToken) {
-            await axios.post(`${appConfig.API_URL}/auth/refresh`,{    
-            },
-                {
-                    withCredentials: true,
-                    headers:{'X-CSRF-TOKEN': refreshToken}
+                const refreshToken: string | undefined = csrfRefreshToken();
+                if (refreshToken) {
+                    await axios.post(`${appConfig.API_URL}/auth/refresh`, {}, {
+                        withCredentials: true,
+                        headers: {'X-CSRF-TOKEN': refreshToken}
+                    })
+
+                    const newCsrfToken: string | undefined = csrfAccessToken()
+                    if (newCsrfToken && ['post', 'put', 'patch', 'delete'].includes(config.method || '')) {
+                        config.headers['X-CSRF-TOKEN'] = newCsrfToken
+                    }
+                    return protectedInstance(config);
                 }
-            )
-
-            const newCsrfToken: string | undefined = csrfAccessToken()
-            if (newCsrfToken && ['post', 'put', 'patch', 'delete', 'get'].includes(config.method || '')) {
-                config.headers['X-CSRF-TOKEN'] = newCsrfToken
+            } catch (refreshErr) {
+                console.error('Token refresh failed:', refreshErr)
+                window.location.href = '/login-email'
+                return Promise.reject(refreshErr)
             }
-          return protectedInstance(config); 
+        }else{
+            console.log('Error')
+            window.location.href = '/login-email'  
         }
-      } catch (refreshErr) {
-        console.error('Token refresh failed:', refreshErr)
-        const navigate: NavigateFunction = useNavigate()
-        navigate('/login-email')
-        return Promise.reject(refreshErr)
-      }
-    }
-    return Promise.reject(error);
-  }
+        return Promise.reject(error);
+    }  
 )
 
 

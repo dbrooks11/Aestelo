@@ -1,7 +1,6 @@
 
-import {useEffect, type JSX, useState} from 'react'
+import {useEffect, type JSX, useState, type Dispatch, type SetStateAction} from 'react'
 import { AxisErrorHelper, protectedInstance } from '../util/axios_api_helpers'
-import Header from '../components/Header'
 import ProfileBanner from '../components/Profile/ProfileBanner'
 import ProfileInfo from '../components/Profile/ProfileInfo'
 import ProfileStats from '../components/Profile/ProfileStats'
@@ -38,7 +37,7 @@ type ProfileData = {
   
 }
 
-export default function ProfilePage(): JSX.Element {
+export default function ProfilePage({setGlobalErrors}: {setGlobalErrors: Dispatch<SetStateAction<number>>}): JSX.Element {
 
   const [profileData, setProfileData] = useState<ProfileData | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -50,12 +49,15 @@ export default function ProfilePage(): JSX.Element {
         const response: AxiosResponse = await protectedInstance.get('/profile/me')
         const data = response.data
 
-        if(response.status === 200){
+        if(response.status in [200,201,204]){
           setProfileData(data.my_profile)
+        }else{
+          setGlobalErrors(response.status)
         }
 
       }catch(error){
         AxisErrorHelper(error, setError, "Profile")
+        
       }
       finally{
         setIsLoading(false)
@@ -71,8 +73,8 @@ export default function ProfilePage(): JSX.Element {
 
   return (
     <>
-    <Header isAuthenticated = {true}/>
     {!isLoading ? <main>
+      {error ? error : null}
       <ProfileBanner/>
       <ProfileInfo 
         profile_pic_url={profileData?.profile_photo ? profileData.profile_photo : defaultProfilePic} //todo: default icon is temporary (remove it since it has liscense)
@@ -85,7 +87,6 @@ export default function ProfilePage(): JSX.Element {
         post_count={profileData?.post_count}
         visit_count={profileData?.visit_count}
       />
-      {error ? error : null}
     </main>: "Loading Profile..."}
     </>
   )

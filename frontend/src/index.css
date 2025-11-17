@@ -38,3 +38,63 @@
   --color-border-light: #E8E4E0;
   --color-border-dark: #3A3A3A;
 }
+
+/* Header */
+.header_container{
+  @apply top-0 z-50 sticky flex justify-between items-center bg-bg-light/50 dark:bg-charcoal/65 backdrop-blur-lg px-8 py-3 border-b-neutral-200 dark:border-b-black font-semibold dark:text-bg-light-secondary;
+}
+
+.header_links{
+  @apply transition hover:scale-110 dark:hover:text-bg-light hover:text-black cursor-pointer;
+}
+
+.theme_button{
+  @apply flex justify-center items-center hover:bg-accents-primary/20 rounded-full w-10 h-10 text-black dark:text-white transition-colors duration-300 hover:cursor-pointer;
+}
+
+.header_login_button{
+  @apply bg-bg-light-secondary hover:bg-bg-light-secondary hover:shadow-lg px-2 py-1.5  rounded-lg w-20 text-accents-deep cursor-pointer dark:bg-transparent dark:hover:bg-accents-deep/50 dark:border-none dark:text-white;
+}
+
+.header_signup_button{
+  @apply bg-accents-primary hover:bg-accents-deep hover:shadow-md px-2 py-1.5 border border-accents-deep rounded-lg w-20 cursor-pointer;
+}
+
+.header_logout_button{
+  @apply bg-bg-light-secondary hover:bg-bg-light-secondary hover:shadow-lg px-2 py-1.5  rounded-lg w-20 text-accents-deep cursor-pointer dark:bg-transparent dark:hover:bg-accents-deep/50 dark:border-none dark:text-white;
+}
+
+
+
+/* Authentication forms */
+.authenticated_forms_input_field{
+  @apply border-neutral-500/30 focus:border-accents-primary border-b-2 focus:outline-none;
+}
+
+.authenticated_forms_field_container{
+  @apply flex flex-col gap-2;
+}
+
+.authenticated_forms_form{
+  @apply flex flex-col gap-8 my-8 w-2/5;
+}
+
+.authenticated_forms_error{
+  @apply bg-bg-light-tertiary mt-8 p-1 border border-neutral-200 rounded-xl font-medium text-sm dark:bg-mid-gray/10 dark:text-white/85;
+}
+
+.authenticated_forms_header{
+  @apply font-bold dark:text-bg-light text-2xl;
+}
+
+.authenticated_forms_main_container{
+  @apply flex items-center justify-center;
+}
+
+.authenticated_forms_section_container{
+  @apply flex flex-col items-center justify-center shadow-xl py-4 border dark:border-slate rounded-lg w-3/6 dark:text-neutral-300 border-bg-light-secondary;
+}
+
+.authenticated_forms_button{
+  @apply flex items-center justify-center gap-3 bg-accents-primary hover:bg-accents-deep hover:shadow-md py-2 mt-4 rounded-md font-semibold text-white text-xl transition hover:-translate-y-1 cursor-pointer;
+}
