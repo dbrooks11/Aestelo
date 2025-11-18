@@ -25,7 +25,7 @@ class UserProfile(db.Model):
 
     music_track_id = Column(String(50), ForeignKey(f'{music_track_schema}.music_track.music_track_id'), index=True)
 
-    username = Column(String(50))
+    username = Column(String(30))
     profile_photo = Column(Text)
     bio = Column(String(250))
 

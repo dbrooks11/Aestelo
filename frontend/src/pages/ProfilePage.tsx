@@ -51,6 +51,7 @@ export default function ProfilePage({setGlobalErrors}: {setGlobalErrors: Dispatc
 
         if(response.status in [200,201,204]){
           setProfileData(data.my_profile)
+          console.log(profileData)
         }else{
           setGlobalErrors(response.status)
         }
@@ -69,7 +70,7 @@ export default function ProfilePage({setGlobalErrors}: {setGlobalErrors: Dispatc
     profile()
   }, []);
     
- 
+  
 
   return (
     <>

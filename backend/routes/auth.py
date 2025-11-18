@@ -30,6 +30,9 @@ def signup():
 
     data = request.get_json()
 
+    if(data.get("name")):
+        return jsonify({'error', 'Invalid(b)'}), 404
+
     email = data.get('email', '')
     password = data.get('password', '')
     confirm_password = data.get('confirm_password', None)
@@ -117,6 +120,9 @@ def login_email():
 
     data = request.get_json()
 
+    if(data.get("name")):
+        return jsonify({'error', 'Invalid(b)'}), 404
+
     email = data.get('email', None)
     password = data.get('password', None)
 
@@ -162,6 +168,9 @@ def login_email():
 def login_username():
 
     data = request.get_json()
+
+    if(data.get("name")):
+        return jsonify({'error', 'Invalid(b)'}), 404
 
     username = data.get('username', None)
     password = data.get('password', None)

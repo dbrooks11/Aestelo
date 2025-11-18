@@ -15,16 +15,19 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
 
 
     async function login(formData: FormData): Promise<void>{
+        const name: FormDataEntryValue | null = formData.get("name")
         const email: FormDataEntryValue | null = formData.get('email') ? formData.get('email') : null
         const username: FormDataEntryValue | null = formData.get('username') ? formData.get('username') : null
         const password: FormDataEntryValue | null = formData.get('password')
 
+        if(name?.toString().trim()) return
         if(email) setEmailState(email.toString())
         else setUsernameState(username?.toString())
 
         const body = {
             ...(email ? {email} : {username}),
-            password
+            password,
+            ...(name ? {name} : {undefined}),
         }
 
         try{ 
@@ -53,19 +56,46 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
   return (
     <main className="authenticated_forms_main_container">
         <section className="authenticated_forms_section_container">
+            {/* Login Header */}
             <h1 className="authenticated_forms_header">Login</h1>
+
+            {/* Error Show */}
             {error ? <span id='error' className="authenticated_forms_error">{error.split('.')[0]}</span>: null}
+
+            {/* Login Form */}
             <form action = {login} className="authenticated_forms_form">
+
+                {/* HoneyPot Field*/}
+                <div className="w-0 h-0 absolute -left-[9999px] -top-[9999px]" aria-hidden aria-label="ignore this">
+                  <label htmlFor="name" className="w-0 h-0"></label>
+                  <input className="overflow-hidden bg-transparent w-0 h-0 cursor-none" type="text" id='name' name='name' autoComplete="off" aria-label="skip this input. it is for non-real users" tabIndex={-1}></input>
+                </div>
+
+                {/* Email field & Username field*/}
                 <div className="authenticated_forms_field_container">
                     <label htmlFor={isEmail ? "email" : "username"}>{isEmail ? "Email" : "Username"}</label>
-                    <input type={isEmail ? "email" : "text"} name={isEmail ? "email" : "username"} id={isEmail ? "email" : "username"} autoComplete={isEmail ? "email" : "username"} defaultValue={isEmail ? emailState : usernameState} className="authenticated_forms_input_field" placeholder="Enter email" required></input>
+                    <input 
+                    type={isEmail ? "email" : "text"} 
+                    name={isEmail ? "email" : "username"} 
+                    id={isEmail ? "email" : "username"} 
+                    autoComplete={isEmail ? "email" : "username"} 
+                    defaultValue={isEmail ? emailState : usernameState} className="authenticated_forms_input_field" 
+                    placeholder={isEmail ? "Enter email" : "Enter username"}
+                    required>
+                    </input>
                 </div>
+
+                {/* Password field */}
                 <div className="authenticated_forms_field_container">
                     <label htmlFor="password">Password</label>
                     <input type="password" name="password" id="password" autoComplete="current-password" className="authenticated_forms_input_field" placeholder="Enter password" required></input>
                 </div>
+
+                {/* Submit button component */}
                 <SubmitButton/>
             </form>
+
+            {/* Alternative login link */}
             <Link className="text-sm flex w-fit" to={`/login-${isEmail ? 'username': 'email'}`}>Log in with {isEmail ? 'username' : 'email'}</Link>
         </section>
     </main>

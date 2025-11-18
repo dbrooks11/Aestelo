@@ -47,7 +47,7 @@
 
 /* Header */
 .header_container{
-  @apply top-0 z-50 sticky flex items-center justify-between bg-bg-light/50 dark:bg-charcoal/65 backdrop-blur-lg px-8 py-3 border-b-neutral-200 dark:border-b-black font-semibold dark:text-bg-light-secondary;
+  @apply top-0 z-50 sticky flex items-center justify-between bg-bg-light-secondary/50 dark:bg-charcoal/65 backdrop-blur-lg px-12 py-3 border-b-neutral-200 dark:border-b-black font-semibold dark:text-bg-light-secondary;
 }
 
 .header_links{
@@ -67,7 +67,7 @@
 }
 
 .header_logout_button{
-  @apply bg-bg-light-secondary hover:bg-bg-light-secondary hover:shadow-lg px-2 py-1.5  rounded-lg w-20 text-accents-deep cursor-pointer dark:bg-transparent dark:hover:bg-accents-deep/50 dark:border-none dark:text-white;
+  @apply bg-bg-light-secondary hover:bg-bg-light-tertiary hover:shadow-lg px-2 py-1.5  rounded-lg w-20 text-accents-deep cursor-pointer dark:bg-transparent dark:hover:bg-accents-deep/50 dark:border-none dark:text-white;
 }
 
 
@@ -78,15 +78,15 @@
 }
 
 .authenticated_forms_field_container{
-  @apply flex flex-col gap-2;
+  @apply flex flex-col gap-2 mb-7;
 }
 
 .authenticated_forms_form{
-  @apply flex flex-col gap-8 my-8 w-2/5;
+  @apply flex flex-col my-8 w-2/5;
 }
 
 .authenticated_forms_error{
-  @apply bg-bg-light-tertiary mt-8 p-1 border border-neutral-200 rounded-xl font-medium text-sm dark:bg-mid-gray/10 dark:text-white/85;
+  @apply bg-bg-light-tertiary mt-8 px-2 py-1 border border-neutral-200 rounded-xl font-medium text-sm dark:bg-mid-gray/10 dark:text-white/85;
 }
 
 .authenticated_forms_header{
@@ -94,7 +94,7 @@
 }
 
 .authenticated_forms_main_container{
-  @apply flex items-center justify-center min-h-full py-2;
+  @apply flex items-center justify-center flex-1 py-2;
 }
 
 .authenticated_forms_section_container{

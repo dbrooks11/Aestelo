@@ -13,9 +13,16 @@ export default function SignupPage(): JSX.Element {
     
 
     async function signUp(formData: FormData): Promise<void>{
+        const name: FormDataEntryValue | null = formData.get("name")
         const email: FormDataEntryValue | null = formData.get("email")
         const password: FormDataEntryValue | null  = formData.get("password")
         const confirm_password: FormDataEntryValue | null  = formData.get("confirm_password")
+
+        if(name?.toString().trim()) {
+            console.log("form rejected. bot detected")
+            return
+        }
+            
 
         const stringEmail: string | undefined = email?.toString()
         setEmail(stringEmail)
@@ -24,7 +31,8 @@ export default function SignupPage(): JSX.Element {
             const response: AxiosResponse = await signupInstance.post('/auth/signup', {
                 email,
                 password,
-                confirm_password
+                confirm_password,
+                ...(name ? {name} : {undefined}),
             })
 
             const data = response.data
@@ -50,21 +58,40 @@ export default function SignupPage(): JSX.Element {
   return (
     <main className="authenticated_forms_main_container">
         <section className="authenticated_forms_section_container">
+            {/* Signup Header */}
             <h1 className="authenticated_forms_header">Sign Up</h1>
+
+            {/* Error show */}
             {error ? <span id='error' className="authenticated_forms_error">{error.split('.')[0]}</span>: null}
+
+            {/* Signup Form */}
             <form action={signUp} className="authenticated_forms_form">
+
+                {/* Honeypot field */}
+                <div className="w-0 h-0 absolute -left-[9999px] -top-[9999px]" aria-hidden aria-label="ignore this">
+                  <label htmlFor="name" className="w-0 h-0"></label>
+                  <input className="overflow-hidden bg-transparent w-0 h-0 cursor-none" type="text" id='name' name='name' autoComplete="off" aria-label="skip this input. it is for non-real users" tabIndex={-1}></input>
+                </div>
+
+                {/* Email field */}
                 <div className="authenticated_forms_field_container">
                     <label htmlFor="email">Email</label>
                     <input className="authenticated_forms_input_field" type="email" name="email" id="email" autoComplete="email" defaultValue={email} placeholder="Enter email"required></input>
                 </div>
+
+                {/* Password field */}
                 <div className="authenticated_forms_field_container">
                     <label htmlFor="password">Password</label>
                     <input className="authenticated_forms_input_field" type="password" name="password" id="password" placeholder="Enter password"required></input>
                 </div>
+
+                {/* Re-confirm password field */}
                 <div className="authenticated_forms_field_container">
                     <label htmlFor="confirm_password">Confirm Password</label>
                     <input className="authenticated_forms_input_field" type="password" name="confirm_password" id="confirm_password" placeholder="Re-enter password" required></input>
                 </div>
+
+                {/* Submit button component */}
                 <SubmitButton/>
             </form>
         </section>

@@ -3,7 +3,7 @@ import { type JSX, type Dispatch, type SetStateAction} from "react";
 import {motion, AnimatePresence} from 'framer-motion'
 import { Moon, Sun } from "lucide-react";
 import { Search } from 'lucide-react';
-import { Link, useNavigate, type NavigateFunction } from "react-router-dom";
+import { Link, useNavigate, type NavigateFunction, useLocation} from "react-router-dom";
 import {AxisErrorHelperConsoleOnly, protectedInstance } from "../util/axios_api_helpers";
 import type { AxiosResponse } from "axios";
 
@@ -18,7 +18,9 @@ type HeaderProps = {
 export default function Header({isAuthenticated, setTheme, theme}: HeaderProps): JSX.Element {
 
   const navigate: NavigateFunction = useNavigate()
+  const location = useLocation()
 
+  const hideSearchPaths: Array<string> = ['/profile/me']
 
   function setThemeHeader():void{
         setTheme((prevTheme: HeaderProps['theme'])=>{
@@ -72,9 +74,7 @@ export default function Header({isAuthenticated, setTheme, theme}: HeaderProps):
       </button>
     )
   }
-
   
-
   return (
     // todo: remove home links for production(home link will be logo)
     <header className="header_container">
@@ -86,14 +86,19 @@ export default function Header({isAuthenticated, setTheme, theme}: HeaderProps):
         </nav>: null}
 
         {/* Aestelo Logo */}
-        <div>
+        <div className={`${isAuthenticated ? 'w-1/3 min-w-fit' : null}`}>
           <span className="text-3xl text-black dark:text-white">Aeste<span className="text-accents-primary">lo</span></span>
         </div>
 
         {/* Search Input for Authenticated Users */}
-        {isAuthenticated ? <form>
-          <Search/>
-          <input className="border border-black rounded-lg" type="search" id="search" name="search"></input>
+        {isAuthenticated && !hideSearchPaths.includes(location.pathname) ? <form className="w-1/3">
+          <label htmlFor="search" className="text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
+          <div className="relative">
+            <div className="absolute inset-y-0 start-0 flex items-center pl-3">
+                <Search className="w-5 text-black dark:text-white"/>
+            </div>
+            <input type="search" id="search" className="block w-full pl-9 py-1.5 pr-2 bg-bg-light border-2 border-neutral-300 hover:border-neutral-400/60 dark:border-stone-600/60 dark:hover:border-stone-600/90 dark:bg-smoke/60 text-heading text-sm rounded-xl focus:outline-none dark:focus:border-accents-deep focus:border-accents-primary shadow-xs placeholder:text-body hover:cursor-pointer focus:cursor-text" placeholder="Search" required />
+          </div>
         </form>: null}
 
         {/* Regular Header for Public users */}
@@ -104,7 +109,7 @@ export default function Header({isAuthenticated, setTheme, theme}: HeaderProps):
         </div>: null}
 
         {/* Header for Authenticated Users */}
-        {isAuthenticated ? <nav className="flex gap-8 items-center">
+        {isAuthenticated ? <nav className={`flex gap-8 items-center ${!hideSearchPaths.includes(location.pathname) ? 'w-1/3 min-w-fit justify-end' : null}`}>
             <Link to="/profile/me">Profile</Link>
             <Link to="/post/feed">Feed</Link>
             <div className="flex items-center border-l pl-3 gap-3">
