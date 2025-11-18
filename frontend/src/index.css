@@ -1,6 +1,12 @@
 @import "tailwindcss";
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
+
+@layer utilities {
+  *{
+    /* @apply border border-red-500 */
+  }
+}
 @theme {
     /* Rose Colors */
   --color-accents-primary: #C85A5E; /* CTAs, active nav items, like buttons, focus states */
@@ -41,7 +47,7 @@
 
 /* Header */
 .header_container{
-  @apply top-0 z-50 sticky flex justify-between items-center bg-bg-light/50 dark:bg-charcoal/65 backdrop-blur-lg px-8 py-3 border-b-neutral-200 dark:border-b-black font-semibold dark:text-bg-light-secondary;
+  @apply top-0 z-50 sticky flex items-center justify-between bg-bg-light/50 dark:bg-charcoal/65 backdrop-blur-lg px-8 py-3 border-b-neutral-200 dark:border-b-black font-semibold dark:text-bg-light-secondary;
 }
 
 .header_links{
@@ -88,11 +94,11 @@
 }
 
 .authenticated_forms_main_container{
-  @apply flex items-center justify-center;
+  @apply flex items-center justify-center min-h-full py-2;
 }
 
 .authenticated_forms_section_container{
-  @apply flex flex-col items-center justify-center shadow-xl py-4 border dark:border-slate rounded-lg w-3/6 dark:text-neutral-300 border-bg-light-secondary;
+  @apply flex flex-col items-center justify-center shadow-xl py-12 border dark:border-slate rounded-lg w-3/6 dark:text-neutral-300 border-bg-light-tertiary;
 }
 
 .authenticated_forms_button{

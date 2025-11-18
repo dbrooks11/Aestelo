@@ -78,21 +78,32 @@ export default function Header({isAuthenticated, setTheme, theme}: HeaderProps):
   return (
     // todo: remove home links for production(home link will be logo)
     <header className="header_container">
-        <span className="text-3xl text-black dark:text-white">Aeste<span className="text-accents-primary">lo</span></span>
-        {isAuthenticated ? <form>
-          <Search/>
-          <input className="border border-black rounded-lg" type="search" id="search" name="search"></input>
-        </form>: null}
-        {!isAuthenticated ? <nav className="flex gap-8 dark:text-mid-gray text-black/75 text-sm p-1">
+        {/* Header Links */}
+        {!isAuthenticated ? <nav className="flex gap-8 dark:text-mid-gray text-black/75 text-sm p-1 min-w-1/3">
           <Link className="header_links" to="/">Home</Link>
           <Link className="header_links" to="/about">About</Link>
           <Link className="header_links" to="/explore">Explore</Link>
         </nav>: null}
-        {!isAuthenticated ? <div className="flex gap-4 text-white">
+
+        {/* Aestelo Logo */}
+        <div>
+          <span className="text-3xl text-black dark:text-white">Aeste<span className="text-accents-primary">lo</span></span>
+        </div>
+
+        {/* Search Input for Authenticated Users */}
+        {isAuthenticated ? <form>
+          <Search/>
+          <input className="border border-black rounded-lg" type="search" id="search" name="search"></input>
+        </form>: null}
+
+        {/* Regular Header for Public users */}
+        {!isAuthenticated ? <div className="flex gap-4 text-white justify-end min-w-1/3">
             <ThemeButton/>
             <button className="header_login_button" onClick={loginRouting}>Login</button>
             <button className="header_signup_button" onClick={signupRouting}>SignUp</button>
         </div>: null}
+
+        {/* Header for Authenticated Users */}
         {isAuthenticated ? <nav className="flex gap-8 items-center">
             <Link to="/profile/me">Profile</Link>
             <Link to="/post/feed">Feed</Link>

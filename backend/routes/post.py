@@ -56,23 +56,24 @@ def feed():
         page = request.args.get('page', default = 1, type=int)
         per_page = request.args.get('per_page', default=20, type=int)
     
-        query = Post.active().order_by(func.random()).limit(20).all()
-
-        paginate_post = query.paginate(
+        query = Post.active().order_by(func.random()).paginate(
             page = page,
-            per_page = per_page
+            per_page = per_page,
+            error_out=False
         )
 
-        result = post_schema.dump(paginate_post.items, many=True)
+        result = post_schema.dump(query.items, many=True)
 
         return jsonify({
             'posts': result,
-            'total': paginate_post.total,
-            'total_pages': paginate_post.pages,
-            'current_page': paginate_post.page
+            'total': query.total,
+            'total_pages': query.pages,
+            'current_page': query.page
         }), 200
     
-    except Exception:
+    except Exception as e:
+        print(f"ERROR: {e}") 
+        print(f"Error type: {type(e)}")
         return jsonify({'error': 'Failed to fetch post'}), 500
 
 

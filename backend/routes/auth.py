@@ -140,7 +140,7 @@ def login_email():
         return jsonify({'error': 'Invalid email or password'}),404
     
     if check_password_hash(authenticate_user.password_encrypted, validate_login['password']) is False:
-        return jsonify({'error':'Wrong Password'}), 400
+        return jsonify({'error':'Incorrect email or password'}), 401
     
     authenticate_user.last_sign_in_at = datetime.now(timezone.utc)
     db.session.commit()
@@ -183,10 +183,10 @@ def login_username():
     authenticate_user = AuthUser.query.filter_by(username = validate_login['username']).first()
 
     if authenticate_user is None:
-        return jsonify({'error': 'Invalid Username or Password'}), 400
+        return jsonify({'error': 'Invalid username or password'}), 401
     
     if check_password_hash(authenticate_user.password_encrypted, validate_login['password']) is False:
-        return ({'error': 'Incorrect Password'}), 400
+        return ({'error': 'Incorrect username or password'}), 400
     
     authenticate_user.last_sign_in_at = datetime.now(timezone.utc)
     db.session.commit()

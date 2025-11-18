@@ -38,7 +38,7 @@ function App() {
       setTheme={setTheme}
       theme={theme}
       ></Header>
-      <div>
+      <div className='flex-1 flex flex-col'>
         {/* TODO: channge route element for about and explore  */}
         <Routes>
           <Route path='/' element={<HomePage />}/>
