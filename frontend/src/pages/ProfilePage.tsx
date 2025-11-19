@@ -1,9 +1,9 @@
 
 import {useEffect, type JSX, useState, type Dispatch, type SetStateAction} from 'react'
 import { AxisErrorHelper, protectedInstance } from '../util/axios_api_helpers'
-import ProfileBanner from '../components/Profile/ProfileBanner'
 import ProfileInfo from '../components/Profile/ProfileInfo'
-import ProfileStats from '../components/Profile/ProfileStats'
+import ProfileTabs from '../components/Profile/ProfileTabs'
+import myProfilePic from '../assets/my_profile_pic.jpg'
 import defaultProfilePic from "../assets/default_profile_pic.png"
 import type { AxiosResponse } from 'axios'
 
@@ -13,10 +13,10 @@ type ProfileData = {
   username: string,
   banner_theme: string,
   bio: string,
-  instagram: string,
-  tiktok: string,
-  twitter: string,
-  facebook: string,
+  instagram: string | undefined,
+  tiktok: string | undefined,
+  twitter_x: string | undefined,
+  facebook: string | undefined,
 
   is_verified_instagram: boolean,
   is_verified_tiktok: boolean,
@@ -49,11 +49,12 @@ export default function ProfilePage({setGlobalErrors}: {setGlobalErrors: Dispatc
         const response: AxiosResponse = await protectedInstance.get('/profile/me')
         const data = response.data
 
-        if(response.status in [200,201,204]){
+        if([200,201,204].includes(response.status)){
           setProfileData(data.my_profile)
-          console.log(profileData)
+          console.log('profile exist')
         }else{
-          setGlobalErrors(response.status)
+          // setGlobalErrors(response.status)
+          console.log('profile error')
         }
 
       }catch(error){
@@ -63,31 +64,32 @@ export default function ProfilePage({setGlobalErrors}: {setGlobalErrors: Dispatc
       finally{
         setIsLoading(false)
       }
-
-    
     }
 
     profile()
   }, []);
     
+  console.log(profileData)
   
 
   return (
     <>
-    {!isLoading ? <main>
+    {!isLoading ? <main className='flex flex-col items-center'>
       {error ? error : null}
-      <ProfileBanner/>
       <ProfileInfo 
-        profile_pic_url={profileData?.profile_photo ? profileData.profile_photo : defaultProfilePic} //todo: default icon is temporary (remove it since it has liscense)
+        profile_pic_url={profileData?.profile_photo ? profileData.profile_photo : myProfilePic} //todo: default icon is temporary (remove it since it has liscense)
         follower_count={profileData?.follower_count ? profileData.follower_count : 0}
         following_count={profileData?.following_count ? profileData.following_count : 0}
         username= {profileData?.username}
-        bio = {profileData?.bio ? profileData.bio : "HELLO I AM A FIAMOUS TIKTOKER"}
+        bio = {profileData?.bio ? profileData.bio : "HELLO I AM A FIAMOUS TIKTOKERhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"}
+        post_count={profileData?.post_count ? profileData.post_count : 0}
+        visit_count={profileData?.visit_count ? profileData.visit_count : 0}
+        instagram = {profileData?.instagram ? profileData.instagram : undefined}
+        tiktok = {profileData?.tiktok ? profileData.tiktok : undefined}
+        twitter_x = {profileData?.twitter_x ? profileData.twitter_x : undefined}
+        facebook = {profileData?.facebook ? profileData.facebook : undefined}
       />
-      <ProfileStats
-        post_count={profileData?.post_count}
-        visit_count={profileData?.visit_count}
-      />
+      <ProfileTabs/>
     </main>: "Loading Profile..."}
     </>
   )

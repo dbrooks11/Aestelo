@@ -104,3 +104,29 @@
 .authenticated_forms_button{
   @apply flex items-center justify-center gap-3 bg-accents-primary hover:bg-accents-deep hover:shadow-md py-2 mt-4 rounded-md font-semibold text-white text-xl transition hover:-translate-y-1 cursor-pointer;
 }
+
+
+/* Profile */
+.profile_image_wrapper{
+  @apply relative rounded-full h-36 w-36 flex items-center justify-center overflow-hidden shadow-md;
+}
+
+.profile_image_wrapper::before{
+  @apply absolute bg-conic from-accents-glow to-accents-deep to-80% w-full h-full content-[''] animate-spin rounded-full;
+}
+
+.profile_image{
+  @apply absolute w-35 h-35 rounded-full object-cover;
+}
+
+.profile_stats_label{
+  @apply font-normal;
+}
+
+.profile_stats_info{
+  @apply font-bold;
+}
+
+.profile_links{
+  @apply hover:text-accents-deep dark:hover:text-accents-primary p-1 hover:shadow-sm rounded-full hover:bg-bg-light-secondary/50 dark:hover:dark:bg-accents-primary/10;
+}
