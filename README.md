@@ -6,14 +6,14 @@ Aestelo is a mobile platform that connects fashion enthusiasts with the perfect 
 
 ## What is Aestelo?
 
-Finding the right backdrop for your fashion photography shouldn't require endless searching through generic location apps or scrolling through hundreds of social media posts. Aestelo solves this by creating a dedicated platform where users can:
+Finding the right area for your fashion photography shouldn't require endless searching through generic location apps or scrolling through hundreds of social media posts. Aestelo solves this by creating a dedicated platform where users can:
 
 - Browse a curated feed of photogenic locations optimized for fashion and streetwear photography
 - Explore spots on an interactive map to find locations near you
 - View real outfit photos taken at each location to see exactly what works
-- Document your visits with photos and soundtrack them with music
+- (Coming soon: Document your visits with photos and soundtrack them with music)
 - Save favorite spots and build personal location collections
-- Connect with other fashion creators through Circles—curated groups that explore locations together
+- (Coming soon: Connect with other fashion creators through Circles—curated groups that explore locations together)
 - Share authentic recommendations within the fashion photography community
 
 ## The Vision
