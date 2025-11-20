@@ -1,7 +1,7 @@
 from ..exstensions import db
 from sqlalchemy.orm import relationship
 from sqlalchemy import (Column, 
-                        String, DateTime, Boolean)
+                        String, DateTime, Boolean, Integer)
 from sqlalchemy.dialects.postgresql import UUID
 from .schema_types import *
 import uuid
@@ -24,6 +24,9 @@ class AuthUser(db.Model):
     password_change_sent_at = Column(DateTime) #for email sending
     password_confirmed_at = Column(DateTime)
     last_sign_in_at = Column(DateTime)
+
+    failed_login_attempts = Column(Integer, default=0)
+    locked_until = Column(DateTime, nullable=True)
 
 
 

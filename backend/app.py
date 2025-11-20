@@ -1,5 +1,6 @@
 
 from flask import Flask, jsonify
+from flask_talisman import Talisman
 from flask_cors import CORS
 from .config import Config
 from colorama import init
@@ -51,8 +52,8 @@ def create_app():
     
     #todo: TEMPORARY CORS Attributes
     CORS(app, 
-     origins=["http://localhost:5179", 
-              "http://127.0.0.1:5179", 
+     origins=["http://localhost:5173", 
+              "http://127.0.0.1:5173", 
               "null"],
      allow_headers=[
               "Content-Type", 
@@ -66,6 +67,17 @@ def create_app():
               "PATCH", 
               "OPTIONS"],
      supports_credentials=True)
+    
+    if not app.debug:
+        Talisman(app,
+            force_https=True,  
+            strict_transport_security=True,  
+            strict_transport_security_max_age=31536000,
+            strict_transport_security_include_subdomains=True,
+            content_security_policy=None,  
+            frame_options='DENY', 
+            )
+        
     
     
     # Register blueprints
@@ -114,12 +126,15 @@ def create_app():
         return app
     
 
+#todo: might remove this too
 def register_global_error_handler(app):
         for endpoint, func in app.view_functions.items():
             if endpoint not in ('static',): 
                 app.view_functions[endpoint] = handle_errors(func)
 
 
+
+#todo: remove these for production
 if __name__ == '__main__':
     app = create_app()
     app.run(debug=True)

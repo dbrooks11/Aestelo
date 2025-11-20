@@ -32,7 +32,7 @@ class Config:
     
     # JWT
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=600)
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=600) #todo: change access token time (current set to 10 hours for development)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=7)
     JWT_ALG = os.environ.get('JWT_ALG')
     

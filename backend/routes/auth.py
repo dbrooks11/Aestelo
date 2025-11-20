@@ -14,14 +14,13 @@ from flask_jwt_extended import(
     get_jwt_identity
 )
 import random
-from sqlalchemy import exists, select
+from sqlalchemy import exists
 from werkzeug.security import check_password_hash, generate_password_hash
 from ..schemas.user_schema import ValidationError
 from ..schemas.auth_schema import username_pass_only,email_pass_only,email_pass_confirm_pass
 from ..models.user import UserProfile, UserInfo, UserSettings, UserRole, UserSubscription
 from ..models.token_blacklist import TokenBlackList
 from ..models.auth import AuthUser
-
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -31,14 +30,14 @@ def signup():
     data = request.get_json()
 
     if(data.get("name")):
-        return jsonify({'error', 'Invalid(b)'}), 404
+        return jsonify({'error', 'Invalid(b)'}), 401
 
-    email = data.get('email', '')
-    password = data.get('password', '')
+    email = data.get('email', None)
+    password = data.get('password', None)
     confirm_password = data.get('confirm_password', None)
 
     if email is None or password is None or confirm_password is None:
-        return jsonify({'error': 'Email, Password, and Confirmed Password are required'}), 400
+        return jsonify({'error': 'Email, Password, and Confirmed Password are required'}), 401
 
     if AuthUser.query.filter_by(email = email).first():
         return jsonify({'error': 'Account already exist'}), 409
@@ -53,7 +52,7 @@ def signup():
                 error_messages.extend(messages)
             else:
                 error_messages.append(str(messages))
-        return jsonify({"error": ". ".join(error_messages)}), 400
+        return jsonify({"error": ". ".join(error_messages)}), 401
 
     try:
         username = ''
@@ -76,34 +75,19 @@ def signup():
             email = validate_auth['email'],
             password_encrypted = generate_password_hash(validate_auth['password'])
         )
-        db.session.add(new_user)
 
         new_user_profile = UserProfile(
-            id = user_id,
-            username = username
+            id=user_id,
+            username=username,
+            user_info=UserInfo(email=validate_auth['email']),
+            user_settings=UserSettings(),
+            user_role=UserRole(),
+            user_subscription=UserSubscription()
         )
+
+        db.session.add(new_user)
         db.session.add(new_user_profile)
-        db.session.flush()
-
-        new_user_info = UserInfo(
-            user_profile_id = user_id,
-            email = validate_auth['email'])
-        db.session.add(new_user_info)
-
-        new_user_settings = UserSettings(
-            user_profile_id = user_id
-        )
-        db.session.add(new_user_settings)
-
-        new_user_role = UserRole(
-            user_profile_id = user_id
-        )
-        db.session.add(new_user_role)
-
-        new_user_sub = UserSubscription(
-            user_profile_id = user_id
-        )
-        db.session.add(new_user_sub)
+        db.session.commit()
 
         db.session.commit()
         return jsonify({'message':'Account created successfully'}), 201
@@ -121,13 +105,13 @@ def login_email():
     data = request.get_json()
 
     if(data.get("name")):
-        return jsonify({'error', 'Invalid(b)'}), 404
+        return jsonify({'error', 'Invalid(b)'}), 401
 
     email = data.get('email', None)
     password = data.get('password', None)
 
     if email is None or password is None:
-        return jsonify({'error': 'Email and Password are required'}), 404
+        return jsonify({'error': 'Email and Password are required'}), 401
     
     try:
         validate_login = email_pass_only.load(data, partial = True)
@@ -138,15 +122,18 @@ def login_email():
                 error_messages.extend(messages)
             else:
                 error_messages.append(str(messages))
-        return jsonify({"error": ". ".join(error_messages)}), 400
+        return jsonify({"error": ". ".join(error_messages)}), 401
 
     authenticate_user = AuthUser.query.filter_by(email = validate_login['email']).first()
 
-    if authenticate_user is None:
-        return jsonify({'error': 'Invalid email or password'}),404
-    
-    if check_password_hash(authenticate_user.password_encrypted, validate_login['password']) is False:
-        return jsonify({'error':'Incorrect email or password'}), 401
+    if authenticate_user:
+        password_correct = check_password_hash(authenticate_user.password_encrypted, validate_login['password'])
+    else:
+        check_password_hash(generate_password_hash('dummy_password'), validate_login['password'])
+        password_correct = False
+
+    if authenticate_user is None or password_correct is False:
+        return jsonify({'error': 'Invalid email or password'}),401
     
     authenticate_user.last_sign_in_at = datetime.now(timezone.utc)
     db.session.commit()
@@ -170,13 +157,13 @@ def login_username():
     data = request.get_json()
 
     if(data.get("name")):
-        return jsonify({'error', 'Invalid(b)'}), 404
+        return jsonify({'error', 'Invalid(b)'}), 401
 
     username = data.get('username', None)
     password = data.get('password', None)
 
     if username is None or password is None:
-        return jsonify({'error': 'Username and Password are required'}), 400
+        return jsonify({'error': 'Username and Password are required'}), 401
     
     try:
         validate_login = username_pass_only.load(data)
@@ -187,15 +174,18 @@ def login_username():
                 error_messages.extend(messages)
             else:
                 error_messages.append(str(messages))
-        return jsonify({"error": ". ".join(error_messages)}), 400
+        return jsonify({"error": ". ".join(error_messages)}), 401
 
     authenticate_user = AuthUser.query.filter_by(username = validate_login['username']).first()
 
-    if authenticate_user is None:
+    if authenticate_user:
+        password_check = check_password_hash(authenticate_user.password_encrypted, validate_login['password'])
+    else:
+        check_password_hash(generate_password_hash('dummy_password'), validate_login['password'])
+        password_check=False
+
+    if authenticate_user is None or password_check is False:
         return jsonify({'error': 'Invalid username or password'}), 401
-    
-    if check_password_hash(authenticate_user.password_encrypted, validate_login['password']) is False:
-        return ({'error': 'Incorrect username or password'}), 400
     
     authenticate_user.last_sign_in_at = datetime.now(timezone.utc)
     db.session.commit()

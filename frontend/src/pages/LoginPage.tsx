@@ -75,7 +75,7 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
                 <div className="authenticated_forms_field_container">
                     <label htmlFor={isEmail ? "email" : "username"}>{isEmail ? "Email" : "Username"}</label>
                     <input 
-                    type={isEmail ? "email" : "text"} 
+                    type={isEmail ? "text" : "text"} 
                     name={isEmail ? "email" : "username"} 
                     id={isEmail ? "email" : "username"} 
                     autoComplete={isEmail ? "email" : "username"} 
