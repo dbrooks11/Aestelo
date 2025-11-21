@@ -22,13 +22,13 @@ function App() {
 
   const [globalErrors, setGlobalErrors] = useState<number>(0)
 
-  useEffect(() => {
-    if(globalErrors in [401, 410, 403]){
-      navigate('login-email')
-    }else{
-      return
-    }
-  }, [globalErrors]);
+  // useEffect(() => {
+  //   if(globalErrors in [401, 410, 403]){
+  //     navigate('login-email')
+  //   }else{
+  //     return
+  //   }
+  // }, [globalErrors]);
 
 
   return (

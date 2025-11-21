@@ -63,7 +63,7 @@
 }
 
 .header_signup_button{
-  @apply bg-accents-primary hover:bg-accents-deep hover:shadow-md px-2 py-1.5 border border-accents-deep rounded-lg w-20 cursor-pointer;
+  @apply bg-accents-primary hover:bg-accents-deep hover:shadow-md px-2 py-1.5 rounded-lg w-20 cursor-pointer;
 }
 
 .header_logout_button{
@@ -77,12 +77,15 @@
   @apply border-neutral-500/30 focus:border-accents-primary border-b-2 focus:outline-none;
 }
 
+.authenticated_forms_input_pass{
+  @apply border-neutral-500/30 focus:border-accents-primary border-b-2 focus:outline-none pr-8;
+}
 .authenticated_forms_field_container{
   @apply flex flex-col gap-2 mb-7;
 }
 
 .authenticated_forms_form{
-  @apply flex flex-col my-8 w-2/5;
+  @apply flex flex-col my-8 w-3/5;
 }
 
 .authenticated_forms_error{
@@ -99,6 +102,10 @@
 
 .authenticated_forms_section_container{
   @apply flex flex-col items-center justify-center shadow-xl py-12 border dark:border-slate rounded-lg w-3/6 dark:text-neutral-300 border-bg-light-tertiary;
+}
+
+.authenticated_forms_showpass{
+  @apply absolute right-0 bottom-1 w-6 p-0.5 rounded-md text-black hover:bg-bg-light-tertiary dark:bg-charcoal hover:dark:bg-slate/60 cursor-pointer dark:text-stone-400 flex items-center justify-center hover:shadow-sm;
 }
 
 .authenticated_forms_button{

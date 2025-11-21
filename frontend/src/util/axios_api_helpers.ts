@@ -38,7 +38,7 @@ export const protectedInstance: AxiosInstance = axios.create({
 protectedInstance.interceptors.request.use(
     (config) => {
         // Add CSRF token for state-changing methods
-        if (['post', 'put', 'patch', 'delete'].includes(config.method || '')) {
+        if (['post', 'put', 'patch', 'delete', 'get'].includes(config.method || '')) {
             const csrfToken: string | undefined = csrfAccessToken()
             if (csrfToken) {
                 config.headers['X-CSRF-TOKEN'] = csrfToken

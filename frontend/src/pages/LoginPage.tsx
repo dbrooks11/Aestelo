@@ -1,5 +1,5 @@
-import { useState, type JSX } from "react";
-import { LoaderCircle } from "lucide-react";
+import { useState, type JSX} from "react";
+import { LoaderCircle, Eye, EyeClosed } from "lucide-react";
 import { useFormStatus } from "react-dom";
 import { useNavigate, type NavigateFunction, Link } from "react-router-dom";
 import { AxisErrorHelper, loginInstance } from "../util/axios_api_helpers";
@@ -9,6 +9,7 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
     const navigate: NavigateFunction = useNavigate()
 
 
+    const [showPassword, setShowPassword] = useState("password")
     const[emailState, setEmailState] = useState<string | undefined>("")
     const [usernameState, setUsernameState] = useState<string | undefined>("")
     const [error, setError] = useState<string | null>("")
@@ -53,6 +54,12 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
 
     }
 
+    function showPasswords(){
+        setShowPassword((type)=>{
+            return type === 'text' ? 'password' : 'text'
+        })
+    }
+
   return (
     <main className="authenticated_forms_main_container">
         <section className="authenticated_forms_section_container">
@@ -75,7 +82,7 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
                 <div className="authenticated_forms_field_container">
                     <label htmlFor={isEmail ? "email" : "username"}>{isEmail ? "Email" : "Username"}</label>
                     <input 
-                    type={isEmail ? "text" : "text"} 
+                    type={isEmail ? "text" : "text"}
                     name={isEmail ? "email" : "username"} 
                     id={isEmail ? "email" : "username"} 
                     autoComplete={isEmail ? "email" : "username"} 
@@ -83,12 +90,14 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
                     placeholder={isEmail ? "Enter email" : "Enter username"}
                     required>
                     </input>
+                    
                 </div>
 
                 {/* Password field */}
-                <div className="authenticated_forms_field_container">
+                <div className="authenticated_forms_field_container relative">
                     <label htmlFor="password">Password</label>
-                    <input type="password" name="password" id="password" autoComplete="current-password" className="authenticated_forms_input_field" placeholder="Enter password" required></input>
+                    <input type={showPassword} name="password" id="password" autoComplete="current-password" className="authenticated_forms_input_pass" placeholder="Enter password" required></input>
+                    <button type="button" onClick={showPasswords} className="authenticated_forms_showpass" aria-label="show or hide password button">{showPassword === 'text' ? <EyeClosed className="w-full h-full"/> : <Eye className="w-full h-full"/>}</button>
                 </div>
 
                 {/* Submit button component */}

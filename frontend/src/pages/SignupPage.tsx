@@ -80,13 +80,13 @@ export default function SignupPage(): JSX.Element {
                 </div>
 
                 {/* Password field */}
-                <div className="authenticated_forms_field_container">
+                <div className="authenticated_forms_field_container relative">
                     <label htmlFor="password">Password</label>
                     <input className="authenticated_forms_input_field" type="password" name="password" id="password" placeholder="Enter password"required></input>
                 </div>
 
                 {/* Re-confirm password field */}
-                <div className="authenticated_forms_field_container">
+                <div className="authenticated_forms_field_container relative">
                     <label htmlFor="confirm_password">Confirm Password</label>
                     <input className="authenticated_forms_input_field" type="password" name="confirm_password" id="confirm_password" placeholder="Re-enter password" required></input>
                 </div>
