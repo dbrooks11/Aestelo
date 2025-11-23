@@ -1,5 +1,5 @@
 import { useState, type JSX } from "react";
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle, Eye, EyeClosed } from "lucide-react";
 import { AxisErrorHelper, signupInstance } from "../util/axios_api_helpers";
 import { useFormStatus } from "react-dom";
 import { useNavigate, type NavigateFunction } from "react-router-dom";
@@ -10,6 +10,9 @@ export default function SignupPage(): JSX.Element {
     const navigate: NavigateFunction = useNavigate()
     const [error, setError] = useState<string | null>("")
     const [email, setEmail] = useState<string | undefined>("")
+    const [showPassword, setShowPassword] = useState("password")
+    const [showPasswordOne, setShowPasswordOne] = useState("password")
+    const [showPasswordTwo, setShowPasswordTwo] = useState("password")
     
 
     async function signUp(formData: FormData): Promise<void>{
@@ -54,6 +57,18 @@ export default function SignupPage(): JSX.Element {
         )
     }
 
+    function showPasswordsOne(){
+        setShowPasswordOne((type)=>{
+            return type === 'text' ? 'password' : 'text'
+        })
+    }
+
+    function showPasswordsTwo(){
+        setShowPasswordTwo((type)=>{
+            return type === 'text' ? 'password' : 'text'
+        })
+    }
+
     
   return (
     <main className="authenticated_forms_main_container">
@@ -82,13 +97,15 @@ export default function SignupPage(): JSX.Element {
                 {/* Password field */}
                 <div className="authenticated_forms_field_container relative">
                     <label htmlFor="password">Password</label>
-                    <input className="authenticated_forms_input_field" type="password" name="password" id="password" placeholder="Enter password"required></input>
+                    <input className="authenticated_forms_input_field" type={showPasswordOne} name="password" id="password" placeholder="Enter password"required></input>
+                    <button type="button" onClick={showPasswordsOne} className="authenticated_forms_showpass" aria-label="show or hide password button">{showPasswordOne === 'text' ? <EyeClosed className="w-full h-full"/> : <Eye className="w-full h-full"/>}</button>
                 </div>
 
                 {/* Re-confirm password field */}
                 <div className="authenticated_forms_field_container relative">
                     <label htmlFor="confirm_password">Confirm Password</label>
-                    <input className="authenticated_forms_input_field" type="password" name="confirm_password" id="confirm_password" placeholder="Re-enter password" required></input>
+                    <input className="authenticated_forms_input_field" type={showPasswordTwo} name="confirm_password" id="confirm_password" placeholder="Re-enter password" required></input>
+                    <button type="button" onClick={showPasswordsTwo} className="authenticated_forms_showpass" aria-label="show or hide password button">{showPasswordTwo === 'text' ? <EyeClosed className="w-full h-full"/> : <Eye className="w-full h-full"/>}</button>
                 </div>
 
                 {/* Submit button component */}
