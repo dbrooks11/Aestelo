@@ -10,7 +10,6 @@ export default function SignupPage(): JSX.Element {
     const navigate: NavigateFunction = useNavigate()
     const [error, setError] = useState<string | null>("")
     const [email, setEmail] = useState<string | undefined>("")
-    const [showPassword, setShowPassword] = useState("password")
     const [showPasswordOne, setShowPasswordOne] = useState("password")
     const [showPasswordTwo, setShowPasswordTwo] = useState("password")
     

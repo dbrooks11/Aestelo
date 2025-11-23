@@ -85,7 +85,7 @@
 }
 
 .authenticated_forms_form{
-  @apply flex flex-col my-8 w-3/5;
+  @apply flex flex-col my-8 w-2/5;
 }
 
 .authenticated_forms_error{
@@ -101,7 +101,7 @@
 }
 
 .authenticated_forms_section_container{
-  @apply flex flex-col items-center justify-center shadow-xl py-12 border dark:border-slate rounded-lg w-3/6 dark:text-neutral-300 border-bg-light-tertiary;
+  @apply flex flex-col items-center justify-center w-full md:shadow-xl py-12 md:border md:dark:border-slate md:rounded-lg md:w-3/6 dark:text-neutral-300 md:border-bg-light-tertiary;
 }
 
 .authenticated_forms_showpass{
