@@ -1,7 +1,7 @@
-from ..exstensions import ma
+from exstensions import ma
 from marshmallow import (fields, validates, 
                          ValidationError, validate, pre_load)
-from ..models.post import Post,PostMedia
+from models.post import Post,PostMedia
 
 class PostSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

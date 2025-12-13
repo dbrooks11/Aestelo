@@ -1,19 +1,19 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime, timezone
-from ..exstensions import db
-from ..models.user import UserProfile
-from ..models.visit import Visit, VisitMedia
-from ..models.post import Post
-from ..models.location import Location
-from ..schemas.visit_schema import visit_schema, visit_media_schema,partial_schema,ValidationError
-from ..schemas.location_schema import location_schema
-from ..routes.auth_required_wrapper import admin_required
-from ..util.photo_processing import photo_processing, get_decimal_coordinates
-from ..util.validation import photo_validation
-from ..util.storage import upload_to_r2
-from ..util.outlier_coords import average_location
-from ..util.decorators import (profile_both_check_banned_removed, block_and_follow_check, profile_current_check_visit, 
+from exstensions import db
+from models.user import UserProfile
+from models.visit import Visit, VisitMedia
+from models.post import Post
+from models.location import Location
+from schemas.visit_schema import visit_schema, visit_media_schema,partial_schema,ValidationError
+from schemas.location_schema import location_schema
+from routes.auth_required_wrapper import admin_required
+from util.photo_processing import photo_processing, get_decimal_coordinates
+from util.validation import photo_validation
+from util.storage import upload_to_r2
+from util.outlier_coords import average_location
+from util.decorators import (profile_both_check_banned_removed, block_and_follow_check, profile_current_check_visit, 
                              profile_check_current__banned_removed)
 
 

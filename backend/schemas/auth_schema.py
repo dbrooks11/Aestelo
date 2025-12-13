@@ -1,6 +1,6 @@
 # schemas/auth_schema.py
-from ..exstensions import ma, db
-from ..models.auth import AuthUser
+from exstensions import ma, db
+from models.auth import AuthUser
 from marshmallow import validates,validates_schema, ValidationError, fields, validate
 from sqlalchemy import exists
 from datetime import datetime

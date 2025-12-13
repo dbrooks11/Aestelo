@@ -1,4 +1,4 @@
-from ..exstensions import db
+from exstensions import db
 from sqlalchemy.orm import relationship
 from sqlalchemy import (Column, 
                         String, DateTime, Boolean, Integer)

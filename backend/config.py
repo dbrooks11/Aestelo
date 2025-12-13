@@ -1,4 +1,7 @@
 import os
+from flask.logging import default_handler
+import logging
+from logging.config import dictConfig
 from dotenv import load_dotenv
 from botocore.client import Config
 from datetime import timedelta
@@ -74,3 +77,26 @@ config = {
     'production': ProductionConfig,
     'default': DevelopmentConfig
 }
+
+def configure_logging(app):
+    dictConfig({
+        'version': 1,
+        'formatters': {
+            'default': {
+                'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+            }
+        },
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+                'stream': 'ext://sys.stdout',
+                'formatter': 'default'
+            }
+        },
+        'root': {
+            'level': 'INFO', #root level for development
+            'handlers': ['console']
+        }
+    })
+    
+    app.logger.removeHandler(default_handler)

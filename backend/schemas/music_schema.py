@@ -1,6 +1,6 @@
 # schemas/user.py
-from ..exstensions import ma
-from ..models.music_track import MusicTrack
+from exstensions import ma
+from models.music_track import MusicTrack
 from marshmallow import validates, ValidationError, fields, validate,pre_load
 from datetime import datetime
 

@@ -1,15 +1,15 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import exists
-from ..exstensions import db
-from ..models.block_profile import BlockProfile
-from ..models.followers_and_following import Follow
-from ..models.music_track import MusicTrack
-from ..models.auth import AuthUser
-from ..schemas.music_schema import music_track_schema
-from ..schemas.user_schema import user_profile_schema, profile_can_edit, partial_schema ,profile_viewing, ValidationError
-from ..util.music_track import set_track
-from ..util.decorators import profile_check_current__banned_removed
+from exstensions import db
+from models.block_profile import BlockProfile
+from models.followers_and_following import Follow
+from models.music_track import MusicTrack
+from models.auth import AuthUser
+from schemas.music_schema import music_track_schema
+from schemas.user_schema import user_profile_schema, profile_can_edit, partial_schema ,profile_viewing, ValidationError
+from util.music_track import set_track
+from util.decorators import profile_check_current__banned_removed
 
 profile_bp = Blueprint('profile',__name__, url_prefix='/profile')
 

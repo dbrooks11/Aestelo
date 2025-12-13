@@ -1,8 +1,8 @@
 
-from ..exstensions import db
+from exstensions import db
 import uuid
 from datetime import datetime, timezone
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import(
     create_access_token, 
     create_refresh_token,
@@ -16,11 +16,11 @@ from flask_jwt_extended import(
 import random
 from sqlalchemy import exists
 from werkzeug.security import check_password_hash, generate_password_hash
-from ..schemas.user_schema import ValidationError
-from ..schemas.auth_schema import username_pass_only,email_pass_only,email_pass_confirm_pass
-from ..models.user import UserProfile, UserInfo, UserSettings, UserRole, UserSubscription
-from ..models.token_blacklist import TokenBlackList
-from ..models.auth import AuthUser
+from schemas.user_schema import ValidationError
+from schemas.auth_schema import username_pass_only,email_pass_only,email_pass_confirm_pass
+from models.user import UserProfile, UserInfo, UserSettings, UserRole, UserSubscription
+from models.token_blacklist import TokenBlackList
+from models.auth import AuthUser
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -45,13 +45,13 @@ def signup():
     try:
         validate_auth = email_pass_confirm_pass.load(data)
     except ValidationError as error:
-        # return jsonify('error', err.messages), 404
         error_messages = []
         for field, messages in error.messages.items():
             if isinstance(messages, list):
                 error_messages.extend(messages)
             else:
                 error_messages.append(str(messages))
+        current_app.logger.error('Signup endpoint failed due to validation error of info')
         return jsonify({"error": ". ".join(error_messages)}), 401
 
     try:
@@ -90,11 +90,11 @@ def signup():
         db.session.commit()
 
         db.session.commit()
+        current_app.logger.info('Successful Signup')
         return jsonify({'message':'Account created successfully'}), 201
     except Exception as e:
         db.session.rollback()
-        print(f"ERROR: {e}") 
-        print(f"Error type: {type(e)}")
+        current_app.logger.error(f'Signup endpoint ERROR: {e}')
         return jsonify({'error': 'Account could not be created'}), 400
     
 
@@ -122,6 +122,7 @@ def login_email():
                 error_messages.extend(messages)
             else:
                 error_messages.append(str(messages))
+        current_app.logger.error('Login-email endpoint failed due to validation error of info')
         return jsonify({"error": ". ".join(error_messages)}), 401
 
     authenticate_user = AuthUser.query.filter_by(email = validate_login['email']).first()
@@ -148,6 +149,7 @@ def login_email():
     set_access_cookies(response, access_token)
     set_refresh_cookies(response, refresh_token)
 
+    current_app.logger.info('Login-email endpoint successful')
     return response, 200
 
 
@@ -174,6 +176,7 @@ def login_username():
                 error_messages.extend(messages)
             else:
                 error_messages.append(str(messages))
+        current_app.logger.error('Login-username endpoint failed due to validation error of info')
         return jsonify({"error": ". ".join(error_messages)}), 401
 
     authenticate_user = AuthUser.query.filter_by(username = validate_login['username']).first()
@@ -200,6 +203,7 @@ def login_username():
     set_access_cookies(response, access_token)
     set_refresh_cookies(response, refresh_token)
 
+    current_app.logger.info('Login-username endpoint successful')
     return response, 200
     
 
@@ -215,8 +219,10 @@ def logout():
 
         response = jsonify({'message': 'Logout successful'})
         unset_jwt_cookies(response)
+        current_app.logger.info('Logout endpoint successful')
         return response, 200
     except Exception:
+        current_app.logger.error('Logout endpoint failed')
         return jsonify({'error': 'Failed to logout'}), 400
 
 

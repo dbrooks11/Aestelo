@@ -1,6 +1,7 @@
 services:
   # --- FLASK BACKEND ---
   backend:
+    container_name: aestelo_backend
     build: ./backend
     ports:
       - "5000:5000"
@@ -16,18 +17,27 @@ services:
       - ./backend/env_backend/.env.backend_sightengine
       - ./backend/env_backend/.env.backend_sendgrid
       - ./backend/env_backend/.env.development
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"       # Max size of one log file
+        max-file: "3"
 
   # --- REACT FRONTEND ---
   frontend:
+    container_name: aestelo_frontend
     build: ./frontend
     ports:
       - "5173:5173"
     volumes:
       - ./frontend:/app      # SYNC: Maps local folder to container
-      - /app/node_modules    # TRICK: Prevents local node_modules from overriding container's
+      - aestelo_node_modules:/app/node_modules   # TRICK: Prevents local node_modules from overriding container's
     environment:
       - VITE_API_URL=http://localhost:5000 
     depends_on:
       - backend
     env_file:
       - ./frontend/.env
+
+volumes:
+  aestelo_node_modules:

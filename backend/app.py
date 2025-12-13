@@ -2,36 +2,14 @@
 from flask import Flask, jsonify
 from flask_talisman import Talisman
 from flask_cors import CORS
-from .config import Config
+from config import Config, configure_logging
 from colorama import init
-import backend.models
-from backend.models.token_blacklist import TokenBlackList
-from .exstensions import db, ma, jwt, limiter,mg, toolbar
-from .routes import register_blueprints
+import models
+from models.token_blacklist import TokenBlackList
+from exstensions import db, ma, jwt, limiter,mg, toolbar
+from routes import register_blueprints
 # from logging.config import dictConfig
-from .routes.logging_wrapper import handle_errors
-
-
-# dictConfig({
-#     "version": 1,
-#     "formatters": {
-#         "default": {
-#             "format": "[%(asctime)s] %(levelname)s in %(module)s - %(message)s",
-#             "datefmt": "%B %d, %Y | %I:%M:%S %p",
-#         }
-#     },
-#     "handlers": {
-#         "file": {
-#             "class": "logging.FileHandler",
-#             "filename": "app_logs.log",
-#             "formatter": "default",
-#         },
-#     },
-#     "root": {
-#         "level": "DEBUG",  
-#         "handlers": ["file"],  
-#     },
-# })
+from routes.logging_wrapper import handle_errors
 
 
 def create_app():
@@ -41,19 +19,21 @@ def create_app():
     app.config['DEBUG_TB_ENABLED'] = True
     init(autoreset=True)
     app.json.sort_keys = False
+    configure_logging(app)
+
     
     toolbar.init_app(app)
     db.init_app(app)
     ma.init_app(app)
     jwt.init_app(app)
     limiter.init_app(app)
-    mg.init_app(app, db)
+    mg.init_app(app, db, compare_type=True)
 
     
     #todo: TEMPORARY CORS Attributes
     CORS(app, 
-     origins=["http://localhost:5176", 
-              "http://127.0.0.1:5176", 
+     origins=["http://localhost:5173", 
+              "http://127.0.0.1:5173", 
               "null"],
      allow_headers=[
               "Content-Type", 
