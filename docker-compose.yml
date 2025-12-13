@@ -1,0 +1,33 @@
+services:
+  # --- FLASK BACKEND ---
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app  # SYNC: Maps your local folder to container folder
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_DEBUG=1
+      # Pass your secret keys here or use env_file
+    env_file:
+      - ./backend/env_backend/.env.backend_cloudflare
+      - ./backend/env_backend/.env.backend_supabase
+      - ./backend/env_backend/.env.backend_sightengine
+      - ./backend/env_backend/.env.backend_sendgrid
+      - ./backend/env_backend/.env.development
+
+  # --- REACT FRONTEND ---
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app      # SYNC: Maps local folder to container
+      - /app/node_modules    # TRICK: Prevents local node_modules from overriding container's
+    environment:
+      - VITE_API_URL=http://localhost:5000 
+    depends_on:
+      - backend
+    env_file:
+      - ./frontend/.env

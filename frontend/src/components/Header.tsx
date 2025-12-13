@@ -1,5 +1,5 @@
 // Universal Header
-import { type JSX, type Dispatch, type SetStateAction} from "react";
+import { type JSX, type Dispatch, type SetStateAction, use, useState} from "react";
 import {motion, AnimatePresence} from 'framer-motion'
 import { Moon, Sun, Search, Menu } from "lucide-react";
 import { Link, useNavigate, type NavigateFunction, useLocation} from "react-router-dom";
@@ -16,6 +16,7 @@ type HeaderProps = {
 
 export default function Header({isAuthenticated, setTheme, theme}: HeaderProps): JSX.Element {
 
+  const [isDropwdown, setIsDropwdown] = useState<boolean>(false)
   const navigate: NavigateFunction = useNavigate()
   const location = useLocation()
 
@@ -73,6 +74,13 @@ export default function Header({isAuthenticated, setTheme, theme}: HeaderProps):
       </button>
     )
   }
+
+  function toggleDropdown(){
+    setIsDropwdown((bool)=>{
+      return bool ? false : true
+    })
+  }
+
   
   return (
     // todo: remove home links for production(home link will be logo)
@@ -89,15 +97,26 @@ export default function Header({isAuthenticated, setTheme, theme}: HeaderProps):
           <span className="text-3xl text-black dark:text-white">Aeste<span className="text-accents-primary">lo</span></span>
         </div>
 
-          {/* Dropdown menu for smaller screens */}
+          {/* Dropdown Menu for smaller screens */}
         {!isAuthenticated ? 
         <div className="flex gap-6 md:hidden">
           <ThemeButton/>
-          <button type="button" className="text-accents-primary cursor-pointer w-8 hover:text-accents-deep ">
-            <nav>
+          <button onClick={toggleDropdown} type="button" className="text-accents-primary cursor-pointer w-8 hover:text-accents-deep ">
               <Menu className="w-full h-full"/>
-            </nav>
         </button>
+        {isDropwdown ? <nav id="nav-dropdown-menu" className="">
+          <ul>
+            <li>
+              <Link className="header_links" to="/">Home</Link>
+            </li>
+            <li>
+              <Link className="header_links" to="/about">About</Link>
+            </li>
+            <li>
+              <Link className="header_links" to="/explore">Explore</Link>
+            </li>
+          </ul>
+        </nav>: null}
         </div>: null}
 
         {/* Search Input for Authenticated Users */}

@@ -1,6 +1,8 @@
 
 import type {JSX} from 'react'
 import ProfileLinks from './ProfileLinks'
+import ProfileBadges from './ProfileBadges'
+import defaultProfilePic from "../../assets/default_profile_pic.png"
 
 
 type ProfileInfoParams = {
@@ -20,12 +22,15 @@ type ProfileInfoParams = {
 
 export default function ProfileInfo(props: ProfileInfoParams):JSX.Element {
   return (
-    <section className='flex flex-col items-center justify-center mt-10'>
-        <div className='flex flex-col max-w-full'>
-            <div className='' aria-hidden>Profile Banner</div>
+    <section className='flex flex-col items-center justify-center mt-10 max-w-full relative'>
+        <img src={defaultProfilePic} className='absolute z-10 w-full'></img>
+        <div className='flex flex-col w-full z-100'>
             <section className='flex items-center gap-6 px-4'>
-                <div className='profile_image_wrapper'>
-                    <img className="profile_image" src={props.profile_pic_url} alt="User's Profile Picture"></img>
+                <div className='relative'>
+                    <span className='z-51 text-3xl absolute top-0 left-0 rotate'>🔥</span>
+                    <div className='profile_image_wrapper'>
+                        <img className="profile_image" src={props.profile_pic_url} alt="User's Profile Picture"></img>
+                    </div>
                 </div>
                 <section className='flex flex-col gap-4'>
                     <h3 className="text-accents-primary" role = 'username' aria-label="username">@{props.username}</h3>
@@ -51,6 +56,7 @@ export default function ProfileInfo(props: ProfileInfoParams):JSX.Element {
                 twitter_x={props.twitter_x}
                 facebook={props.facebook}
             />
+            <ProfileBadges/>
         </div>
     </section>
   )

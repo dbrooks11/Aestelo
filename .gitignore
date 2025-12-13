@@ -25,6 +25,7 @@ __pycache__/
 *.so
 *.egg
 *.egg-info/
+.pytest_cache
 
 # IDEs
 .vscode/
@@ -44,9 +45,8 @@ meexample.png
 png
 jpg
 meexample1.jpg
+
 #Docker stuff
-docker-compose.yml
-.yml
 
 #gitginore
 .gitignore

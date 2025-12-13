@@ -97,14 +97,14 @@ export default function SignupPage(): JSX.Element {
                 <div className="authenticated_forms_field_container relative">
                     <label htmlFor="password">Password</label>
                     <input className="authenticated_forms_input_field" type={showPasswordOne} name="password" id="password" placeholder="Enter password"required></input>
-                    <button type="button" onClick={showPasswordsOne} className="authenticated_forms_showpass" aria-label="show or hide password button">{showPasswordOne === 'text' ? <EyeClosed className="w-full h-full"/> : <Eye className="w-full h-full"/>}</button>
+                    <button type="button" tabIndex={-1} onClick={showPasswordsOne} className="authenticated_forms_showpass" aria-label="show or hide password button">{showPasswordOne === 'text' ? <EyeClosed className="w-full h-full"/> : <Eye className="w-full h-full"/>}</button>
                 </div>
 
                 {/* Re-confirm password field */}
                 <div className="authenticated_forms_field_container relative">
                     <label htmlFor="confirm_password">Confirm Password</label>
                     <input className="authenticated_forms_input_field" type={showPasswordTwo} name="confirm_password" id="confirm_password" placeholder="Re-enter password" required></input>
-                    <button type="button" onClick={showPasswordsTwo} className="authenticated_forms_showpass" aria-label="show or hide password button">{showPasswordTwo === 'text' ? <EyeClosed className="w-full h-full"/> : <Eye className="w-full h-full"/>}</button>
+                    <button type="button" tabIndex={-1} onClick={showPasswordsTwo} className="authenticated_forms_showpass" aria-label="show or hide password button">{showPasswordTwo === 'text' ? <EyeClosed className="w-full h-full"/> : <Eye className="w-full h-full"/>}</button>
                 </div>
 
                 {/* Submit button component */}

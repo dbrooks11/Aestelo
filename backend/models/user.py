@@ -66,9 +66,10 @@ class UserProfile(db.Model):
     profile_created_at = Column(DateTime, default=datetime.now(timezone.utc))
 
 
-    user_info = relationship('UserInfo', backref='user_profile', lazy='joined')
-    user_settings = relationship('UserSettings', backref= 'user_profile', lazy='joined')
-    user_subscription = relationship('UserSubscription', backref= 'user_profile', lazy='joined')
+    user_info = relationship('UserInfo', uselist=False ,backref='user_profile', lazy='joined')
+    user_settings = relationship('UserSettings', uselist=False ,backref= 'user_profile', lazy='joined')
+    user_role = relationship('UserRole', uselist=False, backref='user_profile', lazy='joined')
+    user_subscription = relationship('UserSubscription', uselist=False ,backref= 'user_profile', lazy='joined')
     post = relationship('Post', backref='user_profile', lazy='selectin')
     post_media = relationship('PostMedia', backref='user_profile', lazy=True)
     visit = relationship('Visit', backref='user_profile', lazy='selectin')

@@ -4,8 +4,12 @@
 
 @layer utilities {
   *{
-    /* @apply border border-red-500 */
+    @apply border border-red-500
   }
+}
+
+@utility no-scrollbar {
+  @apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
 }
 @theme {
     /* Rose Colors */

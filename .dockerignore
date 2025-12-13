@@ -8,6 +8,14 @@ pip-log.txt
 .pytest_cache
 .coverage
 *.log
+.DS_Store
+
+# React
+node_modules
+dist
+.env
+.git
+.DS_Store
 
 # Virtual Environment (Don't copy local venv)
 venv/

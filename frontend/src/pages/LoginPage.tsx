@@ -97,7 +97,7 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
                 <div className="authenticated_forms_field_container relative">
                     <label htmlFor="password">Password</label>
                     <input type={showPassword} name="password" id="password" autoComplete="current-password" className="authenticated_forms_input_pass" placeholder="Enter password" required></input>
-                    <button type="button" onClick={showPasswords} className="authenticated_forms_showpass" aria-label="show or hide password button">{showPassword === 'text' ? <EyeClosed className="w-full h-full"/> : <Eye className="w-full h-full"/>}</button>
+                    <button type="button" tabIndex={-1} onClick={showPasswords} className="authenticated_forms_showpass" aria-label="show or hide password button">{showPassword === 'text' ? <EyeClosed className="w-full h-full"/> : <Eye className="w-full h-full"/>}</button>
                 </div>
 
                 {/* Submit button component */}
