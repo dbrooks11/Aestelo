@@ -16,7 +16,7 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
 
 
     async function login(formData: FormData): Promise<void>{
-        const name: FormDataEntryValue | null = formData.get("name")
+        const name: FormDataEntryValue | null = formData.get("name") //for honey pot check
         const email: FormDataEntryValue | null = formData.get('email') ? formData.get('email') : null
         const username: FormDataEntryValue | null = formData.get('username') ? formData.get('username') : null
         const password: FormDataEntryValue | null = formData.get('password')

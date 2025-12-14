@@ -24,13 +24,14 @@ from models.auth import AuthUser
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
+
 @auth_bp.route('/signup', methods = ['POST'])
 def signup():
 
     data = request.get_json()
 
     if(data.get("name")):
-        return jsonify({'error', 'Invalid(b)'}), 401
+        return jsonify({'error': 'Invalid(b)'}), 401
 
     email = data.get('email', None)
     password = data.get('password', None)
@@ -66,6 +67,9 @@ def signup():
                 break
     
             attempts += 1
+        
+        if not username:
+            return jsonify({'error': 'Server busy, please try again'}), 500
 
         user_id = uuid.uuid4()
 
@@ -89,7 +93,6 @@ def signup():
         db.session.add(new_user_profile)
         db.session.commit()
 
-        db.session.commit()
         current_app.logger.info('Successful Signup')
         return jsonify({'message':'Account created successfully'}), 201
     except Exception as e:
@@ -105,13 +108,7 @@ def login_email():
     data = request.get_json()
 
     if(data.get("name")):
-        return jsonify({'error', 'Invalid(b)'}), 401
-
-    email = data.get('email', None)
-    password = data.get('password', None)
-
-    if email is None or password is None:
-        return jsonify({'error': 'Email and Password are required'}), 401
+        return jsonify({'error': 'Invalid input'}), 401
     
     try:
         validate_login = email_pass_only.load(data, partial = True)
@@ -128,17 +125,20 @@ def login_email():
     authenticate_user = AuthUser.query.filter_by(email = validate_login['email']).first()
 
     if authenticate_user:
-        password_correct = check_password_hash(authenticate_user.password_encrypted, validate_login['password'])
+        user_hash = authenticate_user.password_encrypted
     else:
-        check_password_hash(generate_password_hash('dummy_password'), validate_login['password'])
-        password_correct = False
+        #dummy password hash
+        user_hash = 'scrypt:32768:8:1$6k9S8X1d$d067215201772658f8b461876f827918e974e628464a4d6f6580f585d564850c18d1796120e2e5055b41d214a1a511855e90538053513a967732d84784136939'
 
-    if authenticate_user is None or password_correct is False:
+    password_check = check_password_hash(user_hash, validate_login['password'])
+
+    if authenticate_user is None or password_check is False:
         return jsonify({'error': 'Invalid email or password'}),401
     
     authenticate_user.last_sign_in_at = datetime.now(timezone.utc)
     db.session.commit()
 
+    print(type(authenticate_user.id))
     access_token = create_access_token(identity=authenticate_user.id)
     refresh_token = create_refresh_token(identity=authenticate_user.id)
 
@@ -159,13 +159,7 @@ def login_username():
     data = request.get_json()
 
     if(data.get("name")):
-        return jsonify({'error', 'Invalid(b)'}), 401
-
-    username = data.get('username', None)
-    password = data.get('password', None)
-
-    if username is None or password is None:
-        return jsonify({'error': 'Username and Password are required'}), 401
+        return jsonify({'error', 'Invalid input'}), 401
     
     try:
         validate_login = username_pass_only.load(data)
@@ -182,10 +176,12 @@ def login_username():
     authenticate_user = AuthUser.query.filter_by(username = validate_login['username']).first()
 
     if authenticate_user:
-        password_check = check_password_hash(authenticate_user.password_encrypted, validate_login['password'])
+        user_hash = authenticate_user.password_encrypted
     else:
-        check_password_hash(generate_password_hash('dummy_password'), validate_login['password'])
-        password_check=False
+        #dummy password hash
+        user_hash = 'scrypt:32768:8:1$6k9S8X1d$d067215201772658f8b461876f827918e974e628464a4d6f6580f585d564850c18d1796120e2e5055b41d214a1a511855e90538053513a967732d84784136939'
+
+    password_check = check_password_hash(user_hash, validate_login['password'])
 
     if authenticate_user is None or password_check is False:
         return jsonify({'error': 'Invalid username or password'}), 401
