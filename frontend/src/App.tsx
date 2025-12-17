@@ -2,7 +2,8 @@ import { Routes, Route, useLocation, useNavigate, type NavigateFunction } from '
 import AuthProvider from './context/AuthProvider'
 import ProtectedRoute from './components/ProtectedRoute'
 import { useState, useEffect} from 'react'
-import Header from './components/Header'
+import Header from './components/Header/Header'
+import HeaderAuth from './components/Header/HeaderAuthenticated'
 import HomePage from './pages/HomePage'
 import SignupPage from './pages/SignupPage'
 import LoginPage from './pages/LoginPage'
@@ -12,9 +13,8 @@ import FeedPage from './pages/FeedPage'
 
 
 function App() {
-  const navigate: NavigateFunction = useNavigate()
   const currentRoute = useLocation()
-  const hideHeaderRoutes = ['/','/about','/explore','/signup','/login-email','/login-username']
+  const hideAuthHeaderRoutes = ['/','/about','/explore','/signup','/login-email','/login-username']
 
   const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem("theme") as "light" | "dark") ?? "light")
   
@@ -37,11 +37,10 @@ function App() {
     
       <div data-theme={theme} className="flex flex-col h-screen bg-bg-light-secondary dark:bg-charcoal">
         <AuthProvider>
-          <Header 
-          isAuthenticated={hideHeaderRoutes.includes(currentRoute.pathname) ? false : true} 
-          setTheme={setTheme}
-          theme={theme}
-          ></Header>
+          {hideAuthHeaderRoutes.includes(currentRoute.pathname) ? 
+          <Header setTheme={setTheme} theme={theme}/>: 
+          <HeaderAuth setTheme = {setTheme} theme={theme}
+          />}
 
           <div className='flex-1 flex flex-col'>
           {/* TODO: channge route element for about and explore  */}
@@ -52,6 +51,7 @@ function App() {
                 <Route path="/signup" element={<SignupPage/>}/>
                 <Route path='/login-email' element={<LoginPage isEmail={true} />}/>
                 <Route path='/login-username' element={<LoginPage isEmail={false} />}/>
+
 
               <Route element={<ProtectedRoute/>}>
                 <Route path='/profile/me' element={<ProfilePage setGlobalErrors={setGlobalErrors}/>}/>

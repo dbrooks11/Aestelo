@@ -10,6 +10,7 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
     const navigate: NavigateFunction = useNavigate()
 
     const {checkAuth} = useAuth()
+    
     const [showPassword, setShowPassword] = useState("password")
     const[emailState, setEmailState] = useState<string | undefined>("")
     const [usernameState, setUsernameState] = useState<string | undefined>("")

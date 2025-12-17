@@ -52,6 +52,8 @@ protectedInstance.interceptors.request.use(
     (error) => Promise.reject(error)
 )
 
+
+// TODO: remove console logs for token refresh message
 protectedInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
@@ -99,15 +101,15 @@ export function AxisErrorHelper(error: AxiosError | unknown, setError: (err: str
         // Server responded with error
         const errorMessage = axiosError.response.data?.error || axiosError.response.data?.message || fallbackErrorName
         setError(errorMessage)
-        console.error(`${fallbackErrorName} error:`, errorMessage)
+        // console.error(`${fallbackErrorName} error:`, errorMessage)
     } else if (axiosError.request) {
         // Request made but no response
         setError('No response from server. Please try again.')
-        console.error('No response:', axiosError.request)
+        // console.error('No response:', axiosError.request)
     } else {
         // Something else happened
         setError('An error occurred. Please try again.')
-        console.error('Error:', axiosError.message)
+        // console.error('Error:', axiosError.message)
     }
 }
 
@@ -118,12 +120,12 @@ export function AxisErrorHelperConsoleOnly(error: AxiosError | unknown, fallback
     if (axiosError.response) {
         // Server responded with error
         const errorMessage = axiosError.response.data?.error || axiosError.response.data?.message || fallbackErrorName
-        console.error(`${fallbackErrorName} error:`, errorMessage)
+        // console.error(`${fallbackErrorName} error:`, errorMessage)
     } else if (axiosError.request) {
         // Request made but no response
         console.error('No response:', axiosError.request)
     } else {
         // Something else happened
-        console.error('Error:', axiosError.message)
+        // console.error('Error:', axiosError.message)
     }
 }

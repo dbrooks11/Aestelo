@@ -1,22 +1,19 @@
 // Universal Header
-import { type JSX, type Dispatch, type SetStateAction, use, useState} from "react";
+import { type JSX, type Dispatch, type SetStateAction} from "react";
 import {motion, AnimatePresence} from 'framer-motion'
-import { Moon, Sun, Search, Menu } from "lucide-react";
+import { Moon, Sun, Search} from "lucide-react";
 import { Link, useNavigate, type NavigateFunction, useLocation} from "react-router-dom";
-import {AxisErrorHelperConsoleOnly, protectedInstance } from "../util/axios_api_helpers";
+import {AxisErrorHelperConsoleOnly, protectedInstance } from "../../util/axios_api_helpers";
 import type { AxiosResponse } from "axios";
 
 
 type HeaderProps = {
   theme: 'light' | 'dark'
   setTheme: Dispatch<SetStateAction<'light' | 'dark'>>
-  isAuthenticated: boolean
 }
 
 
-export default function Header({isAuthenticated, setTheme, theme}: HeaderProps): JSX.Element {
-
-  const [isDropwdown, setIsDropwdown] = useState<boolean>(false)
+export default function HeaderAuth({ setTheme, theme}: HeaderProps): JSX.Element {
   const navigate: NavigateFunction = useNavigate()
   const location = useLocation()
 
@@ -48,15 +45,6 @@ export default function Header({isAuthenticated, setTheme, theme}: HeaderProps):
 
   }
 
-  function loginRouting(): void{
-    navigate('/login-email')
-  }
-
-  function signupRouting(): void{
-    navigate('/signup')
-  }
-
-
   function ThemeButton(): JSX.Element{
     return(
       <button className="theme_button" onClick={setThemeHeader}>
@@ -75,52 +63,18 @@ export default function Header({isAuthenticated, setTheme, theme}: HeaderProps):
     )
   }
 
-  function toggleDropdown(){
-    setIsDropwdown((bool)=>{
-      return bool ? false : true
-    })
-  }
 
-  
   return (
     // todo: remove home links for production(home link will be logo)
     <header className="header_container">
-        {/* Header Links */}
-        {!isAuthenticated ? <nav className=" hidden md:flex gap-8 dark:text-mid-gray text-black/75 text-sm p-1 min-w-1/3">
-          <Link className="header_links" to="/">Home</Link>
-          <Link className="header_links" to="/about">About</Link>
-          <Link className="header_links" to="/explore">Explore</Link>
-        </nav>: null}
 
         {/* Aestelo Logo */}
-        <div className={`${isAuthenticated ? 'w-1/3 min-w-fit' : null}`}>
+        <div className='w-1/3 min-w-fit'>
           <span className="text-3xl text-black dark:text-white">Aeste<span className="text-accents-primary">lo</span></span>
         </div>
 
-          {/* Dropdown Menu for smaller screens */}
-        {!isAuthenticated ? 
-        <div className="flex gap-6 md:hidden">
-          <ThemeButton/>
-          <button onClick={toggleDropdown} type="button" className="text-accents-primary cursor-pointer w-8 hover:text-accents-deep ">
-              <Menu className="w-full h-full"/>
-        </button>
-        {isDropwdown ? <nav id="nav-dropdown-menu" className="">
-          <ul>
-            <li>
-              <Link className="header_links" to="/">Home</Link>
-            </li>
-            <li>
-              <Link className="header_links" to="/about">About</Link>
-            </li>
-            <li>
-              <Link className="header_links" to="/explore">Explore</Link>
-            </li>
-          </ul>
-        </nav>: null}
-        </div>: null}
-
         {/* Search Input for Authenticated Users */}
-        {isAuthenticated && !hideSearchPaths.includes(location.pathname) ? <form className="w-1/3">
+        {!hideSearchPaths.includes(location.pathname) ? <form className="w-1/3">
           <label htmlFor="search" className="text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
           <div className="relative">
             <div className="absolute inset-y-0 start-0 flex items-center pl-3">
@@ -130,22 +84,15 @@ export default function Header({isAuthenticated, setTheme, theme}: HeaderProps):
           </div>
         </form>: null}
 
-        {/* Regular Header for Public users */}
-        {!isAuthenticated ? <div className="hidden md:flex gap-4 text-white justify-end min-w-1/3 xs:max-md:hidden">
-            <ThemeButton/>
-            <button className="header_login_button" onClick={loginRouting}>Login</button>
-            <button className="header_signup_button" onClick={signupRouting}>SignUp</button>
-        </div>: null}
-
         {/* Header for Authenticated Users */}
-        {isAuthenticated ? <nav className={`flex gap-8 items-center ${!hideSearchPaths.includes(location.pathname) ? 'w-1/3 min-w-fit justify-end' : null}`}>
+        <nav className={`flex gap-8 items-center ${!hideSearchPaths.includes(location.pathname) ? 'w-1/3 min-w-fit justify-end' : null}`}>
             <Link to="/profile/me">Profile</Link>
             <Link to="/post/feed">Feed</Link>
             <div className="flex items-center border-l pl-3 gap-3">
               <ThemeButton/>
               <button className="header_logout_button" onClick={logout}>Logout</button>
             </div>
-        </nav>: null}
+        </nav>
     </header>
   )
 }

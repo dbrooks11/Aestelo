@@ -17,8 +17,8 @@ export default function AuthProvider({ children }: {children: ReactNode}): JSX.E
                 
             }
 
-        }catch(error){
-            console.error(error)
+        }catch{
+            setUser(null)
         }
         finally{
             setIsLoading(false)
