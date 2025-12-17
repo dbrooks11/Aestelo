@@ -1,6 +1,7 @@
 import { useState, type JSX} from "react";
 import { LoaderCircle, Eye, EyeClosed } from "lucide-react";
 import { useFormStatus } from "react-dom";
+import { useAuth } from "../context/AuthContext";
 import { useNavigate, type NavigateFunction, Link } from "react-router-dom";
 import { AxisErrorHelper, loginInstance } from "../util/axios_api_helpers";
 
@@ -8,7 +9,7 @@ import { AxisErrorHelper, loginInstance } from "../util/axios_api_helpers";
 export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
     const navigate: NavigateFunction = useNavigate()
 
-
+    const {checkAuth} = useAuth()
     const [showPassword, setShowPassword] = useState("password")
     const[emailState, setEmailState] = useState<string | undefined>("")
     const [usernameState, setUsernameState] = useState<string | undefined>("")
@@ -38,6 +39,7 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
 
             if(response.status === 200){
                 console.log(data.message)
+                await checkAuth()
                 navigate('/profile/me') 
             }
         }

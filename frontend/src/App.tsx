@@ -1,4 +1,6 @@
 import { Routes, Route, useLocation, useNavigate, type NavigateFunction } from 'react-router-dom'
+import AuthProvider from './context/AuthProvider'
+import ProtectedRoute from './components/ProtectedRoute'
 import { useState, useEffect} from 'react'
 import Header from './components/Header'
 import HomePage from './pages/HomePage'
@@ -32,27 +34,34 @@ function App() {
 
 
   return (
-    <div data-theme={theme} className="flex flex-col h-screen bg-bg-light-secondary dark:bg-charcoal">
-      <Header 
-      isAuthenticated={hideHeaderRoutes.includes(currentRoute.pathname) ? false : true} 
-      setTheme={setTheme}
-      theme={theme}
-      ></Header>
-      <div className='flex-1 flex flex-col'>
-        {/* TODO: channge route element for about and explore  */}
-        <Routes>
-          <Route path='/' element={<HomePage />}/>
-          <Route path='/about' element={<HomePage/>}/>
-          <Route path='/explore' element={<HomePage/>}/>
-          <Route path="/signup" element={<SignupPage/>}/>
-          <Route path='/login-email' element={<LoginPage isEmail={true} />}/>
-          <Route path='/login-username' element={<LoginPage isEmail={false} />}/>
-          <Route path='/profile/me' element={<ProfilePage setGlobalErrors={setGlobalErrors}/>}/>
-          <Route path='/profile/:id' element={<ProfilePage setGlobalErrors={setGlobalErrors}/>}/>
-          <Route path='/post/feed' element={<FeedPage/>}/>
-        </Routes>
+    
+      <div data-theme={theme} className="flex flex-col h-screen bg-bg-light-secondary dark:bg-charcoal">
+        <AuthProvider>
+          <Header 
+          isAuthenticated={hideHeaderRoutes.includes(currentRoute.pathname) ? false : true} 
+          setTheme={setTheme}
+          theme={theme}
+          ></Header>
+
+          <div className='flex-1 flex flex-col'>
+          {/* TODO: channge route element for about and explore  */}
+            <Routes>
+                <Route path='/' element={<HomePage />}/>
+                <Route path='/about' element={<HomePage/>}/>
+                <Route path='/explore' element={<HomePage/>}/>
+                <Route path="/signup" element={<SignupPage/>}/>
+                <Route path='/login-email' element={<LoginPage isEmail={true} />}/>
+                <Route path='/login-username' element={<LoginPage isEmail={false} />}/>
+
+              <Route element={<ProtectedRoute/>}>
+                <Route path='/profile/me' element={<ProfilePage setGlobalErrors={setGlobalErrors}/>}/>
+                <Route path='/profile/:id' element={<ProfilePage setGlobalErrors={setGlobalErrors}/>}/>
+                <Route path='/post/feed' element={<FeedPage/>}/>
+              </Route>
+            </Routes>
+          </div>
+        </AuthProvider>
       </div>
-    </div>
   )
 }
 

@@ -33,7 +33,7 @@ export default function Header({isAuthenticated, setTheme, theme}: HeaderProps):
   async function logout(): Promise<void>{
   
     try{
-      const response: AxiosResponse = await protectedInstance.post('auth/logout')
+      const response: AxiosResponse = await protectedInstance.post('/auth/logout')
 
       const data = response.data
 

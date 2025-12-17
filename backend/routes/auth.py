@@ -138,7 +138,6 @@ def login_email():
     authenticate_user.last_sign_in_at = datetime.now(timezone.utc)
     db.session.commit()
 
-    print(type(authenticate_user.id))
     access_token = create_access_token(identity=authenticate_user.id)
     refresh_token = create_refresh_token(identity=authenticate_user.id)
 
@@ -233,7 +232,20 @@ def refresh():
     return response, 200
 
 
-@auth_bp.route('/verify', methods = ['GET'])
+@auth_bp.route('/authenticate', methods = ['GET'])
 @jwt_required()
 def verify():
-    return jsonify({'authenticated': True})
+    current_user_id = get_jwt_identity()
+
+    user = db.session.query(UserProfile.username, UserProfile.profile_photo).filter_by(id = current_user_id).first()
+
+    if not user:
+        return jsonify({'error': 'User not found'}), 401
+
+    return jsonify({
+        'user': {
+            'id': current_user_id,
+            'username': user.username,
+            'profile_photo': user.profile_photo
+        }
+    }), 200

@@ -1,6 +1,7 @@
 
 import {useEffect, type JSX, useState, type Dispatch, type SetStateAction} from 'react'
-import { AxisErrorHelper, protectedInstance } from '../util/axios_api_helpers'
+import { useNavigate, type NavigateFunction } from 'react-router-dom'
+import { protectedInstance } from '../util/axios_api_helpers'
 import ProfileInfo from '../components/Profile/ProfileInfo'
 import ProfileTabs from '../components/Profile/ProfileTabs'
 import myProfilePic from '../assets/my_profile_pic.jpg'
@@ -39,6 +40,7 @@ type ProfileData = {
 
 export default function ProfilePage({setGlobalErrors}: {setGlobalErrors: Dispatch<SetStateAction<number>>}): JSX.Element {
 
+  const navigate: NavigateFunction = useNavigate()
   const [profileData, setProfileData] = useState<ProfileData | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>("")
@@ -51,25 +53,19 @@ export default function ProfilePage({setGlobalErrors}: {setGlobalErrors: Dispatc
 
         if([200,201,204].includes(response.status)){
           setProfileData(data.my_profile)
-          console.log('profile exist')
-        }else{
-          // setGlobalErrors(response.status)
-          console.log('profile error')
+          setIsLoading(false)
         }
 
       }catch(error){
-        AxisErrorHelper(error, setError, "Profile")
+        navigate('/login-email')
+        // AxisErrorHelper(error, setError, "Profile")
         
-      }
-      finally{
-        setIsLoading(false)
       }
     }
 
     profile()
   }, []);
     
-  console.log(profileData)
   
 
   return (
