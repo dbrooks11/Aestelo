@@ -13,7 +13,7 @@ type HeaderProps = {
 }
 
 
-export default function Header({ setTheme, theme}: HeaderProps): JSX.Element {
+export default function PublicHeader({ setTheme, theme}: HeaderProps): JSX.Element {
 
   const {isAuthenticated} = useAuth()
   const [isDropwdown, setIsDropwdown] = useState<boolean>(false)

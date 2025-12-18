@@ -38,7 +38,7 @@ type ProfileData = {
   
 }
 
-export default function ProfilePage({setGlobalErrors}: {setGlobalErrors: Dispatch<SetStateAction<number>>}): JSX.Element {
+export default function ProfilePage(): JSX.Element {
 
   const navigate: NavigateFunction = useNavigate()
   const [profileData, setProfileData] = useState<ProfileData | null>(null)
@@ -51,7 +51,7 @@ export default function ProfilePage({setGlobalErrors}: {setGlobalErrors: Dispatc
         const response: AxiosResponse = await protectedInstance.get('/profile/me')
         const data = response.data
 
-        if([200,201,204].includes(response.status)){
+        if(response.status === 200){
           setProfileData(data.my_profile)
           setIsLoading(false)
         }

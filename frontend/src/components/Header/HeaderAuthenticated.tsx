@@ -13,7 +13,7 @@ type HeaderProps = {
 }
 
 
-export default function HeaderAuth({ setTheme, theme}: HeaderProps): JSX.Element {
+export default function ProtectedHeader({ setTheme, theme}: HeaderProps): JSX.Element {
   const navigate: NavigateFunction = useNavigate()
   const location = useLocation()
 

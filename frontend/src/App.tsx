@@ -1,9 +1,8 @@
-import { Routes, Route, useLocation, useNavigate, type NavigateFunction } from 'react-router-dom'
-import AuthProvider from './context/AuthProvider'
-import ProtectedRoute from './components/ProtectedRoute'
+import { Routes, Route } from 'react-router-dom'
 import { useState, useEffect} from 'react'
-import Header from './components/Header/Header'
-import HeaderAuth from './components/Header/HeaderAuthenticated'
+import AuthProvider from './context/AuthProvider'
+import ProtectedRoute from './components/Wrappers/ProtectedRoute'
+import PublicRoute from './components/Wrappers/PublicRoute'
 import HomePage from './pages/HomePage'
 import SignupPage from './pages/SignupPage'
 import LoginPage from './pages/LoginPage'
@@ -13,8 +12,6 @@ import FeedPage from './pages/FeedPage'
 
 
 function App() {
-  const currentRoute = useLocation()
-  const hideAuthHeaderRoutes = ['/','/about','/explore','/signup','/login-email','/login-username']
 
   const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem("theme") as "light" | "dark") ?? "light")
   
@@ -22,44 +19,29 @@ function App() {
       localStorage.setItem('theme', theme)
   }, [theme]);
 
-  const [globalErrors, setGlobalErrors] = useState<number>(0)
-
-  // useEffect(() => {
-  //   if(globalErrors in [401, 410, 403]){
-  //     navigate('login-email')
-  //   }else{
-  //     return
-  //   }
-  // }, [globalErrors]);
-
-
   return (
     
       <div data-theme={theme} className="flex flex-col h-screen bg-bg-light-secondary dark:bg-charcoal">
         <AuthProvider>
-          {hideAuthHeaderRoutes.includes(currentRoute.pathname) ? 
-          <Header setTheme={setTheme} theme={theme}/>: 
-          <HeaderAuth setTheme = {setTheme} theme={theme}
-          />}
+        {/* TODO: channge route element for about and explore  */}
+          <Routes>
+            <Route element={<PublicRoute theme = {theme} setTheme={setTheme}/>}/>
+              <Route path='/' element={<HomePage />}/>
+              <Route path='/about' element={<HomePage/>}/>
+              <Route path='/explore' element={<HomePage/>}/>
+              <Route path="/signup" element={<SignupPage/>}/>
+              <Route path='/login-email' element={<LoginPage isEmail={true}/>}/>
+              <Route path='/login-username' element={<LoginPage isEmail={false}/>}/>
+            <Route/>
 
-          <div className='flex-1 flex flex-col'>
-          {/* TODO: channge route element for about and explore  */}
-            <Routes>
-                <Route path='/' element={<HomePage />}/>
-                <Route path='/about' element={<HomePage/>}/>
-                <Route path='/explore' element={<HomePage/>}/>
-                <Route path="/signup" element={<SignupPage/>}/>
-                <Route path='/login-email' element={<LoginPage isEmail={true} />}/>
-                <Route path='/login-username' element={<LoginPage isEmail={false} />}/>
+            <Route element={<ProtectedRoute theme={theme} setTheme={setTheme}/>}>
+              <Route path='/profile/me' element={<ProfilePage/>}/>
+              <Route path='/profile/:id' element={<ProfilePage/>}/>
+              <Route path='/post/feed' element={<FeedPage/>}/>
+            </Route>
 
-
-              <Route element={<ProtectedRoute/>}>
-                <Route path='/profile/me' element={<ProfilePage setGlobalErrors={setGlobalErrors}/>}/>
-                <Route path='/profile/:id' element={<ProfilePage setGlobalErrors={setGlobalErrors}/>}/>
-                <Route path='/post/feed' element={<FeedPage/>}/>
-              </Route>
-            </Routes>
-          </div>
+            <Route path='*' element={<div>404 Page Not Found</div>}/>
+          </Routes>
         </AuthProvider>
       </div>
   )
