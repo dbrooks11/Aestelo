@@ -11,11 +11,10 @@ type PublicRouteProps = {
 export default function PublicRoute ({theme, setTheme}: PublicRouteProps): JSX.Element {
     return (
         <>
-            <PublicHeader theme = {theme} setTheme={setTheme}></PublicHeader>
+            <PublicHeader theme = {theme} setTheme={setTheme}/>
             <div className="flex-1 flex flex-col">
                 <Outlet/>
-            </div>
-            
+            </div> 
         </>
         
     )

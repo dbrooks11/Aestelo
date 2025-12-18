@@ -29,7 +29,6 @@ export default function ProtectedRoute({theme, setTheme}: ProtectedRouteProps): 
         <div className="flex-1 flex flex-col">
             <Outlet/>
         </div>
-        
     </>
     
 )

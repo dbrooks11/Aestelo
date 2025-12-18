@@ -25,14 +25,14 @@ function App() {
         <AuthProvider>
         {/* TODO: channge route element for about and explore  */}
           <Routes>
-            <Route element={<PublicRoute theme = {theme} setTheme={setTheme}/>}/>
+            <Route element={<PublicRoute theme = {theme} setTheme={setTheme}/>}>
               <Route path='/' element={<HomePage />}/>
               <Route path='/about' element={<HomePage/>}/>
               <Route path='/explore' element={<HomePage/>}/>
               <Route path="/signup" element={<SignupPage/>}/>
               <Route path='/login-email' element={<LoginPage isEmail={true}/>}/>
               <Route path='/login-username' element={<LoginPage isEmail={false}/>}/>
-            <Route/>
+            </Route>
 
             <Route element={<ProtectedRoute theme={theme} setTheme={setTheme}/>}>
               <Route path='/profile/me' element={<ProfilePage/>}/>
