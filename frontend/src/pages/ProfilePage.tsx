@@ -1,6 +1,5 @@
 
-import {useEffect, type JSX, useState, type Dispatch, type SetStateAction} from 'react'
-import { useNavigate, type NavigateFunction } from 'react-router-dom'
+import {useEffect, type JSX, useState} from 'react'
 import { protectedInstance } from '../util/axios_api_helpers'
 import ProfileInfo from '../components/Profile/ProfileInfo'
 import ProfileTabs from '../components/Profile/ProfileTabs'
@@ -40,7 +39,6 @@ type ProfileData = {
 
 export default function ProfilePage(): JSX.Element {
 
-  const navigate: NavigateFunction = useNavigate()
   const [profileData, setProfileData] = useState<ProfileData | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>("")
@@ -57,7 +55,7 @@ export default function ProfilePage(): JSX.Element {
         }
 
       }catch(error){
-        navigate('/login-email')
+        console.log('failed to fetch profile')
         // AxisErrorHelper(error, setError, "Profile")
         
       }

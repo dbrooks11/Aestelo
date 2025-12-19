@@ -53,17 +53,16 @@ protectedInstance.interceptors.request.use(
 )
 
 
-// TODO: remove console logs for token refresh message
 protectedInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
         const {response, config} = error;
+
         // Handle expired access token
         if (response?.status === 401 && !config.__isRetry) {
             config.__isRetry = true;
 
             try {
-                console.log('token expired, refreshing...')
 
                 const refreshToken: string | undefined = csrfRefreshToken();
                 if (refreshToken) {
@@ -79,13 +78,8 @@ protectedInstance.interceptors.response.use(
                     return protectedInstance(config);
                 }
             } catch (refreshErr) {
-                console.error('Token refresh failed:', refreshErr)
-                window.location.href = '/login-email'
                 return Promise.reject(refreshErr)
             }
-        }else{
-            console.log('Error')
-            window.location.href = '/login-email'  
         }
         return Promise.reject(error);
     }  

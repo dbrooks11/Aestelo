@@ -29,6 +29,25 @@ export default function AuthProvider({ children }: {children: ReactNode}): JSX.E
         checkAuth()
     }, [])
 
+    useEffect(() => {
+        const authInterceptor = protectedInstance.interceptors.response.use(
+            (response) => response,
+            (error) => {
+                
+                if (error.response?.status === 401){
+                    console.warn("Session expired or invalid. Loggin out...")
+                    setUser(null)
+
+                }
+                return Promise.reject(error)
+            }
+        )
+    
+        return () => {
+            protectedInstance.interceptors.response.eject(authInterceptor)
+        }
+    }, [setUser]);
+
 
 
     const value: AuthContextType = {

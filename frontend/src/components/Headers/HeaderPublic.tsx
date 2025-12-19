@@ -66,7 +66,7 @@ export default function PublicHeader({ setTheme, theme}: HeaderProps): JSX.Eleme
   
   return (
     // todo: remove home links for production(home link will be logo)
-    <header className="header_container">
+    <header className='top-0 z-50 sticky flex items-center justify-between px-12 py-3 border-b-neutral-200 dark:border-b-black font-semibold dark:text-bg-light-secondary bg-bg-light-secondary/50 dark:bg-charcoal/65 backdrop-blur-lg ' >
         {/* Header Links */}
         <nav className=" hidden md:flex gap-8 dark:text-mid-gray text-black/75 text-sm p-1 min-w-1/3">
           <Link className="header_links" to="/">Home</Link>
