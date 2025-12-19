@@ -50,9 +50,6 @@
 }
 
 /* Header */
-.header_container{
-  @apply top-0 z-50 sticky flex items-center justify-between bg-bg-light-secondary/50 dark:bg-charcoal/65 backdrop-blur-lg px-12 py-3 border-b-neutral-200 dark:border-b-black font-semibold dark:text-bg-light-secondary;
-}
 
 .header_links{
   @apply transition hover:scale-110 dark:hover:text-bg-light hover:text-black cursor-pointer;

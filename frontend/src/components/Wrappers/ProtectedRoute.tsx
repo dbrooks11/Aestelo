@@ -1,7 +1,7 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { type JSX, type Dispatch, type SetStateAction} from "react";
 import { useAuth } from "../../context/AuthContext";
-import ProtectedHeader from "../Header/HeaderAuthenticated";
+import ProtectedHeader from "../Headers/HeaderAuth";
 
 type ProtectedRouteProps = {
     theme: 'light' | 'dark'

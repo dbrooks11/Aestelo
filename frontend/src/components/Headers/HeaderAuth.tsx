@@ -18,6 +18,7 @@ export default function ProtectedHeader({ setTheme, theme}: HeaderProps): JSX.El
   const location = useLocation()
 
   const hideSearchPaths: Array<string> = ['/profile/me']
+  const isProfilePage: Array<string> = ['/profile']
 
   function setThemeHeader():void{
         setTheme((prevTheme: HeaderProps['theme'])=>{
@@ -66,7 +67,7 @@ export default function ProtectedHeader({ setTheme, theme}: HeaderProps): JSX.El
 
   return (
     // todo: remove home links for production(home link will be logo)
-    <header className="header_container">
+    <header className={` ${isProfilePage.includes(location.pathname) ? 'bg-transparent': 'bg-bg-light-secondary/50 dark:bg-charcoal/65 backdrop-blur-lg '} 'top-0 z-50 sticky flex items-center justify-between px-12 py-3 border-b-neutral-200 dark:border-b-black font-semibold dark:text-bg-light-secondary'`}>
 
         {/* Aestelo Logo */}
         <div className='w-1/3 min-w-fit'>

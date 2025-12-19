@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { type JSX, type Dispatch, type SetStateAction} from "react";
-import PublicHeader from "../Header/Header";
+import PublicHeader from "../Headers/HeaderPublic";
 
 
 type PublicRouteProps = {

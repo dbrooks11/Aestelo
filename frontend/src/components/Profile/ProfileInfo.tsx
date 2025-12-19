@@ -27,7 +27,7 @@ export default function ProfileInfo(props: ProfileInfoParams):JSX.Element {
                 <div className='relative'>
                     <span className='z-51 text-3xl absolute top-0 left-0 rotate'>🔥</span>
                     <div className='profile_image_wrapper'>
-                        <img className="profile_image" src={props.profile_pic_url} alt="User's Profile Picture"></img>
+                        <img className="profile_image pointer-events-none" src={props.profile_pic_url} alt="User's Profile Picture"></img>
                     </div>
                 </div>
                 <section className='flex flex-col gap-4'>
