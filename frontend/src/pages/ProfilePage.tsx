@@ -70,8 +70,10 @@ export default function ProfilePage(): JSX.Element {
 
   return (
     <>
-    {!isLoading ? <main className='flex flex-col items-center'>
+    
+    {!isLoading ? <main className='flex flex-col items-center h-full relative'>
       {error ? error : null}
+      <img src={myProfilePic} className='absolute z-10 aspect-3/1 mask-b-from-20% mask-b-to-80% object-cover w-full'></img>
       <ProfileInfo 
         profile_pic_url={profileData?.profile_photo ? profileData.profile_photo : myProfilePic} //todo: default icon is temporary (remove it since it has liscense)
         follower_count={profileData?.follower_count ? profileData.follower_count : 0}

@@ -2,7 +2,6 @@
 import type {JSX} from 'react'
 import ProfileLinks from './ProfileLinks'
 import ProfileBadges from './ProfileBadges'
-import defaultProfilePic from "../../assets/default_profile_pic.png"
 
 
 type ProfileInfoParams = {
@@ -22,8 +21,7 @@ type ProfileInfoParams = {
 
 export default function ProfileInfo(props: ProfileInfoParams):JSX.Element {
   return (
-    <section className='flex flex-col items-center justify-center mt-10 max-w-full relative'>
-        <img src={defaultProfilePic} className='absolute z-10 w-full'></img>
+    <section className='flex flex-col items-center justify-center max-w-full relative mt-80'>
         <div className='flex flex-col w-full z-100'>
             <section className='flex items-center gap-6 px-4'>
                 <div className='relative'>
