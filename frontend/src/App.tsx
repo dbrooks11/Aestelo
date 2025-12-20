@@ -1,6 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import { useState, useEffect} from 'react'
-import AuthProvider from './context/AuthProvider'
+import AuthProvider from './hooks/AuthProvider'
 import ProtectedRoute from './components/Wrappers/ProtectedRoute'
 import PublicRoute from './components/Wrappers/PublicRoute'
 import HomePage from './pages/HomePage'

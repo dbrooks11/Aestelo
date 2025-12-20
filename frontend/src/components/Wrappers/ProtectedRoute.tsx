@@ -25,7 +25,6 @@ export default function ProtectedRoute({theme, setTheme}: ProtectedRouteProps): 
 
     return (
     <>
-        <ProtectedHeader theme = {theme} setTheme={setTheme}></ProtectedHeader>
         <div className="flex-1 flex flex-col">
             <Outlet/>
         </div>

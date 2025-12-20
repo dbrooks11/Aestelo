@@ -67,7 +67,7 @@ export default function ProtectedHeader({ setTheme, theme}: HeaderProps): JSX.El
 
   return (
     // todo: remove home links for production(home link will be logo)
-    {{isProfilePage} ? <header className= 'bg-bg-light-secondary/50 dark:bg-charcoal/65 backdrop-blur-lg top-0 z-50 sticky flex items-center justify-between px-12 py-3 border-b-neutral-200 dark:border-b-black font-semibold dark:text-bg-light-secondary'>
+    <header className= 'bg-bg-light-secondary/50 dark:bg-charcoal/65 backdrop-blur-lg top-0 z-50 sticky flex items-center justify-between px-12 py-3 border-b-neutral-200 dark:border-b-black font-semibold dark:text-bg-light-secondary'>
 
         {/* Aestelo Logo */}
         <div className='w-1/3 min-w-fit'>
@@ -94,6 +94,6 @@ export default function ProtectedHeader({ setTheme, theme}: HeaderProps): JSX.El
               <button className="header_logout_button" onClick={logout}>Logout</button>
             </div>
         </nav>
-    </header>: null}
+    </header>
   )
 }

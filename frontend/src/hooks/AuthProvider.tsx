@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode, type JSX } from "react";
 import { protectedInstance } from "../util/axios_api_helpers";
-import { type ProfileDataMinimal, type AuthContextType ,AuthContext } from "./AuthContext";
+import { AuthContext, type ProfileDataMinimal, type AuthContextType } from "../context/AuthContext";
 
 
 export default function AuthProvider({ children }: {children: ReactNode}): JSX.Element {
