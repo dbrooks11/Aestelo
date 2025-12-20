@@ -1,5 +1,7 @@
 // Universal Header
-import { type JSX, type Dispatch, type SetStateAction} from "react";
+import { type JSX } from "react";
+import { type HeaderProps } from "../../hooks/AuthProvider";
+import { useTheme } from "../../context/ThemeContext";
 import {motion, AnimatePresence} from 'framer-motion'
 import { Moon, Sun, Search} from "lucide-react";
 import { Link, useNavigate, type NavigateFunction, useLocation} from "react-router-dom";
@@ -7,25 +9,16 @@ import {AxisErrorHelperConsoleOnly, protectedInstance } from "../../util/axios_a
 import type { AxiosResponse } from "axios";
 
 
-type HeaderProps = {
-  theme: 'light' | 'dark'
-  setTheme: Dispatch<SetStateAction<'light' | 'dark'>>
-}
-
 
 export default function ProtectedHeader({ setTheme, theme}: HeaderProps): JSX.Element {
   const navigate: NavigateFunction = useNavigate()
   const location = useLocation()
 
-  const hideSearchPaths: Array<string> = ['/profile/me']
-  const isProfilePage = location.pathname.startsWith('/profile')
+  const {toggleTheme} = useTheme()
 
-  function setThemeHeader():void{
-        setTheme((prevTheme: HeaderProps['theme'])=>{
-          const newTheme: HeaderProps['theme'] = prevTheme === 'light' ? 'dark' : 'light'
-          return newTheme
-        })
-  }
+  const hideSearchPaths: Array<string> = ['/profile/me']
+
+  
 
 
   async function logout(): Promise<void>{
@@ -48,7 +41,7 @@ export default function ProtectedHeader({ setTheme, theme}: HeaderProps): JSX.El
 
   function ThemeButton(): JSX.Element{
     return(
-      <button className="theme_button" onClick={setThemeHeader}>
+      <button className="theme_button" onClick={toggleTheme}>
         <AnimatePresence mode="wait">
           <motion.div 
             key={theme}

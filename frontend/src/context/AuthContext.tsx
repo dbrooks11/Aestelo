@@ -1,5 +1,6 @@
 import { createContext, useContext} from "react";
 
+
 export type ProfileDataMinimal = {
   id: string,
   profile_photo: string,
@@ -12,7 +13,8 @@ export type AuthContextType = {
     checkAuth: () => Promise<void>,
     setUser: (user: ProfileDataMinimal | null) => void,
     isLoading: boolean,
-    isAuthenticated: boolean
+    isAuthenticated: boolean,
+    
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined)

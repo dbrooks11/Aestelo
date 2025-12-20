@@ -1,16 +1,10 @@
 // Universal Header
-import { type JSX, type Dispatch, type SetStateAction, useState} from "react";
+import { type JSX, useState} from "react";
+import { type HeaderProps } from "../../hooks/AuthProvider";
 import { useAuth } from "../../context/AuthContext";
 import {motion, AnimatePresence} from 'framer-motion'
 import { Moon, Sun, Menu } from "lucide-react";
 import { Link, useNavigate, type NavigateFunction} from "react-router-dom";
-
-
-
-type HeaderProps = {
-  theme: 'light' | 'dark'
-  setTheme: Dispatch<SetStateAction<'light' | 'dark'>>
-}
 
 
 export default function PublicHeader({ setTheme, theme}: HeaderProps): JSX.Element {

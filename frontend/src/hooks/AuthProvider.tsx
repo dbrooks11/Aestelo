@@ -49,13 +49,12 @@ export default function AuthProvider({ children }: {children: ReactNode}): JSX.E
     }, [setUser]);
 
 
-
     const value: AuthContextType = {
         user,
         isLoading,
         isAuthenticated: user ? true : false,
         checkAuth,
-        setUser
+        setUser,
     }
 
     return (

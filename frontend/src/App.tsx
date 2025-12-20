@@ -1,6 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
-import { useState, useEffect} from 'react'
 import AuthProvider from './hooks/AuthProvider'
+import { useTheme } from './context/ThemeContext'
 import ProtectedRoute from './components/Wrappers/ProtectedRoute'
 import PublicRoute from './components/Wrappers/PublicRoute'
 import HomePage from './pages/HomePage'
@@ -12,12 +12,7 @@ import FeedPage from './pages/FeedPage'
 
 
 function App() {
-
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem("theme") as "light" | "dark") ?? "light")
-  
-  useEffect(() => {
-      localStorage.setItem('theme', theme)
-  }, [theme]);
+  const {theme, setTheme} = useTheme()
 
   return (
     
