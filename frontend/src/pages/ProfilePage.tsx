@@ -69,25 +69,25 @@ export default function ProfilePage(): JSX.Element {
 
   return (
     <>
-    {!isLoading ? <main className='flex flex-col items-center h-full relative'>
-      {error ? error : null}
-      <ProfileHeader/>
-      <img src={myProfilePic} className='absolute z-10 aspect-3/1 mask-b-from-20% mask-b-to-80% object-cover w-full pointer-events-none'></img>
-      <ProfileInfo 
-        profile_pic_url={profileData?.profile_photo ? profileData.profile_photo : myProfilePic} //todo: default icon is temporary (remove it since it has liscense)
-        follower_count={profileData?.follower_count ? profileData.follower_count : 0}
-        following_count={profileData?.following_count ? profileData.following_count : 0}
-        username= {profileData?.username}
-        bio = {profileData?.bio ? profileData.bio : "HELLO I AM A FIAMOUS TIKTOKERhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"}
-        post_count={profileData?.post_count ? profileData.post_count : 0}
-        visit_count={profileData?.visit_count ? profileData.visit_count : 0}
-        instagram = {profileData?.instagram ? profileData.instagram : undefined}
-        tiktok = {profileData?.tiktok ? profileData.tiktok : undefined}
-        twitter_x = {profileData?.twitter_x ? profileData.twitter_x : undefined}
-        facebook = {profileData?.facebook ? profileData.facebook : undefined}
-      />
-      <ProfileTabs/>
-    </main>: "Loading Profile..."}
+      {!isLoading ? <main className='flex flex-col items-center h-full relative'>
+        {error ? error : null}
+        <ProfileHeader/>
+        <img src={myProfilePic} className='absolute z-10 aspect-3/1 mask-b-from-20% mask-b-to-80% object-cover w-full pointer-events-none'></img>
+        <ProfileInfo 
+          profile_pic_url={profileData?.profile_photo ? profileData.profile_photo : myProfilePic} //todo: default icon is temporary (remove it since it has liscense)
+          follower_count={profileData?.follower_count ? profileData.follower_count : 0}
+          following_count={profileData?.following_count ? profileData.following_count : 0}
+          username= {profileData?.username}
+          bio = {profileData?.bio ? profileData.bio : "HELLO I AM A FIAMOUS TIKTOKERhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"}
+          post_count={profileData?.post_count ? profileData.post_count : 0}
+          visit_count={profileData?.visit_count ? profileData.visit_count : 0}
+          instagram = {profileData?.instagram ? profileData.instagram : undefined}
+          tiktok = {profileData?.tiktok ? profileData.tiktok : undefined}
+          twitter_x = {profileData?.twitter_x ? profileData.twitter_x : undefined}
+          facebook = {profileData?.facebook ? profileData.facebook : undefined}
+        />
+        <ProfileTabs/>
+      </main>: "Loading Profile..."}
     </>
   )
 }

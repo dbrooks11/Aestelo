@@ -10,7 +10,7 @@ export function ThemeButton({className = ""}: {className: string}): JSX.Element{
     const {theme, toggleTheme} = useTheme()
 
     return(
-      <button onClick={toggleTheme} className={cn('', className)}>
+      <button onClick={toggleTheme} className={cn('flex justify-center items-center hover:bg-accents-primary/20 rounded-full w-10 h-10 text-white/75 transition-colors duration-300 hover:cursor-pointer bg-charcoal/50', className)}>
         <AnimatePresence mode="wait">
           <motion.div 
             key={theme}

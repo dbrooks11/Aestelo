@@ -52,7 +52,7 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
     function SubmitButton(): JSX.Element{
         const {pending}:{pending:boolean} = useFormStatus()
         return(
-            <button className="authenticated_forms_button" disabled = {pending}>{!pending ? null : <LoaderCircle className="animate-spin"/>} {!pending ? "Login" : "Logging in..."}</button>
+            <button className="flex items-center justify-center gap-3 bg-accents-primary hover:bg-accents-deep hover:shadow-md py-2 mt-4 rounded-md font-semibold text-white text-xl transition hover:-translate-y-1 cursor-pointer" disabled = {pending}>{!pending ? null : <LoaderCircle className="animate-spin"/>} {!pending ? "Login" : "Logging in..."}</button>
         )
 
     }
@@ -64,16 +64,16 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
     }
 
   return (
-    <main className="authenticated_forms_main_container">
-        <section className="authenticated_forms_section_container">
+    <main className="flex items-center justify-center flex-1 py-2">
+        <section className="flex flex-col items-center justify-center w-full md:shadow-xl py-12 md:border md:dark:border-slate md:rounded-lg md:w-3/6 dark:text-neutral-300 md:border-bg-light-tertiary">
             {/* Login Header */}
-            <h1 className="authenticated_forms_header">Login</h1>
+            <h1 className="font-bold dark:text-bg-light text-2xl">Login</h1>
 
             {/* Error Show */}
-            {error ? <span id='error' className="authenticated_forms_error">{error.split('.')[0]}</span>: null}
+            {error ? <span id='error' className="bg-bg-light-tertiary mt-8 px-2 py-1 border border-neutral-200 rounded-xl font-medium text-sm dark:bg-mid-gray/10 dark:text-white/85">{error.split('.')[0]}</span>: null}
 
             {/* Login Form */}
-            <form action = {login} className="authenticated_forms_form">
+            <form action = {login} className="flex flex-col my-8 w-2/5">
 
                 {/* HoneyPot Field*/}
                 <div className="w-0 h-0 absolute -left-[9999px] -top-[9999px]" aria-hidden aria-label="ignore this">
@@ -82,14 +82,14 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
                 </div>
 
                 {/* Email field & Username field*/}
-                <div className="authenticated_forms_field_container">
+                <div className="flex flex-col gap-2 mb-7">
                     <label htmlFor={isEmail ? "email" : "username"}>{isEmail ? "Email" : "Username"}</label>
                     <input 
                     type={isEmail ? "text" : "text"}
                     name={isEmail ? "email" : "username"} 
                     id={isEmail ? "email" : "username"} 
                     autoComplete={isEmail ? "email" : "username"} 
-                    defaultValue={isEmail ? emailState : usernameState} className="authenticated_forms_input_field" 
+                    defaultValue={isEmail ? emailState : usernameState} className="border-neutral-500/30 focus:border-accents-primary border-b-2 focus:outline-none" 
                     placeholder={isEmail ? "Enter email" : "Enter username"}
                     required>
                     </input>
@@ -97,10 +97,10 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
                 </div>
 
                 {/* Password field */}
-                <div className="authenticated_forms_field_container relative">
+                <div className="flex flex-col gap-2 mb-7 relative">
                     <label htmlFor="password">Password</label>
-                    <input type={showPassword} name="password" id="password" autoComplete="current-password" className="authenticated_forms_input_pass" placeholder="Enter password" required></input>
-                    <button type="button" tabIndex={-1} onClick={showPasswords} className="authenticated_forms_showpass" aria-label="show or hide password button">{showPassword === 'text' ? <EyeClosed className="w-full h-full"/> : <Eye className="w-full h-full"/>}</button>
+                    <input type={showPassword} name="password" id="password" autoComplete="current-password" className="border-neutral-500/30 focus:border-accents-primary border-b-2 focus:outline-none pr-8" placeholder="Enter password" required></input>
+                    <button type="button" tabIndex={-1} onClick={showPasswords} className="absolute right-0 bottom-1 w-6 p-0.5 rounded-md text-black hover:bg-bg-light-tertiary dark:bg-charcoal hover:dark:bg-slate/60 cursor-pointer dark:text-stone-400 flex items-center justify-center hover:shadow-sm" aria-label="show or hide password button">{showPassword === 'text' ? <EyeClosed className="w-full h-full"/> : <Eye className="w-full h-full"/>}</button>
                 </div>
 
                 {/* Submit button component */}

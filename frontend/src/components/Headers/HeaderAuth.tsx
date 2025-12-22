@@ -84,7 +84,7 @@ export default function ProtectedHeader({ setTheme, theme}: HeaderProps): JSX.El
             <Link to="/post/feed">Feed</Link>
             <div className="flex items-center border-l pl-3 gap-3">
               <ThemeButton/>
-              <button className="header_logout_button" onClick={logout}>Logout</button>
+              <button className="bg-bg-light-secondary hover:bg-bg-light-tertiary hover:shadow-lg px-2 py-1.5  rounded-lg w-20 text-accents-deep cursor-pointer dark:bg-transparent dark:hover:bg-accents-deep/50 dark:border-none dark:text-white" onClick={logout}>Logout</button>
             </div>
         </nav>
     </header>

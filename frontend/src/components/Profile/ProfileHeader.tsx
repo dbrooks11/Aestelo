@@ -4,6 +4,9 @@ import { ArrowLeft, Ellipsis } from "lucide-react"
 import { ThemeButton } from "../../hooks/ThemeProvider";
 
 
+const profileHeaderButtonStyle = "flex justify-center items-center hover:bg-accents-primary hover:dark:bg-accents-primary/35 rounded-full w-9 h-9 text-white/75 transition-colors duration-300 hover:cursor-pointer bg-charcoal/70"
+
+
 export default function ProfileHeader(): JSX.Element{
     
     const {theme} = useTheme()
@@ -42,11 +45,11 @@ export default function ProfileHeader(): JSX.Element{
     return(
         <header style={headerStyle} className='sticky z-50 top-0 w-full h-16 flex justify-between items-center px-4'>
             <div>
-                <button className="flex justify-center items-center hover:bg-accents-primary hover:dark:bg-accents-primary/20 rounded-full w-10 h-10 text-white/75 transition-colors duration-300 hover:cursor-pointer bg-charcoal/50"><ArrowLeft className="w-2/3 h-2/3"/></button>
+                <button className={profileHeaderButtonStyle}><ArrowLeft className="w-2/3 h-2/3"/></button>
             </div>
-            <div className="flex gap-6">
-                <ThemeButton className="flex justify-center items-center hover:bg-accents-primary/20 rounded-full w-10 h-10 text-white/75 transition-colors duration-300 hover:cursor-pointer bg-charcoal/50"/>
-                <button className="flex justify-center items-center hover:bg-accents-primary hover:dark:bg-accents-primary/20 rounded-full w-10 h-10 text-white/75 transition-colors duration-300 hover:cursor-pointer bg-charcoal/50"><Ellipsis className="w-2/3 h-2/3"/></button>
+            <div className="flex gap-4">
+                <ThemeButton className={profileHeaderButtonStyle}/>
+                <button className={profileHeaderButtonStyle}><Ellipsis className="w-2/3 h-2/3"/></button>
             </div>
         </header>
     )

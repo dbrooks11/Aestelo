@@ -21,25 +21,22 @@ type ProfileInfoParams = {
 
 export default function ProfileInfo(props: ProfileInfoParams):JSX.Element {
   return (
-    <section className='flex flex-col items-center justify-center max-w-full relative mt-80 z-10'>
-        <div className='flex flex-col w-full z-100'>
+    <section className='flex flex-col items-center justify-center max-w-full relative mt-60 z-10 border-b border-b-neutral-300 dark:border-b-neutral-800'>
+        <div className='flex flex-col w-full z-100 mb-8'>
             <section className='flex items-center gap-6 px-4'>
-                <div className='relative'>
-                    <span className='z-51 text-3xl absolute top-0 left-0 rotate'>🔥</span>
-                    <div className='profile_image_wrapper'>
-                        <img className="profile_image pointer-events-none" src={props.profile_pic_url} alt="User's Profile Picture"></img>
-                    </div>
+                <div className='min-w-35 min-h-35'>
+                    <img className="w-35 h-35 rounded-full object-cover pointer-events-none" src={props.profile_pic_url} alt="User's Profile Picture"></img>
                 </div>
                 <section className='flex flex-col gap-4'>
                     <h3 className="text-accents-primary" role = 'username' aria-label="username">@{props.username}</h3>
                     <div className='flex gap-5 dark:text-white text-black'>
                         <section className='flex gap-4'>
-                            <span className='profile_stats_label'>Followers<span className='profile_stats_info'>{` ${props.follower_count}`}</span></span>
-                            <span className='profile_stats_label'>Following<span className='profile_stats_info'>{` ${props.following_count}`}</span></span>
+                            <span className='font-normal'>Followers<span className='profile_stats_info'>{` ${props.follower_count}`}</span></span>
+                            <span className='font-normal'>Following<span className='profile_stats_info'>{` ${props.following_count}`}</span></span>
                         </section>
                         <section className='flex gap-4 border-l-2 border-black dark:border-white pl-4'>
-                            <span className='profile_stats_label'>Posts<span className='profile_stats_info'>{` ${props.follower_count}`}</span></span> 
-                            <span className='profile_stats_label'>Visits<span className='profile_stats_info'>{` ${props.following_count}`}</span></span>
+                            <span className='font-normal'>Posts<span className='profile_stats_info'>{` ${props.follower_count}`}</span></span> 
+                            <span className='font-normal'>Visits<span className='profile_stats_info'>{` ${props.following_count}`}</span></span>
                         </section>
                     </div>
                 </section>
