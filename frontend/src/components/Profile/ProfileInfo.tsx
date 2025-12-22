@@ -31,12 +31,12 @@ export default function ProfileInfo(props: ProfileInfoParams):JSX.Element {
                     <h3 className="text-accents-primary" role = 'username' aria-label="username">@{props.username}</h3>
                     <div className='flex gap-5 dark:text-white text-black'>
                         <section className='flex gap-4'>
-                            <span className='font-normal'>Followers<span className='profile_stats_info'>{` ${props.follower_count}`}</span></span>
-                            <span className='font-normal'>Following<span className='profile_stats_info'>{` ${props.following_count}`}</span></span>
+                            <span className='font-normal'>Followers<span className='font-normal'>{` ${props.follower_count}`}</span></span>
+                            <span className='font-normal'>Following<span className='font-normal'>{` ${props.following_count}`}</span></span>
                         </section>
                         <section className='flex gap-4 border-l-2 border-black dark:border-white pl-4'>
-                            <span className='font-normal'>Posts<span className='profile_stats_info'>{` ${props.follower_count}`}</span></span> 
-                            <span className='font-normal'>Visits<span className='profile_stats_info'>{` ${props.following_count}`}</span></span>
+                            <span className='font-normal'>Posts<span className='font-normal'>{` ${props.follower_count}`}</span></span> 
+                            <span className='font-normal'>Visits<span className='font-normal'>{` ${props.following_count}`}</span></span>
                         </section>
                     </div>
                 </section>

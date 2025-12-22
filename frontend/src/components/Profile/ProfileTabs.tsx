@@ -1,30 +1,26 @@
 import {type JSX} from 'react'
-import { Link } from 'react-router-dom'
+import { Tabs, Tab } from '../Tabs'
+import { MapPin, Map, MapPinned, BookMarked } from 'lucide-react'
 
 export default function ProfileTabs(): JSX.Element {
+
+  
+
+
   return (
-    <section className='mt-12 flex gap-12 z-10'>
-        <section>
-            <Link to={'/post/:id/profile-post/all'}>Posts</Link>
-        </section>
-        <section>
-            <Link to={'/visit/:id/profile-visit/all'}>Visits</Link>
-            <div>hello</div>
-            <div>hello</div>
-            <div>hello</div>
-            <div>hello</div>
-            <div>hello</div>
-            <div>hello</div>
-            <div>hello</div>
-            <div>hello</div>
-            <div>hello</div>
-            <div>hello</div>
-            <div>hello</div>
-            <div>hello</div>
-            <div>hello</div>
-            <div>hello</div>
-            <div>hello</div>
-        </section>
-    </section>
+      <Tabs>
+        <Tab label={'Posts'} icon={<MapPin/>}>
+          <p>Post says hello</p>
+        </Tab>
+        <Tab label={'Visits'} icon={<MapPinned/>}>
+          <p>Visits says goodbye</p>
+        </Tab>
+        <Tab label={'Saved'} icon={<BookMarked/>}>
+          <p>Saved says adios</p>
+        </Tab>
+        <Tab label={'Map'} icon={<Map/>}>
+          <p>Map says rawr</p>
+        </Tab>
+      </Tabs>
   )
 }
