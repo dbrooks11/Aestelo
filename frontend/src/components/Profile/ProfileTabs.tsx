@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 
 export default function ProfileTabs(): JSX.Element {
   return (
-    <section className='mt-12 flex gap-12'>
+    <section className='mt-12 flex gap-12 z-10'>
         <section>
             <Link to={'/post/:id/profile-post/all'}>Posts</Link>
         </section>

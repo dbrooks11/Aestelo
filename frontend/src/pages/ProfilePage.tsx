@@ -1,7 +1,7 @@
 
 import {useEffect, type JSX, useState} from 'react'
 import { protectedInstance } from '../util/axios_api_helpers'
-import ProfileHeader from '../components/Headers/ProfileHeader'
+import ProfileHeader from '../components/Profile/ProfileHeader'
 import ProfileInfo from '../components/Profile/ProfileInfo'
 import ProfileTabs from '../components/Profile/ProfileTabs'
 import myProfilePic from '../assets/my_profile_pic.jpg'

@@ -21,7 +21,7 @@ type ProfileInfoParams = {
 
 export default function ProfileInfo(props: ProfileInfoParams):JSX.Element {
   return (
-    <section className='flex flex-col items-center justify-center max-w-full relative mt-80'>
+    <section className='flex flex-col items-center justify-center max-w-full relative mt-80 z-10'>
         <div className='flex flex-col w-full z-100'>
             <section className='flex items-center gap-6 px-4'>
                 <div className='relative'>

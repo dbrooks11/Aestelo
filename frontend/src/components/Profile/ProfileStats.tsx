@@ -7,7 +7,7 @@ type ProfileStatsParams = {
 
 export default function ProfileStats({post_count, visit_count}: ProfileStatsParams): JSX.Element {
   return (
-    <section>
+    <section className='z-10'>
         <div>
             <span>📍 Posts</span>
             <span>{post_count}</span>  

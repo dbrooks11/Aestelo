@@ -10,7 +10,7 @@ type ProfileLinksParams = {
 export default function ProfileLinks(props: ProfileLinksParams): JSX.Element {
   return (
     // Profile Links Section
-    <section className='flex px-4 text-xs gap-4 text-accents-primary' aria-label='Social Media Links'>
+    <section className='flex px-4 text-xs gap-4 text-accents-primary z-10' aria-label='Social Media Links'>
         {/* Instagram */}
         {props.instagram ? <a className="profile_links" target='_blank' rel='noopener noreferrer' aria-label='instagram' href={props.instagram ? props.instagram : undefined}>{props.instagram.split('.').slice(1).join('.')}</a>: null}
 
