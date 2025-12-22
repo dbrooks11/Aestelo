@@ -1,27 +1,18 @@
 // Universal Header
 import { type JSX, useState} from "react";
-import { type HeaderProps } from "../../hooks/AuthProvider";
 import { useAuth } from "../../context/AuthContext";
 import { ThemeButton } from "../../hooks/ThemeProvider";
 import { Link, useNavigate, type NavigateFunction} from "react-router-dom";
-import { head } from "framer-motion/client";
 import { Menu } from "lucide-react";
 
 
 const headerLinksStyle = "transition hover:scale-110 dark:hover:text-bg-light hover:text-black cursor-pointer"
 
-export default function PublicHeader({ setTheme, theme}: HeaderProps): JSX.Element {
+export default function PublicHeader(): JSX.Element {
 
   const {isAuthenticated} = useAuth()
   const [isDropwdown, setIsDropwdown] = useState<boolean>(false)
   const navigate: NavigateFunction = useNavigate()
-
-  function setThemeHeader():void{
-        setTheme((prevTheme: HeaderProps['theme'])=>{
-          const newTheme: HeaderProps['theme'] = prevTheme === 'light' ? 'dark' : 'light'
-          return newTheme
-        })
-  }
 
   function loginRouting(): void{
     if(isAuthenticated){
@@ -82,7 +73,7 @@ export default function PublicHeader({ setTheme, theme}: HeaderProps): JSX.Eleme
 
         {/* Regular Header for Public users */}
         <div className="hidden md:flex gap-4 text-white justify-end min-w-1/3 xs:max-md:hidden">
-            <ThemeButton className="flex justify-center items-center hover:bg-accents-primary/20 rounded-full w-10 h-10 text-black dark:text-white transition-colors duration-300 hover:cursor-pointer"/>
+            <ThemeButton className="flex justify-center items-center hover:bg-accents-primary/20 rounded-full w-10 h-10 text-black dark:text-white transition-colors duration-300 hover:cursor-pointer bg-transparent"/>
             <button className="bg-bg-light-secondary hover:bg-bg-light-secondary hover:shadow-lg px-2 py-1.5  rounded-lg w-20 text-accents-deep cursor-pointer dark:bg-transparent dark:hover:bg-accents-deep/50 dark:border-none dark:text-white" onClick={loginRouting}>Login</button>
             <button className="bg-accents-primary hover:bg-accents-deep hover:shadow-md px-2 py-1.5 rounded-lg w-20 cursor-pointer" onClick={signupRouting}>SignUp</button>
         </div>

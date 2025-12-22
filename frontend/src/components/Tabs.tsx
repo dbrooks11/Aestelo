@@ -1,32 +1,62 @@
-import { useState, type JSX, type ReactElement, type ReactNode } from "react";
+import { useState, useRef, type JSX, type ReactElement, type ReactNode } from "react";
+import cn from "../util/tailwind_merger";
 
-const Tabs = ({children}: {children: Array<JSX.Element>}) => {
+type TabsProps = {
+    children: Array<JSX.Element>
+    tabsAndContentContainerStyle?: string 
+    tabsContainerStyle?: string 
+    tabsStyle?: string
+    activeTabStyle?: string
+    tabsIconStyle?: string
+    tabsLabelStyle?: string 
+}
+
+const Tabs = ({children, tabsAndContentContainerStyle, tabsContainerStyle, tabsStyle, activeTabStyle, tabsIconStyle, tabsLabelStyle}: TabsProps) => {
 
     const [activeTab, setActiveTab] = useState(children[0].props.label)
+    const tabsContentRef = useRef<HTMLElement | null>(null)
 
-    const handleTabClick = (e, newActiveTab: TabProps) =>{
+
+    const handleTabClick = (e, newActiveTab: string) =>{
         e.preventDefault()
         setActiveTab(newActiveTab)
+
+        const offset = 115
+        
+        if(tabsContentRef.current){
+            const contentPosition = tabsContentRef.current.getBoundingClientRect().top
+            const offsetPosition = contentPosition + window.scrollY - offset
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: "smooth"
+            })
+        }
     }
 
     return (
-        <div className="mt-12 flex flex-col w-full">
-            <div className="flex z-10 justify-center items-center" role='tablist'>
+        <div className={cn("flex flex-col", tabsAndContentContainerStyle)} id="tabs_and_content_container">
+            <div 
+            className={cn("flex justify-center items-center", tabsContainerStyle)} 
+            id="tabs_container" aria-roledescription='tablist'
+            >
                 {children.map((child)=> {
 
                     return(
                     <button
                         key = {child.props.label}
-                        className={`${activeTab === child.props.label ? 'dark:text-white text-accents-deep border-b-2 border-b-accents-primary' : ''}  ${child.props.icon && child.props.label ? 'gap-4' : ''} w-1/4 p-4 dark:text-neutral-500 font-bold cursor-pointer hover:dark:text-white hover:text-accents-deep flex items-center justify-center`}
+                        className={`${activeTab === child.props.label ? `${cn('', activeTabStyle)}` : ''}  ${child.props.icon && child.props.label ? 'gap-4' : ''} ${cn('flex justify-center items-center p-4 w-1/4 cursor-pointer', tabsStyle)}`}
                         onClick={(e) => handleTabClick(e, child.props.label)}
+                        aria-roledescription="tab"
+                        id="tab"
                     >
-                        {child.props.icon ? child.props.icon : null}
-                        {child.props.label}
+                        <span className={cn("md:hidden", tabsIconStyle)} title={child.props.label}>{child.props.icon ? child.props.icon : null}</span>
+                        <span className={cn("hidden md:inline", tabsLabelStyle)}>{child.props.label}</span>
                     </button>
                     )
                 })}
             </div>
-            <section>
+            <section ref={tabsContentRef}>
                 {children.map((child)=> {
                     if(child.props.label === activeTab){
                         return <div key={child.props.label}>{child.props.children}</div>

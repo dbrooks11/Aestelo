@@ -1,20 +1,16 @@
 // Universal Header
 import { type JSX } from "react";
-import { type HeaderProps } from "../../hooks/AuthProvider";
-import { useTheme } from "../../context/ThemeContext";
-import {motion, AnimatePresence} from 'framer-motion'
-import { Moon, Sun, Search} from "lucide-react";
+import { ThemeButton } from "../../hooks/ThemeProvider";
+import { Search} from "lucide-react";
 import { Link, useNavigate, type NavigateFunction, useLocation} from "react-router-dom";
 import {AxisErrorHelperConsoleOnly, protectedInstance } from "../../util/axios_api_helpers";
 import type { AxiosResponse } from "axios";
 
 
 
-export default function ProtectedHeader({ setTheme, theme}: HeaderProps): JSX.Element {
+export default function ProtectedHeader(): JSX.Element {
   const navigate: NavigateFunction = useNavigate()
   const location = useLocation()
-
-  const {toggleTheme} = useTheme()
 
   const hideSearchPaths: Array<string> = ['/profile/me']
 
@@ -37,24 +33,6 @@ export default function ProtectedHeader({ setTheme, theme}: HeaderProps): JSX.El
       AxisErrorHelperConsoleOnly(error, "Log Out")
     }
 
-  }
-
-  function ThemeButton(): JSX.Element{
-    return(
-      <button className="theme_button" onClick={toggleTheme}>
-        <AnimatePresence mode="wait">
-          <motion.div 
-            key={theme}
-            initial={{opacity: 0, rotate:-90 }}
-            animate={{opacity: 1, rotate: 0}}
-            exit={{opacity: 0, rotate: 90}}
-            transition={{duration: 0.2}}
-            >
-            {theme === 'light' ? <Moon size={20}/> : <Sun size={20}/>}
-            </motion.div>
-        </AnimatePresence>
-      </button>
-    )
   }
 
 
@@ -83,7 +61,7 @@ export default function ProtectedHeader({ setTheme, theme}: HeaderProps): JSX.El
             <Link to="/profile/me">Profile</Link>
             <Link to="/post/feed">Feed</Link>
             <div className="flex items-center border-l pl-3 gap-3">
-              <ThemeButton/>
+              <ThemeButton className=""/>
               <button className="bg-bg-light-secondary hover:bg-bg-light-tertiary hover:shadow-lg px-2 py-1.5  rounded-lg w-20 text-accents-deep cursor-pointer dark:bg-transparent dark:hover:bg-accents-deep/50 dark:border-none dark:text-white" onClick={logout}>Logout</button>
             </div>
         </nav>
