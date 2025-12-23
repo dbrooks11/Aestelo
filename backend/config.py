@@ -43,14 +43,11 @@ class Config:
     JWT_TOKEN_LOCATION = ['cookies']
     JWT_COOKIE_SECURE = False  # Only send over HTTPS (False in dev) #todo: set to True in production
     JWT_COOKIE_HTTPONLY = True  
-    JWT_COOKIE_SAMESITE = 'Lax'  
+    JWT_COOKIE_SAMESITE = 'Lax'
     JWT_COOKIE_CSRF_PROTECT = True  
     JWT_REFRESH_COOKIE_PATH = os.environ.get('JWT_REFRESH_COOKIE_PATH')
     JWT_ACCESS_COOKIE_PATH = os.environ.get('JWT_ACCESS_COOKIE_PATH')
     JWT_SESSION_COOKIE = os.environ.get('JWT_SESSION_COOKIE')
-
-    # CORS
-    CORS_ORIGINS = ['http://localhost:5000', 'http://localhost:5173']  # Add your frontend URLs
 
     # Cloudflare R2 (NEW)
     R2_ACCOUNT_ID = os.environ.get('R2_ACCOUNT_ID')

@@ -5,12 +5,16 @@ import { type ThemeContextType, type Theme,ThemeContext } from "../context/Theme
 import { AnimatePresence, motion } from "framer-motion";
 import { Moon, Sun } from "lucide-react";
 
+type ThemeButtonAttributes = {
+  className?: string
+  title?: string
+}
 
-export function ThemeButton({className = ""}: {className: string}): JSX.Element{
+export function ThemeButton({className = "", title = ""}: ThemeButtonAttributes): JSX.Element{
     const {theme, toggleTheme} = useTheme()
 
     return(
-      <button onClick={toggleTheme} className={cn('flex justify-center items-center hover:bg-accents-primary/20 rounded-full w-10 h-10 text-white/75 transition-colors duration-300 hover:cursor-pointer bg-charcoal/50', className)}>
+      <button title={title} onClick={toggleTheme} className={cn('flex justify-center items-center hover:bg-accents-primary/20 rounded-full w-10 h-10 text-white/75 transition-colors duration-300 hover:cursor-pointer', className)}>
         <AnimatePresence mode="wait">
           <motion.div 
             key={theme}

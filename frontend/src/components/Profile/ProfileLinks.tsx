@@ -12,7 +12,7 @@ const profileLinksStyle = "hover:text-accents-deep dark:hover:text-accents-prima
 export default function ProfileLinks(props: ProfileLinksParams): JSX.Element {
   return (
     // Profile Links Section
-    <section className='flex px-4 text-xs gap-4 text-accents-primary z-10 mb-4' aria-label='Social Media Links'>
+    <section className='flex px-4 text-xs gap-4 text-accents-primary z-10 mb-4 max-w-full overflow-x-scroll no-scrollbar' aria-label='Social Media Links'>
         {/* Instagram */}
         {props.instagram ? <a className={profileLinksStyle} target='_blank' rel='noopener noreferrer' aria-label='instagram' href={props.instagram ? props.instagram : undefined}>{props.instagram.split('.').slice(1).join('.')}</a>: null}
 

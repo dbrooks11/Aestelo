@@ -7,6 +7,7 @@ export default function AuthProvider({ children }: {children: ReactNode}): JSX.E
 
     const [user, setUser] = useState<ProfileDataMinimal | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    
 
     const checkAuth = async () =>{
         try{

@@ -45,7 +45,7 @@ const Tabs = ({children, tabsAndContentContainerStyle, tabsContainerStyle, tabsS
                     return(
                     <button
                         key = {child.props.label}
-                        className={`${activeTab === child.props.label ? `${cn('', activeTabStyle)}` : ''}  ${child.props.icon && child.props.label ? 'gap-4' : ''} ${cn('flex justify-center items-center p-4 w-1/4 cursor-pointer', tabsStyle)}`}
+                        className={`${activeTab === child.props.label ? `${cn('', activeTabStyle)}` : ''}  ${child.props.icon && child.props.label ? 'gap-4' : ''} ${cn('flex justify-center items-center p-3 w-1/4 cursor-pointer', tabsStyle)}`}
                         onClick={(e) => handleTabClick(e, child.props.label)}
                         aria-roledescription="tab"
                         id="tab"

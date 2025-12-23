@@ -2,6 +2,7 @@
 import {useEffect, type JSX, useState} from 'react'
 import { protectedInstance } from '../util/axios_api_helpers'
 import ProfileHeader from '../components/Profile/ProfileHeader'
+import ProfileBanner from '../components/Profile/ProfileBanner'
 import ProfileInfo from '../components/Profile/ProfileInfo'
 import ProfileTabs from '../components/Profile/ProfileTabs'
 import myProfilePic from '../assets/my_profile_pic.jpg'
@@ -72,7 +73,7 @@ export default function ProfilePage(): JSX.Element {
       {!isLoading ? <main className='flex flex-col items-center h-full relative'>
         {error ? error : null}
         <ProfileHeader username = {profileData?.username} follower_count={profileData?.follower_count}/>
-        <img src={myProfilePic} className='absolute z-10 aspect-3/1 mask-b-from-65% mask-b-to-80% object-cover w-full pointer-events-none'></img>
+        <ProfileBanner myProfilePic={myProfilePic}/>
         <ProfileInfo 
           profile_pic_url={profileData?.profile_photo ? profileData.profile_photo : myProfilePic} //todo: default icon is temporary (remove it since it has liscense)
           follower_count={profileData?.follower_count ? profileData.follower_count : 0}

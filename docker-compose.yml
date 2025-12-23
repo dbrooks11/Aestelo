@@ -32,8 +32,6 @@ services:
     volumes:
       - ./frontend:/app      # SYNC: Maps local folder to container
       - node_modules:/app/node_modules   # TRICK: Prevents local node_modules from overriding container's
-    environment:
-      - VITE_API_URL=http://localhost:5000 
     depends_on:
       - backend
     env_file:
