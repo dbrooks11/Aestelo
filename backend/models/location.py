@@ -3,7 +3,6 @@ from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from sqlalchemy import (Column, ForeignKey, BigInteger, 
                         String, Float, DateTime, Index)
-from .schema_types import *
 
 #todo: Come back to mapbox and google place id. 
 #todo: check format of altitude
@@ -22,16 +21,15 @@ from .schema_types import *
 
 
 class Location(db.Model):
-    __tablename__ = "location"
     __table_args__ = (Index('idx_location_coords', 'latitude', 'longitude'),
-                      {'schema': location_schema})
+                      )
     
-    post_media_id = Column(BigInteger, ForeignKey(f'{post_media_schema}.post_media.post_media_id'), index=True, nullable=True)
-    visit_media_id = Column(BigInteger, ForeignKey(f'{visit_media_schema}.visit_media.visit_media_id'), index=True, nullable=True)
+    post_media_id = Column(BigInteger, ForeignKey('post_media.id'), index=True, nullable=True)
+    visit_media_id = Column(BigInteger, ForeignKey('visit_media.id'), index=True, nullable=True)
     business_location_details = relationship('BusinessLocationDetails', backref='location', lazy=True) #will be handled later
    
         
-    location_id = Column(BigInteger, primary_key=True)
+    id = Column(BigInteger, primary_key=True)
     longitude = Column(Float)
     latitude = Column(Float)
     altitude = Column(Float)
@@ -59,10 +57,8 @@ class Location(db.Model):
 
 #For businesses mainly
 class BusinessLocationDetails(db.Model):
-    __tablename__ = "businesss_location_details"
-    __table_args__ = {'schema': business_location_details_schema} 
 
-    location_id = Column(BigInteger, ForeignKey(f'{location_schema}.location.location_id'), primary_key=True)
+    location_id = Column(BigInteger, ForeignKey('location.id'), primary_key=True)
     description = Column(String(200), default='')
     address_line1 = Column(String(50))
     address_line2 = Column(String(20))

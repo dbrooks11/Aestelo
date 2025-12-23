@@ -3,10 +3,8 @@ from sqlalchemy import Column, String, Integer, BigInteger
 from sqlalchemy.orm import relationship
 
 class MusicTrack(db.Model):
-    __tablename__ = "music_track"
-    __table_args__ = {'schema': 'public'}
 
-    music_track_id = Column(String(50), primary_key=True)  # music's ID (URI)
+    id = Column(String(50), primary_key=True)  # music's ID (URI)
     
     # Track info
     track_name = Column(String(200), nullable=False)

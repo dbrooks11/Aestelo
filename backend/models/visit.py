@@ -1,10 +1,9 @@
 from exstensions import db
-from sqlalchemy import Column, ForeignKey, BigInteger, String, Integer, Float, Text, DateTime, Boolean, ARRAY
+from sqlalchemy import Column, ForeignKey, BigInteger, String, Integer, Text, DateTime, Boolean, ARRAY
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import UUID
-from .schema_types import *
 
 
 
@@ -12,16 +11,14 @@ from .schema_types import *
 
 #The post under a locations posts
 class Visit(db.Model):
-    __tablename__ = "visit"
-    __table_args__ = {'schema': visit_schema} 
     visit_id = Column(BigInteger, primary_key=True)
     
-    post_id = Column(BigInteger, ForeignKey(f'{post_schema}.post.post_id'), nullable=False, index=True)
-    user_profile_id = Column(UUID(as_uuid=True),  ForeignKey(f'{user_profile_schema}.user_profile.id'), nullable=False, index=True)
+    post_id = Column(BigInteger, ForeignKey('post.id'), nullable=False, index=True)
+    user_profile_id = Column(UUID(as_uuid=True),  ForeignKey('user_profile.id'), nullable=False, index=True)
     
     refined_location = Column(JSONB, nullable=False)
 
-    music_track_id = Column(String(50), ForeignKey(f'{music_track_schema}.music_track.music_track_id'), index=True, nullable=True)
+    music_track_id = Column(String(50), ForeignKey('music_track.id'), nullable=True)
     caption = Column(String(200))
     hashtags = Column(ARRAY(String))
     date_posted = Column(DateTime, default=datetime.now(timezone.utc))
@@ -67,12 +64,10 @@ class Visit(db.Model):
 
 
 class VisitMedia(db.Model):
-    __tablename__ = "visit_media"
-    __table_args__ = {'schema': visit_media_schema} 
-    visit_id = Column(BigInteger, ForeignKey(f'{visit_schema}.visit.visit_id'), nullable=False, index=True)
-    uploaded_by = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'), nullable=False, index=True)
+    visit_id = Column(BigInteger, ForeignKey('visit.id'), nullable=False, index=True)
+    uploaded_by = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), nullable=False, index=True)
 
-    visit_media_id =Column(BigInteger, primary_key=True)
+    id = Column(BigInteger, primary_key=True)
     index = Column(Integer)
     thumbnail_url = Column(Text)
     thumb_media_type = Column(String(15), default = 'photo')

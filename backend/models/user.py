@@ -4,7 +4,6 @@ from datetime import datetime, timezone
 from sqlalchemy import (Column, ForeignKey, BigInteger, 
                         String, Integer, Float, Text, DateTime, Boolean)
 from sqlalchemy.dialects.postgresql import UUID
-from .schema_types import *
 #TODO: Stuff to do/link to user_profile
 #socials
 #allow messages from -put in user_profile settings
@@ -17,13 +16,11 @@ from .schema_types import *
 
 
 class UserProfile(db.Model):
-    __tablename__ = "user_profile"
-    __table_args__ = {'schema': user_profile_schema} 
     
-    id = Column(UUID(as_uuid=True), ForeignKey(f'{auth_user_schema}.auth_user.id'), primary_key=True)
+    id = Column(UUID(as_uuid=True), ForeignKey('auth_user.id'), primary_key=True)
     banner_theme = Column(String(30))
 
-    music_track_id = Column(String(50), ForeignKey(f'{music_track_schema}.music_track.music_track_id'), index=True)
+    music_track_id = Column(String(50), ForeignKey('music_track.id'))
 
     username = Column(String(30))
     profile_photo = Column(Text)
@@ -143,10 +140,8 @@ class UserProfile(db.Model):
        
     
 class UserInfo(db.Model):
-    __tablename__ = "user_info"
-    __table_args__ = {'schema': user_info_schema} 
 
-    user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'),primary_key=True, nullable=False)
+    user_profile_id = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'),primary_key=True)
     first_name = Column(String(30))
     last_name = Column(String(30))
     email = Column(String(150))
@@ -180,10 +175,8 @@ class UserInfo(db.Model):
         db.session.commit()
 
 class UserRole(db.Model):
-    __tablename__ = "user_role"
-    __table_args__ = {'schema': user_role_schema}
 
-    user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'), primary_key=True, nullable=False)
+    user_profile_id = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), primary_key=True)
     is_admin = Column(Boolean, default=False)
     is_moderator = Column(Boolean, default=False)
     is_owner = Column(Boolean, default=False)
@@ -207,10 +200,8 @@ class UserRole(db.Model):
 
 
 class UserSettings(db.Model):
-    __tablename__ = "user_settings"
-    __table_args__ = {'schema': user_settings_schema} 
 
-    user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'), primary_key=True, nullable=False)
+    user_profile_id = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), primary_key=True)
     language_preference = Column(String(50))
     email_notifications = Column(Boolean, default=False)
     push_notifications = Column(Boolean, default=False)
@@ -237,10 +228,8 @@ class UserSettings(db.Model):
 
 
 class UserSubscription(db.Model):
-    __tablename__ = "user_subscription"
-    __table_args__ = {'schema': user_subscription_schema} 
 
-    user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'),primary_key=True, nullable=False)
+    user_profile_id = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), primary_key=True)
     tier = Column(String(10), default='free') #free, premium, business
     price = Column(Float, default=0.00)
     started_at= Column(DateTime, default=datetime.now(timezone.utc))

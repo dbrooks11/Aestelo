@@ -5,14 +5,13 @@ from sqlalchemy.dialects.postgresql import UUID
 from .schema_types import *
 
 class Report(db.Model):
-    __tablename__ = "report"
     __table_args__ = (Index('idx_report_item', 'reported_type', 'reported_id'), 
                     Index('idx_report_status', 'status'),
                     UniqueConstraint('reporter_id', 'reported_type', 'reported_id', name='unique_report'),
-                    {'schema': report_schema}) # Moderation data is private
+                    ) 
     
     report_id = Column(BigInteger, primary_key=True, autoincrement=True)
-    reporter_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'), nullable=False)
+    reporter_id = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), nullable=False)
     
     # What's being reported
     reported_type = Column(String(20), nullable=False)  # 'user', 'post', 'visit'

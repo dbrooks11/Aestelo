@@ -8,14 +8,11 @@ import models
 from models.token_blacklist import TokenBlackList
 from exstensions import db, ma, jwt, limiter,mg, toolbar
 from routes import register_blueprints
-# from logging.config import dictConfig
-from routes.logging_wrapper import handle_errors
 
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
-    register_global_error_handler(app)
     app.config['DEBUG_TB_ENABLED'] = True
     init(autoreset=True)
     app.json.sort_keys = False
@@ -57,8 +54,6 @@ def create_app():
             content_security_policy=None,  
             frame_options='DENY', 
             )
-        
-    
     
     # Register blueprints
     register_blueprints(app)
@@ -66,8 +61,7 @@ def create_app():
     # Create tables
     with app.app_context():
         
-        
-        # db.drop_all()   #todo: TEMPORARY for testing
+        db.drop_all()   #todo: TEMPORARY for testing
         db.create_all()
 
         #jwt hanlders
@@ -104,13 +98,6 @@ def create_app():
             return {'status': 'healthy', 'message': 'Aestelo API is running'}   
 
         return app
-    
-
-#todo: might remove this too
-def register_global_error_handler(app):
-        for endpoint, func in app.view_functions.items():
-            if endpoint not in ('static',): 
-                app.view_functions[endpoint] = handle_errors(func)
 
 
 

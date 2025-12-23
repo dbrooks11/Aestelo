@@ -21,17 +21,13 @@ class Config:
     DEBUG_TB_ENABLED = os.environ.get('DEBUG_TB_ENABLED')
     
     # Database
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URI')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_size': 20,
         'pool_recycle': 3600,
         'pool_pre_ping': True,
     }
-
-    #SUPABASE
-    SUPABASE_URL=os.getenv("SUPABASE_URL")
-    SUPABASE_SERVICE_KEY=os.getenv("SUPABASE_SERVICE_KEY")
     
     # JWT
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')

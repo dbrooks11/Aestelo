@@ -4,7 +4,6 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship, ColumnProperty
 from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import UUID
-from .schema_types import *
 #todo: create rating model
 #todo: create filter models
 
@@ -26,12 +25,9 @@ save_count
 
 
 class Post(db.Model):
-    __tablename__ = "post"
-    __table_args__ = {'schema': post_schema} 
+    user_profile_id = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), nullable=False, index=True)
     
-    user_profile_id = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'),nullable=False, index=True)
-    post_id = Column(BigInteger, primary_key=True)
-    
+    id = Column(BigInteger, primary_key=True)
     name = Column(String(100))
     refined_location = Column(JSONB, nullable=False)
     date_posted = Column(DateTime)
@@ -97,12 +93,10 @@ class Post(db.Model):
 
 
 class PostMedia(db.Model):
-    __tablename__ = "post_media"
-    __table_args__ = {'schema': post_media_schema} 
+    post_id = Column(BigInteger, ForeignKey('post.id'), index=True)
+    uploaded_by = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), index=True)
 
-    post_id = Column(BigInteger, ForeignKey(f'{post_schema}.post.post_id'), index=True)
-    uploaded_by = Column(UUID(as_uuid=True), ForeignKey(f'{user_profile_schema}.user_profile.id'), index=True)
-    post_media_id =Column(BigInteger, primary_key=True)
+    id =Column(BigInteger, primary_key=True)
     index = Column(BigInteger)
     thumbnail_url = Column(Text)
     thumb_media_type = Column(String(15), default = 'photo')
