@@ -218,7 +218,8 @@ def logout():
         return response, 200
     except Exception:
         current_app.logger.error('Logout endpoint failed')
-        return jsonify({'error': 'Failed to logout'}), 400
+        db.session.rollback()
+        return jsonify({'error': 'Failed to logout'}), 500
 
 
 @auth_bp.route('/refresh', methods = ['POST'])
@@ -237,15 +238,18 @@ def refresh():
 def verify():
     current_user_id = get_jwt_identity()
 
-    user = db.session.query(UserProfile.username, UserProfile.profile_photo).filter_by(id = current_user_id).first()
+    try:
+        user = db.session.query(UserProfile.username, UserProfile.profile_photo).filter_by(id = current_user_id).first()
 
-    if not user:
-        return jsonify({'error': 'User not found'}), 401
+        if not user:
+            return jsonify({'error': 'User not found'}), 401
 
-    return jsonify({
-        'user': {
-            'id': current_user_id,
-            'username': user.username,
-            'profile_photo': user.profile_photo
-        }
-    }), 200
+        return jsonify({
+            'user': {
+                'id': current_user_id,
+                'username': user.username,
+                'profile_photo': user.profile_photo
+            }
+        }), 200
+    except Exception:
+        return jsonify({'error': 'failed to authenticate'}), 500

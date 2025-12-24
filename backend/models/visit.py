@@ -78,7 +78,7 @@ class VisitMedia(db.Model):
     upload_date = Column(DateTime, default=datetime.now(timezone.utc))
     is_primary = Column(Boolean, default=False) #Sets the primary pic in front
 
-    location = relationship('Location', backref='visit_media', lazy=True)
+    location = relationship('Location', backref='visit_media')
     
     def to_dict(self):
         return {

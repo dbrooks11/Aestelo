@@ -63,18 +63,18 @@ class UserProfile(db.Model):
     profile_created_at = Column(DateTime, default=datetime.now(timezone.utc))
 
 
-    user_info = relationship('UserInfo', uselist=False ,backref='user_profile', lazy='joined')
-    user_settings = relationship('UserSettings', uselist=False ,backref= 'user_profile', lazy='joined')
-    user_role = relationship('UserRole', uselist=False, backref='user_profile', lazy='joined')
-    user_subscription = relationship('UserSubscription', uselist=False ,backref= 'user_profile', lazy='joined')
-    post = relationship('Post', backref='user_profile', lazy='selectin')
-    post_media = relationship('PostMedia', backref='user_profile', lazy=True)
-    visit = relationship('Visit', backref='user_profile', lazy='selectin')
-    visit_media = relationship('VisitMedia', backref='user_profile', lazy=True)
-    rating = relationship('Rating', backref='user_profile', lazy=True)
-    report = relationship('Report', backref='user_profile', lazy=True)
-    follower = relationship('Follow',primaryjoin='UserProfile.id == Follow.follower_id',backref='follower', lazy='dynamic')
-    following = relationship('Follow',primaryjoin='UserProfile.id == Follow.following_id',backref='following', lazy='dynamic')
+    user_info = relationship('UserInfo', uselist=False ,backref='user_profile')
+    user_settings = relationship('UserSettings', uselist=False ,backref= 'user_profile')
+    user_role = relationship('UserRole', uselist=False, backref='user_profile')
+    user_subscription = relationship('UserSubscription', uselist=False ,backref= 'user_profile')
+    post = relationship('Post', backref='user_profile')
+    post_media = relationship('PostMedia', backref='user_profile')
+    visit = relationship('Visit', backref='user_profile')
+    visit_media = relationship('VisitMedia', backref='user_profile')
+    rating = relationship('Rating', backref='user_profile')
+    report = relationship('Report', backref='user_profile')
+    follower = relationship('Follow',primaryjoin='UserProfile.id == Follow.follower_id',backref='follower')
+    following = relationship('Follow',primaryjoin='UserProfile.id == Follow.following_id',backref='following')
     
 
     def to_dict(self):

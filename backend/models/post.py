@@ -55,9 +55,9 @@ class Post(db.Model):
     removed_at = Column(DateTime)
     
     
-    post_media_id = relationship('PostMedia', backref='post', lazy=True)
-    visit_id = relationship('Visit', backref='post', lazy=True)
-    rating = relationship('Rating', backref='post', lazy=True)
+    post_media_id = relationship('PostMedia', backref='post')
+    visit_id = relationship('Visit', backref='post')
+    rating = relationship('Rating', backref='post')
 
 
     def to_dict(self):
@@ -108,7 +108,7 @@ class PostMedia(db.Model):
 
     is_primary = Column(Boolean,default=False) #Sets the primary pic in front
 
-    location = relationship('Location', backref='post_media', lazy=True)
+    location = relationship('Location', backref='post_media')
     
 
     def to_dict(self):

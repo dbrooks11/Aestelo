@@ -27,6 +27,6 @@ class AuthUser(db.Model):
 
 
 
-    user_profile = relationship("UserProfile", backref='auth_user', lazy=True)
+    user_profile = relationship("UserProfile", backref='auth_user')
     
 

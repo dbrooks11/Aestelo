@@ -26,7 +26,7 @@ class Location(db.Model):
     
     post_media_id = Column(BigInteger, ForeignKey('post_media.id'), index=True, nullable=True)
     visit_media_id = Column(BigInteger, ForeignKey('visit_media.id'), index=True, nullable=True)
-    business_location_details = relationship('BusinessLocationDetails', backref='location', lazy=True) #will be handled later
+    business_location_details = relationship('BusinessLocationDetails', backref='location') #will be handled later
    
         
     id = Column(BigInteger, primary_key=True)

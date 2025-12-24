@@ -124,7 +124,7 @@ export default function ProfileHeader(props: ProfileHeaderProps): JSX.Element{
     }, [])
 
     const headerStyle: HeaderStyle = {
-        backgroundColor: theme === 'dark' ? `rgba(26, 26, 26, ${opaqueHeaderScroll})`: `rgba(255, 255, 255, ${opaqueHeaderScroll})` , 
+        backgroundColor: theme === 'dark' ? `rgba(26, 26, 26, ${opaqueHeaderScroll})`: `rgba(250, 250, 248, ${opaqueHeaderScroll})` , 
         backdropFilter: `blur(${opaqueHeaderScroll * 35}px)` ,
         borderBottom: `${opaqueHeaderScroll > .55 ? `1px solid ${theme === 'dark' ? 'oklch(26.9% 0 0)' : 'oklch(90% 0 0)'}` : 'none'}`
     };

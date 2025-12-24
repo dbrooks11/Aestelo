@@ -1,11 +1,12 @@
 @import "tailwindcss";
+
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
 
 @layer utilities {
-  /* *{
+  *{
     @apply border border-red-500
-  }  */
+  } 
 }
 
 @utility no-scrollbar {

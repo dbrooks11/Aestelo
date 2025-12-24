@@ -22,8 +22,8 @@ class MusicTrack(db.Model):
     release_date = Column(String(20))   
     times_used = Column(Integer, default=0)
 
-    visit = relationship('Visit', backref='music_track', lazy=True)
-    user_profile = relationship('UserProfile', backref='music_track', lazy=True)
+    visit = relationship('Visit', backref='music_track')
+    user_profile = relationship('UserProfile', backref='music_track')
 
     def to_dict(self):
         return {
