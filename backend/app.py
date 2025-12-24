@@ -6,8 +6,11 @@ from config import Config, configure_logging
 from colorama import init
 import models
 from models.token_blacklist import TokenBlackList
-from exstensions import db, ma, jwt, limiter,mg, toolbar
+from exstensions import db, ma, jwt, limiter,mg
 from routes import register_blueprints
+from flask import g, request
+import time
+
 
 
 def create_app():
@@ -18,8 +21,7 @@ def create_app():
     app.json.sort_keys = False
     configure_logging(app)
 
-    
-    toolbar.init_app(app)
+
     db.init_app(app)
     ma.init_app(app)
     jwt.init_app(app)
@@ -57,6 +59,21 @@ def create_app():
     
     # Register blueprints
     register_blueprints(app)
+
+    @app.before_request
+    def start_timer():
+        g.start = time.time()
+
+    @app.after_request
+    def log_request(response):
+        if request.path.startswith('/static'): 
+            return response
+        now = time.time()
+        duration = round(now - g.start, 2)
+        duration_ms = round((now - g.start) * 1000, 2)
+        # Print the time taken for this route
+        print(f"⏱️ {request.method} {request.path} took {duration}s/{duration_ms}ms")
+        return response
 
     # Create tables
     with app.app_context():
@@ -96,7 +113,7 @@ def create_app():
 
         return app
 
-
+    
 
 #todo: remove these for production
 if __name__ == '__main__':

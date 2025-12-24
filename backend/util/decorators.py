@@ -8,7 +8,6 @@ from models.followers_and_following import Follow
 from models.block_profile import BlockProfile
 from sqlalchemy import exists, and_, or_
 from exstensions import db
-import time
 
 def profile_active_not_permitted(func):
     @wraps(func)
@@ -40,10 +39,9 @@ def profile_check_current__banned_removed(func):
     @wraps(func)
     def decorator(*args, **kwargs):   
         current_user = get_jwt_identity()
-        
-        auth_start = time.time()
+    
         user_profile = UserProfile.query.get(current_user)
-        print(f'Query time: {(time.time() - auth_start) * 1000}')
+        
         
         if user_profile is None:
             return jsonify({'error': 'Profile not found'}), 404
@@ -62,7 +60,6 @@ def profile_check_current__banned_removed(func):
 def profile_both_check_banned_removed(func):
     @wraps(func)
     def decorator(*args, **kwargs):
-        auth_start = time.time()
 
         current_user = get_jwt_identity()
         profile_id = kwargs.get('id')
@@ -87,7 +84,6 @@ def profile_both_check_banned_removed(func):
         kwargs['user_profile'] = user_profile
         kwargs['current_user_profile'] = current_user_profile
 
-        print(f'Query time: {(time.time() - auth_start) * 1000}')
         return func(*args, **kwargs)
     
     return decorator
@@ -115,8 +111,6 @@ def block_and_follow_check(func):
 def profile_current_check_post(func):
     @wraps(func)
     def decorator(*args, **kwargs):
-        auth_start = time.time()
-
         current_user = get_jwt_identity()
         current_user_profile = UserProfile.query.get(current_user)
         post_id = kwargs.get('post_id')
@@ -140,7 +134,6 @@ def profile_current_check_post(func):
         kwargs['current_user_profile'] = current_user_profile
         kwargs['post'] = post
         
-        print(f'Query time: {(time.time() - auth_start) * 1000}')
         return func(*args, **kwargs)
     return decorator
     
