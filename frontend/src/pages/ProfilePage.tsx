@@ -8,6 +8,7 @@ import ProfileTabs from '../components/Profile/ProfileTabs'
 import myProfilePic from '../assets/my_profile_pic.jpg'
 import defaultProfilePic from "../assets/default_profile_pic.png"
 import type { AxiosResponse } from 'axios'
+import Modal from '../components/Modal'
 
 export type ProfileData = {
   id: string,
@@ -41,16 +42,23 @@ export type ProfileData = {
 
 export type ProfileDataUseState = ProfileData | null
 
+const editProfileFormDivStyle = ""
+const editProfileFormLabelStyle = ""
+
 export default function ProfilePage(): JSX.Element {
 
   const [profileData, setProfileData] = useState<ProfileDataUseState>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>("")
-  const [showForm, setShowForm] = useState<boolean>(false)
+  const [showModal, setShowModal] = useState<boolean>(false)
 
   const editProfileButtonClick = () => {
-    setShowForm(!showForm)
+    setShowModal(!showModal)
   }
+
+  const closeModal = () =>{
+        setShowModal(false)
+    }
 
   useEffect(() => {
     const profile = async () => {
@@ -103,10 +111,27 @@ export default function ProfilePage(): JSX.Element {
               Edit Profile
         </button>
         <ProfileTabs/>
-        {showForm ? <form className='absolute z-10 bg-black text-white top-40 right-32'>
-          <label htmlFor='username'></label>
-          <input type='text' name='username' id='username'></input>
-        </form>: null}
+        <Modal showModal={showModal} closeModal={closeModal} title='Edit Profile'>
+          <form className='text-white flex-1 overflow-y-scroll px-4 flex flex-col items-center gap-30'>
+            <div className='w-150 flex justify-between p-4 text-lg mt-4'>
+              <label htmlFor='username'>Username</label>
+              <input type='text' name='username' id='username'></input>
+            </div>
+            <div>
+              <label htmlFor='username'>Username</label>
+              <input type='text' name='username' id='username'></input>
+            </div>
+            <div>
+              <label htmlFor='username'>Username</label>
+              <input type='text' name='username' id='username'></input>
+            </div>
+            <div>
+              <label htmlFor='username'>Username</label>
+              <input type='text' name='username' id='username'></input>
+            </div>
+          </form>
+        </Modal>
+        
       </main>: "Loading Profile..."}
     </>
   )
