@@ -102,11 +102,11 @@ export default function ProfilePage(): JSX.Element {
             >
               Edit Profile
         </button>
-        {showForm ? <form className='absolute z-10 bg-black text-white top-100 right-32'>
+        <ProfileTabs/>
+        {showForm ? <form className='absolute z-10 bg-black text-white top-40 right-32'>
           <label htmlFor='username'></label>
           <input type='text' name='username' id='username'></input>
         </form>: null}
-        <ProfileTabs/>
       </main>: "Loading Profile..."}
     </>
   )

@@ -52,7 +52,6 @@ meexample1.jpg
 .gitignore
 gitignore
 
-config.ts
 frontend/config.js
 .log
 app_logs.log
