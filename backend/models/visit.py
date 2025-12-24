@@ -11,10 +11,10 @@ from sqlalchemy.dialects.postgresql import UUID
 
 #The post under a locations posts
 class Visit(db.Model):
-    visit_id = Column(BigInteger, primary_key=True)
+    id = Column(BigInteger, primary_key=True)
     
-    post_id = Column(BigInteger, ForeignKey('post.id'), nullable=False, index=True)
-    user_profile_id = Column(UUID(as_uuid=True),  ForeignKey('user_profile.id'), nullable=False, index=True)
+    post_id = Column(BigInteger, ForeignKey('post.id'), nullable=False)
+    user_profile_id = Column(UUID(as_uuid=True),  ForeignKey('user_profile.id'), nullable=False)
     
     refined_location = Column(JSONB, nullable=False)
 
@@ -64,8 +64,8 @@ class Visit(db.Model):
 
 
 class VisitMedia(db.Model):
-    visit_id = Column(BigInteger, ForeignKey('visit.id'), nullable=False, index=True)
-    uploaded_by = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), nullable=False, index=True)
+    visit_id = Column(BigInteger, ForeignKey('visit.id'), nullable=False)
+    uploaded_by = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), nullable=False)
 
     id = Column(BigInteger, primary_key=True)
     index = Column(Integer)

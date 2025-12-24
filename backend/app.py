@@ -60,9 +60,6 @@ def create_app():
 
     # Create tables
     with app.app_context():
-        
-        db.drop_all()   #todo: TEMPORARY for testing
-        db.create_all()
 
         #jwt hanlders
         @jwt.expired_token_loader

@@ -1,6 +1,5 @@
 import os
 from flask.logging import default_handler
-import logging
 from logging.config import dictConfig
 from dotenv import load_dotenv
 from botocore.client import Config
@@ -21,7 +20,7 @@ class Config:
     DEBUG_TB_ENABLED = os.environ.get('DEBUG_TB_ENABLED')
     
     # Database
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URI')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_size': 20,

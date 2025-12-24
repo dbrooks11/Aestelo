@@ -2,7 +2,6 @@ from exstensions import db
 from sqlalchemy import Column, ForeignKey, BigInteger, String, DateTime, UniqueConstraint, Index
 from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import UUID
-from .schema_types import *
 
 class Report(db.Model):
     __table_args__ = (Index('idx_report_item', 'reported_type', 'reported_id'), 
