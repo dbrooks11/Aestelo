@@ -15,6 +15,7 @@ import Modal from '../components/Modal'
 export type ProfileData = {
   id: string,
   profile_photo: string,
+  profile_banner: string
   username: string,
   banner_theme: string,
   bio: string,
@@ -114,7 +115,12 @@ export default function ProfilePage(): JSX.Element {
         </button>
         <ProfileTabs/>
         <Modal showModal={showModal} closeModal={closeModal} title='Edit Profile'>
-          <EditProfileForm/>
+          <EditProfileForm
+            profile_photo={profileData?.profile_photo ? profileData.profile_photo : myProfilePic} //todo: default icon is temporary (remove it since it has liscense) and make own default phtot or svg
+            username = {profileData?.username ? profileData.username : undefined} 
+            bio = {profileData?.bio ? profileData.bio : ""}
+            setProfileData={setProfileData}
+          />
         </Modal>
         
       </main>: "Loading Profile..."}
