@@ -35,7 +35,7 @@ export default function Modal({showModal, closeModal, title, closeOnBgClick ,chi
         <dialog
         ref={dialogRef}
         onClick={closeOnBgClick ? (e) => e.target === dialogRef.current && closeModal(): undefined}
-        className="bg-transparent backdrop:bg-black/30 min-w-full min-h-full"
+        className="bg-transparent backdrop:bg-black/30 min-w-full min-h-full px-4 backdrop-blur-xs"
         >   
             <AnimatePresence initial={false}>
                 {showModal ? <motion.div
@@ -43,7 +43,7 @@ export default function Modal({showModal, closeModal, title, closeOnBgClick ,chi
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0 }}
-                className="flex flex-col dark:bg-bg-modal-dark bg-bg-modal-light mx-auto my-20 border dark:border-border-color-dark border-border-color-light rounded-2xl max-w-2/4 h-140">
+                className="flex flex-col dark:bg-bg-modal-dark bg-bg-modal-light mx-auto my-20 border dark:border-border-color-dark border-border-color-light rounded-2xl max-w-3xl h-140">
 
                     {/* Title and Exit Button */}
                     <div className="flex justify-between p-3 border-b border-border-color-light dark:border-border-color-dark dark:bg-bg-secondary-dark rounded-t-2xl">
