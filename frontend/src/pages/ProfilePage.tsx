@@ -1,7 +1,6 @@
 
 import {useEffect, type JSX, useState} from 'react'
 import { protectedInstance } from '../util/axios_api_helpers'
-import cn from '../util/tailwind_merger'
 import ProfileHeader from '../components/Profile/ProfileHeader'
 import ProfileBanner from '../components/Profile/ProfileBanner'
 import ProfileInfo from '../components/Profile/ProfileInfo'
@@ -12,7 +11,7 @@ import defaultProfilePic from "../assets/default_profile_pic.png"
 import type { AxiosResponse } from 'axios'
 import Modal from '../components/Modal'
 
-export type ProfileData = {
+export type ProfileDataType = {
   id: string,
   profile_photo: string,
   profile_banner: string
@@ -43,7 +42,7 @@ export type ProfileData = {
   
 }
 
-export type ProfileDataUseState = ProfileData | null
+export type ProfileDataUseState = ProfileDataType | null
 
 const editProfileFormDivStyle = ""
 const editProfileFormLabelStyle = ""
@@ -90,14 +89,16 @@ export default function ProfilePage(): JSX.Element {
     <>
       {!isLoading ? <main className='relative flex flex-col items-center h-full'>
         {error ? error : null}
-        <ProfileHeader username = {profileData?.username} follower_count={profileData?.follower_count}/>
-        <ProfileBanner profileBanner={myProfilePic}/>
+        <ProfileHeader 
+          username = {profileData?.username ? profileData.username : ''} 
+          follower_count={profileData?.follower_count ? profileData.follower_count : 0}/>
+        <ProfileBanner profileBanner={myProfilePic}/> //TODO: set actual user banner
         <ProfileInfo 
-          profile_photo={profileData?.profile_photo ? profileData.profile_photo : myProfilePic} //todo: default icon is temporary (remove it since it has liscense)
+          profile_photo={profileData?.profile_photo ? profileData.profile_photo : myProfilePic} //TODO: default icon is temporary (remove it since it has liscense)
           follower_count={profileData?.follower_count ? profileData.follower_count : 0}
           following_count={profileData?.following_count ? profileData.following_count : 0}
           username= {profileData?.username ? profileData.username : ''}
-          bio = {profileData?.bio ? profileData.bio : "HELLO I AM A FIAMOUS TIKTOKERhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"}
+          bio = {profileData?.bio ? profileData.bio : ""}
           post_count={profileData?.post_count ? profileData.post_count : 0}
           visit_count={profileData?.visit_count ? profileData.visit_count : 0}
           instagram = {profileData?.instagram ? profileData.instagram : undefined}
@@ -116,10 +117,11 @@ export default function ProfilePage(): JSX.Element {
         <ProfileTabs/>
         <Modal showModal={showModal} closeModal={closeModal} title='Edit Profile'>
           <EditProfileForm
-            profile_photo={profileData?.profile_photo ? profileData.profile_photo : myProfilePic} //todo: default icon is temporary (remove it since it has liscense) and make own default phtot or svg
-            username = {profileData?.username ? profileData.username : undefined} 
-            bio = {profileData?.bio ? profileData.bio : ""}
+            profile_photo={profileData?.profile_photo ? profileData.profile_photo : myProfilePic} //TODO: default icon is temporary (remove it since it has liscense) and make own default phtot or svg
+            username = {profileData?.username ? profileData.username : ""} 
+            bio = {profileData?.bio ? profileData.bio : "hello im under za water"}
             setProfileData={setProfileData}
+            setShowModal={setShowModal}
           />
         </Modal>
         

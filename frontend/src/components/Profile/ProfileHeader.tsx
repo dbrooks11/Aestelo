@@ -4,6 +4,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { ArrowLeft, Ellipsis, X, Settings, LogOut } from "lucide-react"
 import { motion, useTransform, useScroll, AnimatePresence } from "framer-motion";
 import { ThemeButton} from "../../hooks/ThemeProvider";
+import { type ProfileDataType  } from "../../pages/ProfilePage";
 import type { AxiosResponse } from "axios";
 import { protectedInstance, AxisErrorHelperConsoleOnly } from "../../util/axios_api_helpers";
 
@@ -16,8 +17,8 @@ type MenuLinks = {
 }
 
 type ProfileHeaderProps = {
-    username: string | undefined
-    follower_count: number | undefined
+    username: ProfileDataType ['username']
+    follower_count: ProfileDataType ['follower_count']
 }
 
 type HeaderStyle = {

@@ -43,7 +43,7 @@ export default function Modal({showModal, closeModal, title, closeOnBgClick ,chi
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0 }}
-                className="flex flex-col dark:bg-bg-modal-dark bg-bg-modal-light mx-auto my-20 border dark:border-border-color-dark border-border-color-light rounded-2xl max-w-3xl h-140">
+                className="flex flex-col dark:bg-bg-modal-dark bg-bg-modal-light mx-auto my-20 border dark:border-border-color-dark border-border-color-light rounded-2xl max-w-3xl h-140 overflow-hidden">
 
                     {/* Title and Exit Button */}
                     <div className="flex justify-between p-3 border-b border-border-color-light dark:border-border-color-dark dark:bg-bg-secondary-dark rounded-t-2xl">
@@ -52,7 +52,7 @@ export default function Modal({showModal, closeModal, title, closeOnBgClick ,chi
                     </div>
 
                     {/* Content */}
-                    <section className="flex flex-col flex-1 w-full overflow-hidden">
+                    <section className="flex flex-col flex-1 w-full overflow-y-hidden">
                         {children}
                     </section>
                 </motion.div>: null}

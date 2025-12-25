@@ -49,6 +49,7 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
         }
     }
 
+    //TODO: turn this into reusale component
     function SubmitButton(): JSX.Element{
         const {pending}:{pending:boolean} = useFormStatus()
         return(

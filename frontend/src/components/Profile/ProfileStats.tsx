@@ -1,8 +1,9 @@
 import {type JSX} from 'react'
+import { type ProfileDataType } from '../../pages/ProfilePage'
 
 type ProfileStatsParams = {
-    post_count: number | undefined,
-    visit_count: number | undefined
+    post_count: ProfileDataType['post_count'],
+    visit_count: ProfileDataType['visit_count']
 }
 
 export default function ProfileStats({post_count, visit_count}: ProfileStatsParams): JSX.Element {

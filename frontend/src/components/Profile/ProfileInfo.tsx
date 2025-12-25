@@ -1,17 +1,17 @@
 
-import {useState, type JSX} from 'react'
-import { type ProfileData, type ProfileDataUseState } from '../../pages/ProfilePage'
+import {type JSX} from 'react'
+import { type ProfileDataType , type ProfileDataUseState } from '../../pages/ProfilePage'
 import ProfileLinks from './ProfileLinks'
 import ProfileBadges from './ProfileBadges'
 
 
-type BaseProfileInfoParams = Pick<ProfileData, 'username' | 'profile_photo' | 'bio' 
+type BaseProfileInfoParams = Pick<ProfileDataType , 'username' | 'profile_photo' | 'bio' 
                                             | 'following_count' | 'follower_count'
                                             | 'post_count' | 'visit_count' | 'instagram'
                                             | 'tiktok' | 'twitter_x' | 'facebook'>
 
 type ProfileInfoParams = BaseProfileInfoParams & {
-    setProfileData: (profile: ProfileData | null) => void
+    setProfileData: (profile: ProfileDataType  | null) => void
     profileData: ProfileDataUseState
 }
 

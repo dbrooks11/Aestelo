@@ -1,10 +1,11 @@
 import {type JSX} from 'react'
+import {type ProfileDataType } from '../../pages/ProfilePage'
 
 type ProfileLinksParams = {
-    instagram: string | undefined,
-    tiktok: string | undefined,
-    twitter_x: string | undefined,
-    facebook: string | undefined,
+    instagram: ProfileDataType['instagram'],
+    tiktok: ProfileDataType['tiktok'],
+    twitter_x: ProfileDataType['twitter_x'],
+    facebook: ProfileDataType['facebook'],
 }
 
 const profileLinksStyle = "hover:text-accents-deep dark:hover:text-accents-primary p-1 hover:shadow-sm rounded-full hover:bg-bg-light-secondary/50 dark:hover:dark:bg-accents-primary/10"

@@ -4,9 +4,9 @@
 
 
 @layer utilities {
-  *{
+  /* *{
     @apply border border-red-500
-  } 
+  }  */
 }
 
 @utility no-scrollbar {

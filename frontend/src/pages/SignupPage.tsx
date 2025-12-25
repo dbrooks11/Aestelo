@@ -26,7 +26,6 @@ export default function SignupPage(): JSX.Element {
         const confirm_password: FormDataEntryValue | null  = formData.get("confirm_password")
 
         if(name?.toString().trim()) {
-            console.log("form rejected. bot detected")
             return
         }
             
