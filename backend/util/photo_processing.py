@@ -1,6 +1,11 @@
 from PIL import ExifTags, ImageOps, Image
-
+from PIL.Image import DecompressionBombError
 import io
+from flask import current_app
+
+
+#TODO: Put name for compressed files. Use users ID from route and a label (profile photo, banner, etc)
+
 
 
 def get_decimal_coordinates(gps_info):
@@ -46,7 +51,7 @@ def get_decimal_coordinates(gps_info):
 
 
 
-def photo_processing(*photos):
+def photo_processing(*photos: tuple):
     min_width = 500
     max_width = 1080 
     min_height = 500 
@@ -131,3 +136,50 @@ def photo_processing(*photos):
         'photos': processed_photos
     }, 200
     
+
+
+
+def photo_processing_one_img(img_file, is_banner: bool, current_user_id: str):
+
+    error = []
+    try:
+        img = Image.open(img_file)
+
+        if img.format not in ('JPEG', 'PNG', 'HEIF'):
+            error.append(f"Invalid format: {img.format}. Must be JPEG, PNG, or HEIF")
+            return error
+    
+    
+        img.verify()
+
+    except DecompressionBombError:
+        current_app.logger.warning(f"User {current_user_id} attempted Decompression Bomb upload.")
+        error.append("Image is too large or complex.")
+        return error
+    
+    except Exception:
+        error.append('Invalid Image')
+        return error
+
+    if img.mode not in ['RGB', 'RGBA']:
+        img = img.convert('RGB')
+
+    if is_banner:
+        max_width = 1920
+        max_height = 1080
+
+        if img.width > max_width or img.height > max_height:
+            img = img.thumbnail(size=(max_width, max_height), resample=Image.Resampling.LANCZOS)
+
+    
+    if is_banner is False:
+        max_width = 500
+        max_height = 500
+
+        if img.width > max_width or img.height > max_height:
+            img = img.thumbnail(size=(max_width, max_height), resample=Image.Resampling.LANCZOS)
+        
+    output = io.BytesIO()
+    img.save(output, format="WEBP", quality=90, method=6, exif= b'')
+    output.seek(0)
+    return output

@@ -4,9 +4,9 @@
 
 
 @layer utilities {
-  /* *{
+  *{
     @apply border border-red-500
-  }  */
+  } 
 }
 
 @utility no-scrollbar {
@@ -14,8 +14,7 @@
 }
 
 @layer utilities {
-  /* Define a custom scrollbar class */
-  .scrollbar{
+  body {
     /* Firefox */
     scrollbar-width: thin;
     scrollbar-color: var(--scrollbar-thumb) transparent;
@@ -51,6 +50,29 @@
   --color-slate: #2D2D2D; /* POST CARDS - lighter for content visibility! */
   --color-graphite: #0A0A0A; /* Deep backgrounds (rarely used) */
   --color-smoke: #353535; /* Elevated elements, hover states */
+
+  
+      
+  /* Dynamic Theme Variables for Modal Component */
+  /* --- Light Mode Colors --- */
+  --color-bg-modal-light: #FFFFFF;
+  --color-bg-secondary-light: #FFFFFF;
+  --color-text-main-light: #1A1A1A;
+  --color-text-muted-light: #6B7280;
+  --color-border-color-light: rgba(0, 0, 0, 0.1);
+  --color-header-rgb-light: 250, 250, 248;
+
+  /* --- Dark Mode Colors --- */
+  --color-bg-secondary-dark: #262626;
+  --color-bg-modal-dark: #1E1E1E;
+  --color-text-main-dark: #E5E5E5;
+  --color-text-muted-dark: #9CA3AF;
+  --color-border-color-dark: rgba(255, 255, 255, 0.1);
+  --color-header-rgb-dark: 26, 26, 26;
+
+  /* --- Fonts (Shared) --- */
+  --font-body: 'Inter', sans-serif;
+  --font-display: 'Oswald', sans-serif;
 
   /* Dark Mode Text & UI (these are already defined but will be resued for dark mode too)*/
  /* Light-secondary for primary text,

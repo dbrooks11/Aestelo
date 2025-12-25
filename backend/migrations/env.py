@@ -72,18 +72,6 @@ def run_migrations_offline():
         context.run_migrations()
 
 
-def include_name(name, type_, parent_names):
-    if type_ == "schema":
-        return name in ["public"] 
-        
-    if type_ == "table":
-        # IGNORE PostGIS tables
-        if name == "spatial_ref_sys":
-            return False
-            
-    return True
-
-
 def run_migrations_online():
     """Run migrations in 'online' mode.
 
@@ -112,7 +100,6 @@ def run_migrations_online():
         context.configure(
             connection=connection,
             target_metadata=get_metadata(),
-            include_name=include_name,
             **conf_args
         )
 

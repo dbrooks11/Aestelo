@@ -57,6 +57,8 @@ class Config:
     SIGHTENGINE_API_USER = os.environ.get('SIGHTENGINE_API_USER')
     SIGHTENGINE_API_SECRET =os.environ.get('SIGHTENGINE_API_SECRET')
 
+    
+
 class DevelopmentConfig(Config):
     DEBUG = True
     

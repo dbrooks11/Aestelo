@@ -9,6 +9,7 @@ from models.token_blacklist import TokenBlackList
 from exstensions import db, ma, jwt, limiter,mg
 from routes import register_blueprints
 from flask import g, request
+from PIL import Image
 import time
 
 
@@ -27,6 +28,8 @@ def create_app():
     jwt.init_app(app)
     limiter.init_app(app)
     mg.init_app(app, db, compare_type=True)
+
+    Image.MAX_IMAGE_PIXELS = 100_000_000
 
     
     #todo: TEMPORARY CORS Attributes

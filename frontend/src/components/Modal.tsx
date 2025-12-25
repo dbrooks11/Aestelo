@@ -34,9 +34,8 @@ export default function Modal({showModal, closeModal, title, closeOnBgClick ,chi
     return(
         <dialog
         ref={dialogRef}
-        onCancel={closeModal}
         onClick={closeOnBgClick ? (e) => e.target === dialogRef.current && closeModal(): undefined}
-        className="backdrop:bg-black/30 bg-transparent min-w-full min-h-full"
+        className="bg-transparent backdrop:bg-black/30 min-w-full min-h-full"
         >   
             <AnimatePresence initial={false}>
                 {showModal ? <motion.div
@@ -44,16 +43,16 @@ export default function Modal({showModal, closeModal, title, closeOnBgClick ,chi
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0 }}
-                className="max-w-2/4 h-120 mx-auto mt-30 dark:bg-charcoal border dark:border-neutral-500 rounded-lg flex flex-col">
+                className="flex flex-col dark:bg-bg-modal-dark bg-bg-modal-light mx-auto my-20 border dark:border-border-color-dark border-border-color-light rounded-2xl max-w-2/4 h-140">
 
                     {/* Title and Exit Button */}
-                    <div className="flex p-2 justify-between">
-                        <h2 className="text-2xl dark:text-white font-bold items-center justify-center">{title}</h2>
-                        <button onClick={closeModal} className="w-8 h-8 rounded-full hover:cursor-pointer text-black dark:text-white dark:hover:bg-accents-deep/50"><X className="w-full h-full"/></button>
+                    <div className="flex justify-between p-3 border-b border-border-color-light dark:border-border-color-dark dark:bg-bg-secondary-dark rounded-t-2xl">
+                        <h2 className="justify-center items-center font-semibold dark:text-white text-2xl">{title}</h2>
+                        <button onClick={closeModal} className="dark:hover:bg-accents-deep/40 rounded-full w-8 h-8 text-black dark:text-white transition-colors hover:cursor-pointer p-1"><X className="w-full h-full"/></button>
                     </div>
 
                     {/* Content */}
-                    <section className="flex flex-col w-full flex-1 overflow-hidden">
+                    <section className="flex flex-col flex-1 w-full overflow-hidden">
                         {children}
                     </section>
                 </motion.div>: null}

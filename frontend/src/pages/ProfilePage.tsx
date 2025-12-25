@@ -1,10 +1,12 @@
 
 import {useEffect, type JSX, useState} from 'react'
 import { protectedInstance } from '../util/axios_api_helpers'
+import cn from '../util/tailwind_merger'
 import ProfileHeader from '../components/Profile/ProfileHeader'
 import ProfileBanner from '../components/Profile/ProfileBanner'
 import ProfileInfo from '../components/Profile/ProfileInfo'
 import ProfileTabs from '../components/Profile/ProfileTabs'
+import EditProfileForm from '../components/Profile/ProfileEditForm'
 import myProfilePic from '../assets/my_profile_pic.jpg'
 import defaultProfilePic from "../assets/default_profile_pic.png"
 import type { AxiosResponse } from 'axios'
@@ -85,10 +87,10 @@ export default function ProfilePage(): JSX.Element {
 
   return (
     <>
-      {!isLoading ? <main className='flex flex-col items-center h-full relative'>
+      {!isLoading ? <main className='relative flex flex-col items-center h-full'>
         {error ? error : null}
         <ProfileHeader username = {profileData?.username} follower_count={profileData?.follower_count}/>
-        <ProfileBanner myProfilePic={myProfilePic}/>
+        <ProfileBanner profileBanner={myProfilePic}/>
         <ProfileInfo 
           profile_photo={profileData?.profile_photo ? profileData.profile_photo : myProfilePic} //todo: default icon is temporary (remove it since it has liscense)
           follower_count={profileData?.follower_count ? profileData.follower_count : 0}
@@ -105,31 +107,14 @@ export default function ProfilePage(): JSX.Element {
           profileData = {profileData}
         />
         <button 
-            className='absolute z-10 top-88 right-32 border dark:border-white/20 rounded-full px-6 py-2 hover:cursor-pointer dark:text-white font-bold dark:hover:bg-white/10 hover:bg-accents-primary/5 hover:backdrop-blur-sm text-accents-deep border-accents-deep/30 text-sm transition-colors' 
+            className='top-88 right-32 z-10 absolute hover:bg-accents-primary/5 dark:hover:bg-white/10 hover:backdrop-blur-sm px-6 py-2 border border-accents-deep/30 dark:border-white/20 rounded-full font-bold text-accents-deep dark:text-white text-sm transition-colors hover:cursor-pointer' 
             onClick={editProfileButtonClick}
             >
               Edit Profile
         </button>
         <ProfileTabs/>
         <Modal showModal={showModal} closeModal={closeModal} title='Edit Profile'>
-          <form className='text-white flex-1 overflow-y-scroll px-4 flex flex-col items-center gap-30'>
-            <div className='w-150 flex justify-between p-4 text-lg mt-4'>
-              <label htmlFor='username'>Username</label>
-              <input type='text' name='username' id='username'></input>
-            </div>
-            <div>
-              <label htmlFor='username'>Username</label>
-              <input type='text' name='username' id='username'></input>
-            </div>
-            <div>
-              <label htmlFor='username'>Username</label>
-              <input type='text' name='username' id='username'></input>
-            </div>
-            <div>
-              <label htmlFor='username'>Username</label>
-              <input type='text' name='username' id='username'></input>
-            </div>
-          </form>
+          <EditProfileForm/>
         </Modal>
         
       </main>: "Loading Profile..."}

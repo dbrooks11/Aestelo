@@ -27,7 +27,7 @@ type HeaderStyle = {
 }
 
 
-const profileHeaderButtonStyle = "flex justify-center items-center hover:bg-accents-primary hover:dark:bg-accents-primary/35 rounded-full w-9 h-9 text-white/75 transition-colors duration-300 hover:cursor-pointer bg-charcoal/70"
+const profileHeaderButtonStyle = "flex justify-center items-center hover:bg-accents-primary hover:dark:bg-accents-deep/40 rounded-full w-9 h-9 text-white/75 transition-colors duration-300 hover:cursor-pointer bg-charcoal/70"
 
 const profileMenuLinksStyle = "flex items-center justify-center gap-2 p-2 border-b border-b-neutral-500/40"
 

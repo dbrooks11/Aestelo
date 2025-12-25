@@ -24,6 +24,7 @@ class UserProfile(db.Model):
 
     username = Column(String(30))
     profile_photo = Column(Text)
+    profile_banner = Column(Text)
     bio = Column(String(250))
 
     instagram = Column(Text)

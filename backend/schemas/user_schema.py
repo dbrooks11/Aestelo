@@ -20,7 +20,6 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
     
     username = fields.Str(required=True,validate=[validate.Length(min=1, max=30),validate.Regexp(r'^(?!.*\.$)(?!^\.)[a-zA-Z0-9._]+$', error='Username can only contain letters, numbers, periods, and underscores')])
     bio = fields.Str(validate=[validate.Length(max=150)])
-    profile_photo= fields.Str(validate=validate.URL())
     instagram= fields.Str(validate=validate.URL())
     facebook= fields.Str(validate=validate.URL())
     tiktok= fields.Str(validate=validate.URL())
