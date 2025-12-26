@@ -135,7 +135,7 @@ export default function ProfilePage(): JSX.Element {
             setShowModal={setShowModal}
           />
         </Modal>
-        <Toaster/>
+        <Toaster toasterId='profile'/>
       </main>: "Loading Profile..."}
     </>
   )

@@ -3,7 +3,8 @@ import { LoaderCircle, Eye, EyeClosed } from "lucide-react";
 import { useFormStatus } from "react-dom";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, type NavigateFunction, Link } from "react-router-dom";
-import { AxisErrorHelper, loginInstance } from "../util/axios_api_helpers";
+import { AxiosErrorHelper, loginInstance } from "../util/axios_api_helpers";
+import toast, { Toaster } from "react-hot-toast";
 
 
 export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
@@ -45,7 +46,10 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
             }
         }
         catch(error: unknown){
-            AxisErrorHelper(error, setError, "Log in")
+            const newError = AxiosErrorHelper(error)
+            toast.error(newError, {
+                toasterId: 'login'
+            })
         }
     }
 
@@ -111,6 +115,7 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
             {/* Alternative login link */}
             <Link className="text-sm flex w-fit" to={`/login-${isEmail ? 'username': 'email'}`}>Log in with {isEmail ? 'username' : 'email'}</Link>
         </section>
+        <Toaster toasterId="login"/>
     </main>
   )
 }

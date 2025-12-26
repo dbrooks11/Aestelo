@@ -1,6 +1,7 @@
 
 import {type JSX, useState, useEffect} from 'react'
-import { AxisErrorHelper, protectedInstance } from '../util/axios_api_helpers'
+import { AxiosErrorHelper, protectedInstance } from '../util/axios_api_helpers'
+import toast, { Toaster } from 'react-hot-toast'
 
 export default function FeedPage(): JSX.Element {
 
@@ -20,7 +21,10 @@ export default function FeedPage(): JSX.Element {
                     setFeed(data)
                 }
             }catch(error){
-                AxisErrorHelper(error, setError, "Feed")
+                const newError = AxiosErrorHelper(error)
+                toast.error(newError, {
+                    toasterId: 'feed'
+                })
             }finally{
                 setIsLoading(false)
             }
@@ -35,6 +39,7 @@ export default function FeedPage(): JSX.Element {
   return (
     <main>
         {!isLoading ? "hello" : "Loading feed..."}
+        <Toaster toasterId='feed'/>
     </main>
   )
 }

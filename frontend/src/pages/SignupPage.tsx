@@ -1,9 +1,10 @@
 import { useState, type JSX } from "react";
 import { LoaderCircle, Eye, EyeClosed } from "lucide-react";
-import { AxisErrorHelper, signupInstance } from "../util/axios_api_helpers";
+import { AxiosErrorHelper, signupInstance } from "../util/axios_api_helpers";
 import { useFormStatus } from "react-dom";
 import { useNavigate, type NavigateFunction } from "react-router-dom";
 import type { AxiosResponse} from "axios";
+import toast, { Toaster } from "react-hot-toast";
 
 
 const inputFieldsStyle = "border-neutral-500/30 focus:border-accents-primary border-b-2 focus:outline-none"
@@ -48,7 +49,11 @@ export default function SignupPage(): JSX.Element {
                 navigate('/login-email')
             }
         } catch (error: unknown){
-            (AxisErrorHelper(error, setError, "Sign Up"))
+            const newError = AxiosErrorHelper(error)
+            toast.error(newError, {
+                toasterId: 'signup'
+            })
+
       }
     }
 
@@ -115,6 +120,7 @@ export default function SignupPage(): JSX.Element {
                 <SubmitButton/>
             </form>
         </section>
+        <Toaster toasterId="signup"/>
     </main>
   )
 }

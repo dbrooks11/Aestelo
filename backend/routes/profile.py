@@ -53,6 +53,7 @@ def profile_me():
                     current_app.logger.error(f"Data could not be validated: {str(e)}")
                     return jsonify({'error': e.messages}),400
             
+
             form_files = request.files
             photo_list = request.files.getlist('profile_photo')
             banner_list = request.files.getlist('profile_banner')
@@ -70,29 +71,34 @@ def profile_me():
 
             old_photo_path = user_profile.profile_photo
             old_banner_path = user_profile.profile_banner
-            
-            try:
-                if 'profile_photo' in form_files:
-                    photo_file = form_files.get('profile_photo')
-                    if photo_file:
-                        profile_photo_compressed: list | BytesIO = photo_processing_one_img(photo_file, is_banner=False, current_user_id=user_profile.id)
 
-                        if isinstance(profile_photo_compressed, list):
-                            return jsonify({'error': {'profile_photo': profile_photo_compressed[0]}}),400
-                        
-                        new_photo_path: str = upload_to_r2(file_obj=profile_photo_compressed, user_id=user_profile.id, folder='profile_photo')
+            photo_field_name = 'profile_photo'
+            banner_field_name = 'profile_banner'
+
+            try:
+                if photo_field_name in form_files:
+                    if form_files[photo_field_name].filename:
+                        photo_file = form_files.get(photo_field_name)
+                        if photo_file:
+                            profile_photo_compressed: list | BytesIO = photo_processing_one_img(photo_file, is_banner=False, current_user_id=user_profile.id)
+
+                            if isinstance(profile_photo_compressed, list):
+                                return jsonify({'error': {photo_field_name: profile_photo_compressed[0]}}),400
+                            
+                            new_photo_path: str = upload_to_r2(file_obj=profile_photo_compressed, user_id=user_profile.id, folder=photo_field_name)
                     
 
-                if 'profile_banner' in form_files:
-                    banner_file = form_files.get('profile_banner')
-                    if banner_file:
-                        profile_banner_compressed: list | BytesIO = photo_processing_one_img(banner_file, is_banner=True, current_user_id=user_profile.id)
+                if banner_field_name in form_files:
+                    if form_files[banner_field_name].filename:
+                        banner_file = form_files.get(banner_field_name)
+                        if banner_file:
+                            profile_banner_compressed: list | BytesIO = photo_processing_one_img(banner_file, is_banner=True, current_user_id=user_profile.id)
 
-                        if isinstance(profile_banner_compressed, list):
-                            return jsonify({'error': {'profile_banner': profile_banner_compressed[0]}}), 400
-                        
-                        
-                        new_banner_path: str = upload_to_r2(file_obj=profile_banner_compressed, user_id=user_profile.id, folder='profile_banner')
+                            if isinstance(profile_banner_compressed, list):
+                                return jsonify({'error': {banner_field_name: profile_banner_compressed[0]}}), 400
+                            
+                            
+                            new_banner_path: str = upload_to_r2(file_obj=profile_banner_compressed, user_id=user_profile.id, folder=banner_field_name)
                     
             except Exception as e:
                 current_app.logger.error(f"Image processing failed: {str(e)}")

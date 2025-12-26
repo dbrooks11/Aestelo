@@ -2,10 +2,11 @@ import { useState, useEffect,type Dispatch, type JSX, type SetStateAction } from
 import cn from "../../util/tailwind_merger";
 import { type ProfileDataType } from "../../pages/ProfilePage";
 import { LoaderCircle, PencilLine } from 'lucide-react'
-import { toastNotifyMessage } from "../../Toast";
+import toast from "react-hot-toast";
 import { Monitor, Smartphone, Upload } from "lucide-react";
 import { protectedInstance } from "../../util/axios_api_helpers";
 import { useFormStatus } from "react-dom";
+import { AxiosErrorHelper } from "../../util/axios_api_helpers";
 
 type EditProfileFormProps = {
   profile_banner: ProfileDataType['profile_banner']
@@ -86,9 +87,15 @@ export default function EditProfileForm({
         })
         //TODO: Update css for toasts
         setShowModal(false)
-        toastNotifyMessage(data.message)
+        toast(data.message, {
+          toasterId: 'profile'
+        })
       }
-    } catch {
+    } catch(error) {
+      const newError = AxiosErrorHelper(error)
+      toast.error(newError, {
+        toasterId: 'modal'
+      })
       setProfileBannerPreview(profile_banner)
       setProfilePhotoPreview(profile_photo)
     }

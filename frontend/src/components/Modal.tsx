@@ -1,6 +1,7 @@
 import { type JSX, useEffect, type ReactNode, useRef } from "react";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Toaster } from "react-hot-toast";
 
 type ModalProps = {
     showModal: boolean
@@ -55,6 +56,7 @@ export default function Modal({showModal, closeModal, title, closeOnBgClick ,chi
                     <section className="flex flex-col flex-1 w-full overflow-y-hidden">
                         {children}
                     </section>
+                    <Toaster toasterId="modal"/>
                 </motion.div>: null}
             </AnimatePresence>
         </dialog>

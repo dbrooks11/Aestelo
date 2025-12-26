@@ -9,14 +9,13 @@ export default function AuthProvider({ children }: {children: ReactNode}): JSX.E
     const [isLoading, setIsLoading] = useState<boolean>(true);
     
 
+    //TODO: potential idea - use cookies with login value (true or false) to indicate if user is logged)
     const checkAuth = async () =>{
         try{
             const response = await protectedInstance.get('/auth/authenticate')
 
             if (response.status === 200){
                 setUser(response.data)
-                console.log(response.data)
-                
             }
 
         }catch(error){

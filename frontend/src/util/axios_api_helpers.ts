@@ -88,23 +88,32 @@ protectedInstance.interceptors.response.use(
 
 //axios error handlers
 
-export function AxisErrorHelper(error: AxiosError | unknown, setError: (err: string | null) => void, fallbackErrorName: string): void{
-    const axiosError = error as AxiosError<{ error?: string, message?: string }>
-                
-    if (axiosError.response) {
-        // Server responded with error
-        const errorMessage = axiosError.response.data?.error || axiosError.response.data?.message || fallbackErrorName
-        setError(errorMessage)
-        // console.error(`${fallbackErrorName} error:`, errorMessage)
-    } else if (axiosError.request) {
-        // Request made but no response
-        setError('No response from server. Please try again.')
-        // console.error('No response:', axiosError.request)
+export function AxiosErrorHelper(error: AxiosError | unknown): string{
+    let errorMessage = "Something went wrong";
+
+    if (axios.isAxiosError(error)) {
+        if (error.response) {
+            const serverData = error.response.data;
+            
+            if (serverData && serverData.error) {
+                if (Array.isArray(serverData.error)) {
+                    errorMessage = serverData.error.join(", ");
+                } else if (typeof serverData.error === 'object') {
+                     errorMessage = Object.values(serverData.error).join(", ");
+                } else {
+                    errorMessage = serverData.error;
+                }
+            }
+        } else if (error.request) {
+            errorMessage = "Network error. Please check your connection.";
+        }
+    } else if (error instanceof Error) {
+        errorMessage = error.message;
     } else {
-        // Something else happened
-        setError('An error occurred. Please try again.')
-        // console.error('Error:', axiosError.message)
+        errorMessage = 'An error occured. Please try again.'
     }
+
+    return errorMessage
 }
 
 
