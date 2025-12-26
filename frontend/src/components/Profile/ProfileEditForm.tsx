@@ -1,10 +1,11 @@
 import { useState, useEffect,type Dispatch, type JSX, type SetStateAction } from "react";
 import cn from "../../util/tailwind_merger";
 import { type ProfileDataType } from "../../pages/ProfilePage";
-import { PencilLine } from 'lucide-react'
+import { LoaderCircle, PencilLine } from 'lucide-react'
 import { toastNotifyMessage } from "../../Toast";
 import { Monitor, Smartphone, Upload } from "lucide-react";
 import { protectedInstance } from "../../util/axios_api_helpers";
+import { useFormStatus } from "react-dom";
 
 type EditProfileFormProps = {
   profile_banner: ProfileDataType['profile_banner']
@@ -59,6 +60,14 @@ export default function EditProfileForm({
 
   //TODO: Handle constant username submission (if username is the same when form is submitted ignore it)
   const handleEditProfileFormClick = async (formData: FormData): Promise<void> => {
+
+    const username: FormDataEntryValue | null = formData.get('username')
+    //TODO: finish this (to check if username is the same as state already so it isnt submitted)
+    const isUsername: boolean = false
+    if(username === username){
+      return
+    }
+
     try {
 
       const response = await protectedInstance.patch('/profile/me', formData, {
@@ -92,6 +101,22 @@ export default function EditProfileForm({
     }
   }
 
+  //TODO: export submit button from signup or login an customize css
+  function SubmitButton():JSX.Element{
+    const {pending} = useFormStatus()
+
+    return(
+      <>
+        <button
+          type='submit'
+          className="bg-accents-deep hover:bg-accents-primary hover:shadow-md p-3 rounded-md w-1/2 cursor-pointer flex items-center justify-center"
+          disabled = {pending}
+          >{pending ? <LoaderCircle className="mr-2 animate-spin"/>: null}{pending ? 'Confirming' : 'Confirm'}
+        </button>
+      </>
+    )
+  }
+
   // TODO: Add api call to update profile on form submit
 
   return (
@@ -116,6 +141,7 @@ export default function EditProfileForm({
           className='hidden'
           accept='image/png, image/jpeg'
           onChange={handleProfilePhotoFileChange}
+          multiple = {true}
         ></input>
       </div>
 
@@ -169,7 +195,7 @@ export default function EditProfileForm({
           className="hidden"
           onChange={handleProfileBannerFileChange}
         ></input>
-        <span className={`${editProfileFormTinyText} text-center`} >Safe Zone: Keep important details near the center to ensure visibility on all devices.</span>
+        <span className={`${editProfileFormTinyText} text-center`} >Safe Zone: Keep important details near the center to ensure visibility on all devices. Maximum size: 2560 x 1440</span>
       </div>
       <div className='flex flex-col gap-2 w-full'>
         <label htmlFor='username' className={`${editProfileFormLabelStyle} text-base`}>Username</label>
@@ -189,13 +215,13 @@ export default function EditProfileForm({
           name='bio'
           id='bio'
           defaultValue={bio}
+          maxLength={150}
         ></textarea>
+        <span className={`${editProfileFormTinyText}`}>Max characters: 150</span>
       </div>
       <div className="flex gap-8 mb-8 w-full">
         <button type="button" className="bg-charcoal hover:shadow-md p-3 border border-border-color-dark rounded-md w-1/2 cursor-pointer" onClick={() => setShowModal(false)}>Cancel</button>
-        <button
-          type='submit'
-          className="bg-accents-deep hover:bg-accents-primary hover:shadow-md p-3 rounded-md w-1/2 cursor-pointer">Confirm</button>
+        <SubmitButton/>
       </div>
     </form>
   )

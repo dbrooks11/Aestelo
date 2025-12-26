@@ -43,11 +43,19 @@ def profile_me():
             try:
                 validate_data = profile_can_edit.load(form_data, partial=True) 
             except ValidationError as e:
-                print(e)
                 current_app.logger.error(f"Data could not be validated: {str(e)}")
                 return jsonify({'error': e.messages}),400
             
             form_files = request.files
+            photo_list = request.files.getlist('profile_photo')
+            banner_list = request.files.getlist('profile_banner')
+
+            if len(photo_list) > 1:
+                return jsonify({'error': 'You can only upload one profile photo at a time.'}), 400
+
+            if len(banner_list) > 1:
+                return jsonify({'error': 'You can only upload one banner at a time.'}), 400
+            
             profile_photo_compressed = None
             profile_banner_compressed = None
             new_photo_path = None
@@ -80,7 +88,6 @@ def profile_me():
                         new_banner_path: str = upload_to_r2(file_obj=profile_banner_compressed, user_id=user_profile.id, folder='profile_banner')
                     
             except Exception as e:
-                print(e)
                 current_app.logger.error(f"Image processing failed: {str(e)}")
                 return jsonify({'error': f'Image processing failed: {str(e)}'}), 500
 
@@ -106,7 +113,6 @@ def profile_me():
                 if new_banner_path and old_banner_path:
                     delete_file_r2(old_banner_path)
             except Exception as e:
-                print(e)
                 current_app.logger.warning(f"Failed to delete old images: {str(e)}")
                 return jsonify({'error': str(e)})
                 
@@ -114,7 +120,6 @@ def profile_me():
                             'updated_fields': user_profile_schema.dump(user_profile)}), 200
         except Exception as e:
             db.session.rollback()
-            print(e)
             current_app.logger.error(f"Database Update Failed: {str(e)}")
 
             try:

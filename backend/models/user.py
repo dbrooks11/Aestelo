@@ -26,7 +26,7 @@ class UserProfile(db.Model):
     username = Column(String(30))
     profile_photo = Column(Text)
     profile_banner = Column(Text)
-    bio = Column(String(250))
+    bio = Column(String(150))
 
     instagram = Column(Text)
     is_verified_instagram = Column(Boolean, default=False)
