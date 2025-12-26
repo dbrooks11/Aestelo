@@ -6,8 +6,10 @@ import type {JSX} from 'react'
 
 export default function ProfileBanner({profileBanner}: {profileBanner: string}): JSX.Element {
   return (
-    <div className='absolute z-10 w-full pointer-events-none h-94 md:h-100 lg:h-105'>
-      <img src={profileBanner} className='mask-b-from-80% mask-b-to-99% md:mask-b-from-85% md:mask-b-to-95% object-cover object-[0%_70%] md:object-[5%_48%] w-full h-full'></img>
+    <div className='z-10 absolute w-full h-94 md:h-100 lg:h-105 pointer-events-none'
+      role="banner" 
+    >
+      <img src={profileBanner} className='mask-b-from-80% md:mask-b-from-85% mask-b-to-99% md:mask-b-to-95% w-full h-full object-[0%_70%] object-cover md:object-[5%_48%]'></img>
     </div>
   )
 }

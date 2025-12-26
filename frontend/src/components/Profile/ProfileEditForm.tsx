@@ -109,7 +109,7 @@ export default function EditProfileForm({
       <>
         <button
           type='submit'
-          className="bg-accents-deep hover:bg-accents-primary hover:shadow-md p-3 rounded-md w-1/2 cursor-pointer flex items-center justify-center"
+          className="flex justify-center items-center bg-accents-deep hover:bg-accents-primary hover:shadow-md p-3 rounded-md w-1/2 cursor-pointer"
           disabled = {pending}
           >{pending ? <LoaderCircle className="mr-2 animate-spin"/>: null}{pending ? 'Confirming' : 'Confirm'}
         </button>
@@ -138,9 +138,16 @@ export default function EditProfileForm({
 
 
   return (
-    <form action={handleEditProfileFormClick} className='flex flex-col flex-1 items-center gap-10 px-6 overflow-y-scroll text-white'>
+    <form 
+  action={handleEditProfileFormClick} 
+  className='flex flex-col flex-1 items-center gap-10 px-6 overflow-y-scroll text-white'
+  aria-label="Edit Profile Form"
+>
+      
+      {/* Profile Picture */}
       <div className='flex items-center gap-[5%] md:gap-45 mt-6 w-full'>
         <label htmlFor='profile_photo' className={editProfileFormLabelStyle}>Profile Picture</label>
+        
         <div className={cn(`${editProfileFormContainerStyle} relative`, 'rounded-full')}>
           <div className="w-35 h-35">
             <img
@@ -149,62 +156,96 @@ export default function EditProfileForm({
               alt="Profile Picture Preview"
             ></img>
           </div>
-          <label htmlFor='profile_photo' className='top-25 left-25 absolute bg-black/15 dark:bg-white/10 backdrop-blur-sm p-2 rounded-full w-9 cursor-pointer'><PencilLine className='w-full h-full' strokeWidth={1} /></label>
+          
+          <label 
+            htmlFor='profile_photo' 
+            className='top-25 left-25 absolute bg-black/15 dark:bg-white/10 backdrop-blur-sm p-2 rounded-full w-9 cursor-pointer'
+            aria-label="Change Profile Picture Button"
+          >
+            <PencilLine className='w-full h-full' strokeWidth={1} aria-hidden="true" />
+          </label>
         </div>
+
         <input
-          aria-hidden
           type='file'
           name='profile_photo'
           id='profile_photo'
           className='hidden'
           accept='image/png, image/jpeg'
           onChange={handleProfilePhotoFileChange}
-          multiple = {true}
+          multiple={true} 
         ></input>
       </div>
 
-      {/* Upload Banner Section */}
+      {/* Profile Banner */}
       <div className="flex flex-col gap-4 mt-4 w-full">
-        {/* Upload Banner Header */}
+        
         <div className="flex justify-between items-center">
           <h2 className={editProfileFormLabelStyle}>Profile Banner</h2>
-          <label htmlFor="profile_banner" className="flex items-center gap-2 text-accents-primary text-sm hover:underline cursor-pointer"><Upload size={20} />Change Image</label>
+          
+          <label 
+            htmlFor="profile_banner" 
+            className="flex items-center gap-2 text-accents-primary text-sm hover:underline cursor-pointer"
+            role="button"
+            tabIndex={0}
+          >
+            <Upload size={20} aria-hidden="true" /> Change Image
+          </label>
         </div>
-        <div className={`${editProfileFormContainerStyle} w-50 flex justify-between border p-1 dark:text-text-muted-dark text-text-muted-light font-bold mx-auto md:mx-0`}>
+
+        <div 
+          className={`${editProfileFormContainerStyle} w-50 flex justify-between border p-1 dark:text-text-muted-dark text-text-muted-light font-bold mx-auto md:mx-0`}
+          role="group" 
+          aria-label="Banner Preview Mode"
+        >
           <button
             className={cn(editProfileFormScreenGuideButtonStyle, `${screenGuideType === 'desktop' ? editProfileFormScreenGuideButtonActiveStyle : null}`)}
             type="button"
             onClick={() => setScreenGuideType('desktop')}
+            aria-pressed={screenGuideType === 'desktop'}
           >
-            <Monitor size={18} />Desktop</button>
+            <Monitor size={18} aria-hidden="true" /> Desktop
+          </button>
+          
           <button
             className={cn(editProfileFormScreenGuideButtonStyle, `${screenGuideType === 'mobile' ? editProfileFormScreenGuideButtonActiveStyle : null}`)}
             type="button"
             onClick={() => setScreenGuideType('mobile')}
+            aria-pressed={screenGuideType === 'mobile'}
           >
-            <Smartphone size={18} />Mobile
+            <Smartphone size={18} aria-hidden="true" /> Mobile
           </button>
         </div>
-        <div className={`${editProfileFormContainerStyle} min-h-60 flex items-center justify-center w-full py-8`}>
+
+        <div 
+          className={`${editProfileFormContainerStyle} min-h-60 flex items-center justify-center w-full py-8`}
+          aria-hidden="true" 
+        >
           <div
             className={`${screenGuideType === 'desktop' ? 'w-full aspect-3/1' : 'w-100 aspect-15/16'} border-4 border-black bg-black rounded-lg overflow-hidden transition-all relative shadow-lg`}
           >
-            <img src={profileBannerPreview ? profileBannerPreview : profile_banner}
-              className={`${screenGuideType === 'desktop' ? 'object-[10%_52%]' : null} h-full w-full object-cover  pointer-events-none"
-                    alt="Banner Preview`}
+            <img 
+              src={profileBannerPreview ? profileBannerPreview : profile_banner}
+              className={`${screenGuideType === 'desktop' ? 'object-[10%_52%]' : null} h-full w-full object-cover pointer-events-none`}
+              alt=""
             >
             </img>
-            <div className={`${screenGuideType === 'desktop' ? 'flex w-1/2 h-1/2 bottom-[-10%] left-[5%]' : 'flex flex-col h-1/3 w-2/3 bottom-[5%] left-[15%]'} absolute overflow-hidden items-center gap-[5%] pointer-events-none`} aria-hidden>
-              <div className={`${screenGuideType === 'desktop' ? 'opacity-100 delay-75 w-[33%]' : 'opacity-0'} rounded-full bg-black/10 border-2 border-neutral-500/40 backdrop-blur-xs h-full  transition-opacity`}>
+            
+            <div className={`${screenGuideType === 'desktop' ? 'flex w-1/2 h-1/2 bottom-[-10%] left-[5%]' : 'flex flex-col h-1/3 w-2/3 bottom-[5%] left-[15%]'} absolute overflow-hidden items-center gap-[5%] pointer-events-none`}>
+              <div className={`${screenGuideType === 'desktop' ? 'opacity-100 delay-75 w-[33%]' : 'opacity-0'} rounded-full bg-black/10 border-2 border-neutral-500/40 backdrop-blur-xs h-full transition-opacity`}>
               </div>
               <div className={`${screenGuideType === 'desktop' ? 'h-2/8' : 'h-3/9'} flex flex-col gap-2 w-[60%]`}>
                 <div className="bg-white/20 shadow-sm rounded-full w-full h-[50%]"></div>
                 <div className="bg-white/20 shadow-sm rounded-full w-2/3 h-[50%]"></div>
               </div>
             </div>
-            <span className="top-[5%] right-[2%] absolute bg-black/50 backdrop-blur-sm px-1.5 py-0.5 rounded-sm font-mono text-xs pointer-events-none">{screenGuideType === 'desktop' ? '1200px View' : 'Mobile View'}</span>
+            
+            <span className="top-[5%] right-[2%] absolute bg-black/50 backdrop-blur-sm px-1.5 py-0.5 rounded-sm font-mono text-xs pointer-events-none">
+              {screenGuideType === 'desktop' ? '1200px View' : 'Mobile View'}
+            </span>
           </div>
         </div>
+
         <input
           type='file'
           name='profile_banner'
@@ -213,8 +254,13 @@ export default function EditProfileForm({
           className="hidden"
           onChange={handleProfileBannerFileChange}
         ></input>
-        <span className={`${editProfileFormTinyText} text-center`} >Safe Zone: Keep important details near the center to ensure visibility on all devices. Maximum size: 2560 x 1440</span>
+        
+        <span className={`${editProfileFormTinyText} text-center`} id="banner-help-text">
+          Safe Zone: Keep important details near the center to ensure visibility on all devices. Maximum size: 2560 x 1440
+        </span>
       </div>
+
+      {/* Username */}
       <div className='flex flex-col gap-2 w-full'>
         <label htmlFor='username' className={`${editProfileFormLabelStyle} text-base`}>Username</label>
         <input
@@ -226,9 +272,19 @@ export default function EditProfileForm({
           maxLength={30}
           minLength={1}
           onChange={usernameIndicatorHander}
+          aria-describedby="username-help"
+          aria-invalid={usernameIndicator ? "true" : "false"}
         ></input>
-        <span className={`${cn(editProfileFormTinyText, `${usernameIndicator ? 'dark:text-red-800 text-red-800 transition-colors ease-in-out': ''}`)}`}>Username can only contain letters, numbers, periods, and underscores</span>
+        
+        <span 
+          id="username-help" 
+          className={`${cn(editProfileFormTinyText, `${usernameIndicator ? 'dark:text-red-800 text-red-800 transition-colors ease-in-out': ''}`)}`}
+        >
+          Username can only contain letters, numbers, periods, and underscores
+        </span>
       </div>
+
+      {/* Bio */}
       <div className='flex flex-col gap-2 w-full'>
         <label htmlFor='bio' className={`${editProfileFormLabelStyle} text-base`}>Bio</label>
         <textarea
@@ -238,13 +294,29 @@ export default function EditProfileForm({
           defaultValue={bio}
           maxLength={150}
           onChange={charCounterDisplayHandler}
+          aria-describedby="bio-counter"
         ></textarea>
-        <span className={`${editProfileFormTinyText}`}>Max characters: {charCounter}/150</span>
+        
+        <span 
+          id="bio-counter" 
+          className={`${editProfileFormTinyText}`} 
+          aria-live="polite"
+        >
+          Max characters: {charCounter}/150
+        </span>
       </div>
+
+      {/* Actions */}
       <div className="flex gap-8 mb-8 w-full">
-        <button type="button" className="bg-charcoal hover:shadow-md p-3 border border-border-color-dark rounded-md w-1/2 cursor-pointer" onClick={() => setShowModal(false)}>Cancel</button>
+        <button 
+          type="button" 
+          className="bg-charcoal hover:shadow-md p-3 border border-border-color-dark rounded-md w-1/2 cursor-pointer" 
+          onClick={() => setShowModal(false)}
+        >
+          Cancel
+        </button>
         <SubmitButton/>
       </div>
-    </form>
+</form>
   )
 }

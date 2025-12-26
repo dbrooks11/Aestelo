@@ -24,35 +24,80 @@ export default function ProfileInfo(props: ProfileInfoParams):JSX.Element {
     <section className='z-10 relative justify-items-center mt-50 md:mt-60 w-full'>
         <div className='z-10 flex flex-col pb-8 border-b border-b-neutral-300 dark:border-b-neutral-800 w-5/6'>
             <section className='flex md:flex-row flex-col items-center gap-6 px-4'>
-                <div className='min-w-35 min-h-35'>
-                    <img className="rounded-full w-35 h-35 object-cover pointer-events-none" src={props.profile_photo} alt="User's Profile Picture"></img>
-                </div>
+                
+                {/* Profile Picture */}
+                <figure className='min-w-35 min-h-35'>
+                    <img 
+                        className="rounded-full w-35 h-35 object-cover pointer-events-none" 
+                        src={props.profile_photo} 
+                        alt={`${props.username}'s profile picture`}
+                    />
+                </figure>
+
+                {/* User Details */}
                 <section className='flex flex-col items-center md:items-start gap-4 font-semibold'>
-                    <h3 className="text-accents-primary text-sm sm:text-lg md:text-xl" role = 'username' aria-label="username">@{props.username}</h3>
-                    <div className='flex gap-5 text-black dark:text-white'>
-                        <section className='flex gap-4'>
-                            <span className={followsAndPostCountStyle}>Followers<span className={followsAndPostCountStyle}>{` ${props.follower_count}`}</span></span>
-                            <span className={followsAndPostCountStyle}>Following<span className={followsAndPostCountStyle}>{` ${props.following_count}`}</span></span>
-                        </section>
-                        <section className='flex gap-4 pl-4 border-black dark:border-white border-l-2'>
-                            <span className={followsAndPostCountStyle}>Posts<span className={followsAndPostCountStyle}>{` ${props.follower_count}`}</span></span> 
-                            <span className={followsAndPostCountStyle}>Visits<span className={followsAndPostCountStyle}>{` ${props.following_count}`}</span></span>
-                        </section>
+                    
+                    {/* Username */}
+                    <h3 className="text-accents-primary text-sm sm:text-lg md:text-xl">
+                        @{props.username}
+                    </h3>
+
+                    {/* Stats Row */}
+                    <div 
+                        className='flex gap-5 text-black dark:text-white' 
+                        role="group" 
+                        aria-label="User Statistics"
+                    >
+                        {/* Followers / Following */}
+                        <div className='flex gap-4'>
+                            <span className={followsAndPostCountStyle} aria-label={`${props.follower_count} Followers`}>
+                                Followers
+                                <span className={followsAndPostCountStyle} aria-hidden="true">{` ${props.follower_count}`}</span>
+                            </span>
+                            
+                            <span className={followsAndPostCountStyle} aria-label={`${props.following_count} Following`}>
+                                Following
+                                <span className={followsAndPostCountStyle} aria-hidden="true">{` ${props.following_count}`}</span>
+                            </span>
+                        </div>
+
+                        {/* Posts / Visits */}
+                        <div className='flex gap-4 pl-4 border-black dark:border-white border-l-2'>
+                            <span className={followsAndPostCountStyle} aria-label={`${props.follower_count} Posts`}>
+                                Posts
+                                <span className={followsAndPostCountStyle} aria-hidden="true">{` ${props.follower_count}`}</span>
+                            </span> 
+                            
+                            <span className={followsAndPostCountStyle} aria-label={`${props.following_count} Visits`}>
+                                Visits
+                                <span className={followsAndPostCountStyle} aria-hidden="true">{` ${props.following_count}`}</span>
+                            </span>
+                        </div>
                     </div>
                 </section>
             </section>
-            {props.bio ? <div aria-label='Bio' className='my-4 px-4 max-w-2xl text-[10px] text-slate dark:text-white md:text-xs break-all text-wrap'>
-                <p role='bio' >
-                    {props.bio}
-                </p>
-            </div>:null}
+
+            {/* Bio */}
+            {props.bio ? (
+                <div 
+                    className='my-4 px-4 max-w-2xl text-[10px] text-slate dark:text-white md:text-xs break-all text-wrap'
+                    aria-label="User Biography"
+                >
+                    <p>{props.bio}</p>
+                </div>
+            ) : null}
+
+            {/* Social Links */}
             <ProfileLinks
                 instagram={props.instagram}
-                tiktok = {props.tiktok}
+                tiktok={props.tiktok}
                 twitter_x={props.twitter_x}
                 facebook={props.facebook}
             />
+            
+            {/* Badges */}
             <ProfileBadges/>
+            
         </div>
     </section>
   )

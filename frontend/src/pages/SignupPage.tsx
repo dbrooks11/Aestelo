@@ -61,7 +61,7 @@ export default function SignupPage(): JSX.Element {
         const {pending} = useFormStatus()
 
         return(
-            <button className="flex items-center justify-center gap-3 bg-accents-primary hover:bg-accents-deep hover:shadow-md py-2 mt-4 rounded-md font-semibold text-white text-xl transition hover:-translate-y-1 cursor-pointer" disabled = {pending}>{!pending ? null: <LoaderCircle className="animate-spin"/>} {!pending ? 'Sign Up' : 'Signing Up...'}</button>
+            <button className="flex justify-center items-center gap-3 bg-accents-primary hover:bg-accents-deep hover:shadow-md mt-4 py-2 rounded-md font-semibold text-white text-xl transition hover:-translate-y-1 cursor-pointer" disabled = {pending}>{!pending ? null: <LoaderCircle className="animate-spin"/>} {!pending ? 'Sign Up' : 'Signing Up...'}</button>
         )
     }
 
@@ -79,41 +79,91 @@ export default function SignupPage(): JSX.Element {
 
     
   return (
-    <main className="flex items-center justify-center flex-1 py-2">
-        <section className="flex flex-col items-center justify-center w-full md:shadow-xl py-12 md:border md:dark:border-slate md:rounded-lg md:w-3/6 dark:text-neutral-300 md:border-bg-light-tertiary">
-            {/* Signup Header */}
+    <main className="flex flex-1 justify-center items-center py-2">
+        <section className="flex flex-col justify-center items-center md:shadow-xl py-12 md:border md:border-bg-light-tertiary md:dark:border-slate md:rounded-lg w-full md:w-3/6 dark:text-neutral-300">
+        
+            {/* Header */}
             <h1 className="font-bold dark:text-bg-light text-2xl">Sign Up</h1>
 
-            {/* Signup Form */}
-            <form action={signUp} className="flex flex-col my-8 w-2/5">
+            {/* --- SIGNUP FORM --- */}
+            <form action={signUp} className="flex flex-col my-8 w-2/5" aria-label="Sign Up Form">
 
-                {/* Honeypot field */}
-                <div className="w-0 h-0 absolute -left-[9999px] -top-[9999px]" aria-hidden aria-label="ignore this">
-                  <label htmlFor="name" className="w-0 h-0"></label>
-                  <input className="overflow-hidden bg-transparent w-0 h-0 cursor-none" type="text" id='name' name='name' autoComplete="off" aria-label="skip this input. it is for non-real users" tabIndex={-1}></input>
+                {/* --- Honeypot Field (Hidden for Security) --- */}
+                <div className="-top-[9999px] -left-[9999px] absolute w-0 h-0" aria-hidden="true">
+                    <label htmlFor="name" className="w-0 h-0"></label>
+                    <input 
+                        className="bg-transparent w-0 h-0 overflow-hidden cursor-none" 
+                        type="text" 
+                        id='name' 
+                        name='name' 
+                        autoComplete="off" 
+                        tabIndex={-1} 
+                    />
                 </div>
 
-                {/* Email field */}
+                {/* --- Email Field --- */}
                 <div className="flex flex-col gap-2 mb-7">
                     <label htmlFor="email">Email</label>
-                    <input className={inputFieldsStyle} type="email" name="email" id="email" autoComplete="email" defaultValue={email} placeholder="Enter email"required></input>
+                    <input 
+                        className={inputFieldsStyle} 
+                        type="email" 
+                        name="email" 
+                        id="email" 
+                        autoComplete="email" 
+                        defaultValue={email} 
+                        placeholder="Enter email"
+                        required
+                        aria-required="true" 
+                    />
                 </div>
 
-                {/* Password field */}
-                <div className="flex flex-col gap-2 mb-7 relative">
+                {/* --- Password Field --- */}
+                <div className="relative flex flex-col gap-2 mb-7">
                     <label htmlFor="password">Password</label>
-                    <input className={inputFieldsStyle}  type={showPasswordOne} name="password" id="password" placeholder="Enter password"required></input>
-                    <button type="button" tabIndex={-1} onClick={showPasswordsOne} className={showPassStyle} aria-label="show or hide password button">{showPasswordOne === 'text' ? <EyeClosed className="w-full h-full"/> : <Eye className="w-full h-full"/>}</button>
+                    <input 
+                        className={inputFieldsStyle} 
+                        type={showPasswordOne} 
+                        name="password" 
+                        id="password" 
+                        placeholder="Enter password"
+                        required
+                        aria-required="true"
+                    />
+                    <button 
+                        type="button" 
+                        tabIndex={-1} 
+                        onClick={showPasswordsOne} 
+                        className={showPassStyle} 
+                        aria-label={showPasswordOne === 'text' ? "Hide password" : "Show password"}
+                    >
+                        {showPasswordOne === 'text' ? <EyeClosed className="w-full h-full" aria-hidden="true"/> : <Eye className="w-full h-full" aria-hidden="true"/>}
+                    </button>
                 </div>
 
-                {/* Re-confirm password field */}
-                <div className="flex flex-col gap-2 mb-7 relative">
+                {/* --- Confirm Password Field --- */}
+                <div className="relative flex flex-col gap-2 mb-7">
                     <label htmlFor="confirm_password">Confirm Password</label>
-                    <input className={inputFieldsStyle}  type={showPasswordTwo} name="confirm_password" id="confirm_password" placeholder="Re-enter password" required></input>
-                    <button type="button" tabIndex={-1} onClick={showPasswordsTwo} className={showPassStyle} aria-label="show or hide password button">{showPasswordTwo === 'text' ? <EyeClosed className="w-full h-full"/> : <Eye className="w-full h-full"/>}</button>
+                    <input 
+                        className={inputFieldsStyle} 
+                        type={showPasswordTwo} 
+                        name="confirm_password" 
+                        id="confirm_password" 
+                        placeholder="Re-enter password" 
+                        required
+                        aria-required="true"
+                    />
+                    <button 
+                        type="button" 
+                        tabIndex={-1} 
+                        onClick={showPasswordsTwo} 
+                        className={showPassStyle} 
+                        aria-label={showPasswordTwo === 'text' ? "Hide confirm password" : "Show confirm password"}
+                    >
+                        {showPasswordTwo === 'text' ? <EyeClosed className="w-full h-full" aria-hidden="true"/> : <Eye className="w-full h-full" aria-hidden="true"/>}
+                    </button>
                 </div>
 
-                {/* Submit button component */}
+                {/* --- Submit Action --- */}
                 <SubmitButton/>
             </form>
         </section>

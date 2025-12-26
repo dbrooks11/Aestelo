@@ -36,32 +36,71 @@ const Tabs = ({children, tabsAndContentContainerStyle, tabsContainerStyle, tabsS
 
     return (
         <div className={cn("flex flex-col", tabsAndContentContainerStyle)} id="tabs_and_content_container">
+    
+            {/*  Tab Header */}
             <div 
-            className={cn("flex justify-center items-center", tabsContainerStyle)} 
-            id="tabs_container" aria-roledescription='tablist'
+                className={cn("flex justify-center items-center", tabsContainerStyle)} 
+                id="tabs_container" 
+                role="tablist" 
+                aria-label="Profile Sections" 
             >
-                {children.map((child)=> {
+                {children.map((child, index) => {
+                    const isActive = activeTab === child.props.label;
+                    const tabId = `tab-${index}`;
+                    const panelId = `panel-${index}`;
 
-                    return(
-                    <button
-                        key = {child.props.label}
-                        className={`${activeTab === child.props.label ? `${cn('', activeTabStyle)}` : ''}  ${child.props.icon && child.props.label ? 'gap-4' : ''} ${cn('flex justify-center items-center p-3 w-1/4 cursor-pointer', tabsStyle)}`}
-                        onClick={(e) => handleTabClick(e, child.props.label)}
-                        aria-roledescription="tab"
-                        id="tab"
-                    >
-                        <span className={cn("md:hidden", tabsIconStyle)} title={child.props.label}>{child.props.icon ? child.props.icon : null}</span>
-                        <span className={cn("hidden md:inline", tabsLabelStyle)}>{child.props.label}</span>
-                    </button>
+                    return (
+                        <button
+                            key={child.props.label}
+                            role="tab" 
+                            id={tabId}
+                            aria-selected={isActive} 
+                            aria-controls={panelId} 
+                            tabIndex={isActive ? 0 : -1} 
+                            
+                            className={`${isActive ? `${cn('', activeTabStyle)}` : ''}  ${child.props.icon && child.props.label ? 'gap-4' : ''} ${cn('flex justify-center items-center p-3 w-1/4 cursor-pointer', tabsStyle)}`}
+                            
+                            onClick={(e) => handleTabClick(e, child.props.label)}
+                        >
+                            {/* Icon - Hidden on desktop, visible on mobile */}
+                            <span 
+                                className={cn("md:hidden", tabsIconStyle)} 
+                                title={child.props.label}
+                                aria-hidden="true" 
+                            >
+                                {child.props.icon ? child.props.icon : null}
+                            </span>
+
+                            {/* Label - Visible on desktop */}
+                            <span className={cn("hidden md:inline", tabsLabelStyle)}>
+                                {child.props.label}
+                            </span>
+                        </button>
                     )
                 })}
             </div>
-            <section ref={tabsContentRef}>
-                {children.map((child)=> {
-                    if(child.props.label === activeTab){
-                        return <div key={child.props.label}>{child.props.children}</div>
+
+            {/* Tab Content */}
+            <section ref={tabsContentRef} className="mt-4">
+                {children.map((child, index) => {
+                    const isActive = child.props.label === activeTab;
+                    const panelId = `panel-${index}`;
+                    const tabId = `tab-${index}`;
+
+                    if (isActive) {
+                        return (
+                            <div 
+                                key={child.props.label}
+                                role="tabpanel" 
+                                id={panelId}
+                                aria-labelledby={tabId} 
+                                tabIndex={0} 
+                            >
+                                {child.props.children}
+                            </div>
+                        )
                     }
-                    return null
+                    return null;
                 })}
             </section>
         </div>

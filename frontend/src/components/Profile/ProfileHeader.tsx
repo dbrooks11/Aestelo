@@ -132,41 +132,80 @@ export default function ProfileHeader(props: ProfileHeaderProps): JSX.Element{
         
 
     return(
-        <header style={headerStyle} className='sticky z-50 top-0 w-full h-16 flex justify-between items-center px-4'>
+        <header 
+            style={headerStyle} 
+            className='top-0 z-50 sticky flex justify-between items-center px-4 w-full h-16'
+        >
+            
+            {/* Go back button */}
             <div>
-                <button className={profileHeaderButtonStyle}><ArrowLeft className="w-2/3 h-2/3"/></button>
-            </div>
-            <motion.div 
-            className="text-black flex flex-col items-center justify-center"
-            style={{y: useTransform(scrollY, [100, 200], [50, 0]), opacity: useTransform(scrollY, [160, 200], [0, 1])}}
-            >
-                {opaqueHeaderScroll > .55 ? <>
-                    <span className="dark:text-white/90 text-dark font-bold text-xs">{props.username}</span>
-                    <span className="dark:text-neutral-400 text-neutral-500 text-[11px]">{props?.follower_count} Followers</span>
-                </>: null}
-                
-            </motion.div>
-            <div className="flex gap-4">
-                <ThemeButton className={`${profileHeaderButtonStyle} hidden md:flex`}/>
                 <button 
-                  className={profileHeaderButtonStyle} 
-                  onClick={toggleProfileMenu}
-                  aria-label="Toggle Profile Menu"
-                >{!isOpen ? <Ellipsis className="w-2/3 h-2/3"/>: <X className="w-2/3 h-2/3"/>}</button>
+                    className={profileHeaderButtonStyle} 
+                    aria-label="Go back" // Essential for icon-only buttons
+                >
+                    <ArrowLeft className="w-2/3 h-2/3" aria-hidden="true"/>
+                </button>
             </div>
 
+            {/* Dynamic Title */}
+            <motion.div 
+                className="flex flex-col justify-center items-center text-black"
+                style={{
+                    y: useTransform(scrollY, [100, 200], [50, 0]), 
+                    opacity: useTransform(scrollY, [160, 200], [0, 1])
+                }}
+                aria-hidden={opaqueHeaderScroll <= 0.55} 
+            >
+                {opaqueHeaderScroll > .55 ? (
+                    <>
+                        <span className="font-bold text-dark dark:text-white/90 text-xs">
+                            {props.username}
+                        </span>
+                        <span className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                            {props?.follower_count} Followers
+                        </span>
+                    </>
+                ) : null}
+            </motion.div>
+
+            {/* Hamburger menu */}
+            <div className="flex gap-4">
+                {/* Theme Toggle (Hidden on mobile) */}
+                <div className="hidden md:flex">
+                    <ThemeButton className={profileHeaderButtonStyle} />
+                </div>
+
+                {/* Profile Menu Toggle */}
+                <button 
+                    className={profileHeaderButtonStyle} 
+                    onClick={toggleProfileMenu}
+                    aria-label={isOpen ? "Close Profile Menu" : "Open Profile Menu"}
+                    aria-expanded={isOpen} 
+                    aria-haspopup="true"   
+                >
+                    {!isOpen ? (
+                        <Ellipsis className="w-2/3 h-2/3" aria-hidden="true"/>
+                    ) : (
+                        <X className="w-2/3 h-2/3" aria-hidden="true"/>
+                    )}
+                </button>
+            </div>
+
+            {/* Dropdown menu */}
             <AnimatePresence>
-                {isOpen === true ? 
+                {isOpen === true ? (
                     <motion.nav
-                    key='Profile Menu'
-                    initial={{opacity: 0}}
-                    animate={{opacity: 1}}
-                    exit={{opacity: 0}}
-                    transition={{duration: 0.3, ease: "easeInOut"}}
-                    className="absolute top-15 right-4 flex flex-col p-4 gap-2 bg-white/80 dark:bg-charcoal/80 backdrop-blur-lg rounded-br-sm rounded-tl-sm dark:text-white/95 text-sm border dark:border-neutral-800 border-neutral-300"
+                        key='Profile Menu'
+                        initial={{opacity: 0}}
+                        animate={{opacity: 1}}
+                        exit={{opacity: 0}}
+                        transition={{duration: 0.3, ease: "easeInOut"}}
+                        className="top-15 right-4 absolute flex flex-col gap-2 bg-white/80 dark:bg-charcoal/80 backdrop-blur-lg p-4 border border-neutral-300 dark:border-neutral-800 rounded-tl-sm rounded-br-sm dark:text-white/95 text-sm"
+                        aria-label="Profile Options"
                     >
                         {handleMenuLinks()}
-                    </motion.nav> : null}
+                    </motion.nav> 
+                ) : null}
             </AnimatePresence>
         </header>
     )
