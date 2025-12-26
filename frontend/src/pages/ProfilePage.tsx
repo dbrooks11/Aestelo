@@ -11,6 +11,7 @@ import myProfilePic from '../assets/my_profile_pic.jpg'
 import defaultProfilePic from "../assets/default_profile_pic.png"
 import type { AxiosResponse } from 'axios'
 import Modal from '../components/Modal'
+import ToasterCustom from '../components/Toast'
 
 export type ProfileDataType = {
   id: string,
@@ -135,7 +136,7 @@ export default function ProfilePage(): JSX.Element {
             setShowModal={setShowModal}
           />
         </Modal>
-        <Toaster toasterId='profile'/>
+        <ToasterCustom toasterId='profile'/>
       </main>: "Loading Profile..."}
     </>
   )

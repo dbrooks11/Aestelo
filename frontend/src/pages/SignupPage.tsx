@@ -4,7 +4,8 @@ import { AxiosErrorHelper, signupInstance } from "../util/axios_api_helpers";
 import { useFormStatus } from "react-dom";
 import { useNavigate, type NavigateFunction } from "react-router-dom";
 import type { AxiosResponse} from "axios";
-import toast, { Toaster } from "react-hot-toast";
+import ToasterCustom from "../components/Toast";
+import toast from "react-hot-toast";
 
 
 const inputFieldsStyle = "border-neutral-500/30 focus:border-accents-primary border-b-2 focus:outline-none"
@@ -14,7 +15,6 @@ const showPassStyle = "absolute right-0 bottom-1 w-6 p-0.5 rounded-md text-black
 export default function SignupPage(): JSX.Element {
 
     const navigate: NavigateFunction = useNavigate()
-    const [error, setError] = useState<string | null>("")
     const [email, setEmail] = useState<string | undefined>("")
     const [showPasswordOne, setShowPasswordOne] = useState("password")
     const [showPasswordTwo, setShowPasswordTwo] = useState("password")
@@ -84,9 +84,6 @@ export default function SignupPage(): JSX.Element {
             {/* Signup Header */}
             <h1 className="font-bold dark:text-bg-light text-2xl">Sign Up</h1>
 
-            {/* Error show */}
-            {error ? <span id='error' className="bg-bg-light-tertiary mt-8 px-2 py-1 border border-neutral-200 rounded-xl font-medium text-sm dark:bg-mid-gray/10 dark:text-white/85">{error.split('.')[0]}</span>: null}
-
             {/* Signup Form */}
             <form action={signUp} className="flex flex-col my-8 w-2/5">
 
@@ -120,7 +117,7 @@ export default function SignupPage(): JSX.Element {
                 <SubmitButton/>
             </form>
         </section>
-        <Toaster toasterId="signup"/>
+        <ToasterCustom toasterId='signup'/>
     </main>
   )
 }

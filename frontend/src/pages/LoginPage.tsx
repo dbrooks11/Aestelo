@@ -4,7 +4,8 @@ import { useFormStatus } from "react-dom";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, type NavigateFunction, Link } from "react-router-dom";
 import { AxiosErrorHelper, loginInstance } from "../util/axios_api_helpers";
-import toast, { Toaster } from "react-hot-toast";
+import ToasterCustom from "../components/Toast";
+import toast from "react-hot-toast";
 
 
 export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
@@ -15,7 +16,6 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
     const [showPassword, setShowPassword] = useState("password")
     const[emailState, setEmailState] = useState<string | undefined>("")
     const [usernameState, setUsernameState] = useState<string | undefined>("")
-    const [error, setError] = useState<string | null>("")
 
 
     async function login(formData: FormData): Promise<void>{
@@ -74,9 +74,6 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
             {/* Login Header */}
             <h1 className="font-bold dark:text-bg-light text-2xl">Login</h1>
 
-            {/* Error Show */}
-            {error ? <span id='error' className="bg-bg-light-tertiary mt-8 px-2 py-1 border border-neutral-200 rounded-xl font-medium text-sm dark:bg-mid-gray/10 dark:text-white/85">{error.split('.')[0]}</span>: null}
-
             {/* Login Form */}
             <form action = {login} className="flex flex-col my-8 w-2/5">
 
@@ -115,7 +112,7 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
             {/* Alternative login link */}
             <Link className="text-sm flex w-fit" to={`/login-${isEmail ? 'username': 'email'}`}>Log in with {isEmail ? 'username' : 'email'}</Link>
         </section>
-        <Toaster toasterId="login"/>
+        <ToasterCustom toasterId='login'/>
     </main>
   )
 }
