@@ -25,7 +25,9 @@ const editProfileFormTinyText = 'text-[10px] text-text-muted-light dark:text-tex
 export default function EditProfileForm({
   username, bio, profile_photo, profile_banner,
   setProfileData, setShowModal }: EditProfileFormProps): JSX.Element {
-
+  
+  const [usernameIndicator, setUsernameIndictor] = useState<boolean>(false)
+  const [charCounter, setCharCounter] = useState<number>(bio.length)  
   const [screenGuideType, setScreenGuideType] = useState<'mobile' | 'desktop'>('desktop')
   const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | undefined>(undefined)
   const [profileBannerPreview, setProfileBannerPreview] = useState<string | undefined>(undefined)
@@ -58,18 +60,9 @@ export default function EditProfileForm({
     };
   },);
 
-  //TODO: Handle constant username submission (if username is the same when form is submitted ignore it)
+  //TODO: Add field for links and badges(maybe) in the future
   const handleEditProfileFormClick = async (formData: FormData): Promise<void> => {
-
-    const username: FormDataEntryValue | null = formData.get('username')
-    //TODO: finish this (to check if username is the same as state already so it isnt submitted)
-    const isUsername: boolean = false
-    if(username === username){
-      return
-    }
-
     try {
-
       const response = await protectedInstance.patch('/profile/me', formData, {
         headers:{
           'Content-Type': 'multipart/form-data'
@@ -117,7 +110,25 @@ export default function EditProfileForm({
     )
   }
 
-  // TODO: Add api call to update profile on form submit
+  const charCounterDisplayHandler = (e: React.ChangeEvent<HTMLTextAreaElement>) =>{
+    const bioLength = e.target.value.length
+    setCharCounter(bioLength)
+  }
+
+  const usernameIndicatorHander = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const usernameChars = e.target.value
+    const re = /^[0-9A-Za-z_.]+$/
+
+    if(e.target.value === '' || !re.test(usernameChars)){
+      setUsernameIndictor(true)
+    }else{
+      setUsernameIndictor(false)
+    }
+
+
+  }
+
+
 
   return (
     <form action={handleEditProfileFormClick} className='flex flex-col flex-1 items-center gap-10 px-6 overflow-y-scroll text-white'>
@@ -200,13 +211,16 @@ export default function EditProfileForm({
       <div className='flex flex-col gap-2 w-full'>
         <label htmlFor='username' className={`${editProfileFormLabelStyle} text-base`}>Username</label>
         <input
-          className={`${editProfileFormContainerStyle} p-3 dark:text-white text-black`}
+          className={`${cn(editProfileFormContainerStyle, `${usernameIndicator ? 'dark:border-red-800 border-red-800 transition-colors ease-in-out' : ''}`)} outline-none p-3 dark:text-white text-black`}
           type='text'
           name='username'
           id='username'
           defaultValue={username}
+          maxLength={30}
+          minLength={1}
+          onChange={usernameIndicatorHander}
         ></input>
-        <span className={`${editProfileFormTinyText}`}>Username can only contain letters, numbers, periods, and underscores</span>
+        <span className={`${cn(editProfileFormTinyText, `${usernameIndicator ? 'dark:text-red-800 text-red-800 transition-colors ease-in-out': ''}`)}`}>Username can only contain letters, numbers, periods, and underscores</span>
       </div>
       <div className='flex flex-col gap-2 w-full'>
         <label htmlFor='bio' className={`${editProfileFormLabelStyle} text-base`}>Bio</label>
@@ -216,8 +230,9 @@ export default function EditProfileForm({
           id='bio'
           defaultValue={bio}
           maxLength={150}
+          onChange={charCounterDisplayHandler}
         ></textarea>
-        <span className={`${editProfileFormTinyText}`}>Max characters: 150</span>
+        <span className={`${editProfileFormTinyText}`}>Max characters: {charCounter}/150</span>
       </div>
       <div className="flex gap-8 mb-8 w-full">
         <button type="button" className="bg-charcoal hover:shadow-md p-3 border border-border-color-dark rounded-md w-1/2 cursor-pointer" onClick={() => setShowModal(false)}>Cancel</button>

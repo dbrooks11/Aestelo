@@ -40,11 +40,18 @@ def profile_me():
         try:
             form_data = request.form.to_dict()
             
-            try:
-                validate_data = profile_can_edit.load(form_data, partial=True) 
-            except ValidationError as e:
-                current_app.logger.error(f"Data could not be validated: {str(e)}")
-                return jsonify({'error': e.messages}),400
+            if form_data.get('username') == user_profile.username:
+                form_data.pop('username')
+            
+            if form_data.get('bio') == user_profile.bio:
+                form_data.pop('bio')
+
+            if form_data:
+                try:
+                    validate_data = profile_can_edit.load(form_data, partial=True) 
+                except ValidationError as e:
+                    current_app.logger.error(f"Data could not be validated: {str(e)}")
+                    return jsonify({'error': e.messages}),400
             
             form_files = request.files
             photo_list = request.files.getlist('profile_photo')
@@ -91,14 +98,14 @@ def profile_me():
                 current_app.logger.error(f"Image processing failed: {str(e)}")
                 return jsonify({'error': f'Image processing failed: {str(e)}'}), 500
 
-            
-            for key, value in validate_data.items():
-                if key == 'username':
-                    auth_user = AuthUser.query.options(load_only(AuthUser.username)).get(user_profile.id)
-                    if auth_user:
-                        auth_user.username = value
-                if hasattr(user_profile, key):    
-                    setattr(user_profile,key, value)
+            if form_data:
+                for key, value in validate_data.items():
+                    if key == 'username':
+                        auth_user = AuthUser.query.options(load_only(AuthUser.username)).get(user_profile.id)
+                        if auth_user:
+                            auth_user.username = value
+                    if hasattr(user_profile, key):    
+                        setattr(user_profile,key, value)
 
             if new_photo_path:
                 user_profile.profile_photo = new_photo_path

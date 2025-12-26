@@ -15,6 +15,7 @@ export default function AuthProvider({ children }: {children: ReactNode}): JSX.E
 
             if (response.status === 200){
                 setUser(response.data)
+                console.log(response.data)
                 
             }
 
