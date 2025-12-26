@@ -25,6 +25,7 @@ def upload_to_r2(file_obj, user_id: str, folder: str):
         unique_filename = f"{folder}/{user_id}/{timestamp}_{short_id}.webp"
     
         s3_client = get_r2_client()
+        file_obj.seek(0)
         
         s3_client.upload_fileobj(
             file_obj,
@@ -34,8 +35,6 @@ def upload_to_r2(file_obj, user_id: str, folder: str):
                 "ContentType": 'image/webp'
             }
         )
-       
-        # public_url = f"{current_app.config['R2_PUBLIC_URL']}/{bucket}/{unique_filename}"
         
         return unique_filename
         

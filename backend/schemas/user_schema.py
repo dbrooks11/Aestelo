@@ -14,8 +14,8 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
 
     id = fields.UUID(dump_only=True)
 
-    profile_photo = fields.String(attribute='profile_photo_url', dump_only=True)
-    profile_banner = fields.String(attribute='profile_banner_url', dump_only=True)
+    profile_photo_url = fields.String(attribute='profile_photo_url', dump_only=True)
+    profile_banner_url = fields.String(attribute='profile_banner_url', dump_only=True)
 
     profile_created_at = fields.DateTime(dump_only=True)
     post_count = fields.Int(dump_only=True)
@@ -23,7 +23,7 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
     follower_count = fields.Int(dump_only=True)
     following_count = fields.Int(dump_only=True)
     
-    username = fields.Str(required=True,validate=[validate.Length(min=1, max=30),validate.Regexp(r'^(?!.*\.$)(?!^\.)[a-zA-Z0-9._]+$', error='Username can only contain letters, numbers, periods, and underscores')])
+    username = fields.Str(validate=[validate.Length(min=1, max=30),validate.Regexp(r'^(?!.*\.$)(?!^\.)[a-zA-Z0-9._]+$', error='Username can only contain letters, numbers, periods, and underscores')])
     bio = fields.Str(validate=[validate.Length(max=150)])
     instagram= fields.Str(validate=validate.URL())
     facebook= fields.Str(validate=validate.URL())

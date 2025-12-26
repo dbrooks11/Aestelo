@@ -141,7 +141,7 @@ class UserProfile(db.Model):
     def profile_photo_url(self):
         if not self.profile_photo:
             return None
-        public_url = f"{current_app.config['R2_PUBLIC_URL']}/{self.profile_photo}"
+        public_url = f"{current_app.config['R2_PUBLIC_URL']}/{current_app.config['R2_BUCKET_NAME']}/{self.profile_photo}"
         return public_url
     
 
@@ -149,7 +149,7 @@ class UserProfile(db.Model):
     def profile_banner_url(self):
         if not self.profile_banner:
             return None
-        public_url = f"{current_app.config['R2_PUBLIC_URL']}/{self.profile_banner}"
+        public_url = f"{current_app.config['R2_PUBLIC_URL']}/{current_app.config['R2_BUCKET_NAME']}/{self.profile_banner}"
         return public_url
         
     

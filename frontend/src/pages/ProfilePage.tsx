@@ -15,7 +15,9 @@ import Modal from '../components/Modal'
 export type ProfileDataType = {
   id: string,
   profile_photo: string,
+  profile_photo_url: string
   profile_banner: string | undefined
+  profile_banner_url: string,
   username: string,
   banner_theme: string,
   bio: string,
@@ -89,7 +91,8 @@ export default function ProfilePage(): JSX.Element {
   
     
  
-
+//TODO: set actual Default banner
+//TODO: set Default profile pic
   return (
     <>
       {!isLoading ? <main className='relative flex flex-col items-center h-full'>
@@ -97,9 +100,11 @@ export default function ProfilePage(): JSX.Element {
         <ProfileHeader 
           username = {profileData?.username ? profileData.username : ''} 
           follower_count={profileData?.follower_count ? profileData.follower_count : 0}/>
-        <ProfileBanner profileBanner={myProfilePic}/> //TODO: set actual user banner
+          
+        <ProfileBanner profileBanner={profileData?.profile_banner_url ? profileData.profile_banner_url: ''}/> 
         <ProfileInfo 
-          profile_photo={profileData?.profile_photo ? profileData.profile_photo : myProfilePic} //TODO: default icon is temporary (remove it since it has liscense)
+        
+          profile_photo={profileData?.profile_photo_url ? profileData.profile_photo_url : ''} 
           follower_count={profileData?.follower_count ? profileData.follower_count : 0}
           following_count={profileData?.following_count ? profileData.following_count : 0}
           username= {profileData?.username ? profileData.username : ''}
@@ -122,10 +127,10 @@ export default function ProfilePage(): JSX.Element {
         <ProfileTabs/>
         <Modal showModal={showModal} closeModal={closeModal} title='Edit Profile'>
           <EditProfileForm
-            profile_banner={profileData?.profile_banner}
-            profile_photo={profileData?.profile_photo ? profileData.profile_photo : myProfilePic} //TODO: default icon is temporary (remove it since it has liscense) and make own default phtot or svg
+            profile_banner={profileData?.profile_banner_url}
+            profile_photo={profileData?.profile_photo_url ? profileData.profile_photo_url : ''}  
             username = {profileData?.username ? profileData.username : ""} 
-            bio = {profileData?.bio ? profileData.bio : "hello im under za water"}
+            bio = {profileData?.bio ? profileData.bio : ""}
             setProfileData={setProfileData}
             setShowModal={setShowModal}
           />

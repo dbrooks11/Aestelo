@@ -18,7 +18,8 @@ export default function AuthProvider({ children }: {children: ReactNode}): JSX.E
                 
             }
 
-        }catch{
+        }catch(error){
+            console.log(error)
             setUser(null)
         }
         finally{

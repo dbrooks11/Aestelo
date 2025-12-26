@@ -2,7 +2,9 @@ from flask import Blueprint, request, jsonify, current_app
 from io import BytesIO
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import exists
+from sqlalchemy.orm import load_only
 from exstensions import db
+from models.user import UserProfile
 from models.block_profile import BlockProfile
 from models.followers_and_following import Follow
 from models.music_track import MusicTrack
@@ -19,8 +21,13 @@ profile_bp = Blueprint('profile',__name__, url_prefix='/profile')
 #done testing
 @profile_bp.route('/me', methods = ['GET','PATCH'])
 @jwt_required()
-@profile_check_current__banned_removed
-def profile_me(user_profile):
+def profile_me():
+    current_user = get_jwt_identity()
+    
+    user_profile = UserProfile.query.options(load_only(UserProfile.username,
+                                                       UserProfile.bio,
+                                                       UserProfile.profile_photo,
+                                                       UserProfile.profile_banner)).get(current_user)
 
     if request.method == 'GET':
         try:
@@ -34,94 +41,87 @@ def profile_me(user_profile):
             form_data = request.form.to_dict()
             
             try:
-                validate_data = profile_can_edit.load(form_data, partial=True)    
+                validate_data = profile_can_edit.load(form_data, partial=True) 
             except ValidationError as e:
+                print(e)
+                current_app.logger.error(f"Data could not be validated: {str(e)}")
                 return jsonify({'error': e.messages}),400
             
             form_files = request.files
             profile_photo_compressed = None
             profile_banner_compressed = None
-            profile_photo_filepath = None
-            profile_banner_filepath = None
+            new_photo_path = None
+            new_banner_path = None
 
             old_photo_path = user_profile.profile_photo
             old_banner_path = user_profile.profile_banner
             
             try:
                 if 'profile_photo' in form_files:
-                    profile_photo_compressed: list | BytesIO = photo_processing_one_img(form_files.get('profile_photo'), is_banner=False, current_user_id=user_profile.id)
+                    photo_file = form_files.get('profile_photo')
+                    if photo_file:
+                        profile_photo_compressed: list | BytesIO = photo_processing_one_img(photo_file, is_banner=False, current_user_id=user_profile.id)
 
-                    if isinstance(profile_photo_compressed, list):
-                        return jsonify({'error': {'profile_photo': profile_photo_compressed[0]}}),400
+                        if isinstance(profile_photo_compressed, list):
+                            return jsonify({'error': {'profile_photo': profile_photo_compressed[0]}}),400
+                        
+                        new_photo_path: str = upload_to_r2(file_obj=profile_photo_compressed, user_id=user_profile.id, folder='profile_photo')
                     
-                    try:
-                        profile_photo_filepath: str = upload_to_r2(file_obj=profile_photo_compressed, user_id=user_profile.id, folder='profile_photo')
-                    except Exception as e:
-                        return jsonify({'error': str(e)})
 
                 if 'profile_banner' in form_files:
-                    profile_banner_compressed: list | BytesIO = photo_processing_one_img(form_files.get('profile_banner'), is_banner=True, current_user_id=user_profile.id)
+                    banner_file = form_files.get('profile_banner')
+                    if banner_file:
+                        profile_banner_compressed: list | BytesIO = photo_processing_one_img(banner_file, is_banner=True, current_user_id=user_profile.id)
 
-                    if isinstance(profile_banner_compressed, list):
-                        return jsonify({'error': {'profile_banner': profile_banner_compressed[0]}}), 400
-                    
-                    try:
-                        profile_banner_filepath: str = upload_to_r2(file_obj=profile_banner_compressed, user_id=user_profile.id, folder='profile_banner')
-                    except Exception as e:
-                        return jsonify({'error': str(e)})
+                        if isinstance(profile_banner_compressed, list):
+                            return jsonify({'error': {'profile_banner': profile_banner_compressed[0]}}), 400
+                        
+                        
+                        new_banner_path: str = upload_to_r2(file_obj=profile_banner_compressed, user_id=user_profile.id, folder='profile_banner')
                     
             except Exception as e:
+                print(e)
                 current_app.logger.error(f"Image processing failed: {str(e)}")
                 return jsonify({'error': f'Image processing failed: {str(e)}'}), 500
 
             
-            file_dict = {
-                "profile_photo": profile_photo_filepath,
-                "profile_banner": profile_banner_filepath
-
-            }
-
-            try:
-                validate_files = profile_can_edit.load(file_dict, partial = True)
-            except ValidationError as e:
-                return jsonify({'error': e.messages}),400
-            
             for key, value in validate_data.items():
                 if key == 'username':
-                    auth_user = AuthUser.query.get(user_profile.id)
-                    auth_user.username = validate_data['username']
-                setattr(user_profile,key, value)
+                    auth_user = AuthUser.query.options(load_only(AuthUser.username)).get(user_profile.id)
+                    if auth_user:
+                        auth_user.username = value
+                if hasattr(user_profile, key):    
+                    setattr(user_profile,key, value)
 
-            if profile_photo_filepath:
-                user_profile.profile_photo = profile_photo_filepath
-            if profile_banner_filepath:
-                user_profile.profile_banner = profile_banner_filepath
+            if new_photo_path:
+                user_profile.profile_photo = new_photo_path
+            if new_banner_path:
+                user_profile.profile_banner = new_banner_path
 
             db.session.commit() 
 
             try:
-                if profile_photo_filepath and old_photo_path:
+                if new_photo_path and old_photo_path:
                     delete_file_r2(old_photo_path)
-                if profile_banner_filepath and old_banner_path:
+                if new_banner_path and old_banner_path:
                     delete_file_r2(old_banner_path)
             except Exception as e:
+                print(e)
                 current_app.logger.warning(f"Failed to delete old images: {str(e)}")
                 return jsonify({'error': str(e)})
                 
             return jsonify({'message': 'profile updated',
-                            'updated_fields': {'profile_banner': validate_files['profile_banner'],
-                                               'profile_photo': validate_files['profile_photo'],
-                                               'username': form_data.get('username'),
-                                               'bio': form_data.get('bio')}}), 200
-        except Exception:
+                            'updated_fields': user_profile_schema.dump(user_profile)}), 200
+        except Exception as e:
             db.session.rollback()
+            print(e)
             current_app.logger.error(f"Database Update Failed: {str(e)}")
 
             try:
-                if profile_photo_filepath: 
-                    delete_file_r2(profile_photo_filepath)
-                if profile_banner_filepath: 
-                    delete_file_r2(profile_banner_filepath)
+                if new_photo_path: 
+                    delete_file_r2(new_photo_path)
+                if new_banner_path: 
+                    delete_file_r2(new_banner_path)
             except:
                 pass
 

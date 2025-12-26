@@ -1,13 +1,10 @@
-import { useState, type Dispatch, type JSX, type SetStateAction } from "react";
+import { useState, useEffect,type Dispatch, type JSX, type SetStateAction } from "react";
 import cn from "../../util/tailwind_merger";
 import { type ProfileDataType } from "../../pages/ProfilePage";
 import { PencilLine } from 'lucide-react'
 import { toastNotifyMessage } from "../../Toast";
-import myProfilePic from '/src/assets/my_profile_pic.jpg' //TODO: remove profile pic (only for testing)
 import { Monitor, Smartphone, Upload } from "lucide-react";
 import { protectedInstance } from "../../util/axios_api_helpers";
-
-// TODO: add profile banner to form and props type once setup in backend
 
 type EditProfileFormProps = {
   profile_banner: ProfileDataType['profile_banner']
@@ -24,9 +21,6 @@ const editProfileFormContainerStyle = 'border dark:bg-charcoal dark:border-borde
 const editProfileFormLabelStyle = 'font-bold dark:text-text-muted-dark text-text-main-light'
 const editProfileFormTinyText = 'text-[10px] text-text-muted-light dark:text-text-muted-dark'
 
-//TODO: Set user banner from profile page to edit form state (same for profile)
-//TODO: Set user profile_photo from profile page to edit form state (same for profile)
-
 export default function EditProfileForm({
   username, bio, profile_photo, profile_banner,
   setProfileData, setShowModal }: EditProfileFormProps): JSX.Element {
@@ -41,7 +35,6 @@ export default function EditProfileForm({
       tempUrl = URL.createObjectURL(e.target.files[0])
       setProfilePhotoPreview(tempUrl)
     }
-    return () => URL.revokeObjectURL(tempUrl)
   }
 
   const handleProfileBannerFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,13 +44,27 @@ export default function EditProfileForm({
       setProfileBannerPreview(tempUrl)
     }
 
-    return () => URL.revokeObjectURL(tempUrl)
   }
+
+  useEffect(() => {
+    return () => {
+      if (profilePhotoPreview) {
+        URL.revokeObjectURL(profilePhotoPreview);
+      }
+      if (profileBannerPreview) {
+        URL.revokeObjectURL(profileBannerPreview);
+      }
+    };
+  },);
 
   const handleEditProfileFormClick = async (formData: FormData): Promise<void> => {
     try {
 
-      const response = await protectedInstance.patch('/profile/me', formData)
+      const response = await protectedInstance.patch('/profile/me', formData, {
+        headers:{
+          'Content-Type': 'multipart/form-data'
+        }
+      })
 
       if (response.status === 200) {
         const data = response.data
@@ -67,18 +74,20 @@ export default function EditProfileForm({
           return (
             {
               ...prev,
-              profile_banner: data.updated_fields.profile_banner,
-              profile_photo: data.updated_fields.profile_photo,
+              profile_banner_url: data.updated_fields.profile_banner_url,
+              profile_photo_url: data.updated_fields.profile_photo_url,
               username: data.updated_fields.username,
               bio: data.updated_fields.bio
             }
           )
         })
-
+        //TODO: Update css for toasts
+        setShowModal(false)
         toastNotifyMessage(data.message)
       }
-    } catch (error) {
-      console.log('failed to update')
+    } catch {
+      setProfileBannerPreview(profile_banner)
+      setProfilePhotoPreview(profile_photo)
     }
   }
 
@@ -91,7 +100,7 @@ export default function EditProfileForm({
         <div className={cn(`${editProfileFormContainerStyle} relative`, 'rounded-full')}>
           <div className="w-35 h-35">
             <img
-              src={profilePhotoPreview ? profileBannerPreview : profile_photo}
+              src={profilePhotoPreview ? profilePhotoPreview : profile_photo}
               className='rounded-full w-full h-full object-cover pointer-events-none'
               alt="Profile Picture Preview"
             ></img>

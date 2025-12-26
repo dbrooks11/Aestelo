@@ -14,9 +14,10 @@ from flask_jwt_extended import(
     get_jwt_identity
 )
 import random
+from sqlalchemy.orm import load_only
 from sqlalchemy import exists
 from werkzeug.security import check_password_hash, generate_password_hash
-from schemas.user_schema import ValidationError
+from schemas.user_schema import ValidationError, username_only
 from schemas.auth_schema import username_pass_only,email_pass_only,email_pass_confirm_pass
 from models.user import UserProfile, UserInfo, UserSettings, UserRole, UserSubscription
 from models.token_blacklist import TokenBlackList
@@ -239,17 +240,19 @@ def verify():
     current_user_id = get_jwt_identity()
 
     try:
-        user = db.session.query(UserProfile.username, UserProfile.profile_photo).filter_by(id = current_user_id).first()
+        user = UserProfile.query.options(load_only(UserProfile.username,
+                                                    UserProfile.profile_photo
+                                                )).get(current_user_id)
 
         if not user:
-            return jsonify({'error': 'User not found'}), 401
-
+            return jsonify({'error': 'Failed to authenticate'}), 401
+        
         return jsonify({
             'user': {
                 'id': current_user_id,
                 'username': user.username,
-                'profile_photo': user.profile_photo
+                'profile_photo': user.profile_photo_url
             }
         }), 200
     except Exception:
-        return jsonify({'error': 'failed to authenticate'}), 500
+        return jsonify({'error': 'Failed to authenticate'}), 500

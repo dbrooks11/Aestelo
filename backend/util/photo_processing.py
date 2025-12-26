@@ -152,6 +152,10 @@ def photo_processing_one_img(img_file, is_banner: bool, current_user_id: str):
     
         img.verify()
 
+        img = Image.open(img_file)
+        print(img)
+        
+
     except DecompressionBombError:
         current_app.logger.warning(f"User {current_user_id} attempted Decompression Bomb upload.")
         error.append("Image is too large or complex.")
@@ -169,7 +173,7 @@ def photo_processing_one_img(img_file, is_banner: bool, current_user_id: str):
         max_height = 1080
 
         if img.width > max_width or img.height > max_height:
-            img = img.thumbnail(size=(max_width, max_height), resample=Image.Resampling.LANCZOS)
+            img.thumbnail(size=(max_width, max_height), resample=Image.Resampling.LANCZOS)
 
     
     if is_banner is False:
@@ -177,9 +181,9 @@ def photo_processing_one_img(img_file, is_banner: bool, current_user_id: str):
         max_height = 500
 
         if img.width > max_width or img.height > max_height:
-            img = img.thumbnail(size=(max_width, max_height), resample=Image.Resampling.LANCZOS)
+            img.thumbnail(size=(max_width, max_height), resample=Image.Resampling.LANCZOS)
         
     output = io.BytesIO()
-    img.save(output, format="WEBP", quality=90, method=6, exif= b'')
+    img.save(output, format="WEBP", quality=95, method=6, exif= b'')
     output.seek(0)
     return output
