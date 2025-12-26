@@ -57,6 +57,7 @@ export default function EditProfileForm({
     };
   },);
 
+  //TODO: Handle constant username submission (if username is the same when form is submitted ignore it)
   const handleEditProfileFormClick = async (formData: FormData): Promise<void> => {
     try {
 
@@ -121,7 +122,7 @@ export default function EditProfileForm({
       {/* Upload Banner Section */}
       <div className="flex flex-col gap-4 mt-4 w-full">
         {/* Upload Banner Header */}
-        <div className="flex justify-between">
+        <div className="flex justify-between items-center">
           <h2 className={editProfileFormLabelStyle}>Profile Banner</h2>
           <label htmlFor="profile_banner" className="flex items-center gap-2 text-accents-primary text-sm hover:underline cursor-pointer"><Upload size={20} />Change Image</label>
         </div>

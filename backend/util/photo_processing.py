@@ -164,13 +164,15 @@ def photo_processing_one_img(img_file, is_banner: bool, current_user_id: str):
     except Exception:
         error.append('Invalid Image')
         return error
+    
+    img = ImageOps.exif_transpose(img)
 
     if img.mode not in ['RGB', 'RGBA']:
         img = img.convert('RGB')
 
     if is_banner:
-        max_width = 1920
-        max_height = 1080
+        max_width = 2560
+        max_height = 1440
 
         if img.width > max_width or img.height > max_height:
             img.thumbnail(size=(max_width, max_height), resample=Image.Resampling.LANCZOS)
@@ -184,6 +186,6 @@ def photo_processing_one_img(img_file, is_banner: bool, current_user_id: str):
             img.thumbnail(size=(max_width, max_height), resample=Image.Resampling.LANCZOS)
         
     output = io.BytesIO()
-    img.save(output, format="WEBP", quality=95, method=6, exif= b'')
+    img.save(output, format="WEBP", quality=90, method=6, exif= b'', subsampling=0)
     output.seek(0)
     return output
