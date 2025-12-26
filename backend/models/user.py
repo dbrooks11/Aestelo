@@ -1,4 +1,5 @@
 from exstensions import db
+from flask import current_app
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from sqlalchemy import (Column, ForeignKey, BigInteger, 
@@ -135,10 +136,22 @@ class UserProfile(db.Model):
     def save(self):
         db.session.add(self)
         db.session.commit()
-        
+
+    @property
+    def profile_photo_url(self):
+        if not self.profile_photo:
+            return None
+        public_url = f"{current_app.config['R2_PUBLIC_URL']}/{self.profile_photo}"
+        return public_url
     
 
-       
+    @property
+    def profile_banner_url(self):
+        if not self.profile_banner:
+            return None
+        public_url = f"{current_app.config['R2_PUBLIC_URL']}/{self.profile_banner}"
+        return public_url
+        
     
 class UserInfo(db.Model):
 

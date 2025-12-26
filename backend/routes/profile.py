@@ -1,4 +1,5 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
+from io import BytesIO
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import exists
 from exstensions import db
@@ -9,6 +10,8 @@ from models.auth import AuthUser
 from schemas.music_schema import music_track_schema
 from schemas.user_schema import user_profile_schema, profile_can_edit, partial_schema ,profile_viewing, ValidationError
 from util.music_track import set_track
+from util.storage import upload_to_r2, delete_file_r2
+from util.photo_processing import photo_processing_one_img
 from util.decorators import profile_check_current__banned_removed
 
 profile_bp = Blueprint('profile',__name__, url_prefix='/profile')
@@ -28,23 +31,100 @@ def profile_me(user_profile):
     if request.method == 'PATCH':
         
         try:
+            form_data = request.form.to_dict()
+            
             try:
-                data = request.get_json()
-                valid = profile_can_edit.load(data, partial=True)    
+                validate_data = profile_can_edit.load(form_data, partial=True)    
             except ValidationError as e:
                 return jsonify({'error': e.messages}),400
             
-            if valid.get('username'):
-                auth_user = AuthUser.query.get(user_profile.id)
-                auth_user.username = valid['username']
+            form_files = request.files
+            profile_photo_compressed = None
+            profile_banner_compressed = None
+            profile_photo_filepath = None
+            profile_banner_filepath = None
+
+            old_photo_path = user_profile.profile_photo
+            old_banner_path = user_profile.profile_banner
             
-            for key, value in valid.items():
+            try:
+                if 'profile_photo' in form_files:
+                    profile_photo_compressed: list | BytesIO = photo_processing_one_img(form_files.get('profile_photo'), is_banner=False, current_user_id=user_profile.id)
+
+                    if isinstance(profile_photo_compressed, list):
+                        return jsonify({'error': {'profile_photo': profile_photo_compressed[0]}}),400
+                    
+                    try:
+                        profile_photo_filepath: str = upload_to_r2(file_obj=profile_photo_compressed, user_id=user_profile.id, folder='profile_photo')
+                    except Exception as e:
+                        return jsonify({'error': str(e)})
+
+                if 'profile_banner' in form_files:
+                    profile_banner_compressed: list | BytesIO = photo_processing_one_img(form_files.get('profile_banner'), is_banner=True, current_user_id=user_profile.id)
+
+                    if isinstance(profile_banner_compressed, list):
+                        return jsonify({'error': {'profile_banner': profile_banner_compressed[0]}}), 400
+                    
+                    try:
+                        profile_banner_filepath: str = upload_to_r2(file_obj=profile_banner_compressed, user_id=user_profile.id, folder='profile_banner')
+                    except Exception as e:
+                        return jsonify({'error': str(e)})
+                    
+            except Exception as e:
+                current_app.logger.error(f"Image processing failed: {str(e)}")
+                return jsonify({'error': f'Image processing failed: {str(e)}'}), 500
+
+            
+            file_dict = {
+                "profile_photo": profile_photo_filepath,
+                "profile_banner": profile_banner_filepath
+
+            }
+
+            try:
+                validate_files = profile_can_edit.load(file_dict, partial = True)
+            except ValidationError as e:
+                return jsonify({'error': e.messages}),400
+            
+            for key, value in validate_data.items():
+                if key == 'username':
+                    auth_user = AuthUser.query.get(user_profile.id)
+                    auth_user.username = validate_data['username']
                 setattr(user_profile,key, value)
 
+            if profile_photo_filepath:
+                user_profile.profile_photo = profile_photo_filepath
+            if profile_banner_filepath:
+                user_profile.profile_banner = profile_banner_filepath
+
             db.session.commit() 
-            return jsonify({'updated_profile_fields': valid}), 200
+
+            try:
+                if profile_photo_filepath and old_photo_path:
+                    delete_file_r2(old_photo_path)
+                if profile_banner_filepath and old_banner_path:
+                    delete_file_r2(old_banner_path)
+            except Exception as e:
+                current_app.logger.warning(f"Failed to delete old images: {str(e)}")
+                return jsonify({'error': str(e)})
+                
+            return jsonify({'message': 'profile updated',
+                            'updated_fields': {'profile_banner': validate_files['profile_banner'],
+                                               'profile_photo': validate_files['profile_photo'],
+                                               'username': form_data.get('username'),
+                                               'bio': form_data.get('bio')}}), 200
         except Exception:
             db.session.rollback()
+            current_app.logger.error(f"Database Update Failed: {str(e)}")
+
+            try:
+                if profile_photo_filepath: 
+                    delete_file_r2(profile_photo_filepath)
+                if profile_banner_filepath: 
+                    delete_file_r2(profile_banner_filepath)
+            except:
+                pass
+
             return jsonify({'error': 'Failed to update profile'}), 500
         
 
@@ -81,7 +161,7 @@ def user_profile(id, user_profile):
     return jsonify({'user_profile':profile_viewing.dump(user_profile)}), 200
     
     
-#todo: test when music is added       
+#TODO: test when music is added       
 # @profile_bp.route('/add-track', methods = ['POST'])
 # @jwt_required()
 # @profile_check_current__banned_removed

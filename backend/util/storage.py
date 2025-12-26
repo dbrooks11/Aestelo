@@ -10,40 +10,53 @@ def get_r2_client():
         endpoint_url=current_app.config['R2_ENDPOINT_URL'],
         aws_access_key_id=current_app.config['R2_ACCESS_KEY_ID'],
         aws_secret_access_key=current_app.config['R2_SECRET_ACCESS_KEY'],
-        config=Config(signature_version='s3v4'),
-        region_name='us-east-1'
+        config=Config(signature_version='s3v4')
         )
 
 
 
-def upload_to_r2(file_obj, user_id, folder='posts', bucket = None):
+def upload_to_r2(file_obj, user_id: str, folder: str):
 
     bucket = current_app.config['R2_BUCKET_NAME']
     
     try:
         timestamp = datetime.now(timezone.utc).strftime('%d%m%Y_%H%M%S')
         short_id = secrets.token_urlsafe(16) 
-        unique_filename = f"{folder}/{user_id}/{timestamp}_{short_id}.jpg"
+        unique_filename = f"{folder}/{user_id}/{timestamp}_{short_id}.webp"
     
         s3_client = get_r2_client()
         
-        file_obj.seek(0)
-        
-        # Upload
         s3_client.upload_fileobj(
             file_obj,
             bucket,
             unique_filename,
             ExtraArgs={
-                'CacheControl': 'public, max-age=15768000'
+                "ContentType": 'image/webp'
             }
         )
        
-        public_url = f"{current_app.config['R2_PUBLIC_URL']}/{bucket}/{unique_filename}"
+        # public_url = f"{current_app.config['R2_PUBLIC_URL']}/{bucket}/{unique_filename}"
         
-        return public_url
+        return unique_filename
         
-    except ClientError as e:
-        raise ClientError(f"An error occurred: {e}")
+    except ClientError as ce:
+        current_app.logger.error(f"R2 Upload Failed: {ce}")
+        raise ClientError(f"An error occurred: {ce}")
     except Exception as e:
-        raise Exception(f"R2 upload failed: {str(e)}")
+        raise Exception(f"Upload failed: {e}")
+    
+
+
+def delete_file_r2(file_path):
+    s3_client = get_r2_client()
+    bucket = current_app.config['R2_BUCKET_NAME']
+
+    try:
+        s3_client.delete_object(Bucket=bucket, Key=file_path)
+        return True
+    except ClientError as ce:
+        current_app.logger.error(f"R2 Deletion Failed: {ce}")
+        return False
+    except Exception as e:
+        current_app.logger.error(f"R2 Deletion Failed: {e}")
+        return False

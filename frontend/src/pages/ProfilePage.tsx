@@ -1,5 +1,6 @@
 
 import {useEffect, type JSX, useState} from 'react'
+import toast, { Toaster } from 'react-hot-toast'
 import { protectedInstance } from '../util/axios_api_helpers'
 import ProfileHeader from '../components/Profile/ProfileHeader'
 import ProfileBanner from '../components/Profile/ProfileBanner'
@@ -14,7 +15,7 @@ import Modal from '../components/Modal'
 export type ProfileDataType = {
   id: string,
   profile_photo: string,
-  profile_banner: string
+  profile_banner: string | undefined
   username: string,
   banner_theme: string,
   bio: string,
@@ -46,6 +47,8 @@ export type ProfileDataUseState = ProfileDataType | null
 
 const editProfileFormDivStyle = ""
 const editProfileFormLabelStyle = ""
+
+
 
 export default function ProfilePage(): JSX.Element {
 
@@ -82,6 +85,8 @@ export default function ProfilePage(): JSX.Element {
 
     profile()
   }, []);
+
+  
     
  
 
@@ -117,6 +122,7 @@ export default function ProfilePage(): JSX.Element {
         <ProfileTabs/>
         <Modal showModal={showModal} closeModal={closeModal} title='Edit Profile'>
           <EditProfileForm
+            profile_banner={profileData?.profile_banner}
             profile_photo={profileData?.profile_photo ? profileData.profile_photo : myProfilePic} //TODO: default icon is temporary (remove it since it has liscense) and make own default phtot or svg
             username = {profileData?.username ? profileData.username : ""} 
             bio = {profileData?.bio ? profileData.bio : "hello im under za water"}
@@ -124,7 +130,7 @@ export default function ProfilePage(): JSX.Element {
             setShowModal={setShowModal}
           />
         </Modal>
-        
+        <Toaster/>
       </main>: "Loading Profile..."}
     </>
   )

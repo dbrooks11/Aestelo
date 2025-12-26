@@ -9,9 +9,14 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserProfile
         include_fk = True
-        exclude = ('is_banned', 'banned_at', 'banned_by', 'banned_reason','num_reports_made','num_reports', 'is_deleted','deleted_at')  # Hide ban info from users
+        exclude = ('is_banned', 'banned_at', 'banned_by', 'banned_reason','num_reports_made',
+                   'num_reports', 'is_deleted','deleted_at', 'profile_photo', 'profile_banner')
 
     id = fields.UUID(dump_only=True)
+
+    profile_photo = fields.String(attribute='profile_photo_url', dump_only=True)
+    profile_banner = fields.String(attribute='profile_banner_url', dump_only=True)
+
     profile_created_at = fields.DateTime(dump_only=True)
     post_count = fields.Int(dump_only=True)
     visit_count = fields.Int(dump_only=True)
@@ -160,7 +165,7 @@ class UserSubscriptionSchema(ma.SQLAlchemyAutoSchema):
 
 user_profile_schema = UserProfileSchema()
 username_only = UserProfileSchema(only = ('username', 'profile_photo'))
-profile_can_edit = UserProfileSchema(only = ('username','bio','banner_theme','profile_photo', 'instagram','facebook','tiktok','twitter_x','music_track_id'))
+profile_can_edit = UserProfileSchema(only = ('username','bio','profile_banner','profile_photo', 'instagram','facebook','tiktok','twitter_x'))
 profile_viewing = UserProfileSchema(only = ('username','bio','banner_theme','profile_photo','post_count','visit_count','follower_count','following_count', 'instagram','facebook','tiktok','twitter_x','music_track_id'))
 partial_schema = UserProfileSchema(only = ('id','banner_theme','username','profile_photo'))
 user_info_schema = UserInfoSchema(only = ('age','first_name','last_name','date_of_birth','gender','height_ft','height_in'))
