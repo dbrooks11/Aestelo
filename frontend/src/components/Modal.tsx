@@ -74,10 +74,10 @@ export default function Modal({showModal, closeModal, title, closeOnBgClick ,chi
               {children}
             </section>
             
-            <ToasterCustom toasterId="modal"/>
           </motion.div>
         ) : null}
       </AnimatePresence>
+      <ToasterCustom toasterId="modal"/>
     </dialog>
   )
 }

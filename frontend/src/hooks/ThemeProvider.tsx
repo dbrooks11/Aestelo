@@ -41,8 +41,11 @@ export default function ThemeProvider({ children }: {children: ReactNode}){
     function toggleTheme():void{
         setTheme((prevTheme: ThemeContextType['theme'])=>{
           const newTheme: ThemeContextType['theme'] = prevTheme === 'light' ? 'dark' : 'light'
+          document.body.setAttribute('data-theme', newTheme)
           return newTheme
         })
+
+        
     }
 
 
