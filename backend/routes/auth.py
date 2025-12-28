@@ -251,7 +251,7 @@ def verify():
             'user': {
                 'id': current_user_id,
                 'username': user.username,
-                'profile_photo': user.profile_photo_url
+                'profile_photo_url': user.profile_photo_url
             }
         }), 200
     except Exception:

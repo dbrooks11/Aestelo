@@ -3,7 +3,6 @@ import {type JSX} from 'react'
 import { type ProfileDataType , type ProfileDataUseState } from '../../pages/ProfilePage'
 import ProfileLinks from './ProfileLinks'
 import ProfileBadges from './ProfileBadges'
-import ProfilePhotoPlaceholder from './placeholder/ProfilePhotoPlaceHolder'
 
 
 type BaseProfileInfoParams = Pick<ProfileDataType , 'username' | 'profile_photo_url' | 'bio' 
@@ -28,21 +27,18 @@ export default function ProfileInfo(props: ProfileInfoParams):JSX.Element {
                 
                 {/* Profile Picture */}
                 <figure className='w-35 h-35 flex'>
-                    {props.profile_photo_url ? <img 
+                    <img 
                         className="rounded-full w-full h-full object-cover pointer-events-none" 
                         src={props.profile_photo_url} 
                         alt={`${props.username}'s profile picture`}
-                    />: <ProfilePhotoPlaceholder 
-                        username={props.username}  
-                        className=' text-6xl border border-border-color-light dark:border-border-color-dark dark:bg-charcoal bg-white'
-                        />}
+                    />
                 </figure>
 
                 {/* User Details */}
                 <section className='flex flex-col items-center md:items-start gap-4 font-semibold'>
                     
                     {/* Username */}
-                    <h3 className="text-accents-primary text-sm sm:text-lg md:text-xl">
+                    <h3 className="text-accents-primary text-base sm:text-lg md:text-xl">
                         @{props.username}
                     </h3>
 

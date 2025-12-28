@@ -70,14 +70,14 @@ export default function ProfileHeader(props: ProfileHeaderProps): JSX.Element{
         const links: Array<JSX.Element> = menuLinks.map((items: MenuLinks)=>{
             if(items.link.includes('/logout') || (items.label.toLowerCase() == 'logout')){
                 return(
-                    <div className="flex justify-between md:justify-center">
+                    <div className="flex justify-between md:justify-center" key={items.label}>
                       <ThemeButton className={`${profileHeaderButtonStyle} flex md:hidden`}/>
                       <button title={items.label} onClick={logout} className={items.className}>{items.icon}</button>
                     </div>
                 )
             }else{
             return(
-                <Link to={items.link} className={items.className}>{items.icon}{items.label}</Link>
+                <Link to={items.link} className={items.className} key={items.label}>{items.icon}{items.label}</Link>
                 )
             }
         })

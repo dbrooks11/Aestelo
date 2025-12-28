@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode, type JSX } from "react";
 import { protectedInstance } from "../util/axios_api_helpers";
 import { AuthContext, type ProfileDataMinimal, type AuthContextType } from "../context/AuthContext";
+import DefaultProfilePhoto from "../assets/default_photo.svg"
 
 
 export default function AuthProvider({ children }: {children: ReactNode}): JSX.Element {
@@ -13,11 +14,15 @@ export default function AuthProvider({ children }: {children: ReactNode}): JSX.E
     const checkAuth = async () =>{
         try{
             const response = await protectedInstance.get('/auth/authenticate')
-
+ 
             if (response.status === 200){
-                setUser(response.data)
-            }
+                const data: ProfileDataMinimal = response.data.user
 
+                if(!data.profile_photo_url){
+                    data.profile_photo_url = DefaultProfilePhoto
+                }
+                setUser(data)
+            }
         }catch{
             setUser(null)
         }

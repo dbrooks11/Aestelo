@@ -7,7 +7,6 @@ import { Monitor, Smartphone, Upload } from "lucide-react";
 import { protectedInstance } from "../../util/axios_api_helpers";
 import { useFormStatus } from "react-dom";
 import { AxiosErrorHelper } from "../../util/axios_api_helpers";
-import ProfilePhotoPlaceholder from "./placeholder/ProfilePhotoPlaceHolder";
 
 type EditProfileFormProps = {
   profile_banner_url: ProfileDataType['profile_banner_url']
@@ -32,7 +31,7 @@ export default function EditProfileForm({
   const [charCounterBio, setCharCounterBio] = useState<number>(bio.length) 
   const [charCounterUsername, setCharCounterUsername] = useState<number>(username.length) 
   const [screenGuideType, setScreenGuideType] = useState<'mobile' | 'desktop'>('desktop')
-  const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(null)
+  const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | undefined>(undefined)
   const [profileBannerPreview, setProfileBannerPreview] = useState<string | undefined>(undefined)
 
   const handleProfilePhotoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -157,14 +156,11 @@ export default function EditProfileForm({
             
             <div className={cn(`${editProfileFormContainerStyle} relative`, 'rounded-full')}>
               <div className="w-35 h-35">
-                {profile_photo_url ? <img
+                <img
                   src={profilePhotoPreview ? profilePhotoPreview : profile_photo_url}
                   className='rounded-full w-full h-full object-cover pointer-events-none'
                   alt="Profile Picture Preview"
-                ></img>: 
-                <ProfilePhotoPlaceholder 
-                  username={username} 
-                  className="text-6xl"/>}
+                ></img>
               </div>
               
               <label 

@@ -3,6 +3,7 @@ import {useEffect, type JSX, useState} from 'react'
 import { AxiosErrorHelper, protectedInstance } from '../util/axios_api_helpers'
 import DefaultBannerDark from "../assets/default_banner_dark.svg"
 import DefaultBannerLight from "../assets/default_banner_light.svg"
+import DefaultPhoto from "../assets/default_photo.svg"
 import ProfileHeader from '../components/Profile/ProfileHeader'
 import ProfileBanner from '../components/Profile/ProfileBanner'
 import ProfileInfo from '../components/Profile/ProfileInfo'
@@ -16,7 +17,7 @@ import { useTheme } from '../context/ThemeContext'
 
 export type ProfileDataType = {
   id: string,
-  profile_photo_url: string | null
+  profile_photo_url: string | undefined
   profile_banner_url: string | undefined,
   username: string,
   banner_theme: string,
@@ -88,10 +89,6 @@ export default function ProfilePage(): JSX.Element {
   }, []);
 
   
-    
- 
-//TODO: set actual Default banner
-//TODO: set Default profile pic
   return (
     <>
       {!isLoading ? <main className='relative flex flex-col items-center h-full'>
@@ -102,7 +99,7 @@ export default function ProfilePage(): JSX.Element {
         <ProfileBanner profileBanner={profileData?.profile_banner_url ? profileData.profile_banner_url: banner}/> 
         <ProfileInfo 
         
-          profile_photo_url={profileData?.profile_photo_url ? profileData.profile_photo_url : ''} 
+          profile_photo_url={profileData?.profile_photo_url ? profileData.profile_photo_url : DefaultPhoto} 
           follower_count={profileData?.follower_count ? profileData.follower_count : 0}
           following_count={profileData?.following_count ? profileData.following_count : 0}
           username= {profileData?.username ? profileData.username : ''}
@@ -126,7 +123,7 @@ export default function ProfilePage(): JSX.Element {
         <Modal showModal={showModal} closeModal={closeModal} title='Edit Profile'>
           <EditProfileForm
             profile_banner_url={profileData?.profile_banner_url ? profileData.profile_banner_url : banner}
-            profile_photo_url={profileData?.profile_photo_url ? profileData.profile_photo_url : null}  
+            profile_photo_url={profileData?.profile_photo_url ? profileData.profile_photo_url : DefaultPhoto}  
             username = {profileData?.username ? profileData.username : ""} 
             bio = {profileData?.bio ? profileData.bio : ""}
             setProfileData={setProfileData}
