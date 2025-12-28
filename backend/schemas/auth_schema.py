@@ -25,14 +25,14 @@ class AuthUserSchema(ma.SQLAlchemyAutoSchema):
         validate=[
             validate.Length(min=5, max=150)
     ])
-    password = fields.String(
+    password = fields.Str(
         required=True, 
         validate=[
             validate.Length(min=min_password_length,max=max_password_length, 
                             error = f"Password must be between {min_password_length} and {max_password_length} characters")], 
                             load_only=True
                     )
-    confirm_password = fields.String(
+    confirm_password = fields.Str(
         required=False, 
         validate=[validate.Length(min=min_password_length,max=max_password_length, 
                                   error = f"Confirmed Password must be between {min_password_length} and {max_password_length} characters")], 

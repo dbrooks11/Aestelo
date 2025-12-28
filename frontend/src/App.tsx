@@ -16,7 +16,7 @@ function App() {
 
   return (
     
-      <div className="flex flex-col min-h-screen bg-bg-light-secondary dark:bg-charcoal">
+      <div data-theme={theme} className="flex flex-col min-h-screen bg-bg-light-secondary dark:bg-charcoal">
         <AuthProvider>
         {/* TODO: channge route element for about and explore  */}
           <Routes>

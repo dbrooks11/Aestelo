@@ -21,7 +21,7 @@ export function ThemeButton({className = "", title = ""}: ThemeButtonAttributes)
             initial={{opacity: 0, rotate: -90 }}
             animate={{opacity: 1, rotate: 0}}
             exit={{opacity: 0, rotate: 90}}
-            transition={{duration: 0.2}}
+            transition={{duration: 0.1}}
             >
             {theme === 'light' ? <Moon size={20}/> : <Sun size={20}/>}
             </motion.div>
@@ -41,7 +41,6 @@ export default function ThemeProvider({ children }: {children: ReactNode}){
     function toggleTheme():void{
         setTheme((prevTheme: ThemeContextType['theme'])=>{
           const newTheme: ThemeContextType['theme'] = prevTheme === 'light' ? 'dark' : 'light'
-          document.body.setAttribute('data-theme', newTheme)
           return newTheme
         })
 

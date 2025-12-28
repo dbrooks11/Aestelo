@@ -7,11 +7,8 @@ from exstensions import db
 from models.user import UserProfile
 from models.block_profile import BlockProfile
 from models.followers_and_following import Follow
-from models.music_track import MusicTrack
 from models.auth import AuthUser
-from schemas.music_schema import music_track_schema
 from schemas.user_schema import user_profile_schema, profile_can_edit, partial_schema ,profile_viewing, ValidationError
-from util.music_track import set_track
 from util.storage import upload_to_r2, delete_file_r2
 from util.photo_processing import photo_processing_one_img
 from util.decorators import profile_check_current__banned_removed
@@ -42,15 +39,19 @@ def profile_me():
             
             if form_data.get('username') == user_profile.username:
                 form_data.pop('username')
+            else:
+                form_data['username'] = form_data.get('username').lower()
             
             if form_data.get('bio') == user_profile.bio:
                 form_data.pop('bio')
+
 
             if form_data:
                 try:
                     validate_data = profile_can_edit.load(form_data, partial=True) 
                 except ValidationError as e:
                     current_app.logger.error(f"Data could not be validated: {str(e)}")
+                    print(e.messages)
                     return jsonify({'error': e.messages}),400
             
 
@@ -64,16 +65,16 @@ def profile_me():
             if len(banner_list) > 1:
                 return jsonify({'error': 'You can only upload one banner at a time.'}), 400
             
-            profile_photo_compressed = None
-            profile_banner_compressed = None
-            new_photo_path = None
-            new_banner_path = None
+            profile_photo_compressed: list | BytesIO = None
+            profile_banner_compressed: list | BytesIO = None
+            new_photo_path: str | None = None
+            new_banner_path: str | None = None
 
             old_photo_path = user_profile.profile_photo
             old_banner_path = user_profile.profile_banner
 
-            photo_field_name = 'profile_photo'
-            banner_field_name = 'profile_banner'
+            photo_field_name: str = 'profile_photo'
+            banner_field_name: str = 'profile_banner'
 
             try:
                 if photo_field_name in form_files:

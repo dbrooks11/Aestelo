@@ -153,7 +153,6 @@ def photo_processing_one_img(img_file, is_banner: bool, current_user_id: str):
         img.verify()
 
         img = Image.open(img_file)
-        print(img)
         
 
     except DecompressionBombError:

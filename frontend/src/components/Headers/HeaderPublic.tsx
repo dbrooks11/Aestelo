@@ -71,7 +71,7 @@ export default function PublicHeader(): JSX.Element {
         </nav>: null}
         </div>: null}
 
-        {/* Regular Header for Public users */}
+        {/* Regular Header for Public pages */}
         <div className="hidden md:flex gap-4 text-white justify-end min-w-1/3 xs:max-md:hidden">
             <ThemeButton className="flex justify-center items-center hover:bg-accents-primary/20 rounded-full w-10 h-10 text-black dark:text-white transition-colors duration-300 hover:cursor-pointer bg-transparent"/>
             <button className="bg-bg-light-secondary hover:bg-bg-light-secondary hover:shadow-lg px-2 py-1.5  rounded-lg w-20 text-accents-deep cursor-pointer dark:bg-transparent dark:hover:bg-accents-deep/50 dark:border-none dark:text-white" onClick={loginRouting}>Login</button>

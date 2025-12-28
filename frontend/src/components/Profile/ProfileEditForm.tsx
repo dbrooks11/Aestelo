@@ -7,10 +7,11 @@ import { Monitor, Smartphone, Upload } from "lucide-react";
 import { protectedInstance } from "../../util/axios_api_helpers";
 import { useFormStatus } from "react-dom";
 import { AxiosErrorHelper } from "../../util/axios_api_helpers";
+import ProfilePhotoPlaceholder from "./placeholder/ProfilePhotoPlaceHolder";
 
 type EditProfileFormProps = {
-  profile_banner: ProfileDataType['profile_banner']
-  profile_photo: ProfileDataType['profile_photo']
+  profile_banner_url: ProfileDataType['profile_banner_url']
+  profile_photo_url: ProfileDataType['profile_photo_url']
   username: ProfileDataType['username']
   bio: ProfileDataType['bio']
   setProfileData: Dispatch<SetStateAction<ProfileDataType | null>>
@@ -24,13 +25,14 @@ const editProfileFormLabelStyle = 'font-bold dark:text-text-muted-dark text-text
 const editProfileFormTinyText = 'text-[10px] text-text-muted-light dark:text-text-muted-dark'
 
 export default function EditProfileForm({
-  username, bio, profile_photo, profile_banner,
+  username, bio, profile_photo_url, profile_banner_url,
   setProfileData, setShowModal }: EditProfileFormProps): JSX.Element {
   
   const [usernameIndicator, setUsernameIndictor] = useState<boolean>(false)
-  const [charCounter, setCharCounter] = useState<number>(bio.length)  
+  const [charCounterBio, setCharCounterBio] = useState<number>(bio.length) 
+  const [charCounterUsername, setCharCounterUsername] = useState<number>(username.length) 
   const [screenGuideType, setScreenGuideType] = useState<'mobile' | 'desktop'>('desktop')
-  const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | undefined>(undefined)
+  const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(null)
   const [profileBannerPreview, setProfileBannerPreview] = useState<string | undefined>(undefined)
 
   const handleProfilePhotoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,9 +87,8 @@ export default function EditProfileForm({
             }
           )
         })
-        //TODO: Update css for toasts
         setShowModal(false)
-        toast(data.message, {
+        toast.success(data.message, {
           toasterId: 'profile'
         })
       }
@@ -96,8 +97,8 @@ export default function EditProfileForm({
       toast.error(newError, {
         toasterId: 'modal'
       })
-      setProfileBannerPreview(profile_banner)
-      setProfilePhotoPreview(profile_photo)
+      setProfileBannerPreview(profile_banner_url)
+      setProfilePhotoPreview(profile_photo_url)
     }
   }
 
@@ -117,9 +118,15 @@ export default function EditProfileForm({
     )
   }
 
-  const charCounterDisplayHandler = (e: React.ChangeEvent<HTMLTextAreaElement>) =>{
-    const bioLength = e.target.value.length
-    setCharCounter(bioLength)
+  const charCounterBioDisplayHandler = (e: React.ChangeEvent<HTMLTextAreaElement>) =>{
+    const length = e.target.value.length
+    setCharCounterBio(length)
+  }
+    
+
+  const charCounterUsernameDisplayHander = (e: React.ChangeEvent<HTMLInputElement>) =>{
+    const length = e.target.value.length
+    setCharCounterUsername(length)
   }
 
   const usernameIndicatorHander = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -132,7 +139,7 @@ export default function EditProfileForm({
       setUsernameIndictor(false)
     }
 
-
+    charCounterUsernameDisplayHander(e)
   }
 
 
@@ -150,11 +157,14 @@ export default function EditProfileForm({
             
             <div className={cn(`${editProfileFormContainerStyle} relative`, 'rounded-full')}>
               <div className="w-35 h-35">
-                <img
-                  src={profilePhotoPreview ? profilePhotoPreview : profile_photo}
+                {profile_photo_url ? <img
+                  src={profilePhotoPreview ? profilePhotoPreview : profile_photo_url}
                   className='rounded-full w-full h-full object-cover pointer-events-none'
                   alt="Profile Picture Preview"
-                ></img>
+                ></img>: 
+                <ProfilePhotoPlaceholder 
+                  username={username} 
+                  className="text-6xl"/>}
               </div>
               
               <label 
@@ -225,7 +235,7 @@ export default function EditProfileForm({
                 className={`${screenGuideType === 'desktop' ? 'w-full aspect-3/1' : 'w-100 aspect-15/16'} border-4 border-black bg-black rounded-lg overflow-hidden transition-all relative shadow-lg`}
               >
                 <img 
-                  src={profileBannerPreview ? profileBannerPreview : profile_banner}
+                  src={profileBannerPreview ? profileBannerPreview : profile_banner_url}
                   className={`${screenGuideType === 'desktop' ? 'object-[10%_52%]' : null} h-full w-full object-cover pointer-events-none`}
                   alt=""
                 >
@@ -264,7 +274,7 @@ export default function EditProfileForm({
           <div className='flex flex-col gap-2 w-full'>
             <label htmlFor='username' className={`${editProfileFormLabelStyle} text-base`}>Username</label>
             <input
-              className={`${cn(editProfileFormContainerStyle, `${usernameIndicator ? 'dark:border-red-800 border-red-800 transition-colors ease-in-out' : ''}`)} outline-none p-3 dark:text-white text-black`}
+              className={`${cn(editProfileFormContainerStyle, `${usernameIndicator && 'dark:border-red-800 border-red-800 transition-colors ease-in-out'}`)} outline-none p-3 dark:text-white text-black lowercase`}
               type='text'
               name='username'
               id='username'
@@ -278,9 +288,9 @@ export default function EditProfileForm({
             
             <span 
               id="username-help" 
-              className={`${cn(editProfileFormTinyText, `${usernameIndicator ? 'dark:text-red-800 text-red-800 transition-colors ease-in-out': ''}`)}`}
+              className={`${cn(editProfileFormTinyText, `${usernameIndicator && 'dark:text-red-800 text-red-800 transition-colors ease-in-out'}`)}`}
             >
-              Username can only contain letters, numbers, periods, and underscores
+              Username can only contain letters, numbers, periods, and underscores. Max characters {charCounterUsername}/30
             </span>
           </div>
 
@@ -288,12 +298,12 @@ export default function EditProfileForm({
           <div className='flex flex-col gap-2 w-full'>
             <label htmlFor='bio' className={`${editProfileFormLabelStyle} text-base`}>Bio</label>
             <textarea
-              className={`${editProfileFormContainerStyle} h-40 wrap-break-word p-3 dark:text-white text-black`}
+              className={`${editProfileFormContainerStyle} h-40 wrap-break-word p-3 dark:text-white text-black lowercase`}
               name='bio'
               id='bio'
               defaultValue={bio}
               maxLength={150}
-              onChange={charCounterDisplayHandler}
+              onChange={charCounterBioDisplayHandler}
               aria-describedby="bio-counter"
             ></textarea>
             
@@ -302,7 +312,7 @@ export default function EditProfileForm({
               className={`${editProfileFormTinyText}`} 
               aria-live="polite"
             >
-              Max characters: {charCounter}/150
+              Max characters: {charCounterBio}/150
             </span>
           </div>
 

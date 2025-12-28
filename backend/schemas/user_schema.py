@@ -4,6 +4,7 @@ from models.user import UserProfile, UserInfo, UserRole, UserSettings, UserSubsc
 from marshmallow import validates, ValidationError, fields, validate
 from sqlalchemy import exists
 from datetime import datetime
+import re
     
 class UserProfileSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -14,8 +15,8 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
 
     id = fields.UUID(dump_only=True)
 
-    profile_photo_url = fields.String(attribute='profile_photo_url', dump_only=True)
-    profile_banner_url = fields.String(attribute='profile_banner_url', dump_only=True)
+    profile_photo_url = fields.Str(attribute='profile_photo_url', dump_only=True)
+    profile_banner_url = fields.Str(attribute='profile_banner_url', dump_only=True)
 
     profile_created_at = fields.DateTime(dump_only=True)
     post_count = fields.Int(dump_only=True)
@@ -23,7 +24,7 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
     follower_count = fields.Int(dump_only=True)
     following_count = fields.Int(dump_only=True)
     
-    username = fields.Str(validate=[validate.Length(min=1, max=30),validate.Regexp(r'^(?!.*\.$)(?!^\.)[a-zA-Z0-9._]+$', error='Username can only contain letters, numbers, periods, and underscores')])
+    username = fields.Str()
     bio = fields.Str(validate=[validate.Length(max=150)])
     instagram= fields.Str(validate=validate.URL())
     facebook= fields.Str(validate=validate.URL())
@@ -40,6 +41,12 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
         
         if existing_user:
             raise ValidationError('Username already exists')
+        
+        if len(value) < 1 or len(value) > 30:
+            raise ValidationError('Invalid Length')
+
+        if not re.match(r'^(?!.*\.$)(?!^\.)[a-z0-9._]+$', value):
+            raise ValidationError('Username can only contain letters, numbers, periods, and underscores')
         
         return value.strip()
     

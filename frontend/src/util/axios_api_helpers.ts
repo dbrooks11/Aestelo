@@ -97,9 +97,9 @@ export function AxiosErrorHelper(error: AxiosError | unknown): string{
             
             if (serverData && serverData.error) {
                 if (Array.isArray(serverData.error)) {
-                    errorMessage = serverData.error.join(", ");
+                    errorMessage = serverData.error.join(". ");
                 } else if (typeof serverData.error === 'object') {
-                     errorMessage = Object.values(serverData.error).join(", ");
+                     errorMessage = Object.values(serverData.error).join(". ");
                 } else {
                     errorMessage = serverData.error;
                 }

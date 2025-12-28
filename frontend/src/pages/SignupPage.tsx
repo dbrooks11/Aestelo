@@ -45,8 +45,10 @@ export default function SignupPage(): JSX.Element {
             const data = response.data
 
             if (response.status === 201){
-                console.log(data.message)
                 navigate('/login-email')
+                toast.success(data.message, {
+                    toasterId: 'login'
+                })
             }
         } catch (error: unknown){
             const newError = AxiosErrorHelper(error)
@@ -85,7 +87,7 @@ export default function SignupPage(): JSX.Element {
             {/* Header */}
             <h1 className="font-bold dark:text-bg-light text-2xl">Sign Up</h1>
 
-            {/* --- SIGNUP FORM --- */}
+            {/* --- Signup Form --- */}
             <form action={signUp} className="flex flex-col my-8 w-2/5" aria-label="Sign Up Form">
 
                 {/* --- Honeypot Field (Hidden for Security) --- */}

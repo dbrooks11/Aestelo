@@ -1,12 +1,8 @@
 import { createContext, useContext} from "react";
+import { type ProfileDataType } from "../pages/ProfilePage";
 
 
-export type ProfileDataMinimal = {
-  id: string,
-  profile_photo: string,
-  username: string,
-  
-}
+export type ProfileDataMinimal = Pick<ProfileDataType, 'id' | 'username' | 'profile_photo_url'>
 
 export type AuthContextType = {
     user: ProfileDataMinimal | null,

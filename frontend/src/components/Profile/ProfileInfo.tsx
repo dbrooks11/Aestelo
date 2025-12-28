@@ -3,9 +3,10 @@ import {type JSX} from 'react'
 import { type ProfileDataType , type ProfileDataUseState } from '../../pages/ProfilePage'
 import ProfileLinks from './ProfileLinks'
 import ProfileBadges from './ProfileBadges'
+import ProfilePhotoPlaceholder from './placeholder/ProfilePhotoPlaceHolder'
 
 
-type BaseProfileInfoParams = Pick<ProfileDataType , 'username' | 'profile_photo' | 'bio' 
+type BaseProfileInfoParams = Pick<ProfileDataType , 'username' | 'profile_photo_url' | 'bio' 
                                             | 'following_count' | 'follower_count'
                                             | 'post_count' | 'visit_count' | 'instagram'
                                             | 'tiktok' | 'twitter_x' | 'facebook'>
@@ -26,12 +27,15 @@ export default function ProfileInfo(props: ProfileInfoParams):JSX.Element {
             <section className='flex md:flex-row flex-col items-center gap-6 px-4'>
                 
                 {/* Profile Picture */}
-                <figure className='min-w-35 min-h-35'>
-                    <img 
-                        className="rounded-full w-35 h-35 object-cover pointer-events-none" 
-                        src={props.profile_photo} 
+                <figure className='w-35 h-35 flex'>
+                    {props.profile_photo_url ? <img 
+                        className="rounded-full w-full h-full object-cover pointer-events-none" 
+                        src={props.profile_photo_url} 
                         alt={`${props.username}'s profile picture`}
-                    />
+                    />: <ProfilePhotoPlaceholder 
+                        username={props.username}  
+                        className=' text-6xl border border-border-color-light dark:border-border-color-dark dark:bg-charcoal bg-white'
+                        />}
                 </figure>
 
                 {/* User Details */}

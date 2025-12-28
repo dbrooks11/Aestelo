@@ -1,4 +1,4 @@
-import { Toaster, type ToastPosition } from 'react-hot-toast';
+import { Toaster, type ToastPosition} from 'react-hot-toast';
 import { type JSX } from 'react';
 
 
@@ -35,7 +35,8 @@ export default function ToasterCustom({position, removeDelay, toasterId}:Toaster
             },
             },
         }}
-        />
+        >
+        </Toaster>
     </>
     );
 }

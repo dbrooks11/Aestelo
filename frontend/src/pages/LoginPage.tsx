@@ -37,18 +37,16 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
         try{ 
             const response = await loginInstance.post(`/auth/login-${email ? 'email' : 'username'}`, body)
 
-            const data = response.data
-
             if(response.status === 200){
-                console.log(data.message)
                 await checkAuth()
-                navigate('/profile/me') 
+                navigate('/profile/me')
             }
         }
         catch(error: unknown){
             const newError = AxiosErrorHelper(error)
             toast.error(newError, {
-                toasterId: 'login'
+                toasterId: 'login',
+                
             })
         }
     }

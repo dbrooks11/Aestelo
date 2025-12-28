@@ -102,7 +102,7 @@ def signup():
         return jsonify({'error': 'Account could not be created'}), 400
     
 
-
+# TODO: Merge username route and email route into one
 @auth_bp.route('/login-email', methods = ['POST'])
 def login_email():
 

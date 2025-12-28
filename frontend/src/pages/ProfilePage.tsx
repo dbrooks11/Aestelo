@@ -1,24 +1,23 @@
 
 import {useEffect, type JSX, useState} from 'react'
-import toast, { Toaster } from 'react-hot-toast'
-import { protectedInstance } from '../util/axios_api_helpers'
+import { AxiosErrorHelper, protectedInstance } from '../util/axios_api_helpers'
+import DefaultBannerDark from "../assets/default_banner_dark.svg"
+import DefaultBannerLight from "../assets/default_banner_light.svg"
 import ProfileHeader from '../components/Profile/ProfileHeader'
 import ProfileBanner from '../components/Profile/ProfileBanner'
 import ProfileInfo from '../components/Profile/ProfileInfo'
 import ProfileTabs from '../components/Profile/ProfileTabs'
 import EditProfileForm from '../components/Profile/ProfileEditForm'
-import myProfilePic from '../assets/my_profile_pic.jpg'
-import defaultProfilePic from "../assets/default_profile_pic.png"
 import type { AxiosResponse } from 'axios'
 import Modal from '../components/Modal'
 import ToasterCustom from '../components/Toast'
+import toast from 'react-hot-toast'
+import { useTheme } from '../context/ThemeContext'
 
 export type ProfileDataType = {
   id: string,
-  profile_photo: string,
-  profile_photo_url: string
-  profile_banner: string | undefined
-  profile_banner_url: string,
+  profile_photo_url: string | null
+  profile_banner_url: string | undefined,
   username: string,
   banner_theme: string,
   bio: string,
@@ -48,17 +47,14 @@ export type ProfileDataType = {
 
 export type ProfileDataUseState = ProfileDataType | null
 
-const editProfileFormDivStyle = ""
-const editProfileFormLabelStyle = ""
-
-
 
 export default function ProfilePage(): JSX.Element {
 
+  const {theme} = useTheme()
   const [profileData, setProfileData] = useState<ProfileDataUseState>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>("")
   const [showModal, setShowModal] = useState<boolean>(false)
+  const banner = `${theme === 'light' ? DefaultBannerLight : DefaultBannerDark}`
 
   const editProfileButtonClick = () => {
     setShowModal(!showModal)
@@ -80,8 +76,10 @@ export default function ProfilePage(): JSX.Element {
         }
 
       }catch(error){
-        console.log('failed to fetch profile')
-        // AxisErrorHelper(error, setError, "Profile")
+        const newError = AxiosErrorHelper(error)
+        toast.error(newError, {
+          toasterId: 'profile'
+        })
         
       }
     }
@@ -97,15 +95,14 @@ export default function ProfilePage(): JSX.Element {
   return (
     <>
       {!isLoading ? <main className='relative flex flex-col items-center h-full'>
-        {error ? error : null}
         <ProfileHeader 
           username = {profileData?.username ? profileData.username : ''} 
           follower_count={profileData?.follower_count ? profileData.follower_count : 0}/>
           
-        <ProfileBanner profileBanner={profileData?.profile_banner_url ? profileData.profile_banner_url: ''}/> 
+        <ProfileBanner profileBanner={profileData?.profile_banner_url ? profileData.profile_banner_url: banner}/> 
         <ProfileInfo 
         
-          profile_photo={profileData?.profile_photo_url ? profileData.profile_photo_url : ''} 
+          profile_photo_url={profileData?.profile_photo_url ? profileData.profile_photo_url : ''} 
           follower_count={profileData?.follower_count ? profileData.follower_count : 0}
           following_count={profileData?.following_count ? profileData.following_count : 0}
           username= {profileData?.username ? profileData.username : ''}
@@ -128,8 +125,8 @@ export default function ProfilePage(): JSX.Element {
         <ProfileTabs/>
         <Modal showModal={showModal} closeModal={closeModal} title='Edit Profile'>
           <EditProfileForm
-            profile_banner={profileData?.profile_banner_url}
-            profile_photo={profileData?.profile_photo_url ? profileData.profile_photo_url : ''}  
+            profile_banner_url={profileData?.profile_banner_url ? profileData.profile_banner_url : banner}
+            profile_photo_url={profileData?.profile_photo_url ? profileData.profile_photo_url : null}  
             username = {profileData?.username ? profileData.username : ""} 
             bio = {profileData?.bio ? profileData.bio : ""}
             setProfileData={setProfileData}
