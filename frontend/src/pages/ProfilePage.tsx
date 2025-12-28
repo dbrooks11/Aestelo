@@ -58,9 +58,7 @@ export default function ProfilePage(): JSX.Element {
   const [showModal, setShowModal] = useState<boolean>(false)
   const banner = `${theme === 'light' ? DefaultBannerLight : DefaultBannerDark}`
 
-  const editProfileButtonClick = () => {
-    setShowModal(!showModal)
-  }
+  
 
   const closeModal = () =>{
         setShowModal(false)
@@ -99,7 +97,6 @@ export default function ProfilePage(): JSX.Element {
           
         <ProfileBanner profileBanner={profileData?.profile_banner_url ? profileData.profile_banner_url: banner}/> 
         <ProfileInfo 
-        
           profile_photo_url={profileData?.profile_photo_url ? profileData.profile_photo_url : DefaultPhoto} 
           follower_count={profileData?.follower_count ? profileData.follower_count : 0}
           following_count={profileData?.following_count ? profileData.following_count : 0}
@@ -113,13 +110,10 @@ export default function ProfilePage(): JSX.Element {
           facebook = {profileData?.facebook ? profileData.facebook : undefined}
           setProfileData = {setProfileData}
           profileData = {profileData}
+          setShowModal = {setShowModal}
+          showModal = {showModal}
         />
-        <button 
-            className='top-88 right-32 z-10 absolute hover:bg-accents-primary/5 dark:hover:bg-white/10 hover:backdrop-blur-sm px-6 py-2 border border-accents-deep/30 dark:border-white/20 rounded-full font-bold text-accents-deep dark:text-white text-sm transition-colors hover:cursor-pointer' 
-            onClick={editProfileButtonClick}
-            >
-              Edit Profile
-        </button>
+        
         <ProfileTabs/>
         <Modal showModal={showModal} closeModal={closeModal} title='Edit Profile'>
           <EditProfileForm
