@@ -14,6 +14,7 @@ import Modal from '../components/Modal'
 import ToasterCustom from '../components/Toast'
 import toast from 'react-hot-toast'
 import { useTheme } from '../context/ThemeContext'
+import ProfileLoadingSkeleton from '../components/Skeletons/ProfileSkeleton'
 
 export type ProfileDataType = {
   id: string,
@@ -131,7 +132,7 @@ export default function ProfilePage(): JSX.Element {
           />
         </Modal>
         <ToasterCustom toasterId='profile'/>
-      </main>: "Loading Profile..."}
+      </main>: <ProfileLoadingSkeleton/>}
     </>
   )
 }

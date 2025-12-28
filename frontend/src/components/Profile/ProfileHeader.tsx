@@ -7,6 +7,7 @@ import { ThemeButton} from "../../hooks/ThemeProvider";
 import { type ProfileDataType  } from "../../pages/ProfilePage";
 import type { AxiosResponse } from "axios";
 import { protectedInstance, AxisErrorHelperConsoleOnly } from "../../util/axios_api_helpers";
+import toast from "react-hot-toast";
 
 
 type MenuLinks = {
@@ -92,8 +93,10 @@ export default function ProfileHeader(props: ProfileHeaderProps): JSX.Element{
           const data = response.data
     
           if(response.status === 200){
-            console.log(data.message)
             navigate('/login-email')
+            toast.success(data.message, {
+                toasterId: 'login'
+            })
           }
     
         }catch(error: unknown){

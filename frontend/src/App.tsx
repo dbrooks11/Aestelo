@@ -12,7 +12,7 @@ import FeedPage from './pages/FeedPage'
 
 
 function App() {
-  const {theme, setTheme} = useTheme()
+  const {theme} = useTheme()
 
   return (
     
@@ -20,7 +20,7 @@ function App() {
         <AuthProvider>
         {/* TODO: channge route element for about and explore  */}
           <Routes>
-            <Route element={<PublicRoute theme = {theme} setTheme={setTheme}/>}>
+            <Route element={<PublicRoute/>}>
               <Route path='/' element={<HomePage />}/>
               <Route path='/about' element={<HomePage/>}/>
               <Route path='/explore' element={<HomePage/>}/>
@@ -29,7 +29,7 @@ function App() {
               <Route path='/login-username' element={<LoginPage isEmail={false}/>}/>
             </Route>
 
-            <Route element={<ProtectedRoute theme={theme} setTheme={setTheme}/>}>
+            <Route element={<ProtectedRoute/>}>
               <Route path='/profile/me' element={<ProfilePage/>}/>
               <Route path='/profile/:id' element={<ProfilePage/>}/>
               <Route path='/post/feed' element={<FeedPage/>}/>

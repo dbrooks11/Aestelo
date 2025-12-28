@@ -1,17 +1,12 @@
 import { Outlet } from "react-router-dom";
-import { type JSX, type Dispatch, type SetStateAction} from "react";
+import { type JSX} from "react";
 import PublicHeader from "../Headers/HeaderPublic";
 
 
-type PublicRouteProps = {
-    theme: 'light' | 'dark'
-    setTheme: Dispatch<SetStateAction<'light' | 'dark'>>
-}
-
-export default function PublicRoute ({theme, setTheme}: PublicRouteProps): JSX.Element {
+export default function PublicRoute (): JSX.Element {
     return (
         <>
-            <PublicHeader theme = {theme} setTheme={setTheme}/>
+            <PublicHeader/>
             <div className="flex-1 flex flex-col">
                 <Outlet/>
             </div> 
