@@ -2,43 +2,47 @@
 import {type JSX, useState, useEffect} from 'react'
 import { AxiosErrorHelper, protectedInstance } from '../util/axios_api_helpers'
 import toast, { Toaster } from 'react-hot-toast'
+import Post from '../components/Post/Post'
 
 export default function FeedPage(): JSX.Element {
 
     const [feed, setFeed] = useState<null>(null)
-    const [isLoading, setIsLoading] = useState<boolean>(true)
+    const [isLoading, setIsLoading] = useState<boolean>(false)
     const [error, setError] = useState<string | null>("")
 
 
-    useEffect(() => {
-        async function getFeed(){
-            try{
-                const response = await protectedInstance.get('/post/feed')
+    // useEffect(() => {
+    //     async function getFeed(){
+    //         try{
+    //             const response = await protectedInstance.get('/post/feed')
 
-                const data = response.data
+    //             const data = response.data
 
-                if(response.status === 200){
-                    setFeed(data)
-                }
-            }catch(error){
-                const newError = AxiosErrorHelper(error)
-                toast.error(newError, {
-                    toasterId: 'feed'
-                })
-            }finally{
-                setIsLoading(false)
-            }
-        }
+    //             if(response.status === 200){
+    //                 setFeed(data)
+    //             }
+    //         }catch(error){
+    //             const newError = AxiosErrorHelper(error)
+    //             toast.error(newError, {
+    //                 toasterId: 'feed'
+    //             })
+    //         }finally{
+    //             setIsLoading(false)
+    //         }
+    //     }
 
-        getFeed()
-    }, []);
+    //     getFeed()
+    // }, []);
 
     console.log(feed)
         
       
   return (
     <main>
-        {!isLoading ? "hello" : "Loading feed..."}
+        {!isLoading ? 
+            <Post/>
+
+        : "Loading feed..."}
         <Toaster toasterId='feed'/>
     </main>
   )

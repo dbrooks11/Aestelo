@@ -18,8 +18,8 @@ type MenuLinks = {
 }
 
 type ProfileHeaderProps = {
-    username: ProfileDataType ['username']
-    follower_count: ProfileDataType ['follower_count']
+    username: ProfileDataType['username']
+    follower_count: ProfileDataType['follower_count']
 }
 
 type HeaderStyle = {
@@ -85,6 +85,7 @@ export default function ProfileHeader(props: ProfileHeaderProps): JSX.Element{
         return links
     }
 
+
     async function logout(): Promise<void>{
       
         try{
@@ -144,7 +145,8 @@ export default function ProfileHeader(props: ProfileHeaderProps): JSX.Element{
             <div>
                 <button 
                     className={profileHeaderButtonStyle} 
-                    aria-label="Go back" // Essential for icon-only buttons
+                    aria-label="Go back"
+                    onClick={()=> navigate(-1)} 
                 >
                     <ArrowLeft className="w-2/3 h-2/3" aria-hidden="true"/>
                 </button>

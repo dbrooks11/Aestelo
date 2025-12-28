@@ -1,6 +1,5 @@
 import { type JSX } from "react";
 
-//TODO: finish skeleton loader
 export default function ProfileLoadingSkeleton(): JSX.Element{
     return(
         <div 
