@@ -1,21 +1,21 @@
 import { type JSX } from "react";
-import { Accessibility, Star, Ellipsis } from "lucide-react";
+import { Accessibility, Star, Ellipsis
+    ,ExternalLink, Bookmark} from "lucide-react";
+import VIconRounded from "../DynamicSvgs/VIconRounded";
 
+// type PostProps = {
+//     name: string
+//     date_posted: string
+//     description: string
+//     total_num_of_photos: number
+//     average_rating: number
+//     total_num_of_ratings: string
+//     save_count: number
+//     share_count: string
+//     hashtags: Array<string>
+//     accessibility: boolean
 
-
-type PostProps = {
-    name: string
-    date_posted: string
-    description: string
-    total_num_of_photos: number
-    average_rating: number
-    total_num_of_ratings: string
-    save_count: number
-    share_count: string
-    hashtags: Array<string>
-    accessibility: boolean
-
-}
+// }
 
 export default function Post(): JSX.Element{
     return(
@@ -46,7 +46,7 @@ export default function Post(): JSX.Element{
                         <span aria-hidden='true'>]</span>
                     </div>
 
-                    <div className="border w-10 h-10 border-white rounded-full p-1 text-sm text-white absolute bottom-1 right-1">
+                    <div className="border w-8 h-8 border-white rounded-full p-1 text-[10px] text-white absolute bottom-1 right-1 flex items-center justify-center">
                         <span>3/10</span>
                     </div>
                 
@@ -57,6 +57,34 @@ export default function Post(): JSX.Element{
             {/* Action button and tags container */}
             <div className="border border-white w-full h-30">
 
+                {/* Hashtags */}
+                {/* TODO: map over each tag to display it */}
+                <div className="text-white">
+                    <span>Tag1</span>
+                    <span>Tag1</span>
+                    <span>Tag1</span>
+                    <span>Tag1</span>
+                    <span>Tag1</span>
+                    <span>Tag1</span>
+                </div>      
+                <div className="flex text-white gap-6 items-center justify-center">
+                    <div className="flex flex-col">
+                        <button><ExternalLink/></button>
+                        <span>400</span>
+                    </div>
+                    <div className="flex flex-col">
+                        <button><Bookmark/></button>
+                        <span>1k</span>
+                    </div>
+                    <div className="flex flex-col">
+                        <button><Star/></button>
+                        <span>145k</span>
+                    </div>
+                    <div className="flex flex-col">
+                        <button><VIconRounded/></button>
+                        <span>234</span>
+                    </div>
+                </div>          
             </div>
         </div>
     )

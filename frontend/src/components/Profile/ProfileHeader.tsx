@@ -146,7 +146,7 @@ export default function ProfileHeader(props: ProfileHeaderProps): JSX.Element{
                 <button 
                     className={profileHeaderButtonStyle} 
                     aria-label="Go back"
-                    onClick={()=> navigate(-1)} 
+                    onClick={()=> navigate(-1)} //TODO: fix to only go back to neccesary pages
                 >
                     <ArrowLeft className="w-2/3 h-2/3" aria-hidden="true"/>
                 </button>
