@@ -74,7 +74,6 @@ def create_app():
         now = time.time()
         duration = round(now - g.start, 2)
         duration_ms = round((now - g.start) * 1000, 2)
-        # Print the time taken for this route
         print(f"⏱️ {request.method} {request.path} took {duration}s/{duration_ms}ms")
         return response
 

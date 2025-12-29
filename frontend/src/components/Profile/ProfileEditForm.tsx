@@ -109,7 +109,7 @@ export default function EditProfileForm({
       <>
         <button
           type='submit'
-          className="flex justify-center items-center bg-accents-deep hover:bg-accents-primary hover:shadow-md p-3 rounded-md w-1/2 cursor-pointer"
+          className={`${!pending && `hover:bg-accents-primary hover:shadow-md`} flex justify-center items-center bg-accents-deep  p-3 rounded-md w-1/2 cursor-pointer`}
           disabled = {pending}
           >{pending ? <LoaderCircle className="mr-2 animate-spin"/>: null}{pending ? 'Confirming' : 'Confirm'}
         </button>

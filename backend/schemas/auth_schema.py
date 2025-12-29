@@ -18,7 +18,7 @@ class AuthUserSchema(ma.SQLAlchemyAutoSchema):
         required=True,
         validate=[
             validate.Length(min=1, max=30),
-            validate.Regexp(r'^(?!.*\.$)(?!^\.)[a-zA-Z0-9._]+$', error='Username can only contain letters, numbers, periods, and underscores')
+            validate.Regexp(r'^(?!.*\.$)(?!^\.)[a-z0-9._]+$', error='Username can only contain letters, numbers, periods, and underscores')
     ])
     email = fields.Email(
         required=True, 
@@ -39,13 +39,6 @@ class AuthUserSchema(ma.SQLAlchemyAutoSchema):
                                   load_only=True
                     )
 
-
-    @validates('username')
-    def validate_username(self, value, **kwargs):
-        existing_user = db.session.query(exists().where(AuthUser.username == value)).scalar()
-        
-        if existing_user:
-            raise ValidationError('Username already exists')
     
     @validates('password')
     def validate_password(self, value, **kwargs):

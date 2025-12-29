@@ -25,6 +25,8 @@ from models.auth import AuthUser
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
+dummy_hash = generate_password_hash('secure_timing_attack_prevention_string')
+
 
 @auth_bp.route('/signup', methods = ['POST'])
 def signup():
@@ -129,7 +131,7 @@ def login_email():
         user_hash = authenticate_user.password_encrypted
     else:
         #dummy password hash
-        user_hash = 'scrypt:32768:8:1$6k9S8X1d$d067215201772658f8b461876f827918e974e628464a4d6f6580f585d564850c18d1796120e2e5055b41d214a1a511855e90538053513a967732d84784136939'
+        user_hash = dummy_hash
 
     password_check = check_password_hash(user_hash, validate_login['password'])
 
@@ -178,8 +180,7 @@ def login_username():
     if authenticate_user:
         user_hash = authenticate_user.password_encrypted
     else:
-        #dummy password hash
-        user_hash = 'scrypt:32768:8:1$6k9S8X1d$d067215201772658f8b461876f827918e974e628464a4d6f6580f585d564850c18d1796120e2e5055b41d214a1a511855e90538053513a967732d84784136939'
+        user_hash = dummy_hash
 
     password_check = check_password_hash(user_hash, validate_login['password'])
 
