@@ -1,4 +1,4 @@
-import { useState, useEffect,type Dispatch, type JSX, type SetStateAction } from "react";
+import { useState, useEffect,type Dispatch, type JSX, type SetStateAction, type ChangeEvent } from "react";
 import cn from "../../util/tailwind_merger";
 import { type ProfileDataType } from "../../pages/ProfilePage";
 import { LoaderCircle, PencilLine } from 'lucide-react'
@@ -34,7 +34,7 @@ export default function EditProfileForm({
   const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | undefined>(undefined)
   const [profileBannerPreview, setProfileBannerPreview] = useState<string | undefined>(undefined)
 
-  const handleProfilePhotoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleProfilePhotoFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     let tempUrl: string = ''
     if (e.target.files) {
       tempUrl = URL.createObjectURL(e.target.files[0])
@@ -42,7 +42,7 @@ export default function EditProfileForm({
     }
   }
 
-  const handleProfileBannerFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleProfileBannerFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     let tempUrl: string = ''
     if (e.target.files) {
       tempUrl = URL.createObjectURL(e.target.files[0])
@@ -117,18 +117,18 @@ export default function EditProfileForm({
     )
   }
 
-  const charCounterBioDisplayHandler = (e: React.ChangeEvent<HTMLTextAreaElement>) =>{
+  const charCounterBioDisplayHandler = (e: ChangeEvent<HTMLTextAreaElement>) =>{
     const length = e.target.value.length
     setCharCounterBio(length)
   }
     
 
-  const charCounterUsernameDisplayHander = (e: React.ChangeEvent<HTMLInputElement>) =>{
+  const charCounterUsernameDisplayHander = (e: ChangeEvent<HTMLInputElement>) =>{
     const length = e.target.value.length
     setCharCounterUsername(length)
   }
 
-  const usernameIndicatorHander = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const usernameIndicatorHander = (e: ChangeEvent<HTMLInputElement>) => {
     const usernameChars = e.target.value
     const re = /^[0-9A-Za-z_.]+$/
 

@@ -28,7 +28,7 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
     description = fields.Str(validate=[validate.Length(max = 200)])
     hashtags = fields.List(
         fields.Str(validate=validate.Regexp(r'^[a-zA-Z0-9_#]+$', error="Hashtags can only contain letters, numbers, and underscores")),
-        validate=validate.Length(max=20)
+        validate=validate.Length(max=10)
     )
 
     @validates('hashtags')
