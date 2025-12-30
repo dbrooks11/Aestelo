@@ -10,7 +10,6 @@ import ProfilePage from './pages/ProfilePage'
 import FeedPage from './pages/FeedPage'
 
 
-
 function App() {
   const {theme} = useTheme()
 

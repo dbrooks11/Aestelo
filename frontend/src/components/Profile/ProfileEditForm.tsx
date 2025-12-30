@@ -205,7 +205,7 @@ export default function EditProfileForm({
               aria-label="Banner Preview Mode"
             >
               <button
-                className={cn(editProfileFormScreenGuideButtonStyle, `${screenGuideType === 'desktop' ? editProfileFormScreenGuideButtonActiveStyle : null}`)}
+                className={cn(editProfileFormScreenGuideButtonStyle, `${screenGuideType === 'desktop' && editProfileFormScreenGuideButtonActiveStyle}`)}
                 type="button"
                 onClick={() => setScreenGuideType('desktop')}
                 aria-pressed={screenGuideType === 'desktop'}
@@ -214,7 +214,7 @@ export default function EditProfileForm({
               </button>
               
               <button
-                className={cn(editProfileFormScreenGuideButtonStyle, `${screenGuideType === 'mobile' ? editProfileFormScreenGuideButtonActiveStyle : null}`)}
+                className={cn(editProfileFormScreenGuideButtonStyle, `${screenGuideType === 'mobile' && editProfileFormScreenGuideButtonActiveStyle}`)}
                 type="button"
                 onClick={() => setScreenGuideType('mobile')}
                 aria-pressed={screenGuideType === 'mobile'}
@@ -232,7 +232,7 @@ export default function EditProfileForm({
               >
                 <img 
                   src={profileBannerPreview ? profileBannerPreview : profile_banner_url}
-                  className={`${screenGuideType === 'desktop' ? 'object-[10%_52%]' : null} h-full w-full object-cover pointer-events-none`}
+                  className={`${screenGuideType === 'desktop' && 'object-[10%_52%]'} h-full w-full object-cover pointer-events-none`}
                   alt=""
                 >
                 </img>
@@ -247,7 +247,7 @@ export default function EditProfileForm({
                 </div>
                 
                 <span className="top-[5%] right-[2%] absolute bg-black/50 backdrop-blur-sm px-1.5 py-0.5 rounded-sm font-mono text-xs pointer-events-none">
-                  {screenGuideType === 'desktop' ? '1200px View' : 'Mobile View'}
+                  {screenGuideType === 'desktop' ? '1400px View' : 'Mobile View'}
                 </span>
               </div>
             </div>

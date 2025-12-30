@@ -86,6 +86,7 @@ export default function ProfileHeader(props: ProfileHeaderProps): JSX.Element{
     }
 
 
+    //TODO: add second popup to ask user if they are sure they want to logout
     async function logout(): Promise<void>{
       
         try{

@@ -34,7 +34,7 @@ export default function FeedPage(): JSX.Element {
     //     getFeed()
     // }, []);
 
-    console.log(feed)
+    // console.log(feed)
         
       
   return (

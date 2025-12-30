@@ -19,7 +19,7 @@ import testImage from "../../assets/testImage.jpg"
 
 // }
 
-const testTags = ['#b', '#rickowens', '#b', '#ok', '#fishing', '#f', '#h', '#tr', '#r','#okay', '#robotics', '#iloverickowensnow', '#metoo', '#ro' , '#meow']
+const testTags = ['#b', '#rickowens', '#a', '#ok', '#fishing', '#f', '#h', '#tr', '#r','#okay', '#robotics', '#iloverickowensnow', '#metoo', '#ro' , '#meow']
 
 export default function Post(): JSX.Element{
 
@@ -61,7 +61,7 @@ export default function Post(): JSX.Element{
                     <div className={'flex items-center gap-4 w-full px-4 h-1/2'}>
                         {bottomRowTags.map((tag) =>{
                             return(
-                                <span className="flex justify-center items-center px-1 py-0.5 rounded-md border">{tag}</span>
+                                <span key={tag} className="flex justify-center items-center px-1 py-0.5 rounded-md border">{tag}</span>
                             )
                         })}
                     </div>
@@ -130,19 +130,19 @@ export default function Post(): JSX.Element{
                 {/* Action Buttons */}
                 <div className="flex justify-center items-center h-1/2 text-white w-full">
                     <div className="flex items-center justify-center text-sm gap-2">
-                        <div className="flex justify-center items-center w-1/4">
+                        <div className="flex justify-center items-center w-1/4 gap-1">
                             <button><ExternalLink strokeWidth={1.5} className="w-full h-full"/></button>
                             <span>999.8m</span>
                         </div>
-                        <div className="flex justify-center items-center w-1/4">
+                        <div className="flex justify-center items-center w-1/4 gap-1">
                             <button><Bookmark strokeWidth={1.5} className="w-full h-full"/></button>
                             <span>234.8m</span>
                         </div>
-                        <div className="flex justify-center items-center w-1/4">
+                        <div className="flex justify-center items-center w-1/4 gap-1">
                             <button><Star strokeWidth={1.5} className="w-full h-full"/></button>
                             <span>234.8m</span>
                         </div>
-                        <div className="flex justify-center items-center w-1/4">
+                        <div className="flex justify-center items-center w-1/4 gap-1">
                             <button><VIconRounded strokeWidth={1.5} className="w-full h-full"/></button>
                             <span>999.6m</span>
                         </div>
