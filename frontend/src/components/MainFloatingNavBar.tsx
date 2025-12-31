@@ -108,6 +108,7 @@ export default function MainFloatingNavBar(): JSX.Element {
                         >
                             {/* Tooltip Label (Left side) */}
                             <div 
+                                aria-hidden="true"
                                 className="top-1/2 right-full absolute bg-white dark:bg-neutral-900 opacity-0 group-hover:opacity-100 shadow-lg mr-3 px-2 py-1 border border-gray-100 dark:border-white/10 rounded font-bold text-black dark:text-white text-xs whitespace-nowrap transition-opacity -translate-y-1/2 pointer-events-none">
                                 {nav.label}
                                 {/* Tiny arrow pointing right */}
@@ -119,6 +120,8 @@ export default function MainFloatingNavBar(): JSX.Element {
                             {!isTheme && <Link
                                 to={nav.linkTo}
                                 title={nav.label}
+                                aria-label={nav.label}
+                                aria-current={isActive ? 'page' : undefined}
                                 className={cn(
                                     "flex justify-center items-center rounded-full w-12 h-12 group-hover:scale-110 transition-all duration-200",
                                     isActive 
@@ -143,6 +146,8 @@ export default function MainFloatingNavBar(): JSX.Element {
             <AnimatePresence>
                 {isNavOpen && (
                     <motion.nav
+                        id="main-floating-nav"
+                        aria-label="Main Navigation"
                         variants={containerVariants}
                         initial="hidden"
                         animate="visible"
@@ -157,12 +162,16 @@ export default function MainFloatingNavBar(): JSX.Element {
 
             {/* Main Toggle Button */}
             <motion.button
+                type="button"
+                aria-label={isNavOpen ? "Close menu" : "Open menu"}
+                aria-expanded={isNavOpen}
+                aria-controls="main-floating-nav"
                 className="z-10 flex justify-center items-center bg-accents-primary/95 shadow-[0_4px_10px_rgba(200,90,94,0.5)] hover:shadow-[0_6px_20px_rgba(200,90,94,0.7)] mb-1 rounded-full w-14 h-14 text-white transition-shadow cursor-pointer"
                 onClick={() => setIsNavOpen(!isNavOpen)}
                 whileTap={{ scale: 0.9 }}
                 animate={{ rotate: isNavOpen ? 180 : 0 }} 
             >
-                <ChevronUp size={30} />
+                <ChevronUp size={30} aria-hidden="true" />
             </motion.button>
         </div>
     )
