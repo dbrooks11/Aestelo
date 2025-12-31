@@ -50,7 +50,7 @@
   --color-slate: #2D2D2D; /* POST CARDS - lighter for content visibility! */
   --color-graphite: #0A0A0A; /* Deep backgrounds (rarely used) */
   --color-smoke: #353535; /* Elevated elements, hover states */
-
+  --color-off-slate: #1F1F1F;
   
   /* Light Mode Backgrounds */
   --color-bg-light: #FFFFFF; /*Post cards, photo backgrounds, main content areas*/

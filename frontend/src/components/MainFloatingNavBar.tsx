@@ -17,7 +17,9 @@ const navButtons: Array<NavButtonsType> = [
     {
         order: 1,
         label: 'Change Theme',
-        icon: <ThemeButton className=""/>,
+        icon: <ThemeButton 
+                    className="hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 hover:text-black dark:hover:text-white dark:text-gray-400"
+                />,
         linkTo: ''
     },
     {
@@ -60,9 +62,9 @@ const containerVariants: Variants = {
         transition: { 
             type: "spring",
             stiffness: 400,
-            damping: 30,
+            damping: 20,
             when: "afterChildren", 
-            staggerChildren: 0.05,
+            staggerChildren: 0.04,
             staggerDirection: -1 
         }
     },
@@ -74,7 +76,7 @@ const containerVariants: Variants = {
             type: "spring", 
             stiffness: 300, 
             damping: 20,
-            staggerChildren: 0.07, 
+            staggerChildren: 0.05, 
             delayChildren: 0.1,
             staggerDirection: -1
         }
@@ -97,29 +99,31 @@ export default function MainFloatingNavBar(): JSX.Element {
             <>
                 {orderLinks.map((nav) => {
                     const isActive = location.pathname === nav.linkTo
+                    const isTheme = nav.label.toLowerCase().includes('theme')
                     return (
                         <motion.div
                             key={nav.order}
                             variants={itemVariants}
-                            className="relative group" 
+                            className={`${isTheme && 'border-b dark:border-b-neutral-700 border-b-neutral-300 pb-1'} group relative`} 
                         >
                             {/* Tooltip Label (Left side) */}
-                            <div className="absolute right-full top-1/2 -translate-y-1/2 mr-3 px-2 py-1 rounded bg-neutral-900 text-white text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg">
+                            <div 
+                                className="top-1/2 right-full absolute bg-white dark:bg-neutral-900 opacity-0 group-hover:opacity-100 shadow-lg mr-3 px-2 py-1 border border-gray-100 dark:border-white/10 rounded font-bold text-black dark:text-white text-xs whitespace-nowrap transition-opacity -translate-y-1/2 pointer-events-none">
                                 {nav.label}
                                 {/* Tiny arrow pointing right */}
-                                <div className="absolute top-1/2 -right-1 -translate-y-1/2 w-2 h-2 bg-neutral-900 rotate-45"></div>
+                                <div className="top-1/2 -right-1 absolute bg-white dark:bg-neutral-900 border-gray-100 dark:border-white/10 border-t border-r w-2 h-2 rotate-45 -translate-y-1/2"></div>
                             </div>
 
-                            {nav.label.toLowerCase().includes('theme') && nav.icon}
+                            {isTheme && nav.icon}
 
-                            {!nav.label.toLowerCase().includes('theme') && <Link
+                            {!isTheme && <Link
                                 to={nav.linkTo}
                                 title={nav.label}
                                 className={cn(
-                                    "flex items-center justify-center w-12 h-12 rounded-full transition-all duration-200 group-hover:scale-110",
+                                    "flex justify-center items-center rounded-full w-12 h-12 group-hover:scale-110 transition-all duration-200",
                                     isActive 
-                                        ? "bg-accents-deep text-white shadow-[0_0_10px_rgba(244,63,94,0.5)]" 
-                                        : "text-neutral-400 hover:text-white hover:bg-white/10",
+                                        ? "bg-accents-deep text-white shadow-[0_0_10px_rgba(200,90,94,0.5)]" 
+                                        : "text-gray-500 hover:text-black hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/10",
                                     nav.className
                                 )}
                                 onClick={() => setIsNavOpen(false)} 
@@ -134,7 +138,7 @@ export default function MainFloatingNavBar(): JSX.Element {
     }
 
     return (
-        <div className="flex flex-col items-center fixed right-6 bottom-6 z-50 gap-4"> 
+        <div className="right-6 bottom-6 z-50 fixed flex flex-col items-center gap-4"> 
             
             <AnimatePresence>
                 {isNavOpen && (
@@ -143,7 +147,7 @@ export default function MainFloatingNavBar(): JSX.Element {
                         initial="hidden"
                         animate="visible"
                         exit="hidden"
-                        className="absolute bottom-0 z-0 flex flex-col items-center gap-3 p-2 pb-20 rounded-full bg-neutral-900/90 dark:bg-neutral-800/90 backdrop-blur-xl border border-white/10 shadow-2xl origin-bottom"
+                        className="bottom-0 z-0 absolute flex flex-col items-center gap-3 bg-white/90 dark:bg-neutral-900/90 shadow-2xl backdrop-blur-xl p-2 pb-20 border border-gray-200 dark:border-white/10 rounded-full origin-bottom"
                         style={{ paddingBottom: "5rem" }}
                     >
                         {handleNavButtonLinks()}
@@ -153,7 +157,7 @@ export default function MainFloatingNavBar(): JSX.Element {
 
             {/* Main Toggle Button */}
             <motion.button
-                className="w-14 h-14 mb-1 rounded-full bg-accents-primary/95 text-white shadow-[0_4px_10px_rgba(200,90,94,0.5)] flex items-center justify-center z-10 hover:shadow-[0_6px_20px_rgba(200,90,94,0.7)] transition-shadow cursor-pointer"
+                className="z-10 flex justify-center items-center bg-accents-primary/95 shadow-[0_4px_10px_rgba(200,90,94,0.5)] hover:shadow-[0_6px_20px_rgba(200,90,94,0.7)] mb-1 rounded-full w-14 h-14 text-white transition-shadow cursor-pointer"
                 onClick={() => setIsNavOpen(!isNavOpen)}
                 whileTap={{ scale: 0.9 }}
                 animate={{ rotate: isNavOpen ? 180 : 0 }} 
