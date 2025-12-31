@@ -29,7 +29,7 @@ const postButtons: Array<PostButtonType> = [
         title: 'Save',
         position: 'left',
         color: '#60a5fa',
-        fillColor: '#60a5fa',
+        // fillColor: '#60a5fa',
         icon: Bookmark,
         data: 96000
     },
@@ -37,7 +37,7 @@ const postButtons: Array<PostButtonType> = [
         order: 3,
         title: 'Rate',
         color: '#fbbf24',
-        fillColor: '#facc15',
+        // fillColor: '#facc15',
         position: 'left',
         icon: Star,
         data: 9876
@@ -46,7 +46,7 @@ const postButtons: Array<PostButtonType> = [
         order: 4,
         title: 'Visits',
         color: '#22c55e',
-        fillColor: '#22c55e',
+        // fillColor: '#22c55e',
         position: 'right',
         icon: VIconRounded,
         data: 318099
@@ -95,31 +95,31 @@ export default function PostButtons(): JSX.Element{
     }, [])
 
     function renderPostButtons(btnArray: Array<PostButtonType>): JSX.Element {
-            return(
-                <>
-                    <div className="flex gap-2 text-neutral-400">
-                        {btnArray.map((btn: PostButtonType) => {
-                                return(
-                                    <button
-                                        key={btn.title}
-                                        title={btn.title}
-                                        style={{'--btn-color': btn.color, '--btn-fill-color': btn.fillColor} as React.CSSProperties}
-                                        className="group flex items-center gap-1 hover:text-white transition-colors cursor-pointer"
+        return(
+            <>
+                <div className="flex gap-2 text-neutral-400">
+                    {btnArray.map((btn: PostButtonType) => {
+                            return(
+                                <button
+                                    key={btn.title}
+                                    title={btn.title}
+                                    style={{'--btn-color': btn.color, '--btn-fill-color': btn.fillColor} as React.CSSProperties}
+                                    className="group flex items-center gap-1 hover:text-white transition-colors cursor-pointer"
+                                >
+                                    {/* TODO: change stroke and fill to be on when user completes action */}
+                                    <btn.icon
+                                        strokeWidth={1}
+                                        className={`stroke-(--btn-color) ${btn.fillColor && 'fill-(--btn-fill-color)'} transition-colors`}
                                     >
-                                        {/* TODO: change stroke and fill to be on when user completes action */}
-                                        <btn.icon
-                                            strokeWidth={1}
-                                            className={`stroke-(--btn-color) ${btn.fillColor && 'fill-(--btn-fill-color)'} transition-colors`}
-                                        >
-                                        </btn.icon>
-                                        {/* TODO: replace hardcoded stat with real data */}
-                                        <span className="font-medium text-xs">{handlePostStats(1219994)}</span>
-                                    </button>
-                                )
-                        })}
-                    </div>
-                </>
-            )
+                                    </btn.icon>
+                                    {/* TODO: replace hardcoded stat with real data */}
+                                    <span className="font-medium text-xs">{handlePostStats(1219994)}</span>
+                                </button>
+                            )
+                    })}
+                </div>
+            </>
+        )
     }
 
     return(

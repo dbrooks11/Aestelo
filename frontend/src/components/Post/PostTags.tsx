@@ -2,7 +2,7 @@ import { useEffect, useRef, type JSX } from "react";
 import ScrollContainer from "react-indiana-drag-scroll";
 
 
-const testTags = ["streetwear", "archive", "rickowens", "fashion", "ootd", "style", "vintage", "grailed", "y2k", "opium"]
+const testTags: Array<string> = []
 
 
 export default function PostTags(): JSX.Element{
@@ -25,30 +25,43 @@ export default function PostTags(): JSX.Element{
     }, [])
 
     const handleTags = (tags: Array<string>): JSX.Element | undefined => {
-        if(tags){
+        if(tags.length > 0){
             return(
                 <ScrollContainer 
                     className="flex flex-col justify-center gap-1 mask-x-from-90% mask-x-to-100% w-full h-full overflow-x-scroll no-scrollbar mx-2"
                     innerRef={scrollRef}
                     >
-                    <div className="flex justify-start items-center gap-2 mx-2">
+                    <ul 
+                        className="flex justify-start items-center gap-2 mx-2"
+                        aria-label="Hashtags scrollable list"
+                        tabIndex={0}
+                        role="region"
+                        >
 
                         {tags.map((tag)=> {
-
+                            // TODO: make hashtags clickable
                             return(
-                                <span 
+                                <li 
                                     key={tag} 
                                     className='flex justify-center items-center bg-neutral-700 px-1.5 py-0.5 border dark:border-white/5 rounded-md min-w-8 hover:text-accents-primary whitespace-nowrap hover:cursor-pointer shrink-0 drop-shadow-sm'
+                                    aria-label={`Hashtag ${tag}`}
                                     >
                                         #{tag}
-                                </span>
+                                </li>
                             )
                         })}
-                    </div>
+                    </ul>
                 </ScrollContainer>
             )
         }else{
-            return <span>• No tags</span>
+            return (
+                <span 
+                    className="flex items-center ml-4 text-neutral-600 italic gap-1"
+                >
+                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-700"></span>
+                    No tags
+                </span>
+                )
         }
     }
     

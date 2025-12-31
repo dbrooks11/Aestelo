@@ -16,6 +16,11 @@ export default function PostDescripton(): JSX.Element{
                 {showDescription ? 
                 <motion.div 
                     key='description'
+                    id="post-description-content"
+                    role="button"
+                    tabIndex={0}
+                    aria-expanded={true}
+                    aria-label="Post description. Click to collapse."
                     initial={{opacity: 0}}
                     animate={{opacity: 1}}
                     exit={{opacity: 0}}
@@ -24,6 +29,12 @@ export default function PostDescripton(): JSX.Element{
                     onClick={(e) => {
                         e.stopPropagation()
                         setShowDescription(false)}}
+                    onKeyDown={(e) => {
+                        if(e.key === 'Enter' || e.key === ' '){
+                            e.stopPropagation()
+                            setShowDescription(false)
+                        }
+                    }}
                     >
                             <p>
                                 Breastfeeding is good for babies and moms. Infants that are breastfed get antibodies from their mothers against common illnesses. Breastfed babies have less chance of being obese as an adult. Breastfeeding a baby lets the infant-mother pair bond in a very unique way. Mother’s who breastfeed lower their chances of developing breast cancer. Usually, mothers who breastfeed lose their pregnancy weight more quickly and easily. The benefits of breastfeeding are numerous.
@@ -32,6 +43,11 @@ export default function PostDescripton(): JSX.Element{
                 <motion.button
                     key="button"
                     type="button"
+                    role="button"
+                    aria-label="Show full description"
+                    aria-expanded={false}
+                    aria-controls="post-description-content"
+                    tabIndex={0}
                     initial={{ opacity: 0}}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
