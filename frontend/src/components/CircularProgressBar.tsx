@@ -31,7 +31,7 @@ export function CircularProgress({
 
   return (
     <div 
-      className="relative flex items-center justify-center"
+      className="relative flex items-center justify-center pointer-events-none"
       style={{ width: size, height: size }}
       role="progressbar"
       aria-valuenow={numCurrent}

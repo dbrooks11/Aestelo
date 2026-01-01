@@ -43,7 +43,7 @@ export default function PostTags(): JSX.Element{
                             return(
                                 <li 
                                     key={tag} 
-                                    className='flex justify-center items-center bg-neutral-700 px-1.5 py-0.5 border dark:border-white/5 rounded-md min-w-8 hover:text-accents-primary whitespace-nowrap hover:cursor-pointer shrink-0 drop-shadow-sm'
+                                    className='flex justify-center items-center dark:bg-neutral-700 px-1.5 py-0.5 border dark:border-white/5 rounded-md min-w-8 hover:text-accents-primary whitespace-nowrap hover:cursor-pointer shrink-0 drop-shadow-sm'
                                     aria-label={`Hashtag ${tag}`}
                                     >
                                         #{tag}
@@ -56,9 +56,9 @@ export default function PostTags(): JSX.Element{
         }else{
             return (
                 <span 
-                    className="flex items-center ml-4 text-neutral-600 italic gap-1"
+                    className="flex items-center ml-4 dark:text-neutral-600 text-black/40 italic gap-1 pointer-events-none"
                 >
-                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-700"></span>
+                    <span className="w-1.5 h-1.5 rounded-full dark:bg-neutral-700 bg-black/40"></span>
                     No tags
                 </span>
                 )
@@ -66,7 +66,7 @@ export default function PostTags(): JSX.Element{
     }
     
     return(
-        <div className="flex w-full h-10 text-[10px] text-white dark:bg-slate/50 dark:border-white/5 border">
+        <div className="flex w-full h-10 text-[10px] text-white dark:bg-slate/50 bg-stone-50 dark:border-white/5 border-border-light border-y">
             {handleTags(testTags)} 
         </div>  
     )

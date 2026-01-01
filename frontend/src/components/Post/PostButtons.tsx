@@ -1,6 +1,7 @@
 import { useMemo, type ComponentType, type JSX, type SVGProps } from "react";
 import { Star,ExternalLink, Bookmark, type LucideProps} from "lucide-react"
 import VIconRounded from "../DynamicSvgs/VIconRounded"
+import { handleNumStats } from "../../util/StatConverter";
 
 
 type IconComponent = ComponentType<LucideProps | SVGProps<SVGSVGElement>>;
@@ -55,36 +56,11 @@ const postButtons: Array<PostButtonType> = [
 ]
 
 
+
+
 export default function PostButtons(): JSX.Element{
 
-    const handlePostStats = (stat: number): string => {
-    if (stat === 0) return "0"
-
-    const thousand = 1000
-    const tenThousand = 10000
-    const million = 1000000
-    const billion = 1000000000
-    const trillion = 1000000000000
-
-    const floorStat = (value: number) => {
-        return Math.floor(value * 10) / 10;
-    };
-
-        if (stat >= trillion) {
-            return floorStat(stat / trillion) + 't'
-        } 
-        if (stat >= billion) {
-            return floorStat(stat / billion) + 'b'
-        } 
-        if (stat >= million) {
-            return floorStat(stat / million) + 'm'
-        }
-        if(stat >= tenThousand){
-            return floorStat(stat / thousand) + 'k'
-        }
-        
-    return stat.toString();
-    }
+    
 
     const {leftButtons, rightButtons} = useMemo(() => {
         const sortedButtons = postButtons.sort((btn1, btn2) => btn1.order - btn2.order)
@@ -97,23 +73,23 @@ export default function PostButtons(): JSX.Element{
     function renderPostButtons(btnArray: Array<PostButtonType>): JSX.Element {
         return(
             <>
-                <div className="flex gap-2 text-neutral-400">
+                <div className="flex gap-2.5 dark:text-neutral-400 text-neutral-600">
                     {btnArray.map((btn: PostButtonType) => {
                             return(
                                 <button
                                     key={btn.title}
                                     title={btn.title}
                                     style={{'--btn-color': btn.color, '--btn-fill-color': btn.fillColor} as React.CSSProperties}
-                                    className="group flex items-center gap-1 hover:text-white transition-colors cursor-pointer"
+                                    className="group flex items-center gap-1 hover:dark:text-white hover:text-black transition-colors cursor-pointer"
                                 >
                                     {/* TODO: change stroke and fill to be on when user completes action */}
                                     <btn.icon
                                         strokeWidth={1}
-                                        className={`stroke-(--btn-color) ${btn.fillColor && 'fill-(--btn-fill-color)'} transition-colors`}
+                                        className={`group-hover:stroke-(--btn-color) ${btn.fillColor && 'fill-(--btn-fill-color)'} transition-colors`}
                                     >
                                     </btn.icon>
                                     {/* TODO: replace hardcoded stat with real data */}
-                                    <span className="font-medium text-xs">{handlePostStats(1219994)}</span>
+                                    <span className="font-medium text-xs">{handleNumStats(1219994)}</span>
                                 </button>
                             )
                     })}

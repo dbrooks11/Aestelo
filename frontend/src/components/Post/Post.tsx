@@ -2,6 +2,7 @@ import { useState, type JSX} from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import testImage from "../../assets/testImage.jpg"
 import whitePlain from "../../assets/white_plain.jpg"
+import blackPlain from "../../assets/black_plain.jpg"
 import testImage2 from "../../assets/testImage2.jpg"
 import PostTags from "./PostTags"
 import PostButtons from "./PostButtons"
@@ -39,7 +40,7 @@ export default function Post(): JSX.Element{
 
     return(
         
-        <div className="flex flex-col dark:bg-off-slate mx-auto mb-200 border border-border-dark rounded-sm w-90 mt-10">
+        <div className="flex flex-col dark:bg-off-slate bg-white mx-auto mb-200 border dark:border-border-dark border-border-light rounded-sm w-90 mt-10">
             
             {/* Images and Header container */}
             <div className="relative flex flex-1">
@@ -49,18 +50,18 @@ export default function Post(): JSX.Element{
 
                 {/* Arrow Buttons */}
                 <div 
-                    className="absolute flex left-1 bottom-[45%]">
+                    className="absolute flex left-1 bottom-[50%]">
                     <button 
-                        className=" w-8 h-8 flex items-center justify-center rounded-full dark:bg-black/10 bg-white/10 backdrop-blur-[2px] text-white/70 border border-white/10 transition-all active:scale-90 cursor-pointer shadow-2xl" 
+                        className=" w-7 h-7 flex items-center justify-center rounded-full bg-black/10 backdrop-blur-[2px] text-white/70 border border-white/10  active:scale-90 cursor-pointer shadow-2xl" 
                         onClick={() => setProgress(Math.max(1, progress - 1))}
                         aria-label="previous button"
                     >
                         <ChevronLeft/>
                     </button>
                 </div>
-                <div className="absolute flex right-1 bottom-[45%]">
+                <div className="absolute flex right-1 bottom-[50%]">
                     <button 
-                        className=" w-8 h-8 flex items-center justify-center rounded-full dark:bg-black/10 bg-white/10 backdrop-blur-[2px] text-white/70 border border-white/10 transition-all active:scale-90 cursor-pointer" 
+                        className=" w-7 h-7 flex items-center justify-center rounded-full bg-black/10 backdrop-blur-[2px] text-white/70 border border-white/10  active:scale-90 cursor-pointer" 
                         onClick={() => setProgress(Math.min(total, progress + 1))}
                         aria-label="next button"
                     >
@@ -89,7 +90,7 @@ export default function Post(): JSX.Element{
                 
             </div>
             {/* Action button and tags container */}
-            <div className="flex flex-col bg-off-slate backdrop-blur-md w-full min-h-25">
+            <div className="flex flex-col dark:bg-off-slate w-full min-h-25">
                 <PostTags/>
                 <PostButtons/>   
             </div>

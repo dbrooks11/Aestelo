@@ -9,12 +9,12 @@ export default function PostDescripton(): JSX.Element{
 
     return(
         <div 
-            className="bottom-1 left-2 absolute flex max-w-55 max-h-30 overflow-y-scroll text-white text-xs cursor-pointer no-scrollbar"
+            className={`${showDescription && 'overscroll-contain overflow-y-scroll no-scrollbar'} bottom-1 left-2 absolute flex max-w-55 max-h-30 text-white text-xs cursor-pointer border border-neutral-300/30 bg-black/10 backdrop-blur-[2px]`}
 
         >
             <AnimatePresence mode="wait">
                 {showDescription ? 
-                <motion.div 
+                <motion.button 
                     key='description'
                     id="post-description-content"
                     role="button"
@@ -24,8 +24,7 @@ export default function PostDescripton(): JSX.Element{
                     initial={{opacity: 0}}
                     animate={{opacity: 1}}
                     exit={{opacity: 0}}
-                    transition={{duration: 0.1}}
-                    className= 'flex dark:bg-black/10 bg-white/10 backdrop-blur-[2px] p-1 border border-neutral-300/40 h-min'
+                    className= 'flex p-1 h-min cursor-pointer'
                     onClick={(e) => {
                         e.stopPropagation()
                         setShowDescription(false)}}
@@ -39,7 +38,7 @@ export default function PostDescripton(): JSX.Element{
                             <p>
                                 Breastfeeding is good for babies and moms. Infants that are breastfed get antibodies from their mothers against common illnesses. Breastfed babies have less chance of being obese as an adult. Breastfeeding a baby lets the infant-mother pair bond in a very unique way. Mother’s who breastfeed lower their chances of developing breast cancer. Usually, mothers who breastfeed lose their pregnancy weight more quickly and easily. The benefits of breastfeeding are numerous.
                             </p>
-                </motion.div>: 
+                </motion.button>: 
                 <motion.button
                     key="button"
                     type="button"
@@ -55,7 +54,7 @@ export default function PostDescripton(): JSX.Element{
                     onClick={(e) => {
                         e.stopPropagation()
                         setShowDescription(true)}}
-                    className= 'flex items-center dark:bg-black/10 bg-white/10 backdrop-blur-[2px] px-0.5 border-neutral-300/40 h-5 cursor-pointer'
+                    className= 'flex items-center px-0.5 h-5 cursor-pointer'
                     >
                     <span aria-hidden='true' className="">[</span>
                     <span aria-hidden='true' className="mt-0.5"><Ellipsis/></span>

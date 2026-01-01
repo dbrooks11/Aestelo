@@ -1,4 +1,4 @@
-import { useState, type JSX } from "react";
+import { type JSX } from "react";
 import { CircularProgress } from "../CircularProgressBar";
 
 type PostPhotoCounterProps = {
