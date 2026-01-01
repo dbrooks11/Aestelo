@@ -1,8 +1,8 @@
-from exstensions import db
-from sqlalchemy.orm import relationship
-from datetime import datetime, timezone
-from sqlalchemy import (Column, ForeignKey, BigInteger, 
-                        String, Float, DateTime, Index)
+# from exstensions import db
+# from sqlalchemy.orm import relationship
+# from datetime import datetime, timezone
+# from sqlalchemy import (Column, ForeignKey, BigInteger, 
+#                         String, Float, DateTime, Index)
 
 #todo: Come back to mapbox and google place id. 
 #todo: check format of altitude
@@ -20,70 +20,70 @@ from sqlalchemy import (Column, ForeignKey, BigInteger,
 #Get location_id from pics
 
 
-class Location(db.Model):
-    __table_args__ = (Index('idx_location_coords', 'latitude', 'longitude'),
-                      )
+# class Location(db.Model):
+#     __table_args__ = (Index('idx_location_coords', 'latitude', 'longitude'),
+#                       )
     
-    post_media_id = Column(BigInteger, ForeignKey('post_media.id'), index=True, nullable=True)
-    visit_media_id = Column(BigInteger, ForeignKey('visit_media.id'), index=True, nullable=True)
-    business_location_details = relationship('BusinessLocationDetails', backref='location') #will be handled later
+#     post_media_id = Column(BigInteger, ForeignKey('post_media.id'), index=True, nullable=True)
+#     visit_media_id = Column(BigInteger, ForeignKey('visit_media.id'), index=True, nullable=True)
+#     business_location_details = relationship('BusinessLocationDetails', backref='location') #will be handled later
    
         
-    id = Column(BigInteger, primary_key=True)
-    longitude = Column(Float)
-    latitude = Column(Float)
-    altitude = Column(Float)
+#     id = Column(BigInteger, primary_key=True)
+#     longitude = Column(Float)
+#     latitude = Column(Float)
+#     altitude = Column(Float)
 
 
-    created_on = Column(DateTime, default= datetime.now(timezone.utc))
+#     created_on = Column(DateTime, default= datetime.now(timezone.utc))
 
     
-    def to_dict(self):
-        return {
-            "post_id": self.post_media_id,
-            "visit_id": self.visit_media_id, 
-            "location_id": self.location_id,
-            "longitude": self.longitude,
-            "latitude": self.latitude,  # fixed typo: lagitude → latitude
-            "altitude": self.altitude,
-            "created_on": self.created_on,
-    }
+#     def to_dict(self):
+#         return {
+#             "post_id": self.post_media_id,
+#             "visit_id": self.visit_media_id, 
+#             "location_id": self.location_id,
+#             "longitude": self.longitude,
+#             "latitude": self.latitude,  # fixed typo: lagitude → latitude
+#             "altitude": self.altitude,
+#             "created_on": self.created_on,
+#     }
 
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
+#     def save(self):
+#         db.session.add(self)
+#         db.session.commit()
 
 
 
-#For businesses mainly
-class BusinessLocationDetails(db.Model):
+# #For businesses mainly
+# class BusinessLocationDetails(db.Model):
 
-    location_id = Column(BigInteger, ForeignKey('location.id'), primary_key=True)
-    description = Column(String(200), default='')
-    address_line1 = Column(String(50))
-    address_line2 = Column(String(20))
-    city = Column(String(30))
-    state = Column(String(30))
-    postal_code = Column(String(10))
+#     location_id = Column(BigInteger, ForeignKey('location.id'), primary_key=True)
+#     description = Column(String(200), default='')
+#     address_line1 = Column(String(50))
+#     address_line2 = Column(String(20))
+#     city = Column(String(30))
+#     state = Column(String(30))
+#     postal_code = Column(String(10))
     
-    def to_dict(self):
-        return {
-            'location_id': self.location_id,
-            'description': self.description,
-            'address_line1': self.address_line1,
-            'address_line2': self.address_line2,
-            'city': self.city,
-            'state': self.state,
-            'postal_code': self.postal_code
-    }
+#     def to_dict(self):
+#         return {
+#             'location_id': self.location_id,
+#             'description': self.description,
+#             'address_line1': self.address_line1,
+#             'address_line2': self.address_line2,
+#             'city': self.city,
+#             'state': self.state,
+#             'postal_code': self.postal_code
+#     }
 
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
+#     def save(self):
+#         db.session.add(self)
+#         db.session.commit()
 
 
 
-#todo: make another business location model
+# #todo: make another business location model
 
 
 

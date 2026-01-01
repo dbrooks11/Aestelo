@@ -6,10 +6,12 @@ from botocore.client import Config
 from datetime import timedelta
 
 
+
 load_dotenv('env_backend/.env.backend_cloudflare')
 load_dotenv('env_backend/.env.backend_supabase')
 load_dotenv('env_backend/.env.backend_sightengine')
 load_dotenv('env_backend/.env.backend_sendgrid')
+load_dotenv('env_backend/.env.backend_celery')
 load_dotenv('env_backend/.env.development')
 
 class Config:
@@ -52,10 +54,19 @@ class Config:
     R2_ENDPOINT_URL = os.environ.get('R2_ENDPOINT_URL')
     R2_PUBLIC_URL = os.environ.get('R2_PUBLIC_URL')
 
+    #CELERY
+    CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+    CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
+
     #SIGHTENGINE
     SIGHTENGINE_WORKFLOW_ID = os.environ.get('SIGHTENGINE_WORKFLOW_ID')
     SIGHTENGINE_API_USER = os.environ.get('SIGHTENGINE_API_USER')
     SIGHTENGINE_API_SECRET =os.environ.get('SIGHTENGINE_API_SECRET')
+
+    #IMAGE HANDLING
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
+
+
 
     
 
@@ -94,3 +105,4 @@ def configure_logging(app):
     })
     
     app.logger.removeHandler(default_handler)
+

@@ -4,12 +4,12 @@ from flask import current_app
 from datetime import datetime, timezone
 import secrets
 
-def get_r2_client():
-    return boto3.client(
+s3_client = boto3.client(
         's3',
         endpoint_url=current_app.config['R2_ENDPOINT_URL'],
         aws_access_key_id=current_app.config['R2_ACCESS_KEY_ID'],
         aws_secret_access_key=current_app.config['R2_SECRET_ACCESS_KEY'],
+        region_name='auto',
         config=Config(signature_version='s3v4')
         )
 
@@ -24,7 +24,6 @@ def upload_to_r2(file_obj, user_id: str, folder: str):
         short_id = secrets.token_urlsafe(16) 
         unique_filename = f"{folder}/{user_id}/{timestamp}_{short_id}.webp"
     
-        s3_client = get_r2_client()
         file_obj.seek(0)
         
         s3_client.upload_fileobj(
@@ -47,7 +46,6 @@ def upload_to_r2(file_obj, user_id: str, folder: str):
 
 
 def delete_file_r2(file_path):
-    s3_client = get_r2_client()
     bucket = current_app.config['R2_BUCKET_NAME']
 
     try:

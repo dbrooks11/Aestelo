@@ -16,12 +16,27 @@ services:
       - ./backend/env_backend/.env.backend_supabase
       - ./backend/env_backend/.env.backend_sightengine
       - ./backend/env_backend/.env.backend_sendgrid
+      - ./backend/env_backend/.env.backend_celery
       - ./backend/env_backend/.env.development
     logging:
       driver: "json-file"
       options:
         max-size: "10m"       
         max-file: "3"
+    depends_on:
+      - redis
+
+  #---- CELERY ----#
+  celery_worker:
+    build: .
+    command: celery -A make_celery.celery_app worker --loglevel=info
+    env_file:
+      - ./backend/env_backend/.env.backend_celery
+    depends_on:
+      - backend
+      - redis
+    volumes:
+      - .:/app
 
   # --- REACT FRONTEND ---
   frontend:
@@ -36,6 +51,25 @@ services:
       - backend
     env_file:
       - ./frontend/.env
+  
+  #--- REDIS ---#
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+  
+  flower:
+    image: mher/flower
+    command: celery -A make_celery.celery_app flower --port=5555
+    ports:
+      - "5555:5555"
+    env_file:
+      - ./backend/env_backend/.env.backend_celery
+    depends_on:
+      - redis
+      - celery_worker
 
 volumes:
   node_modules:
+
+  

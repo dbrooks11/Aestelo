@@ -4,6 +4,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import UUID
+from geoalchemy2 import Geography
 
 
 
@@ -16,7 +17,7 @@ class Visit(db.Model):
     post_id = Column(BigInteger, ForeignKey('post.id'), nullable=False)
     user_profile_id = Column(UUID(as_uuid=True),  ForeignKey('user_profile.id'), nullable=False)
     
-    refined_location = Column(JSONB, nullable=False)
+    coordinates = Column(Geography(geometry_type='POINT', srid=4326, spatial_index=True))
 
     music_track_id = Column(String(50), ForeignKey('music_track.id'), nullable=True)
     caption = Column(String(200))
@@ -67,42 +68,14 @@ class VisitMedia(db.Model):
     visit_id = Column(BigInteger, ForeignKey('visit.id'), nullable=False)
     uploaded_by = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), nullable=False)
 
-    id = Column(BigInteger, primary_key=True)
-    index = Column(Integer)
-    thumbnail_url = Column(Text)
-    thumb_media_type = Column(String(15), default = 'photo')
-    photo_url = Column(Text)
+    id =Column(BigInteger, primary_key=True)
+    sort_order = Column(Integer)
+
+    photo_path = Column(Text)
     photo_type = Column(String(15), default = 'photo') #stores what type of media is uploaed, photo, video, 360 video, etc
     width =  Column(Integer)
     height = Column(Integer)
-    upload_date = Column(DateTime, default=datetime.now(timezone.utc))
-    is_primary = Column(Boolean, default=False) #Sets the primary pic in front
-
-    location = relationship('Location', backref='visit_media')
-    
-    def to_dict(self):
-        return {
-            "visit_id": self.visit_id,
-            "uploaded_by": self.uploaded_by,
-            "visit_media_id": self.visit_media_id,
-            "media_url": self.photo_url,
-            "media_type": self.photo_type,
-            "width": self.width,
-            "height": self.height,
-            "upload_date": self.upload_date,
-            "is_primary": self.is_primary
-        }
-    
 
     def save(self):
         db.session.add(self)
         db.session.commit()
-    
-#* Visits can get likes but not ratings.Only post can have star ratings
-# class VisitLike(db.Model):
-#     pass
-
-
-#     def save(self):
-#         db.session.add(self)
-#         db.session.commit()

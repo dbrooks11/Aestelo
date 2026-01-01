@@ -1,6 +1,6 @@
 from exstensions import db
 from sqlalchemy import Column, ForeignKey, BigInteger, String, Integer, Float, Text, DateTime, Boolean, ARRAY
-from sqlalchemy.dialects.postgresql import JSONB
+from geoalchemy2 import Geography
 from sqlalchemy.orm import relationship, ColumnProperty
 from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import UUID
@@ -29,7 +29,7 @@ class Post(db.Model):
     
     id = Column(BigInteger, primary_key=True)
     name = Column(String(100))
-    refined_location = Column(JSONB, nullable=False)
+    coordinates = Column(Geography(geometry_type='POINT', srid=4326, spatial_index=True))
     date_posted = Column(DateTime)
     description = Column(String(200))
     total_num_of_photos = Column(Integer)
@@ -37,7 +37,7 @@ class Post(db.Model):
     # total_visits = Column(Integer, default=0)  #* Might add total visits to a post
     average_rating = Column(Float, default=0.0)
     total_num_of_ratings = Column(Integer, default=0)
-    last_rated_at = Column(DateTime, default=datetime.now(timezone.utc))
+    last_rated_at = Column(DateTime)
 
     save_count = Column(Integer, default=0)
     share_count = Column(Integer, default=0)
@@ -97,18 +97,12 @@ class PostMedia(db.Model):
     uploaded_by = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), index=True)
 
     id =Column(BigInteger, primary_key=True)
-    index = Column(BigInteger)
-    thumbnail_url = Column(Text)
-    thumb_media_type = Column(String(15), default = 'photo')
+    sort_order = Column(BigInteger)
 
-    photo_url = Column(Text)
+    photo_path = Column(Text)
     photo_type = Column(String(15), default = 'photo') #stores what type of media is uploaed, photo, video, 360 video, etc
     width =  Column(Integer)
     height = Column(Integer)
-
-    is_primary = Column(Boolean,default=False) #Sets the primary pic in front
-
-    location = relationship('Location', backref='post_media')
     
 
     def to_dict(self):

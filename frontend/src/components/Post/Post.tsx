@@ -40,7 +40,7 @@ export default function Post(): JSX.Element{
 
     return(
         
-        <div className="flex flex-col dark:bg-off-slate bg-white mx-auto mb-200 border dark:border-border-dark border-border-light rounded-sm w-90 mt-10">
+        <div className="flex flex-col dark:bg-off-slate bg-white mx-auto mb-200 border-1 dark:border-border-dark border-border-light rounded-sm w-90 mt-10">
             
             {/* Images and Header container */}
             <div className="relative flex flex-1">

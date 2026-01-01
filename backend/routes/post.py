@@ -4,11 +4,9 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.user import UserProfile
 from models.post import Post, PostMedia
-from models.location import Location
 from routes.auth_required_wrapper import admin_required
 from datetime import datetime, timezone
 from schemas.post_schema import post_schema,post_media_schema, ValidationError, partial_schema
-from schemas.location_schema import location_schema
 from util.photo_processing import photo_processing, get_decimal_coordinates
 from util.validation import photo_validation
 from util.storage import upload_to_r2
@@ -292,114 +290,5 @@ def create_post():
     current_user = get_jwt_identity()
     current_user_profile = UserProfile.query.get(current_user)
 
-    if current_user_profile is None:
-        return jsonify({'error': 'Profile not found'}), 404
     
-    if current_user_profile.is_deleted:
-        return jsonify({'error': 'Profile does not exist'}), 404
-    
-    if current_user_profile.is_banned:
-        return jsonify({'error':'Profile unavailable'}),404
-
-    data = request.get_json()
-    if not isinstance(data, dict):
-    # This handles None (no data) or a string (malformed data)
-        return jsonify({'error': 'Invalid or malformed data provided'}), 400
-
-    if data.get('photos') is None or data.get('location') is None or data.get('photo_count') is None:
-        return jsonify({'error':'Invalid data provided'}), 400
-    
-
-    post_name = data.get('name')
-    post_description = data.get('description')
-    accessibility = data.get('accessibility')
-    hashtags = data.get('hashtags', [])
-    photos = data.get('photos')
-    avg_location = data.get('location')
-    num_of_photos = data.get('photo_count')
-
-    try:
-
-        try:
-            data_to_load = {
-                "name": post_name, 
-                "refined_location": avg_location,
-                "description": post_description,
-                "total_num_of_photos": num_of_photos,
-                "accessibility": accessibility, 
-                "hashtags": hashtags
-            }
-            valid_post_data = post_schema.load(data_to_load, partial = True)
-        except ValidationError as error:
-            return jsonify({"error": error.messages}), 400
-
-        new_post = Post(
-            user_profile_id=current_user_profile.id,
-            name=valid_post_data.get('name'),
-            refined_location = valid_post_data.get('refined_location'),
-            description= valid_post_data.get('description'),
-            total_num_of_photos= valid_post_data.get('total_num_of_photos'),
-            accessibility= valid_post_data.get('accessibility'),
-            hashtags=valid_post_data.get('hashtags',[]),
-            date_posted = datetime.now(timezone.utc)
-        )
-        db.session.add(new_post)
-        db.session.flush()
-
-
-        for position, pht_data in enumerate(photos, start=1):
-            media_data_to_load = {
-                "thumbnail_url": pht_data.get('thumbnail_url'),
-                "thumb_media_type": 'photo',
-                "photo_url": pht_data.get('photo_url'),
-                "photo_type": 'photo',
-                "width": pht_data.get('width'),
-                "height": pht_data.get('height')
-            }
-            try:
-                valid_media_data = post_media_schema.load(media_data_to_load, partial = True)
-            except ValidationError as error:
-                return jsonify({"error": error.messages}), 400
-
-            post_media = PostMedia(
-                post_id=new_post.post_id,
-                uploaded_by=current_user_profile.id,
-                index = position,
-                photo_url=valid_media_data.get('photo_url'),     
-                thumbnail_url=valid_media_data.get('thumbnail_url'),
-                photo_type='photo',
-                thumb_media_type='photo',
-                width=valid_media_data.get('width'),
-                height=valid_media_data.get('height'),
-            )
-            db.session.add(post_media)
-            db.session.flush()
-
-            try:
-
-                location_data_to_load = {
-                    "latitude": pht_data.get('latitude'),
-                    "longitude": pht_data.get('longitude'),
-                    "altitude": pht_data.get('altitude') 
-                }
-                valid_location_data = location_schema.load(location_data_to_load, partial = True)
-            except ValidationError as error:
-                return jsonify({"error": error.messages}), 400
-
-            location = Location(
-                post_media_id=post_media.post_media_id,
-                latitude=valid_location_data.get('latitude'),
-                longitude=valid_location_data.get('longitude'),
-                altitude=valid_location_data.get('altitude'),
-            )
-            db.session.add(location)
-
-
-        UserProfile.query.filter_by(id = current_user_profile.id).update({'post_count': UserProfile.post_count + 1}, synchronize_session=False)
-        
-        db.session.commit()
-        return post_schema.dump(new_post), 201
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': f'Failed to create post: {str(e)}'}), 500
 

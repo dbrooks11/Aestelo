@@ -5,9 +5,7 @@ from exstensions import db
 from models.user import UserProfile
 from models.visit import Visit, VisitMedia
 from models.post import Post
-from models.location import Location
 from schemas.visit_schema import visit_schema, visit_media_schema,partial_schema,ValidationError
-from schemas.location_schema import location_schema
 from routes.auth_required_wrapper import admin_required
 from util.photo_processing import photo_processing, get_decimal_coordinates
 from util.validation import photo_validation
@@ -370,28 +368,18 @@ def create_visit(post_id):
             db.session.add(new_visit_media)
             db.session.flush()
 
-            try:
+           
 
-                #cehcks location data and makes location info database
-                location_data_to_load = {
-                    "latitude": pht_data.get('latitude'),
-                    "longitude": pht_data.get('longitude'),
-                    "altitude": pht_data.get('altitude'),
-                }
+            #cehcks location data and makes location info database
+            location_data_to_load = {
+                "latitude": pht_data.get('latitude'),
+                "longitude": pht_data.get('longitude'),
+                "altitude": pht_data.get('altitude'),
+            }
 
-                valid_location = location_schema.load(location_data_to_load, partial = True)
-            except ValidationError as error:
-                return jsonify({"error": error.messages}), 400
             
 
-            location = Location(
-                visit_media_id = new_visit_media.visit_media_id,
-                latitude = valid_location.get('latitude'),
-                longitude = valid_location.get('longitude'),
-                altitude = valid_location.get('altitude')
-            )
-            db.session.add(location)
-
+    
         UserProfile.query.filter_by(id = current_user_profile.id).update({'visit_count': UserProfile.visit_count + 1}, synchronize_session=False)
 
         Post.query.filter_by(post_id = post_id).update({'total_visits': Post.total_visits + 1}, synchronize_session=False)

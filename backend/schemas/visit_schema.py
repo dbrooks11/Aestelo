@@ -2,6 +2,7 @@
 from exstensions import ma
 from models.visit import Visit, VisitMedia
 from marshmallow import validates, ValidationError, fields, validate, pre_load
+from geoalchemy2.shape import to_shape
 class VisitSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Visit
@@ -9,7 +10,7 @@ class VisitSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('is_deleted', 'deleted_at', 'is_removed', 'num_reports', 'deleted_by')  
    
     visit_id = fields.Int(dump_only=True)
-    refined_location = fields.Dict(required=True)
+    coordinates = fields.Method("get_coordinates")
     date_posted = fields.DateTime(dump_only=True)
     like_count = fields.Int(dump_only=True)
     share_count = fields.Int(dump_only=True)
@@ -58,6 +59,17 @@ class VisitSchema(ma.SQLAlchemyAutoSchema):
             if isinstance(value, str):
                 data[key] = value.strip()
         return data
+    
+    def get_coordinates(self, obj):
+        if not obj.coordinates:
+            return None
+        
+        # to_shape converts the binary WKBElement to a Python Shapely object
+        point = to_shape(obj.coordinates)
+        return {
+            "latitude": point.y,
+            "longitude": point.x
+        }
 
 class VisitMediaSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

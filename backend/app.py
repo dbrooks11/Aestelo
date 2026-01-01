@@ -6,11 +6,12 @@ from config import Config, configure_logging
 from colorama import init
 import models
 from models.token_blacklist import TokenBlackList
-from exstensions import db, ma, jwt, limiter,mg
+from exstensions import db, ma, jwt, limiter,mg, celery_init_app
 from routes import register_blueprints
 from flask import g, request
 from PIL import Image
 import time
+import os
 
 
 
@@ -21,8 +22,15 @@ def create_app():
     init(autoreset=True)
     app.json.sort_keys = False
     configure_logging(app)
+    app.config.from_mapping(
+        CELERY=dict(
+            broker_url=os.getenv('CELERY_BROKER_URL'),
+            result_backend=os.getenv('CELERY_RESULT_BACKEND'),
+            task_ignore_result=True,
+        ),
+    )
 
-
+    celery_init_app(app)
     db.init_app(app)
     ma.init_app(app)
     jwt.init_app(app)
@@ -77,8 +85,11 @@ def create_app():
         print(f"⏱️ {request.method} {request.path} took {duration}s/{duration_ms}ms")
         return response
 
-    # Create tables
+ 
     with app.app_context():
+        #Celery
+
+
 
         #jwt hanlders
         @jwt.expired_token_loader

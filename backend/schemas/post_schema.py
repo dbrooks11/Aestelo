@@ -2,6 +2,7 @@ from exstensions import ma
 from marshmallow import (fields, validates, 
                          ValidationError, validate, pre_load)
 from models.post import Post,PostMedia
+from geoalchemy2.shape import to_shape
 
 class PostSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -11,7 +12,7 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
 
     user_profile_id = fields.UUID(dump_only=True)
     post_id = fields.Integer(dump_only=True)
-    refined_location = fields.Dict()
+    coordinates = fields.Method("get_coordinates")
     date_posted = fields.DateTime(dump_only=True)
     total_num_of_photos = fields.Integer(validate=[(validate.Range(min=0,max=5))])
     total_visits = fields.Integer(dump_only = True)
@@ -69,7 +70,16 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
                 data[key] = value.strip()
         return data
 
-
+    def get_coordinates(self, obj):
+        if not obj.coordinates:
+            return None
+        
+        # to_shape converts the binary WKBElement to a Python Shapely object
+        point = to_shape(obj.coordinates)
+        return {
+            "latitude": point.y,
+            "longitude": point.x
+        }
 class PostMediaSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = PostMedia
