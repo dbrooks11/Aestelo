@@ -1,12 +1,13 @@
 from PIL import ExifTags, ImageOps, Image
 from PIL.Image import DecompressionBombError
+from pillow_heif import register_heif_opener
 import io
 from flask import current_app
 
 
 #TODO: Put name for compressed files. Use users ID from route and a label (profile photo, banner, etc)
 
-
+register_heif_opener()
 
 def get_decimal_coordinates(gps_info):
 
@@ -145,8 +146,8 @@ def photo_processing_one_img(img_file, is_banner: bool, current_user_id: str):
     try:
         img = Image.open(img_file)
 
-        if img.format not in ('JPEG', 'PNG', 'HEIF'):
-            error.append(f"Invalid format: {img.format}. Must be JPEG, PNG, or HEIF")
+        if img.format not in ('JPEG', 'PNG', 'HEIF', 'HEIC'):
+            error.append(f"Invalid format: {img.format}. Must be JPEG, PNG, HEIC, or HEIF")
             return error
     
     

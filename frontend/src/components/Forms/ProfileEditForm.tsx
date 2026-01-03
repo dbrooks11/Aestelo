@@ -1,12 +1,13 @@
 import { useState, useEffect,type Dispatch, type JSX, type SetStateAction, type ChangeEvent } from "react";
 import cn from "../../util/tailwind_merger";
 import { type ProfileDataType } from "../../pages/ProfilePage";
-import { LoaderCircle, PencilLine } from 'lucide-react'
+import { LoaderCircle, PencilLine, X } from 'lucide-react'
 import toast from "react-hot-toast";
 import { Monitor, Smartphone, Upload } from "lucide-react";
 import { protectedInstance } from "../../util/axios_api_helpers";
 import { useFormStatus } from "react-dom";
 import { AxiosErrorHelper } from "../../util/axios_api_helpers";
+import Modal from "../Modal";
 
 type EditProfileFormProps = {
   profile_banner_url: ProfileDataType['profile_banner_url']
@@ -15,6 +16,7 @@ type EditProfileFormProps = {
   bio: ProfileDataType['bio']
   setProfileData: Dispatch<SetStateAction<ProfileDataType | null>>
   setShowModal: (value: boolean) => void
+  showModal: boolean
 }
 
 const editProfileFormScreenGuideButtonStyle = 'flex gap-2 py-1 px-2 items-center rounded-md hover:dark:text-text-main-dark hover:text-text-main-light cursor-pointer'
@@ -25,7 +27,7 @@ const editProfileFormTinyText = 'text-[10px] text-text-muted-light dark:text-tex
 
 export default function EditProfileForm({
   username, bio, profile_photo_url, profile_banner_url,
-  setProfileData, setShowModal }: EditProfileFormProps): JSX.Element {
+  setProfileData, setShowModal, showModal }: EditProfileFormProps): JSX.Element {
   
   const [usernameIndicator, setUsernameIndictor] = useState<boolean>(false)
   const [charCounterBio, setCharCounterBio] = useState<number>(bio.length) 
@@ -143,13 +145,35 @@ export default function EditProfileForm({
 
 
 
-  return (
-    <form 
-      action={handleEditProfileFormClick} 
-      className='flex flex-col flex-1 items-center gap-10 px-6 overflow-y-scroll text-white'
-      aria-label="Edit Profile Form"
-    >
-          
+  return (   
+    <Modal showModal={showModal} closeModal={() => setShowModal(false)}>
+      
+      {/* Form Header */}
+      <div className="flex justify-between dark:bg-bg-secondary-dark p-3 border-border-color-light dark:border-border-color-dark border-b rounded-t-2xl">
+        <h2 
+          id="modal-title" 
+          className="justify-center items-center font-semibold dark:text-white text-2xl"
+        >
+          Edit Profile
+        </h2>
+        
+        <button 
+          onClick={() => setShowModal(false)} 
+          className="dark:hover:bg-accents-deep/40 p-1 rounded-full w-8 h-8 text-black dark:text-white transition-colors hover:cursor-pointer"
+          aria-label="Close Modal"
+        >
+          <X className="w-full h-full" aria-hidden="true" />
+        </button>
+      </div>
+
+      {/* Form Section */}
+      <section className="flex flex-col flex-1 w-full overflow-y-hidden">
+        <form 
+          action={handleEditProfileFormClick} 
+          className='flex flex-col flex-1 items-center gap-10 px-6 overflow-y-scroll text-white'
+          aria-label="Edit Profile Form"
+        >
+              
           {/* Profile Picture */}
           <div className='flex items-center gap-[5%] md:gap-45 mt-6 w-full'>
             <label htmlFor='profile_photo' className={editProfileFormLabelStyle}>Profile Picture</label>
@@ -177,7 +201,7 @@ export default function EditProfileForm({
               name='profile_photo'
               id='profile_photo'
               className='hidden'
-              accept='image/png, image/jpeg'
+              accept='image/png, image/jpeg, image/heic, image/heif'
               onChange={handleProfilePhotoFileChange}
               multiple={true} 
             ></input>
@@ -256,7 +280,7 @@ export default function EditProfileForm({
               type='file'
               name='profile_banner'
               id='profile_banner'
-              accept="image/png, image/jpeg"
+              accept="image/png, image/jpeg, image/heic, image/heif"
               className="hidden"
               onChange={handleProfileBannerFileChange}
             ></input>
@@ -323,6 +347,8 @@ export default function EditProfileForm({
             </button>
             <SubmitButton/>
           </div>
-    </form>
+        </form>
+      </section>
+    </Modal>
   )
 }

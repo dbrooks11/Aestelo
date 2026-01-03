@@ -8,9 +8,8 @@ import ProfileHeader from '../components/Profile/ProfileHeader'
 import ProfileBanner from '../components/Profile/ProfileBanner'
 import ProfileInfo from '../components/Profile/ProfileInfo'
 import ProfileTabs from '../components/Profile/ProfileTabs'
-import EditProfileForm from '../components/Profile/ProfileEditForm'
+import EditProfileForm from '../components/Forms/ProfileEditForm'
 import type { AxiosResponse } from 'axios'
-import Modal from '../components/Modal'
 import ToasterCustom from '../components/Toast'
 import toast from 'react-hot-toast'
 import { useTheme } from '../context/ThemeContext'
@@ -58,11 +57,6 @@ export default function ProfilePage(): JSX.Element {
   const [showModal, setShowModal] = useState<boolean>(false)
   const banner = `${theme === 'light' ? DefaultBannerLight : DefaultBannerDark}`
 
-  
-
-  const closeModal = () =>{
-        setShowModal(false)
-    }
 
   useEffect(() => {
     const profile = async () => {
@@ -115,16 +109,15 @@ export default function ProfilePage(): JSX.Element {
         />
         
         <ProfileTabs/>
-        <Modal showModal={showModal} closeModal={closeModal} title='Edit Profile'>
-          <EditProfileForm
-            profile_banner_url={profileData?.profile_banner_url ? profileData.profile_banner_url : banner}
-            profile_photo_url={profileData?.profile_photo_url ? profileData.profile_photo_url : DefaultPhoto}  
-            username = {profileData?.username ? profileData.username : ""} 
-            bio = {profileData?.bio ? profileData.bio : ""}
-            setProfileData={setProfileData}
-            setShowModal={setShowModal}
-          />
-        </Modal>
+        <EditProfileForm
+          profile_banner_url={profileData?.profile_banner_url ? profileData.profile_banner_url : banner}
+          profile_photo_url={profileData?.profile_photo_url ? profileData.profile_photo_url : DefaultPhoto}  
+          username = {profileData?.username ? profileData.username : ""} 
+          bio = {profileData?.bio ? profileData.bio : ""}
+          setProfileData={setProfileData}
+          setShowModal={setShowModal}
+          showModal={showModal}
+        />
         <ToasterCustom toasterId='profile'/>
       </main>: <ProfileLoadingSkeleton/>}
     </>

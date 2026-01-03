@@ -3,12 +3,13 @@ from botocore.client import Config, ClientError
 from flask import current_app
 from datetime import datetime, timezone
 import secrets
+import os
 
-s3_client = boto3.client(
+s3 = boto3.client(
         's3',
-        endpoint_url=current_app.config['R2_ENDPOINT_URL'],
-        aws_access_key_id=current_app.config['R2_ACCESS_KEY_ID'],
-        aws_secret_access_key=current_app.config['R2_SECRET_ACCESS_KEY'],
+        endpoint_url=os.environ.get('R2_ENDPOINT_URL'),
+        aws_access_key_id=os.environ.get('R2_ACCESS_KEY_ID'),
+        aws_secret_access_key=os.environ.get('R2_SECRET_ACCESS_KEY'),
         region_name='auto',
         config=Config(signature_version='s3v4')
         )
@@ -26,7 +27,7 @@ def upload_to_r2(file_obj, user_id: str, folder: str):
     
         file_obj.seek(0)
         
-        s3_client.upload_fileobj(
+        s3.upload_fileobj(
             file_obj,
             bucket,
             unique_filename,
@@ -49,7 +50,7 @@ def delete_file_r2(file_path):
     bucket = current_app.config['R2_BUCKET_NAME']
 
     try:
-        s3_client.delete_object(Bucket=bucket, Key=file_path)
+        s3.delete_object(Bucket=bucket, Key=file_path)
         return True
     except ClientError as ce:
         current_app.logger.error(f"R2 Deletion Failed: {ce}")

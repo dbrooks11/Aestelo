@@ -35,7 +35,7 @@ const profileMenuLinksStyle = "flex items-center justify-center gap-2 p-2 border
 
 const profileMenuIconsStyle = ""
 
-
+// TODO: update profile menu linkes
 const menuLinks: Array<MenuLinks> = [
     {
         link: "/",
@@ -72,7 +72,6 @@ export default function ProfileHeader(props: ProfileHeaderProps): JSX.Element{
             if(items.link.includes('/logout') || (items.label.toLowerCase() == 'logout')){
                 return(
                     <div className="flex justify-between md:justify-center" key={items.label}>
-                      <ThemeButton className={`${profileHeaderButtonStyle} flex md:hidden`}/>
                       <button title={items.label} onClick={logout} className={items.className}>{items.icon}</button>
                     </div>
                 )
@@ -177,7 +176,7 @@ export default function ProfileHeader(props: ProfileHeaderProps): JSX.Element{
             {/* Hamburger menu */}
             <div className="flex gap-4">
                 {/* Theme Toggle (Hidden on mobile) */}
-                <div className="hidden md:flex">
+                <div className="sm:hidden flex">
                     <ThemeButton className={profileHeaderButtonStyle} />
                 </div>
 

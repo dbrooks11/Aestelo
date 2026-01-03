@@ -6,11 +6,12 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./backend:/app  # SYNC: Maps your local folder to container folder
+      - ./backend:/app
+      - temp_uploads:/app/uploads_tmp 
     environment:
       - FLASK_APP=app.py
       - FLASK_DEBUG=1
-      # Pass your secret keys here or use env_file
+      - UPLOAD_FOLDER=/app/uploads_tmp 
     env_file:
       - ./backend/env_backend/.env.backend_cloudflare
       - ./backend/env_backend/.env.backend_supabase
@@ -21,22 +22,25 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-size: "10m"       
+        max-size: "10m"
         max-file: "3"
     depends_on:
       - redis
 
   #---- CELERY ----#
   celery_worker:
-    build: .
-    command: celery -A make_celery.celery_app worker --loglevel=info
+    build: ./backend
+    command: python -m watchdog.watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A make_celery.celery_app worker --loglevel=info
     env_file:
       - ./backend/env_backend/.env.backend_celery
     depends_on:
       - backend
       - redis
     volumes:
-      - .:/app
+      - ./backend:/app
+      - temp_uploads:/app/uploads_tmp 
+    environment:
+      - UPLOAD_FOLDER=/app/uploads_tmp
 
   # --- REACT FRONTEND ---
   frontend:
@@ -45,8 +49,8 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      - ./frontend:/app      # SYNC: Maps local folder to container
-      - node_modules:/app/node_modules   # TRICK: Prevents local node_modules from overriding container's
+      - ./frontend:/app
+      - node_modules:/app/node_modules 
     depends_on:
       - backend
     env_file:
@@ -54,13 +58,20 @@ services:
   
   #--- REDIS ---#
   redis:
-    image: redis:alpine
+    image: redis/redis-stack:latest
+    container_name: aestelo_redis_stack
     ports:
       - "6379:6379"
+      - "8001:8001"
+    volumes:
+      - redis_data:/data 
   
   flower:
-    image: mher/flower
+    build: ./backend
+    container_name: aestelo_flower
+    
     command: celery -A make_celery.celery_app flower --port=5555
+    
     ports:
       - "5555:5555"
     env_file:
@@ -68,8 +79,16 @@ services:
     depends_on:
       - redis
       - celery_worker
+    volumes:
+      - ./backend:/app
 
 volumes:
-  node_modules:
 
-  
+  node_modules:
+    name: aestelo_frontend_node_modules
+
+  temp_uploads:
+    name: aestelo_backend_temp_uploads
+
+  redis_data:
+    name: aestelo_redis_data

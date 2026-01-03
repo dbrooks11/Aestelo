@@ -1,20 +1,21 @@
 import { type JSX, useEffect, type ReactNode, useRef } from "react";
-import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ToasterCustom from "./Toast";
+import cn from "../util/tailwind_merger";
 
 type ModalProps = {
     showModal: boolean
     closeModal: () => void
-    title?: string
     closeOnBgClick?: boolean
     children: ReactNode
+    className?: string
 }
 
 
-export default function Modal({showModal, closeModal, title, closeOnBgClick ,children}: ModalProps): JSX.Element {    
+export default function Modal({showModal, closeModal, closeOnBgClick ,
+  children, className}: ModalProps): JSX.Element {    
     const dialogRef = useRef<HTMLDialogElement>(null)
-    
+
     useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
@@ -48,32 +49,9 @@ export default function Modal({showModal, closeModal, title, closeOnBgClick ,chi
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0 }}
-            className="flex flex-col bg-bg-modal-light dark:bg-bg-modal-dark mx-auto my-20 border border-border-color-light dark:border-border-color-dark rounded-2xl max-w-3xl h-140 overflow-hidden"
+            className={cn(`flex flex-col bg-bg-modal-light dark:bg-bg-modal-dark mx-auto my-20 border border-border-color-light dark:border-border-color-dark rounded-xl max-w-3xl h-140 overflow-hidden`, className)}
           >
-
-            {/* Header Section */}
-            <div className="flex justify-between dark:bg-bg-secondary-dark p-3 border-border-color-light dark:border-border-color-dark border-b rounded-t-2xl">
-              <h2 
-                id="modal-title" 
-                className="justify-center items-center font-semibold dark:text-white text-2xl"
-              >
-                {title}
-              </h2>
-              
-              <button 
-                onClick={closeModal} 
-                className="dark:hover:bg-accents-deep/40 p-1 rounded-full w-8 h-8 text-black dark:text-white transition-colors hover:cursor-pointer"
-                aria-label="Close Modal"
-              >
-                <X className="w-full h-full" aria-hidden="true" />
-              </button>
-            </div>
-
-            {/* Content Section */}
-            <section className="flex flex-col flex-1 w-full overflow-y-hidden">
               {children}
-            </section>
-            
           </motion.div>
         ) : null}
       </AnimatePresence>

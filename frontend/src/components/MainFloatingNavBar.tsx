@@ -1,58 +1,20 @@
-import { useState, type JSX, type ReactElement } from "react";
-import { ChevronUp, House, Search, SquarePlus, Map, User } from "lucide-react";
+import { useState, type ComponentType, type JSX, type SVGProps } from "react";
+import { ChevronUp, House, Search, SquarePlus, Map, User, Sun, Moon, type LucideProps } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 import cn from "../util/tailwind_merger";
-import { ThemeButton } from "../hooks/ThemeProvider";
+import { useTheme } from "../context/ThemeContext";;
+
+type IconComponent = ComponentType<LucideProps | SVGProps<SVGSVGElement>>
 
 type NavButtonsType = {
     order: number
     label: string
-    icon: ReactElement
-    linkTo: string
-    className?: string // Optional
+    icon: IconComponent
+    action?: () => void
+    linkTo?: string
+    className?: string 
 }
-
-const navButtons: Array<NavButtonsType> = [
-    {
-        order: 1,
-        label: 'Change Theme',
-        icon: <ThemeButton 
-                    className="hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 hover:text-black dark:hover:text-white dark:text-gray-400"
-                />,
-        linkTo: ''
-    },
-    {
-        order: 2,
-        label: 'Map',
-        icon: <Map className="w-6 h-6" />, 
-        linkTo: '/map', 
-    },
-    {
-        order: 3,
-        label: 'Search',
-        icon: <Search className="w-6 h-6" />,
-        linkTo: '/explore',
-    },
-    {
-        order: 4,
-        label: 'Post',
-        icon: <SquarePlus className="w-6 h-6" />,
-        linkTo: '/create',
-    },
-    {
-        order: 5,
-        label: 'Feed',
-        icon: <House className="w-6 h-6" />,
-        linkTo: '/post/feed',
-    },
-    {
-        order: 6,
-        label: 'Profile',
-        icon: <User className="w-6 h-6" />,
-        linkTo: '/profile/me',
-    }
-]
 
 const containerVariants: Variants = {
     hidden: { 
@@ -88,9 +50,50 @@ const itemVariants: Variants = {
     visible: { opacity: 1, y: 0, scale: 1 }
 };
 
-export default function MainFloatingNavBar(): JSX.Element {
+export default function MainFloatingNavBar({openModal}: {openModal: () => void}): JSX.Element {
+    const {theme, toggleTheme} = useTheme()
     const location = useLocation()
     const [isNavOpen, setIsNavOpen] = useState<boolean>(false)
+
+
+    const navButtons: Array<NavButtonsType> = [
+        {
+            order: 1,
+            label: 'Change Theme',
+            icon: theme === 'light' ? Sun : Moon,
+            action: toggleTheme
+        },
+        {
+            order: 2,
+            label: 'Map',
+            icon: Map, 
+            linkTo: '/map', 
+        },
+        {
+            order: 3,
+            label: 'Search',
+            icon: Search,
+            linkTo: '/explore',
+        },
+        {
+            order: 4,
+            label: 'Post',
+            icon: SquarePlus,
+            action: openModal
+        },
+        {
+            order: 5,
+            label: 'Feed',
+            icon: House,
+            linkTo: '/post/feed',
+        },
+        {
+            order: 6,
+            label: 'Profile',
+            icon: User,
+            linkTo: '/profile/me',
+        }
+    ]   
 
     const handleNavButtonLinks = (): JSX.Element => {
         const orderLinks = navButtons.sort((nav1, nav2) => nav1.order - nav2.order)
@@ -99,12 +102,12 @@ export default function MainFloatingNavBar(): JSX.Element {
             <>
                 {orderLinks.map((nav) => {
                     const isActive = location.pathname === nav.linkTo
-                    const isTheme = nav.label.toLowerCase().includes('theme')
+
                     return (
                         <motion.div
                             key={nav.order}
                             variants={itemVariants}
-                            className={`${isTheme && 'border-b dark:border-b-neutral-700 border-b-neutral-300 pb-1'} group relative`} 
+                            className={` group relative`} 
                         >
                             {/* Tooltip Label (Left side) */}
                             <div 
@@ -114,11 +117,28 @@ export default function MainFloatingNavBar(): JSX.Element {
                                 {/* Tiny arrow pointing right */}
                                 <div className="top-1/2 -right-1 absolute bg-white dark:bg-neutral-900 border-gray-100 dark:border-white/10 border-t border-r w-2 h-2 rotate-45 -translate-y-1/2"></div>
                             </div>
+                            {/* TODO: fix theme button in menu */}
 
-                            {isTheme && nav.icon}
-
-                            {!isTheme && <Link
-                                to={nav.linkTo}
+                            {nav.action !== undefined ? 
+                            <button
+                                title={nav.label}
+                                aria-label={nav.label}
+                                aria-current={isActive ? 'page' : undefined}
+                                className={cn(
+                                    "flex justify-center items-center rounded-full w-12 h-12 group-hover:scale-110 transition-all duration-200 cursor-pointer",
+                                    isActive 
+                                        ? "bg-accents-deep text-white shadow-[0_0_10px_rgba(200,90,94,0.5)]" 
+                                        : "text-gray-500 hover:text-black hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/10",
+                                    nav.className
+                                )}
+                                onClick={() => {
+                                    if(nav.action !== undefined) nav.action()
+                                }} 
+                            >
+                                <nav.icon className="w-6 h-6"></nav.icon>
+                            </button> :
+                            <Link
+                                to={nav.linkTo ? nav.linkTo : ''}
                                 title={nav.label}
                                 aria-label={nav.label}
                                 aria-current={isActive ? 'page' : undefined}
@@ -129,9 +149,8 @@ export default function MainFloatingNavBar(): JSX.Element {
                                         : "text-gray-500 hover:text-black hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/10",
                                     nav.className
                                 )}
-                                onClick={() => setIsNavOpen(false)} 
                             >
-                                {nav.icon}
+                                <nav.icon></nav.icon>
                             </Link>}
                         </motion.div>
                     )
