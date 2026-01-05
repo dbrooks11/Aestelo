@@ -36,7 +36,7 @@ export default function PostDescripton(): JSX.Element{
                         }
                     }}
                     >
-                            <p>
+                            <p className="text-shadow-2xs">
                                 Breastfeeding is good for babies and moms. Infants that are breastfed get antibodies from their mothers against common illnesses. Breastfed babies have less chance of being obese as an adult. Breastfeeding a baby lets the infant-mother pair bond in a very unique way. Mother’s who breastfeed lower their chances of developing breast cancer. Usually, mothers who breastfeed lose their pregnancy weight more quickly and easily. The benefits of breastfeeding are numerous.
                             </p>
                 </motion.div>: 

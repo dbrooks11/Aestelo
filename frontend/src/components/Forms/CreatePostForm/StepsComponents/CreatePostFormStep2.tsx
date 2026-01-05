@@ -1,0 +1,229 @@
+import { useEffect, useRef, useState, type JSX } from "react";
+import { type UploadedPhotosState, type StepState, type PreviewPhotosState} from "../CreatePostForm";
+import { Scan, LoaderCircle, Trash2, Plus } from "lucide-react";
+import { fileCompressionForPreview } from "../../../../util/client_image_compression";
+import ScrollContainer from "react-indiana-drag-scroll";
+
+
+type Step2 = {
+    setStep: (value: StepState) => void
+    setUploadedPhotos: (value: UploadedPhotosState) => void
+    uploadedPhotos: UploadedPhotosState
+    previewPhotos:PreviewPhotosState
+    setPreviewPhotos: (value: PreviewPhotosState) => void
+    setIsLoading: (value:boolean) => void
+    isLoading: boolean
+}
+
+export default function CreatePostFormStepTwo({setStep, setUploadedPhotos, uploadedPhotos, 
+    previewPhotos, setPreviewPhotos, setIsLoading, isLoading}: Step2):JSX.Element{
+    
+    const [isLoadingAddedPhotos, setIsLoadingAddedPhotos] = useState<boolean>(false)
+    const [deletedPhotos, setDeletedPhotos] = useState<Array<number>>([])
+    const [isDeleting, setIsDeleting] = useState<boolean>(false)
+    const [currentPhoto, setCurrentPhoto] = useState<number>(0)
+    const [aspectRatio, setAspectRatio] = useState<'Original' | '1/1' | '4/5'>('Original')
+
+    const scrollRef = useRef<HTMLElement>(null)
+    
+    useEffect(() => {
+        const element: HTMLElement | null = scrollRef.current
+        if (!element) return
+
+        const handleWheel = (e: WheelEvent): void => {
+            if (e.deltaY !== 0) {
+            e.preventDefault()
+            
+            element.scrollLeft += e.deltaY
+            }
+        };
+        element.addEventListener('wheel', handleWheel, { passive: false })
+        return () => element.removeEventListener('wheel', handleWheel)
+    }, [])
+
+
+    
+
+    const showPreviews = () => {
+        if(previewPhotos){
+            const photoPreviewEl = previewPhotos.map((photo, index) => {
+                return(
+                    <div 
+                        className="relative rounded-sm h-full aspect-4/5 overflow-hidden cursor-pointer" 
+                        onClick={() => {
+                            if(isDeleting) togglePhotoDeletion(index)
+                            else setCurrentPhoto(index)
+                        }}
+                        key={index}
+                    >
+                        <img 
+                            loading="lazy"
+                            decoding="async"
+                            src={photo} 
+                            className="w-full h-full object-cover"
+                            
+                            >
+                        </img>
+                        <div 
+                            className={`${isDeleting && deletedPhotos.includes(index) ? 'bg-red-800/70' : 'bg-black/60'} top-1 left-1 absolute flex justify-center items-center  rounded-full w-6 h-6 text-white pointer-events-none`}
+                        >
+                            {!isDeleting && index + 1}
+                        </div>
+                    </div>
+                )
+            })
+            return photoPreviewEl
+        }
+    }
+
+    const handleAspectRatio = () => {
+        if(aspectRatio === 'Original') {
+            setAspectRatio('1/1')
+        }else if(aspectRatio === '1/1'){
+            setAspectRatio('4/5')
+        } 
+        else {
+            setAspectRatio('Original')
+        }
+    }
+
+    const showAspectAlias = () => {
+        if(aspectRatio === '1/1') {
+            return 'Square'
+        }else if(aspectRatio === '4/5'){
+            return 'Portrait'
+        } 
+        else {
+            return 'Original'
+        }
+    }
+
+    const togglePhotoDeletion = (index: number) => {
+        if(deletedPhotos.includes(index)){
+            setDeletedPhotos(prev => prev.filter(id => id !== index))
+        }
+        else{
+            setDeletedPhotos(prev => [...prev, index])
+        }
+    }
+
+    const handlePhotoDeletion = () => {
+        if(deletedPhotos.length === 0){
+            setIsDeleting(false)
+            return
+        }
+
+        const currentFiles = Array.from(uploadedPhotos || [])
+        const filesToKeep = currentFiles.filter((_, index) => !deletedPhotos.includes(index))
+
+        const previewsToKeep = previewPhotos.filter((url, index) => {
+            if(deletedPhotos.includes(index)){
+                if(url){
+                    URL.revokeObjectURL(url)
+                    return false
+                }
+            }
+            return true
+        })
+
+        setUploadedPhotos(arrayToFileList(filesToKeep))
+        setPreviewPhotos(previewsToKeep)
+
+        setDeletedPhotos([])
+        setIsDeleting(false)
+        setCurrentPhoto(0)
+    }
+
+    const arrayToFileList = (files: Array<File>) => {
+        const newArray = new DataTransfer()
+        files.forEach(file => newArray.items.add(file))
+        return newArray.files
+    }
+
+
+    return(
+        <div className="flex flex-col m-4 border border-white/10 rounded-sm w-auto">
+            <div className="relative flex justify-center items-center bg-black p-4 h-86">
+                {!isLoading ?
+                 <>
+                    <img 
+                        style={{ aspectRatio: aspectRatio !== 'Original' ? aspectRatio : undefined}}
+                        className= "shadow-xl max-h-full object-cover"
+                        src={previewPhotos && previewPhotos[currentPhoto]}
+                    ></img>
+                    <button 
+                        type="button"
+                        onClick={handleAspectRatio}
+                        className="top-2 left-2 absolute flex justify-center items-center gap-2 px-2 py-1 border border-white/15 rounded-full h-8 font-medium text-white text-xs cursor-pointer"
+                    >
+                        <Scan size={15}/>
+                        {showAspectAlias()}
+                    </button>
+                    {isDeleting ? (
+                            <div className="bottom-4 slide-in-from-bottom-2 absolute flex gap-2 animate-in fade-in">
+                                <button
+                                    onClick={() => {
+                                        setIsDeleting(false);
+                                        setDeletedPhotos([]);
+                                    }}
+                                    className="bg-neutral-700 hover:bg-neutral-600 px-4 py-2 rounded-full font-bold text-white text-xs"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handlePhotoDeletion}
+                                    className="flex items-center gap-2 bg-red-600 hover:bg-red-500 px-4 py-2 rounded-full font-bold text-white text-xs"
+                                >
+                                    <Trash2 size={14}/> Delete ({deletedPhotos.length})
+                                </button>
+                            </div>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={() => setIsDeleting(true)}
+                                className="right-2 bottom-2 absolute bg-neutral-800/80 hover:bg-red-900/50 p-3 border border-white/10 hover:border-red-500/50 rounded-full text-white transition-all cursor-pointer"
+                                title="Manage photos"
+                            >
+                                <Trash2 size={18}/>
+                            </button>
+                        )}
+                </>: <LoaderCircle className="stroke-white animate-spin"/>}
+                
+            </div>
+            <ScrollContainer innerRef={scrollRef} className="flex items-center border-white/10 border-t min-h-40 shrink-0">
+                {!isLoading ? <div className="flex justify-center items-center gap-4 mx-4 h-34">
+                    {showPreviews()}
+                    <label 
+                        htmlFor="new_photos"
+                        className="flex justify-center items-center border border-white/10 rounded-sm h-full aspect-4/5 overflow-hidden 
+                        text-white/70 hover:text-white cursor-pointer transition-colors"
+                    >
+                        {!isLoadingAddedPhotos ? <Plus/> : <LoaderCircle className="stroke-white mx-auto animate-spin"/>}
+                    </label>
+                    <input 
+                        type="file" 
+                        accept="image/png, image/jpeg, image/heic, image/heif"
+                        name="new_photos"
+                        id="new_photos"
+                        className="hidden"
+                        multiple
+                        onChange={(e) => {
+                            const newFiles = e.target.files
+                            if(newFiles && newFiles.length > 0){
+                                setUploadedPhotos((prev) => {
+
+                                const currentFiles = prev && Array.from(prev)
+                                const addedFiles = Array.from(newFiles)
+                                const newFileArray = [...currentFiles, ...addedFiles]
+                                return arrayToFileList(newFileArray)
+                                })
+                            fileCompressionForPreview(e.target.files, setIsLoadingAddedPhotos, setPreviewPhotos)
+                            }
+                        }}
+                    >
+                    </input>
+                </div>: <LoaderCircle className="stroke-white mx-auto animate-spin"/>}
+            </ScrollContainer>
+        </div>
+    )
+}

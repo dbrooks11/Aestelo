@@ -2,11 +2,12 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useState, type JSX,} from "react";
 import { useAuth } from "../../context/AuthContext";
 import MainFloatingNavBar from "../MainFloatingNavBar";
-import CreatePostForm from "../Forms/CreatePostForm";
+import CreatePostForm from "../Forms/CreatePostForm/CreatePostForm";
 
+export type CreatePostFormModalOpenType = boolean
 
 export default function ProtectedRoute(): JSX.Element{
-    const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState<boolean>(false)
+    const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState<CreatePostFormModalOpenType>(false)
     const {isAuthenticated, isLoading} = useAuth()
     const location = useLocation()
 
