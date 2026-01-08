@@ -77,7 +77,7 @@ export default function MainFloatingNavBar({openModal}: {openModal: () => void})
         },
         {
             order: 4,
-            label: 'Post',
+            label: 'Spot',
             icon: SquarePlus,
             action: openModal
         },

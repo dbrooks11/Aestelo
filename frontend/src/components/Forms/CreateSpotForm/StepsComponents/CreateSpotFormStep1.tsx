@@ -11,10 +11,7 @@ export type Step1 = {
 
 }
 
-
 export default function CreateSpotFormStepOne({setStep, setUploadedPhotos, setPreviewPhotos,setIsLoading}: Step1):JSX.Element{
-
-    
 
     // TODO: add drag and drop for photo reordering
     return(

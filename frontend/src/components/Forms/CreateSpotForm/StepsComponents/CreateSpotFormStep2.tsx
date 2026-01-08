@@ -1,22 +1,20 @@
 import { useEffect, useRef, useState, type JSX } from "react";
-import { type UploadedPhotosState, type StepState, type PreviewPhotosState} from "../CreateSpotForm";
+import { type UploadedPhotosState, type PreviewPhotosState} from "../CreateSpotForm";
 import { Scan, LoaderCircle, Trash2, Plus } from "lucide-react";
 import { fileCompressionForPreview } from "../../../../util/client_image_compression";
 import ScrollContainer from "react-indiana-drag-scroll";
 
 
-type Step2 = {
-    setStep: (value: StepState) => void
+type Step2Type = {
     setUploadedPhotos: (value: UploadedPhotosState) => void
     uploadedPhotos: UploadedPhotosState
     previewPhotos:PreviewPhotosState
     setPreviewPhotos: (value: PreviewPhotosState) => void
-    setIsLoading: (value:boolean) => void
     isLoading: boolean
 }
 
-export default function CreateSpotFormStepTwo({setStep, setUploadedPhotos, uploadedPhotos, 
-    previewPhotos, setPreviewPhotos, setIsLoading, isLoading}: Step2):JSX.Element{
+export default function CreateSpotFormStepTwo({setUploadedPhotos, uploadedPhotos, 
+    previewPhotos, setPreviewPhotos, isLoading}: Step2Type):JSX.Element{
     
     const [isLoadingAddedPhotos, setIsLoadingAddedPhotos] = useState<boolean>(false)
     const [deletedPhotos, setDeletedPhotos] = useState<Array<number>>([])
@@ -41,15 +39,13 @@ export default function CreateSpotFormStepTwo({setStep, setUploadedPhotos, uploa
         return () => element.removeEventListener('wheel', handleWheel)
     }, [])
 
-
-    
-
     const showPreviews = () => {
         if(previewPhotos){
             const photoPreviewEl = previewPhotos.map((photo, index) => {
                 return(
                     <div 
-                        className="relative rounded-sm h-full aspect-4/5 overflow-hidden cursor-pointer" 
+                        className={`${currentPhoto === index && 'scale-110 border-2 dark:border-accents-deep border-accents-primary'} 
+                        ${isDeleting && deletedPhotos.includes(index) && 'opacity-30'} relative rounded-sm h-full aspect-4/5 overflow-hidden cursor-pointer transition-all`} 
                         onClick={() => {
                             if(isDeleting) togglePhotoDeletion(index)
                             else setCurrentPhoto(index)
@@ -65,9 +61,9 @@ export default function CreateSpotFormStepTwo({setStep, setUploadedPhotos, uploa
                             >
                         </img>
                         <div 
-                            className={`${isDeleting && deletedPhotos.includes(index) ? 'bg-red-800/70' : 'bg-black/60'} top-1 left-1 absolute flex justify-center items-center  rounded-full w-6 h-6 text-white pointer-events-none`}
+                            className='top-1 left-1 absolute flex justify-center items-center bg-black/60 rounded-full w-6 h-6 text-white pointer-events-none'
                         >
-                            {!isDeleting && index + 1}
+                            {index + 1}
                         </div>
                     </div>
                 )
@@ -142,8 +138,8 @@ export default function CreateSpotFormStepTwo({setStep, setUploadedPhotos, uploa
 
 
     return(
-        <div className="flex flex-col m-4 border dark:border-white/10 border-neutral-200 rounded-sm w-auto">
-            <div className="relative flex justify-center items-center dark:bg-black bg-neutral-100 p-4 h-86">
+        <div className="flex flex-col m-4 border border-neutral-200 dark:border-white/10 rounded-sm w-auto">
+            <div className="relative flex justify-center items-center bg-neutral-100 dark:bg-black p-4 h-86">
                 {!isLoading ?
                  <>
                     <img 
@@ -154,25 +150,25 @@ export default function CreateSpotFormStepTwo({setStep, setUploadedPhotos, uploa
                     <button 
                         type="button"
                         onClick={handleAspectRatio}
-                        className="top-2 left-2 absolute flex justify-center items-center gap-2 px-2 py-1 border dark:border-white/15 border-neutral-200 rounded-full h-8 font-medium dark:text-white text-black text-xs cursor-pointer"
+                        className="top-2 left-2 absolute flex justify-center items-center gap-2 px-2 py-1 border border-neutral-200 dark:border-white/15 rounded-full h-8 font-medium text-black dark:text-white text-xs cursor-pointer"
                     >
                         <Scan size={15}/>
                         {showAspectAlias()}
                     </button>
                     {isDeleting ? (
-                            <div className="bottom-4 slide-in-from-bottom-2 absolute flex gap-2 animate-in fade-in">
+                            <div className="bottom-2 slide-in-from-bottom-2 absolute flex gap-2 animate-in fade-in">
                                 <button
                                     onClick={() => {
                                         setIsDeleting(false);
                                         setDeletedPhotos([]);
                                     }}
-                                    className="bg-neutral-800 hover:bg-neutral-600 px-4 py-2 rounded-full font-bold text-white text-xs"
+                                    className="bg-neutral-100 hover:bg-white hover:dark:bg-neutral-600 dark:bg-neutral-800 px-4 py-2 border border-neutral-200 dark:border-none rounded-full w-26 font-bold text-black dark:text-white text-xs transition-colors cursor-pointer"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handlePhotoDeletion}
-                                    className="flex items-center gap-2 bg-red-600 hover:bg-red-500 px-4 py-2 rounded-full font-bold text-white text-xs"
+                                    className="flex items-center gap-2 bg-red-700 hover:bg-red-600 px-4 py-2 rounded-full font-bold text-white text-xs transition-colors cursor-pointer"
                                 >
                                     <Trash2 size={14}/> Delete ({deletedPhotos.length})
                                 </button>
@@ -181,24 +177,23 @@ export default function CreateSpotFormStepTwo({setStep, setUploadedPhotos, uploa
                             <button
                                 type="button"
                                 onClick={() => setIsDeleting(true)}
-                                className="right-2 bottom-2 absolute bg-neutral-800/80 hover:bg-red-900/50 p-3 border border-white/10 hover:border-red-500/50 rounded-full text-white transition-all cursor-pointer"
-                                title="Manage photos"
+                                className="right-2 bottom-2 absolute bg-white hover:bg-red-500/50 hover:dark:bg-red-900/50 dark:bg-neutral-800/80 p-3 border border-neutral-300 hover:border-red-600/50 hover:dark:border-red-500/50 dark:border-white/10 rounded-full text-black dark:text-white transition-all cursor-pointe cursor-pointer"
+                                title="Delete photos"
                             >
                                 <Trash2 size={18}/>
                             </button>
                         )}
-                </>: <LoaderCircle className="dark:stroke-white mx-auto animate-spin stroke-neutral-400"/>}
+                </>: <LoaderCircle className="stroke-neutral-400 dark:stroke-white mx-auto animate-spin"/>}
                 
             </div>
-            <ScrollContainer innerRef={scrollRef} className="flex items-center dark:border-white/10 border-neutral-200 border-t min-h-40 shrink-0">
+            <ScrollContainer innerRef={scrollRef} className="flex items-center border-neutral-200 dark:border-white/10 border-t min-h-40 shrink-0">
                 {!isLoading ? <div className="flex justify-center items-center gap-4 mx-4 h-34">
                     {showPreviews()}
                     <label 
                         htmlFor="new_photos"
-                        className="flex justify-center items-center border dark:border-white/10 border-neutral-200 rounded-sm h-full aspect-4/5 overflow-hidden 
-                        dark:text-white/70 dark:hover:text-white  text-neutral-500 hover:text-neutral-600 cursor-pointer"
+                        className="flex justify-center items-center border border-neutral-200 dark:border-white/10 rounded-sm h-full aspect-4/5 overflow-hidden text-neutral-500 hover:text-neutral-600 dark:hover:text-white dark:text-white/70 cursor-pointer"
                     >
-                        {!isLoadingAddedPhotos ? <Plus/> : <LoaderCircle className="dark:stroke-white mx-auto animate-spin stroke-neutral-400 transition-colors"/>}
+                        {!isLoadingAddedPhotos ? <Plus/> : <LoaderCircle className="stroke-neutral-400 dark:stroke-white mx-auto transition-colors animate-spin"/>}
                     </label>
                     <input 
                         type="file" 
@@ -222,7 +217,7 @@ export default function CreateSpotFormStepTwo({setStep, setUploadedPhotos, uploa
                         }}
                     >
                     </input>
-                </div>: <LoaderCircle className="dark:stroke-white mx-auto animate-spin stroke-neutral-400"/>}
+                </div>: <LoaderCircle className="stroke-neutral-400 dark:stroke-white mx-auto animate-spin"/>}
             </ScrollContainer>
         </div>
     )

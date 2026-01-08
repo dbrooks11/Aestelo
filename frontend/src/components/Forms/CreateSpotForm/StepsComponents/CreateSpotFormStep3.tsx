@@ -2,11 +2,11 @@ import { useState, type JSX } from "react";
 import { ArrowLeft, ArrowRight, X, Accessibility } from "lucide-react";
 import type { PreviewPhotosState } from "../CreateSpotForm";
 
-type Step3 = {
+type Step3Type = {
     previewPhotos: PreviewPhotosState
 }
 
-export default function CreateSpotFormStepThree({previewPhotos}: Step3): JSX.Element{
+export default function CreateSpotFormStepThree({previewPhotos}: Step3Type): JSX.Element{
 
     const [currentPhoto, setCurrentPhoto] = useState<number>(0)
     const [tags, setTags] = useState<Array<string | undefined>>([])
@@ -61,7 +61,7 @@ export default function CreateSpotFormStepThree({previewPhotos}: Step3): JSX.Ele
                 
                 {/* Navigation Buttons */}
                 <button 
-                    className="hidden bottom-1/2 left-2 absolute group-hover:flex hover:bg-neutral-500/40 p-1 rounded-full text-white/80 hover:text-white transition-colors cursor-pointer disabled:opacity-50"
+                    className="hidden bottom-1/2 left-2 absolute group-hover:flex hover:bg-neutral-500/40 disabled:opacity-50 p-1 rounded-full text-white/80 hover:text-white transition-colors cursor-pointer"
                     type="button"
                     onClick={() => setCurrentPhoto(Math.max(0, currentPhoto - 1))}
                     disabled={currentPhoto === 0}
@@ -71,7 +71,7 @@ export default function CreateSpotFormStepThree({previewPhotos}: Step3): JSX.Ele
                 </button>
                 
                 <button 
-                    className="hidden right-2 bottom-1/2 absolute group-hover:flex hover:bg-neutral-500/40 p-1 rounded-full text-white/80 hover:text-white transition-colors cursor-pointer disabled:opacity-50"
+                    className="hidden right-2 bottom-1/2 absolute group-hover:flex hover:bg-neutral-500/40 disabled:opacity-50 p-1 rounded-full text-white/80 hover:text-white transition-colors cursor-pointer"
                     type="button"
                     onClick={() => setCurrentPhoto(Math.min(previewPhotos.length - 1, currentPhoto + 1))}
                     disabled={currentPhoto === previewPhotos.length - 1}
@@ -82,7 +82,7 @@ export default function CreateSpotFormStepThree({previewPhotos}: Step3): JSX.Ele
 
                 {/* Status Indicator */}
                 <span 
-                    className="absolute right-2 top-4 rounded-full px-2 py-0.5 text-white/90 bg-neutral-500/40 border border-neutral-500/50 tracking-widest text-xs"
+                    className="top-4 right-2 absolute bg-neutral-500/40 px-2 py-0.5 border border-neutral-500/50 rounded-full text-white/90 text-xs tracking-widest"
                     role="status"
                     aria-live="polite"
                 >
@@ -98,7 +98,7 @@ export default function CreateSpotFormStepThree({previewPhotos}: Step3): JSX.Ele
             <form 
                 id="create-spot-form"
                 action={handleSpotFormClick}
-                className="flex flex-col bg-white dark:bg-[#0A0A0A] border-neutral-200 dark:border-white/10 border-l w-1/2 h-full overflow-y-auto transition-colors"
+                className="flex flex-col bg-white dark:bg-graphite border-neutral-200 dark:border-white/10 border-l w-1/2 h-full overflow-y-auto overscroll-y-contain transition-colors"
                 aria-label="Spot Details Form"
             >
                 <div className="flex flex-col gap-8 p-4">
@@ -113,7 +113,7 @@ export default function CreateSpotFormStepThree({previewPhotos}: Step3): JSX.Ele
                             maxLength={40}
                             onChange={(e) => setSpotNameInput((e.target.value).length)}
                             aria-describedby="name-char-count"
-                            className="bg-transparent px-4 py-2 border border-neutral-200 dark:border-white/10 focus:border-neutral-400 focus:dark:border-white/20 rounded-md outline-none text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-white/20 transition-colors"
+                            className="bg-transparent px-4 py-2 border border-neutral-200 focus:border-neutral-400 focus:dark:border-white/20 dark:border-white/10 rounded-md outline-none text-neutral-900 dark:placeholder:text-white/20 dark:text-white placeholder:text-neutral-400 placeholder:text-sm transition-colors"
                             placeholder="e.g. Hidden Skate Park"
                         />
                         <span 
@@ -133,7 +133,7 @@ export default function CreateSpotFormStepThree({previewPhotos}: Step3): JSX.Ele
                             name="description" 
                             onChange={(e) => setDescriptionInput((e.target.value).length)}
                             aria-describedby="desc-char-count"
-                            className="bg-transparent px-4 py-2 border border-neutral-200 dark:border-white/10 focus:border-neutral-400 focus:dark:border-white/20 rounded-md outline-none min-h-[120px] text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-white/20 transition-colors resize-none" 
+                            className="bg-transparent px-4 py-2 border border-neutral-200 focus:border-neutral-400 focus:dark:border-white/20 dark:border-white/10 rounded-md outline-none min-h-[120px] text-neutral-900 dark:placeholder:text-white/20 dark:text-white placeholder:text-neutral-400 placeholder:text-sm transition-colors resize-none" 
                             maxLength={200}
                             placeholder="Tell us about this spot..."
                         />
@@ -150,7 +150,7 @@ export default function CreateSpotFormStepThree({previewPhotos}: Step3): JSX.Ele
                     <div className="flex">
                         <label
                             htmlFor="accessible"
-                            className="flex justify-center items-center gap-4 dark:text-neutral-500 text-neutral-600 text-sm cursor-pointer"
+                            className="flex justify-center items-center gap-4 text-neutral-600 dark:text-neutral-500 text-sm cursor-pointer"
                         >
                             <input
                                 type="checkbox"
@@ -158,7 +158,7 @@ export default function CreateSpotFormStepThree({previewPhotos}: Step3): JSX.Ele
                                 id="accessible"
                                 className="sr-only peer"
                             />
-                            <div className="flex justify-center items-center bg-transparent border-2 border-neutral-200 dark:border-neutral-600 dark:group-hover:border-neutral-400 group-hover:border-neutral-500 peer-checked:border-blue-800 rounded-md w-6 h-6 text-transparent peer-checked:text-black peer-checked:dark:text-white/90 transition-all duration-200"
+                            <div className="flex justify-center items-center bg-transparent border-2 border-neutral-200 dark:border-neutral-600 dark:group-hover:border-neutral-400 group-hover:border-neutral-500 peer-checked:border-blue-800 rounded-md w-6 h-6 text-transparent peer-checked:dark:text-white/90 peer-checked:text-black transition-all duration-200"
                             >
                                 <Accessibility strokeWidth={3} className="w-3.5 h-3.5" />
                             </div>
@@ -170,7 +170,7 @@ export default function CreateSpotFormStepThree({previewPhotos}: Step3): JSX.Ele
                     <div className="flex flex-col gap-2 font-semibold text-neutral-600 dark:text-neutral-500">
                         <label htmlFor="tags" className="text-xs uppercase tracking-wider">Hashtags</label>
                         <div 
-                            className="flex flex-wrap gap-2 px-4 py-2 border border-neutral-200 dark:border-white/10 rounded-md w-full text-neutral-900 dark:text-white transition-colors focus-within:border-neutral-400 focus-within:dark:border-white/20" 
+                            className="flex flex-wrap gap-2 px-4 py-2 border border-neutral-200 focus-within:border-neutral-400 focus-within:dark:border-white/20 dark:border-white/10 rounded-md w-full text-neutral-900 dark:text-white transition-colors" 
                             onClick={() => document.getElementById('tags')?.focus()}
                         >
                             {tags.map((tag) => (
@@ -181,7 +181,7 @@ export default function CreateSpotFormStepThree({previewPhotos}: Step3): JSX.Ele
                                     #{tag}
                                     <button 
                                         type='button' 
-                                        className="flex justify-center items-center cursor-pointer hover:text-black dark:hover:text-white transition-colors"
+                                        className="flex justify-center items-center hover:text-black dark:hover:text-white transition-colors cursor-pointer"
                                         onClick={() => handleTagRemoval(tag)}
                                         aria-label={`Remove tag ${tag}`}
                                     >
@@ -193,7 +193,7 @@ export default function CreateSpotFormStepThree({previewPhotos}: Step3): JSX.Ele
                                 type="text"
                                 id="tags" 
                                 name="tags" 
-                                className="bg-transparent outline-none min-w-[120px] flex-1 placeholder:text-neutral-400 dark:placeholder:text-white/20"
+                                className="flex-1 bg-transparent outline-none min-w-[120px] dark:placeholder:text-white/20 placeholder:text-neutral-400 placeholder:text-sm"
                                 value={tagInput}
                                 onChange={(e) => setTagInput(e.target.value)}
                                 onKeyDown={(e) => {
