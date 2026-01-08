@@ -1,16 +1,15 @@
 import { useEffect, useRef, useState, type JSX } from "react";
 import Modal from "../../Modal";
 import { type CreateSpotFormModalOpenType } from "../../Wrappers/ProtectedRoute";
-import { ArrowRight, Sun, Moon, ChevronLeft } from "lucide-react";
+import { ArrowRight,ChevronLeft } from "lucide-react";
 import CreateSpotFormStepOne from "./StepsComponents/CreateSpotFormStep1";
 import CreateSpotFormStepTwo from "./StepsComponents/CreateSpotFormStep2";
-import { useTheme } from "../../../context/ThemeContext";
 import CreateSpotFormStepThree from "./StepsComponents/CreateSpotFormStep3";
 
 
 export type PreviewPhotosState = Array<string | undefined> 
 export type UploadedPhotosState = FileList | null
-export type StepState = 1 | 2 | 3
+export type StepState = number
 type CreateSpotForm = {
     isCreateSpotModalOpen: CreateSpotFormModalOpenType
     setIsCreateSpotModalOpen: (value: CreateSpotFormModalOpenType) => void
@@ -40,7 +39,6 @@ const steps: Array<Steps> = [
 // TODO: create save draft feature and add a table for drafts
 export default function CreateSpotForm({isCreateSpotModalOpen, setIsCreateSpotModalOpen}: CreateSpotForm): JSX.Element{
 
-    const {theme, toggleTheme} = useTheme()
     const dialogRef = useRef<HTMLDialogElement>(null)
     const [showConfirmation, setShowConfirmation] = useState<boolean>(false)
     const [previewPhotos, setPreviewPhotos] = useState<PreviewPhotosState>([])
@@ -54,7 +52,7 @@ export default function CreateSpotForm({isCreateSpotModalOpen, setIsCreateSpotMo
         
     }, [showConfirmation]);
     
-// TODO: turn backend models and routes from 'post' to 'spot'
+    // TODO: turn backend models and routes from 'post' to 'spot'
     function resetForm(): void {
         setShowConfirmation(false)
         setPreviewPhotos([])
@@ -77,7 +75,7 @@ export default function CreateSpotForm({isCreateSpotModalOpen, setIsCreateSpotMo
                 <div className="flex items-center gap-4">
                     {step > 2 && 
                     <ChevronLeft 
-                        className="hover:stroke-neutral-200 dark:stroke-neutral-400 transition-colors cursor-pointer"
+                        className="hover:dark:stroke-neutral-200 dark:stroke-neutral-400 hover:stroke-black stroke-neutral-600 transition-colors cursor-pointer"
                         onClick={() => {
                             setStep((prev) => {
                                 return prev - 1
@@ -86,16 +84,10 @@ export default function CreateSpotForm({isCreateSpotModalOpen, setIsCreateSpotMo
                     />
                     }
                     <span 
-                        className="flex items-center gap-4 font-bold dark:text-white text-2xl"
+                        className="font-bold dark:text-white text-2xl"
                         >
                             {steps[step - 1].title}
                     </span>
-                    <button
-                        className="flex justify-center items-center bg-black/5 hover:bg-black/10 hover:dark:bg-white/10 dark:bg-white/5 p-1.5 rounded-full w-8 h-8 dark:text-white/50 transition-colors cursor-pointer"
-                        onClick={toggleTheme}
-                    >
-                        {theme === 'light' ? <Sun/> : <Moon/>}
-                    </button>
                 </div>
                 
                 <div className="flex items-center gap-4">

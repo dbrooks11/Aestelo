@@ -1,4 +1,4 @@
-import { useState, type JSX } from "react";
+import { useState, type JSX, type KeyboardEvent } from "react";
 import { ArrowLeft, ArrowRight, X, Accessibility } from "lucide-react";
 import type { PreviewPhotosState } from "../CreateSpotForm";
 
@@ -16,7 +16,7 @@ export default function CreateSpotFormStepThree({previewPhotos}: Step3Type): JSX
 
     const handleSpotFormClick = async(formData: FormData) => {
         const data = Object.fromEntries(formData)
-        const tagsList: Array<string | undefined> = tags && tags
+        const tagsList: Array<string | undefined> = tags
         const accessible: FormDataEntryValue = data?.accessible
         const description: FormDataEntryValue = data?.description
         const name: FormDataEntryValue = data?.name
@@ -25,7 +25,7 @@ export default function CreateSpotFormStepThree({previewPhotos}: Step3Type): JSX
 
     }
 
-    const handleTags = (e) => {
+    const handleTags = (e: KeyboardEvent<HTMLInputElement>) => {
         if((e.key === 'Enter' || e.key === ' ') && tagInput?.trim()){
             if(tagInput.length > 50 || tagInput.includes('#')) return
             if(!tags.includes(tagInput.trim())){
@@ -171,7 +171,6 @@ export default function CreateSpotFormStepThree({previewPhotos}: Step3Type): JSX
                         <label htmlFor="tags" className="text-xs uppercase tracking-wider">Hashtags</label>
                         <div 
                             className="flex flex-wrap gap-2 px-4 py-2 border border-neutral-200 focus-within:border-neutral-400 focus-within:dark:border-white/20 dark:border-white/10 rounded-md w-full text-neutral-900 dark:text-white transition-colors" 
-                            onClick={() => document.getElementById('tags')?.focus()}
                         >
                             {tags.map((tag) => (
                                 <span

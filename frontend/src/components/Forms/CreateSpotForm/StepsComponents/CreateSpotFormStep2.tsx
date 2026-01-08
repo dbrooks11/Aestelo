@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type JSX } from "react";
+import { useEffect, useRef, useState, type Dispatch, type JSX } from "react";
 import { type UploadedPhotosState, type PreviewPhotosState} from "../CreateSpotForm";
 import { Scan, LoaderCircle, Trash2, Plus } from "lucide-react";
 import { fileCompressionForPreview } from "../../../../util/client_image_compression";
@@ -6,7 +6,7 @@ import ScrollContainer from "react-indiana-drag-scroll";
 
 
 type Step2Type = {
-    setUploadedPhotos: (value: UploadedPhotosState) => void
+    setUploadedPhotos: Dispatch<React.SetStateAction<UploadedPhotosState>>;
     uploadedPhotos: UploadedPhotosState
     previewPhotos:PreviewPhotosState
     setPreviewPhotos: (value: PreviewPhotosState) => void
@@ -206,11 +206,10 @@ export default function CreateSpotFormStepTwo({setUploadedPhotos, uploadedPhotos
                             const newFiles = e.target.files
                             if(newFiles && newFiles.length > 0){
                                 setUploadedPhotos((prev) => {
-
-                                const currentFiles = prev && Array.from(prev)
-                                const addedFiles = Array.from(newFiles)
-                                const newFileArray = [...currentFiles, ...addedFiles]
-                                return arrayToFileList(newFileArray)
+                                    const currentFiles = prev ? Array.from(prev) : []
+                                    const addedFiles = Array.from(newFiles)
+                                    const newFileArray = [...currentFiles, ...addedFiles]
+                                    return arrayToFileList(newFileArray)
                                 })
                             fileCompressionForPreview(e.target.files, setIsLoadingAddedPhotos, setPreviewPhotos)
                             }
