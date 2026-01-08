@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Ellipsis } from "lucide-react";
 import { useState, type JSX } from "react";
 
-export default function PostDescripton(): JSX.Element{
+export default function SpotDescripton(): JSX.Element{
 
     const [showDescription, setShowDescription] = useState<boolean>(false)
     
@@ -16,11 +16,11 @@ export default function PostDescripton(): JSX.Element{
                 {showDescription ? 
                 <motion.div 
                     key='description'
-                    id="post-description-content"
+                    id="spot-description-content"
                     role="button"
                     tabIndex={0}
                     aria-expanded={true}
-                    aria-label="Post description. Click to collapse."
+                    aria-label="Spot description. Click to collapse."
                     initial={{opacity: 0}}
                     animate={{opacity: 1}}
                     exit={{opacity: 0}}
@@ -46,7 +46,7 @@ export default function PostDescripton(): JSX.Element{
                     role="button"
                     aria-label="Show full description"
                     aria-expanded={false}
-                    aria-controls="post-description-content"
+                    aria-controls="spot-description-content"
                     tabIndex={0}
                     initial={{ opacity: 0}}
                     animate={{ opacity: 1 }}

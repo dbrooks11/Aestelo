@@ -4,12 +4,12 @@ import testImage from "../../assets/testImage.jpg"
 import whitePlain from "../../assets/white_plain.jpg"
 import blackPlain from "../../assets/black_plain.jpg"
 import testImage2 from "../../assets/testImage2.jpg"
-import PostTags from "./PostTags"
-import PostButtons from "./PostButtons"
-import PostDescripton from "./PostDesciption"
-import PostHeader from "./PostHeader"
-import PostPhotoCounter from "./PostPhotoCount"
-// type PostProps = {
+import SpotTags from "./SpotTags"
+import SpotButtons from "./SpotButtons"
+import SpotDescripton from "./SpotDesciption"
+import SpotHeader from "./SpotHeader"
+import SpotPhotoCounter from "./SpotPhotoCount"
+// type SpotProps = {
 //     name: string
 //     date_posted: string
 //     description: string
@@ -23,7 +23,7 @@ import PostPhotoCounter from "./PostPhotoCount"
 
 // }
 
-export default function Post(): JSX.Element{
+export default function Spot(): JSX.Element{
 
     const [progress, setProgress] = useState<number>(5)
     const [total, setTotal ] = useState<number>(10)
@@ -40,13 +40,13 @@ export default function Post(): JSX.Element{
 
     return(
         
-        <div className="flex flex-col dark:bg-off-slate bg-white mx-auto mb-200 border-1 dark:border-border-dark border-border-light rounded-sm w-90 mt-10">
+        <div className="flex flex-col dark:bg-off-slate bg-white mx-auto mb-200 border dark:border-border-dark border-border-light rounded-sm w-90 mt-10">
             
             {/* Images and Header container */}
             <div className="relative flex flex-1">
                 
                 {/* Header */}
-                <PostHeader/>
+                <SpotHeader/>
 
                 {/* Arrow Buttons */}
                 <div 
@@ -71,10 +71,10 @@ export default function Post(): JSX.Element{
                 
 
                 {/* Description and Photo Counter */}
-                <PostDescripton/>
+                <SpotDescripton/>
                 {/* TODO: fix screen snapping when description is toggled */}
                     
-                <PostPhotoCounter
+                <SpotPhotoCounter
                     progress={progress}
                     total={total}
                 />
@@ -84,15 +84,15 @@ export default function Post(): JSX.Element{
                     <img 
                         src={testImage2} 
                         className="w-full h-full"
-                        alt='Post content'
+                        alt='Spot content'
                     ></img>
                 </div>
                 
             </div>
             {/* Action button and tags container */}
             <div className="flex flex-col dark:bg-off-slate w-full min-h-25">
-                <PostTags/>
-                <PostButtons/>   
+                <SpotTags/>
+                <SpotButtons/>   
             </div>
         </div>
     )

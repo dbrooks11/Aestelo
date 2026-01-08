@@ -1,11 +1,10 @@
 import { Camera } from "lucide-react";
 import { type JSX } from "react";
-import { type StepState, type UploadedPhotosState, type PreviewPhotosState } from "../CreatePostForm";
+import { type StepState, type UploadedPhotosState, type PreviewPhotosState } from "../CreateSpotForm";
 import { fileCompressionForPreview } from "../../../../util/client_image_compression";
 
 export type Step1 = {
     setStep: (num: StepState) => void
-    uploadedPhotos: UploadedPhotosState
     setUploadedPhotos: (files: UploadedPhotosState) => void
     setPreviewPhotos: (value: PreviewPhotosState) => void
     setIsLoading: (num: boolean) => void
@@ -13,11 +12,11 @@ export type Step1 = {
 }
 
 
-export default function CreatePostFormStepOne({setStep, setUploadedPhotos, setPreviewPhotos, uploadedPhotos, setIsLoading}: Step1):JSX.Element{
+export default function CreateSpotFormStepOne({setStep, setUploadedPhotos, setPreviewPhotos,setIsLoading}: Step1):JSX.Element{
 
     
 
-    
+    // TODO: add drag and drop for photo reordering
     return(
         <label 
             htmlFor="photos"

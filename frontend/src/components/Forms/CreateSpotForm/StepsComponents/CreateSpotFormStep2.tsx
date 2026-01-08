@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type JSX } from "react";
-import { type UploadedPhotosState, type StepState, type PreviewPhotosState} from "../CreatePostForm";
+import { type UploadedPhotosState, type StepState, type PreviewPhotosState} from "../CreateSpotForm";
 import { Scan, LoaderCircle, Trash2, Plus } from "lucide-react";
 import { fileCompressionForPreview } from "../../../../util/client_image_compression";
 import ScrollContainer from "react-indiana-drag-scroll";
@@ -15,7 +15,7 @@ type Step2 = {
     isLoading: boolean
 }
 
-export default function CreatePostFormStepTwo({setStep, setUploadedPhotos, uploadedPhotos, 
+export default function CreateSpotFormStepTwo({setStep, setUploadedPhotos, uploadedPhotos, 
     previewPhotos, setPreviewPhotos, setIsLoading, isLoading}: Step2):JSX.Element{
     
     const [isLoadingAddedPhotos, setIsLoadingAddedPhotos] = useState<boolean>(false)
@@ -142,8 +142,8 @@ export default function CreatePostFormStepTwo({setStep, setUploadedPhotos, uploa
 
 
     return(
-        <div className="flex flex-col m-4 border border-white/10 rounded-sm w-auto">
-            <div className="relative flex justify-center items-center bg-black p-4 h-86">
+        <div className="flex flex-col m-4 border dark:border-white/10 border-neutral-200 rounded-sm w-auto">
+            <div className="relative flex justify-center items-center dark:bg-black bg-neutral-100 p-4 h-86">
                 {!isLoading ?
                  <>
                     <img 
@@ -154,7 +154,7 @@ export default function CreatePostFormStepTwo({setStep, setUploadedPhotos, uploa
                     <button 
                         type="button"
                         onClick={handleAspectRatio}
-                        className="top-2 left-2 absolute flex justify-center items-center gap-2 px-2 py-1 border border-white/15 rounded-full h-8 font-medium text-white text-xs cursor-pointer"
+                        className="top-2 left-2 absolute flex justify-center items-center gap-2 px-2 py-1 border dark:border-white/15 border-neutral-200 rounded-full h-8 font-medium dark:text-white text-black text-xs cursor-pointer"
                     >
                         <Scan size={15}/>
                         {showAspectAlias()}
@@ -166,7 +166,7 @@ export default function CreatePostFormStepTwo({setStep, setUploadedPhotos, uploa
                                         setIsDeleting(false);
                                         setDeletedPhotos([]);
                                     }}
-                                    className="bg-neutral-700 hover:bg-neutral-600 px-4 py-2 rounded-full font-bold text-white text-xs"
+                                    className="bg-neutral-800 hover:bg-neutral-600 px-4 py-2 rounded-full font-bold text-white text-xs"
                                 >
                                     Cancel
                                 </button>
@@ -187,18 +187,18 @@ export default function CreatePostFormStepTwo({setStep, setUploadedPhotos, uploa
                                 <Trash2 size={18}/>
                             </button>
                         )}
-                </>: <LoaderCircle className="stroke-white animate-spin"/>}
+                </>: <LoaderCircle className="dark:stroke-white mx-auto animate-spin stroke-neutral-400"/>}
                 
             </div>
-            <ScrollContainer innerRef={scrollRef} className="flex items-center border-white/10 border-t min-h-40 shrink-0">
+            <ScrollContainer innerRef={scrollRef} className="flex items-center dark:border-white/10 border-neutral-200 border-t min-h-40 shrink-0">
                 {!isLoading ? <div className="flex justify-center items-center gap-4 mx-4 h-34">
                     {showPreviews()}
                     <label 
                         htmlFor="new_photos"
-                        className="flex justify-center items-center border border-white/10 rounded-sm h-full aspect-4/5 overflow-hidden 
-                        text-white/70 hover:text-white cursor-pointer transition-colors"
+                        className="flex justify-center items-center border dark:border-white/10 border-neutral-200 rounded-sm h-full aspect-4/5 overflow-hidden 
+                        dark:text-white/70 dark:hover:text-white  text-neutral-500 hover:text-neutral-600 cursor-pointer"
                     >
-                        {!isLoadingAddedPhotos ? <Plus/> : <LoaderCircle className="stroke-white mx-auto animate-spin"/>}
+                        {!isLoadingAddedPhotos ? <Plus/> : <LoaderCircle className="dark:stroke-white mx-auto animate-spin stroke-neutral-400 transition-colors"/>}
                     </label>
                     <input 
                         type="file" 
@@ -222,7 +222,7 @@ export default function CreatePostFormStepTwo({setStep, setUploadedPhotos, uploa
                         }}
                     >
                     </input>
-                </div>: <LoaderCircle className="stroke-white mx-auto animate-spin"/>}
+                </div>: <LoaderCircle className="dark:stroke-white mx-auto animate-spin stroke-neutral-400"/>}
             </ScrollContainer>
         </div>
     )

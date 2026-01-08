@@ -2,7 +2,7 @@
 import {type JSX, useState, useEffect} from 'react'
 import { AxiosErrorHelper, protectedInstance } from '../util/axios_api_helpers'
 import toast, { Toaster } from 'react-hot-toast'
-import Post from '../components/Post/Post'
+import Post from '../components/Post/Spot'
 
 export default function FeedPage(): JSX.Element {
 

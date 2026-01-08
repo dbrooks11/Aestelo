@@ -13,6 +13,7 @@ import FeedPage from './pages/FeedPage'
 function App() {
   const {theme} = useTheme()
 
+
   return (
     
       <div data-theme={theme} className="flex flex-col min-h-screen bg-bg-light-secondary dark:bg-charcoal">

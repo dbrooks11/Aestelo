@@ -1,7 +1,7 @@
 import { Accessibility, Star } from "lucide-react";
 import { type JSX } from "react";
 
-export default function PostHeader(): JSX.Element{
+export default function SpotHeader(): JSX.Element{
     return(
         <div className="top-4 left-[50%] -translate-x-1/2 absolute flex flex-col justify-center items-center gap-1 
         border-neutral-300/30 bg-black/10 backdrop-blur-[2px] px-2 py-1 border text-xs text-white">

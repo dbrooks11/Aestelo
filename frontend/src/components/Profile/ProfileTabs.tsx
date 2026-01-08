@@ -13,7 +13,7 @@ export default function ProfileTabs(): JSX.Element {
       activeTabStyle='dark:text-white text-accents-deep border-b-2 border-b-accents-primary'
       tabsStyle='dark:text-neutral-500 font-bold hover:dark:text-white hover:text-accents-deep'
       >
-        <Tab label={'Posts'} icon={<MapPin className='md:hidden'/>}>
+        <Tab label={'Spots'} icon={<MapPin className='md:hidden'/>}>
           <p>Post says hello</p>
           <p>Post says hello</p>
           <p>Post says hello</p>

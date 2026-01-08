@@ -66,6 +66,7 @@ export default function EditProfileForm({
 
   //TODO: Add field for links and badges(maybe) in the future
   const handleEditProfileFormClick = async (formData: FormData): Promise<void> => {
+    console.log(formData)
     try {
       const response = await protectedInstance.patch('/profile/me', formData, {
         headers:{

@@ -6,7 +6,7 @@ import { handleNumStats } from "../../util/StatConverter";
 
 type IconComponent = ComponentType<LucideProps | SVGProps<SVGSVGElement>>;
 
-type PostButtonType = {
+type SpotButtonType = {
     order: number
     title: string
     position: 'left' | 'right'
@@ -16,7 +16,7 @@ type PostButtonType = {
     data: number
 }
 
-const postButtons: Array<PostButtonType> = [
+const spotButtons: Array<SpotButtonType> = [
     {
         order: 1,
         title: 'Share',
@@ -58,23 +58,23 @@ const postButtons: Array<PostButtonType> = [
 
 
 
-export default function PostButtons(): JSX.Element{
+export default function SpotButtons(): JSX.Element{
 
     
 
     const {leftButtons, rightButtons} = useMemo(() => {
-        const sortedButtons = postButtons.sort((btn1, btn2) => btn1.order - btn2.order)
+        const sortedButtons = spotButtons.sort((btn1, btn2) => btn1.order - btn2.order)
         return{
             leftButtons: sortedButtons.filter(btn => btn.position === 'left'),
             rightButtons: sortedButtons.filter(btn => btn.position === 'right')
         }
     }, [])
 
-    function renderPostButtons(btnArray: Array<PostButtonType>): JSX.Element {
+    function renderSpotButtons(btnArray: Array<SpotButtonType>): JSX.Element {
         return(
             <>
                 <div className="flex gap-2.5 dark:text-neutral-400 text-neutral-600">
-                    {btnArray.map((btn: PostButtonType) => {
+                    {btnArray.map((btn: SpotButtonType) => {
                             return(
                                 <button
                                     key={btn.title}
@@ -100,8 +100,8 @@ export default function PostButtons(): JSX.Element{
 
     return(
         <div className="flex flex-1 justify-between items-center gap-4 px-4 w-full text-xs">
-            {renderPostButtons(leftButtons)}
-            {renderPostButtons(rightButtons)}
+            {renderSpotButtons(leftButtons)}
+            {renderSpotButtons(rightButtons)}
         </div>
     )
 }
