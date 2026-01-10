@@ -7,20 +7,20 @@ from sqlalchemy.dialects.postgresql import UUID
 
 
 class Rating(db.Model):
-    __table_args__ = (Index('idx_rating_post_id','post_id')
-                    ,UniqueConstraint('user_profile_id', 'post_id', name='unique_rating'), 
+    __table_args__ = (Index('idx_rating_spot_id','spot_id')
+                    ,UniqueConstraint('user_profile_id', 'spot_id', name='unique_rating'), 
                    )
     
     rating_id = Column(BigInteger, primary_key=True)
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), nullable=False)
-    post_id = Column(BigInteger, ForeignKey('post.id'), nullable=False)
+    spot_id = Column(BigInteger, ForeignKey('spot.id'), nullable=False)
     rating_choice = Column(Integer, default=0, nullable=True)
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
     
 
     def to_dict(self):
         return {
-            'post_id': self.post_id,
+            'spot_id': self.spot_id,
             'user_profile_id': self.user_profile_id,
             'rating_id': self.rating_id,
             'rating_choice': self.rating_choice,

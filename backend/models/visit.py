@@ -10,11 +10,11 @@ from geoalchemy2 import Geography
 
 
 
-#The post under a locations posts
+#The spot under a locations spots
 class Visit(db.Model):
     id = Column(BigInteger, primary_key=True)
     
-    post_id = Column(BigInteger, ForeignKey('post.id'), nullable=False)
+    spot_id = Column(BigInteger, ForeignKey('spot.id'), nullable=False)
     user_profile_id = Column(UUID(as_uuid=True),  ForeignKey('user_profile.id'), nullable=False)
     
     coordinates = Column(Geography(geometry_type='POINT', srid=4326, spatial_index=True))
@@ -29,7 +29,7 @@ class Visit(db.Model):
     total_num_of_photos = Column(Integer)
 
     num_of_edits = Column(Integer, default=0) # user_profile can edit their vistit only 3 times (caption, photo, hashtag, song, etc)
-    is_deleted = Column(Boolean, default=False) #is the post deleted by user_profile
+    is_deleted = Column(Boolean, default=False) #is the spot deleted by user_profile
     deleted_at = Column(DateTime)
     deleted_by = Column(UUID(as_uuid=True))
     num_reports = Column(Integer, default=0)
@@ -40,7 +40,7 @@ class Visit(db.Model):
     def to_dict(self):
         return {
             "visit_id": self.visit_id,
-            "post_id": self.post_id,
+            "spot_id": self.spot_id,
             "user_profile_id": self.user_profile_id,
             'music_track_id':self.music_track_id,
             "caption": self.caption,

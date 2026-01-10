@@ -81,7 +81,6 @@ export default function ProfilePage(): JSX.Element {
     profile()
   }, []);
 
-  
   return (
     <>
       {!isLoading ? <main className='relative flex flex-col items-center h-full'>

@@ -2,7 +2,7 @@ import logging
 from logging.config import fileConfig
 
 from flask import current_app
-
+import geoalchemy2
 from alembic import context
 
 # this is the Alembic Config object, which provides

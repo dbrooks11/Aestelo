@@ -30,7 +30,7 @@ services:
   #---- CELERY ----#
   celery_worker:
     build: ./backend
-    command: python -m watchdog.watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A make_celery.celery_app worker --loglevel=info
+    command: celery -A make_celery.celery_app worker --loglevel=info
     env_file:
       - ./backend/env_backend/.env.backend_celery
     depends_on:

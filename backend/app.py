@@ -37,6 +37,9 @@ def create_app():
     limiter.init_app(app)
     mg.init_app(app, db, compare_type=True)
 
+    # Register blueprints
+    register_blueprints(app)
+    
     Image.MAX_IMAGE_PIXELS = 100_000_000
 
     
@@ -67,9 +70,6 @@ def create_app():
             content_security_policy=None,  
             frame_options='DENY', 
             )
-    
-    # Register blueprints
-    register_blueprints(app)
 
     @app.before_request
     def start_timer():
@@ -87,10 +87,6 @@ def create_app():
 
  
     with app.app_context():
-        #Celery
-
-
-
         #jwt hanlders
         @jwt.expired_token_loader
         def expired_token_callback(jwt_header, jwt_data):

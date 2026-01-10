@@ -34,6 +34,13 @@ export const protectedInstance: AxiosInstance = axios.create({
     withCredentials: true
 })
 
+export const protectedInstanceForm: AxiosInstance = axios.create({
+    baseURL: appConfig.API_URL,
+    timeout: 10000,
+    headers:{'Content-Type': 'multipart/form-data'},
+    withCredentials: true
+})
+
 //axios intercepter
 protectedInstance.interceptors.request.use(
     (config) => {

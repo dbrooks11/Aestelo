@@ -13,13 +13,13 @@ user_settings_schema = 'private'
 user_subscription_schema = 'private'
 removed_user_schema = 'private'
 
-#*POST
-post_schema = 'public'
-post_media_schema = 'public'
+#*SPOT
+spot_schema = 'public'
+spot_media_schema = 'public'
 rating_schema = 'public'
 visit_schema = 'public'
 visit_media_schema = 'public'
-removed_post_schema = 'private'
+removed_spot_schema = 'private'
 removed_visit_schema = 'private'
 
 #*LOCATION

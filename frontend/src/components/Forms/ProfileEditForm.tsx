@@ -36,37 +36,39 @@ export default function EditProfileForm({
   const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | undefined>(undefined)
   const [profileBannerPreview, setProfileBannerPreview] = useState<string | undefined>(undefined)
 
-  const handleProfilePhotoFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    let tempUrl: string = ''
-    if (e.target.files) {
-      tempUrl = URL.createObjectURL(e.target.files[0])
-      setProfilePhotoPreview(tempUrl)
+  const handleProfileFileChange = (e: ChangeEvent<HTMLInputElement>, isFor: ('banner' | 'photo')) => {
+    let tempUrl = ''
+    if(e.target.files){
+      if(isFor === 'photo'){
+        if(profilePhotoPreview !== undefined) URL.revokeObjectURL(profilePhotoPreview)
+        tempUrl = URL.createObjectURL(e.target.files[0])
+        setProfilePhotoPreview(tempUrl)
+      }
+      else if(isFor === 'banner'){
+        if(profileBannerPreview !== undefined) URL.revokeObjectURL(profileBannerPreview)
+        tempUrl = URL.createObjectURL(e.target.files[0])
+        setProfileBannerPreview(tempUrl)
+      }
     }
-  }
-
-  const handleProfileBannerFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    let tempUrl: string = ''
-    if (e.target.files) {
-      tempUrl = URL.createObjectURL(e.target.files[0])
-      setProfileBannerPreview(tempUrl)
-    }
-
   }
 
   useEffect(() => {
     return () => {
       if (profilePhotoPreview) {
-        URL.revokeObjectURL(profilePhotoPreview);
+        URL.revokeObjectURL(profilePhotoPreview)
+        setProfilePhotoPreview(undefined)
+        console.log('running profile link removal')
       }
       if (profileBannerPreview) {
-        URL.revokeObjectURL(profileBannerPreview);
+        URL.revokeObjectURL(profileBannerPreview)
+        setProfileBannerPreview(undefined)
+        console.log('running banner link removal')
       }
-    };
-  },);
+    }
+  },)
 
   //TODO: Add field for links and badges(maybe) in the future
   const handleEditProfileFormClick = async (formData: FormData): Promise<void> => {
-    console.log(formData)
     try {
       const response = await protectedInstance.patch('/profile/me', formData, {
         headers:{
@@ -120,15 +122,15 @@ export default function EditProfileForm({
     )
   }
 
-  const charCounterBioDisplayHandler = (e: ChangeEvent<HTMLTextAreaElement>) =>{
-    const length = e.target.value.length
-    setCharCounterBio(length)
-  }
-    
-
-  const charCounterUsernameDisplayHander = (e: ChangeEvent<HTMLInputElement>) =>{
-    const length = e.target.value.length
-    setCharCounterUsername(length)
+  const charCounterDisplayHandler = (e:ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, isFor: ('username' | 'bio')) => {
+    if(isFor === 'username'){
+      const length = e.target.value.length
+      setCharCounterUsername(length)
+    }
+    else if(isFor === 'bio'){
+      const length = e.target.value.length
+      setCharCounterBio(length)
+    }
   }
 
   const usernameIndicatorHander = (e: ChangeEvent<HTMLInputElement>) => {
@@ -141,9 +143,8 @@ export default function EditProfileForm({
       setUsernameIndictor(false)
     }
 
-    charCounterUsernameDisplayHander(e)
+    charCounterDisplayHandler(e, 'username')
   }
-
 
 
   return (   
@@ -203,7 +204,7 @@ export default function EditProfileForm({
               id='profile_photo'
               className='hidden'
               accept='image/png, image/jpeg, image/heic, image/heif'
-              onChange={handleProfilePhotoFileChange}
+              onChange={(e) => handleProfileFileChange(e, 'photo')}
               multiple={true} 
             ></input>
           </div>
@@ -258,7 +259,7 @@ export default function EditProfileForm({
                 <img 
                   src={profileBannerPreview ? profileBannerPreview : profile_banner_url}
                   className={`${screenGuideType === 'desktop' && 'object-[10%_52%]'} h-full w-full object-cover pointer-events-none`}
-                  alt=""
+                  alt="Profile Banner Preview"
                 >
                 </img>
                 
@@ -283,7 +284,7 @@ export default function EditProfileForm({
               id='profile_banner'
               accept="image/png, image/jpeg, image/heic, image/heif"
               className="hidden"
-              onChange={handleProfileBannerFileChange}
+              onChange={(e) => handleProfileFileChange(e, 'banner')}
             ></input>
             
             <span className={`${editProfileFormTinyText} text-center`} id="banner-help-text">
@@ -324,7 +325,7 @@ export default function EditProfileForm({
               id='bio'
               defaultValue={bio}
               maxLength={150}
-              onChange={charCounterBioDisplayHandler}
+              onChange={(e) => charCounterDisplayHandler(e, 'bio')}
               aria-describedby="bio-counter"
             ></textarea>
             

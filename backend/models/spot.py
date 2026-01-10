@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import UUID
 #todo: create rating model
 #todo: create filter models
+#TODO: turn backend models and routes from 'post' to 'spot'
 
 '''
 # Rating fields
@@ -24,7 +25,7 @@ save_count
 
 
 
-class Post(db.Model):
+class Spot(db.Model):
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), nullable=False, index=True)
     
     id = Column(BigInteger, primary_key=True)
@@ -34,36 +35,36 @@ class Post(db.Model):
     description = Column(String(200))
     total_num_of_photos = Column(Integer)
 
-    # total_visits = Column(Integer, default=0)  #* Might add total visits to a post
+    # total_visits = Column(Integer, default=0)  #* Might add total visits to a spot
     average_rating = Column(Float, default=0.0)
     total_num_of_ratings = Column(Integer, default=0)
     last_rated_at = Column(DateTime)
 
     save_count = Column(Integer, default=0)
     share_count = Column(Integer, default=0)
-    trending_score = ColumnProperty((4 * share_count)+(2*save_count)+((1 * average_rating ) + (1.5 * total_num_of_ratings))) #will be used to calculate a score for trending post to keep track of which post is trending
-    hashtags = Column(ARRAY(String)) #different from hastags, can put tags on post like ('graffiti', 'red', 'streetwear','dark')
+    trending_score = ColumnProperty((4 * share_count)+(2*save_count)+((1 * average_rating ) + (1.5 * total_num_of_ratings))) #will be used to calculate a score for trending spot to keep track of which spot is trending
+    hashtags = Column(ARRAY(String)) #different from hastags, can put tags on spot like ('graffiti', 'red', 'streetwear','dark')
 
     #* Color pallete willl be added later
     # color_pallette = Column(String())
     accessibility = Column(Boolean, default=False) #is it accessible to people who are handicapped. True = yes, False = no
     num_of_edits = Column(Integer, default=0)
-    is_deleted = Column(Boolean, default=False) #is the post deleted by user_profile
+    is_deleted = Column(Boolean, default=False) #is the spot deleted by user_profile
     deleted_at = Column(DateTime)
     num_reports = Column(Integer, default=0)
     is_removed = Column(Boolean, default=False) #removed due to moderaters, admin, etc (does NOT mean deleted by user_profile)
     removed_at = Column(DateTime)
     
     
-    post_media_id = relationship('PostMedia', backref='post')
-    visit_id = relationship('Visit', backref='post')
-    rating = relationship('Rating', backref='post')
+    spot_media_id = relationship('SpotMedia', backref='spot')
+    visit_id = relationship('Visit', backref='spot')
+    rating = relationship('Rating', backref='spot')
 
 
     def to_dict(self):
         return {
             "user_profile_id": self.user_profile_id,
-            "post_id": self.post_id,
+            "spot_id": self.spot_id,
             "date_posted": self.date_posted,
             "description": self.description,
             "total_num_of_photos": self.total_num_of_photos,
@@ -92,8 +93,8 @@ class Post(db.Model):
 
 
 
-class PostMedia(db.Model):
-    post_id = Column(BigInteger, ForeignKey('post.id'), index=True)
+class SpotMedia(db.Model):
+    spot_id = Column(BigInteger, ForeignKey('spot.id'), index=True)
     uploaded_by = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), index=True)
 
     id =Column(BigInteger, primary_key=True)
@@ -103,19 +104,6 @@ class PostMedia(db.Model):
     photo_type = Column(String(15), default = 'photo') #stores what type of media is uploaed, photo, video, 360 video, etc
     width =  Column(Integer)
     height = Column(Integer)
-    
-
-    def to_dict(self):
-        return {
-            "post_id": self.post_id,
-            "uploaded_by": self.uploaded_by,
-            "post_media_id": self.post_media_id,
-            "photo_url": self.photo_url,
-            "photo_type": self.photo_type,
-            "width": self.width,
-            "height": self.height,
-            "is_primary": self.is_primary
-    }
 
     def save(self):
         db.session.add(self)

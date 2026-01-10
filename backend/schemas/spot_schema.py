@@ -1,17 +1,17 @@
 from exstensions import ma
 from marshmallow import (fields, validates, 
                          ValidationError, validate, pre_load)
-from models.post import Post,PostMedia
+from models.spot import Spot,SpotMedia
 from geoalchemy2.shape import to_shape
 
-class PostSchema(ma.SQLAlchemyAutoSchema):
+class SpotSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = Post
+        model = Spot
         include_fk = True
         exclude = ('is_deleted','deleted_at','num_reports','is_removed','removed_at')
 
     user_profile_id = fields.UUID(dump_only=True)
-    post_id = fields.Integer(dump_only=True)
+    spot_id = fields.Integer(dump_only=True)
     coordinates = fields.Method("get_coordinates")
     date_posted = fields.DateTime(dump_only=True)
     total_num_of_photos = fields.Integer(validate=[(validate.Range(min=0,max=5))])
@@ -21,7 +21,7 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
     last_rated_at = fields.DateTime(dump_only=True)
     save_count = fields.Integer(validate=[(validate.Range(min=0))], dump_only=True)
     share_count = fields.Integer(validate=[(validate.Range(min=0))], dump_only=True)
-    num_of_edits = fields.Int(validate=validate.Range(max=1, error='Post can only be edited once'))
+    num_of_edits = fields.Int(validate=validate.Range(max=1, error='Spot can only be edited once'))
     trending_score = fields.Integer(validate=[(validate.Range(min=0))], dump_only=True)
 
 
@@ -50,7 +50,7 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
             return value
         
         if "  " in value:
-            raise ValidationError("Invalid post name")
+            raise ValidationError("Invalid spot name")
         
         if value.startswith(("'", '-')) or value.endswith(("'", '-')):
             raise ValidationError("Name cannot start or end with apostrophe or hyphen")
@@ -80,12 +80,12 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
             "latitude": point.y,
             "longitude": point.x
         }
-class PostMediaSchema(ma.SQLAlchemyAutoSchema):
+class SpotMediaSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = PostMedia
+        model = SpotMedia
         include_fk = True
         
-    post_media_id = fields.Int(dump_only=True)
+    spot_media_id = fields.Int(dump_only=True)
 
     thumbnail_url = fields.URL()
     thumb_media_type = fields.Str()
@@ -117,6 +117,6 @@ class PostMediaSchema(ma.SQLAlchemyAutoSchema):
         return data
 
 
-post_schema = PostSchema()
-post_media_schema = PostMediaSchema()
-partial_schema = PostSchema(only =('name','description','hashtags','accessibility'))
+spot_schema = SpotSchema()
+spot_media_schema = SpotMediaSchema()
+partial_schema = SpotSchema(only =('name','description','hashtags','accessibility'))

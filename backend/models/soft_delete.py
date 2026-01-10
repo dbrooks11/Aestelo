@@ -33,10 +33,10 @@
 
 
 
-# class RemovedPost(db.Model):
-#     __tablename__ = "removed_post"
-#     __table_args__ = {'schema': removed_post_schema} 
-#     removed_post_id = Column(BigInteger, primary_key=True)
+# class RemovedSpot(db.Model):
+#     __tablename__ = "removed_spot"
+#     __table_args__ = {'schema': removed_spot_schema} 
+#     removed_spot_id = Column(BigInteger, primary_key=True)
 #     posted_by = Column(String(50), nullable= False)
 
 #     date_posted = Column(DateTime, default=datetime.now(timezone.utc))
@@ -49,7 +49,7 @@
 
 #     save_count = Column(Integer, default=0)
 #     share_count = Column(Integer, default=0)
-#     trending_score = Column(Integer, default=0) #will be used to calculate a score for trending post to keep track of which post is trending
+#     trending_score = Column(Integer, default=0) #will be used to calculate a score for trending spot to keep track of which spot is trending
 
 #     accessibility = Column(Boolean, default=False) #is it accessible to people who are handicapped. True = yes, False = no
 
@@ -67,7 +67,7 @@
 
 #     def to_dict(self):
 #         return {
-#             'removed_post_id': self.removed_post_id,
+#             'removed_spot_id': self.removed_spot_id,
 #             'posted_by': self.posted_by,
 #             'date_posted': self.date_posted,
 #             'description': self.description,

@@ -13,7 +13,7 @@ class Report(db.Model):
     reporter_id = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), nullable=False)
     
     # What's being reported
-    reported_type = Column(String(20), nullable=False)  # 'user', 'post', 'visit'
+    reported_type = Column(String(20), nullable=False)  # 'user', 'spot', 'visit'
     reported_id = Column(String(50), nullable=False)  # The ID of whatever is reported
     
     # Report details

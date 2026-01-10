@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type Dispatch, type JSX } from "react";
+import { useEffect, useRef, useState, type Dispatch, type JSX, type SetStateAction } from "react";
 import { type UploadedPhotosState, type PreviewPhotosState} from "../CreateSpotForm";
 import { Scan, LoaderCircle, Trash2, Plus } from "lucide-react";
 import { fileCompressionForPreview } from "../../../../util/client_image_compression";
@@ -6,7 +6,7 @@ import ScrollContainer from "react-indiana-drag-scroll";
 
 
 type Step2Type = {
-    setUploadedPhotos: Dispatch<React.SetStateAction<UploadedPhotosState>>;
+    setUploadedPhotos: Dispatch<SetStateAction<UploadedPhotosState>>;
     uploadedPhotos: UploadedPhotosState
     previewPhotos:PreviewPhotosState
     setPreviewPhotos: (value: PreviewPhotosState) => void

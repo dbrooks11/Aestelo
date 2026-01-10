@@ -34,7 +34,7 @@ const steps: Array<Steps> = [
     }
 ]
 
-
+// TODO: add progress barfor form
 
 // TODO: create save draft feature and add a table for drafts
 export default function CreateSpotForm({isCreateSpotModalOpen, setIsCreateSpotModalOpen}: CreateSpotForm): JSX.Element{
@@ -52,7 +52,7 @@ export default function CreateSpotForm({isCreateSpotModalOpen, setIsCreateSpotMo
         
     }, [showConfirmation]);
     
-    // TODO: turn backend models and routes from 'post' to 'spot'
+    
     function resetForm(): void {
         setShowConfirmation(false)
         setPreviewPhotos([])
@@ -61,7 +61,7 @@ export default function CreateSpotForm({isCreateSpotModalOpen, setIsCreateSpotMo
         setStep(1)
         setIsCreateSpotModalOpen(false)
     }
-
+    console.log(isLoading)
     return(
         <Modal 
             showModal={isCreateSpotModalOpen} 
@@ -75,7 +75,7 @@ export default function CreateSpotForm({isCreateSpotModalOpen, setIsCreateSpotMo
                 <div className="flex items-center gap-4">
                     {step > 2 && 
                     <ChevronLeft 
-                        className="hover:dark:stroke-neutral-200 dark:stroke-neutral-400 hover:stroke-black stroke-neutral-600 transition-colors cursor-pointer"
+                        className="stroke-neutral-600 hover:dark:stroke-neutral-200 hover:stroke-black dark:stroke-neutral-400 transition-colors cursor-pointer"
                         onClick={() => {
                             setStep((prev) => {
                                 return prev - 1
@@ -92,7 +92,8 @@ export default function CreateSpotForm({isCreateSpotModalOpen, setIsCreateSpotMo
                 
                 <div className="flex items-center gap-4">
                     <button
-                        className="px-4 py-1.5 rounded-full text-neutral-400 hover:dark:text-neutral-300 hover:text-neutral-500 text-sm text-center transition-colors cursor-pointer"
+                        disabled={isLoading}
+                        className="disabled:opacity-50 px-4 py-1.5 rounded-full text-neutral-400 not-disabled:hover:text-neutral-500 not-disabled:dark:hover:text-neutral-300 text-sm text-center transition-colors not-disabled:cursor-pointer disabled:cursor-not-allowed"
                         onClick={() => setShowConfirmation(true)}
                     >
                         Cancel
@@ -114,8 +115,11 @@ export default function CreateSpotForm({isCreateSpotModalOpen, setIsCreateSpotMo
                         <button 
                             type="submit" 
                             form="create-spot-form" 
-                            className="bg-black/90 hover:bg-black hover:dark:bg-white dark:bg-white/90 hover:shadow-md px-4 py-1.5 rounded-full text-white dark:text-black text-center transition-colors cursor-pointer"
-                        >Create</button>
+                            disabled={isLoading}
+                            className="bg-black/90 not-disabled:hover:bg-black not-disabled:hover:dark:bg-white dark:bg-white/90 disabled:opacity-50 not-disabled:hover:shadow-md px-4 py-1.5 rounded-full text-white dark:text-black text-center transition-all cursor-pointer not-disabled:cursor-pointer disabled:cursor-not-allowed"
+                        >
+                            {isLoading ? 'Creating...' : 'Create'}
+                        </button>
                     }
                 </div>
             </div>
@@ -149,6 +153,9 @@ export default function CreateSpotForm({isCreateSpotModalOpen, setIsCreateSpotMo
                     {step === 3 && 
                     <CreateSpotFormStepThree
                         previewPhotos={previewPhotos}
+                        uploadedPhotos={uploadedPhotos}
+                        resetForm={resetForm}
+                        setIsLoading={setIsLoading}
                     />}
 
                     {showConfirmation && 

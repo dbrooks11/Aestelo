@@ -22,6 +22,8 @@ ma = Marshmallow()
 jwt = JWTManager()
 mg = Migrate()
 celery = Celery()
+
+# TODO: use redis for rate limit storage
 limiter = Limiter(
     get_remote_address,
     default_limits=["10000 per day", "10000 per hour"],

@@ -9,7 +9,7 @@ from sqlalchemy.dialects.postgresql import UUID
 #socials
 #allow messages from -put in user_profile settings
 #circles - for users to be together
-#post privacy settings (might go in post.py)
+#spot privacy settings (might go in spot.py)
 #content_filter_mode
 #referal code
 
@@ -40,7 +40,7 @@ class UserProfile(db.Model):
     tiktok = Column(Text)
     is_verified_tiktok = Column(Boolean, default=False)
 
-    post_count = Column(Integer, default=0)
+    spot_count = Column(Integer, default=0)
     visit_count = Column(Integer, default=0)
     
     follower_count = Column(BigInteger, default=0)
@@ -69,8 +69,8 @@ class UserProfile(db.Model):
     user_settings = relationship('UserSettings', uselist=False ,backref= 'user_profile')
     user_role = relationship('UserRole', uselist=False, backref='user_profile')
     user_subscription = relationship('UserSubscription', uselist=False ,backref= 'user_profile')
-    post = relationship('Post', backref='user_profile')
-    post_media = relationship('PostMedia', backref='user_profile')
+    spot = relationship('Spot', backref='user_profile')
+    spot_media = relationship('SpotMedia', backref='user_profile')
     visit = relationship('Visit', backref='user_profile')
     visit_media = relationship('VisitMedia', backref='user_profile')
     rating = relationship('Rating', backref='user_profile')
@@ -141,7 +141,7 @@ class UserProfile(db.Model):
     def profile_photo_url(self):
         if not self.profile_photo:
             return None
-        public_url = f"{current_app.config['R2_PUBLIC_URL']}/{current_app.config['R2_BUCKET_NAME']}/{self.profile_photo}"
+        public_url = f"{current_app.config['R2_PUBLIC_URL']}/{self.profile_photo}"
         return public_url
     
 
@@ -149,7 +149,7 @@ class UserProfile(db.Model):
     def profile_banner_url(self):
         if not self.profile_banner:
             return None
-        public_url = f"{current_app.config['R2_PUBLIC_URL']}/{current_app.config['R2_BUCKET_NAME']}/{self.profile_banner}"
+        public_url = f"{current_app.config['R2_PUBLIC_URL']}/{self.profile_banner}"
         return public_url
         
     

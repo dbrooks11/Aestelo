@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from exstensions import db
 from models.user import UserProfile
 from models.visit import Visit, VisitMedia
-from models.post import Post
+from models.spot import Spot
 from schemas.visit_schema import visit_schema, visit_media_schema,partial_schema,ValidationError
 from routes.auth_required_wrapper import admin_required
 from util.photo_processing import photo_processing, get_decimal_coordinates
@@ -214,7 +214,7 @@ def upload_photos():
             return jsonify({
                 'error': 'Photos are from different locations',
                 'message': f'All photos must be taken at the same location (within {max_meter_distance} meters of each other).',
-                'suggestion': 'Please select photos taken at the same place, or create separate posts for different locations.'
+                'suggestion': 'Please select photos taken at the same place, or create separate spots for different locations.'
             }), 400
         
         uploaded_photos = []
@@ -258,12 +258,12 @@ def upload_photos():
     
 
 
-@visit_bp.route('/create/under-post/<int:post_id>', methods = ['POST'])
+@visit_bp.route('/create/under-spot/<int:spot_id>', methods = ['POST'])
 @jwt_required()
-def create_visit(post_id):
+def create_visit(spot_id):
     current_user = get_jwt_identity()
     current_user_profile = UserProfile.query.get(current_user)
-    post = Post.query.get(post_id)
+    spot = Spot.query.get(spot_id)
 
     if current_user_profile is None:
         return jsonify({'error': 'Profile not found'}), 404
@@ -274,8 +274,8 @@ def create_visit(post_id):
     if current_user_profile.is_banned:
         return jsonify({'error':'Profile unavailable'}),404
     
-    if post is None or post.is_deleted or post.is_removed:
-        return jsonify({'error': 'Post does not exist'}), 404
+    if spot is None or spot.is_deleted or spot.is_removed:
+        return jsonify({'error': 'Spot does not exist'}), 404
     
     data = request.get_json()
 
@@ -288,15 +288,15 @@ def create_visit(post_id):
     
     avg_location = data.get('location', {})
 
-    coords_post_visit = [post.refined_location, avg_location]
-    avg_location_post_visit = average_location(coords_post_visit)
+    coords_spot_visit = [spot.refined_location, avg_location]
+    avg_location_spot_visit = average_location(coords_spot_visit)
 
-    #checks if the distance between the visit location and post location is far so user dont create falsey visits
+    #checks if the distance between the visit location and spot location is far so user dont create falsey visits
     max_meter_distance = 30
-    if avg_location_post_visit is None:
+    if avg_location_spot_visit is None:
         return jsonify({
-                'error': 'Visit is from a different location than the post',
-                'message': f'Visit must be taken at the same location (within {max_meter_distance} of the post).',
+                'error': 'Visit is from a different location than the spot',
+                'message': f'Visit must be taken at the same location (within {max_meter_distance} of the spot).',
                 'suggestion': 'Please make sure visit is taken at the same place'
             }), 400
     
@@ -324,7 +324,7 @@ def create_visit(post_id):
             return jsonify({"error": error.messages}), 400
         
         new_visit = Visit(
-            post_id = post.post_id,
+            spot_id = spot.spot_id,
             user_profile_id = current_user_profile.id,
             refined_location = valid_visit_data.get('refined_location'),
             music_track_id = valid_visit_data.get('music_track_id'),
@@ -382,13 +382,13 @@ def create_visit(post_id):
     
         UserProfile.query.filter_by(id = current_user_profile.id).update({'visit_count': UserProfile.visit_count + 1}, synchronize_session=False)
 
-        Post.query.filter_by(post_id = post_id).update({'total_visits': Post.total_visits + 1}, synchronize_session=False)
+        Spot.query.filter_by(spot_id = spot_id).update({'total_visits': Spot.total_visits + 1}, synchronize_session=False)
 
         db.session.commit()
         return visit_schema.dump(new_visit), 201
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': f'Failed to create post: {str(e)}'}), 500
+        return jsonify({'error': f'Failed to create spot: {str(e)}'}), 500
             
 
 

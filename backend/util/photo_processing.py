@@ -3,7 +3,7 @@ from PIL.Image import DecompressionBombError
 from pillow_heif import register_heif_opener
 import io
 from flask import current_app
-
+from celery import shared_task
 
 #TODO: Put name for compressed files. Use users ID from route and a label (profile photo, banner, etc)
 
@@ -138,8 +138,8 @@ def photo_processing(*photos: tuple):
     }, 200
     
 
-
-
+# TODO: raise errors instead of returning them
+@shared_task
 def photo_processing_one_img(img_file, is_banner: bool, current_user_id: str):
 
     error = []
@@ -150,11 +150,8 @@ def photo_processing_one_img(img_file, is_banner: bool, current_user_id: str):
             error.append(f"Invalid format: {img.format}. Must be JPEG, PNG, HEIC, or HEIF")
             return error
     
-    
         img.verify()
-
-        img = Image.open(img_file)
-        
+        img = Image.open(img_file)  
 
     except DecompressionBombError:
         current_app.logger.warning(f"User {current_user_id} attempted Decompression Bomb upload.")
@@ -176,7 +173,6 @@ def photo_processing_one_img(img_file, is_banner: bool, current_user_id: str):
 
         if img.width > max_width or img.height > max_height:
             img.thumbnail(size=(max_width, max_height), resample=Image.Resampling.LANCZOS)
-
     
     if is_banner is False:
         max_width = 500

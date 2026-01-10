@@ -24,7 +24,7 @@
 #     __table_args__ = (Index('idx_location_coords', 'latitude', 'longitude'),
 #                       )
     
-#     post_media_id = Column(BigInteger, ForeignKey('post_media.id'), index=True, nullable=True)
+#     spot_media_id = Column(BigInteger, ForeignKey('spot_media.id'), index=True, nullable=True)
 #     visit_media_id = Column(BigInteger, ForeignKey('visit_media.id'), index=True, nullable=True)
 #     business_location_details = relationship('BusinessLocationDetails', backref='location') #will be handled later
    
@@ -40,7 +40,7 @@
     
 #     def to_dict(self):
 #         return {
-#             "post_id": self.post_media_id,
+#             "spot_id": self.spot_media_id,
 #             "visit_id": self.visit_media_id, 
 #             "location_id": self.location_id,
 #             "longitude": self.longitude,

@@ -2,7 +2,7 @@ from functools import wraps
 from flask import jsonify, request
 from flask_jwt_extended import get_jwt_identity
 from models.user import UserProfile
-from models.post import Post
+from models.spot import Spot
 from models.visit import Visit
 from models.followers_and_following import Follow
 from models.block_profile import BlockProfile
@@ -113,8 +113,8 @@ def profile_current_check_post(func):
     def decorator(*args, **kwargs):
         current_user = get_jwt_identity()
         current_user_profile = UserProfile.query.get(current_user)
-        post_id = kwargs.get('post_id')
-        post = Post.query.get(post_id)
+        spot_id = kwargs.get('spot_id')
+        spot = Spot.query.get(spot_id)
         
         if current_user_profile is None:
             return jsonify({'error': 'Profile not found'}), 404
@@ -125,14 +125,14 @@ def profile_current_check_post(func):
         if current_user_profile.is_banned:
             return jsonify({'error':'Profile unavailable'}),404
         
-        if str(post.user_profile_id) != current_user:
+        if str(spot.user_profile_id) != current_user:
             return jsonify({'error': 'Action not permitted'}), 403
         
-        if post is None or post.is_deleted or post.is_removed:
+        if spot is None or spot.is_deleted or spot.is_removed:
             return jsonify({'error': 'Post not found'}), 404
 
         kwargs['current_user_profile'] = current_user_profile
-        kwargs['post'] = post
+        kwargs['spot'] = spot
         
         return func(*args, **kwargs)
     return decorator

@@ -1,12 +1,17 @@
-import { useState, type JSX, type KeyboardEvent } from "react";
+import { useState, type FormEvent, type JSX, type KeyboardEvent } from "react";
 import { ArrowLeft, ArrowRight, X, Accessibility } from "lucide-react";
-import type { PreviewPhotosState } from "../CreateSpotForm";
+import type { PreviewPhotosState, UploadedPhotosState } from "../CreateSpotForm";
+import { AxiosErrorHelper, protectedInstance } from "../../../../util/axios_api_helpers";
+import axios, { type AxiosResponse } from "axios";
 
 type Step3Type = {
     previewPhotos: PreviewPhotosState
+    uploadedPhotos: UploadedPhotosState
+    resetForm: () => void
+    setIsLoading: (value:boolean) => void
 }
 
-export default function CreateSpotFormStepThree({previewPhotos}: Step3Type): JSX.Element{
+export default function CreateSpotFormStepThree({previewPhotos, uploadedPhotos, resetForm, setIsLoading}: Step3Type): JSX.Element{
 
     const [currentPhoto, setCurrentPhoto] = useState<number>(0)
     const [tags, setTags] = useState<Array<string | undefined>>([])
@@ -14,15 +19,68 @@ export default function CreateSpotFormStepThree({previewPhotos}: Step3Type): JSX
     const [spotNameInput, setSpotNameInput] = useState<number>(0)
     const [descriptionInput, setDescriptionInput] = useState<number>(0)
 
-    const handleSpotFormClick = async(formData: FormData) => {
-        const data = Object.fromEntries(formData)
-        const tagsList: Array<string | undefined> = tags
-        const accessible: FormDataEntryValue = data?.accessible
-        const description: FormDataEntryValue = data?.description
-        const name: FormDataEntryValue = data?.name
-
+    const handleSpotFormClick = async(e: FormEvent<HTMLFormElement>): Promise<void> => {
+        e.preventDefault()
+        let fileInfo: Array<{fileName: string, fileType: string}> = []
+        setIsLoading(true)
         
+        if(uploadedPhotos && uploadedPhotos.length > 0){
+            const arrayUploadedPhotos: Array<File> = Array.from(uploadedPhotos)
+            fileInfo = arrayUploadedPhotos.map((file) => ({
+                fileName: file.name,
+                fileType: file.type
+            }))
 
+            const formData = new FormData(e.currentTarget)
+
+            // TODO: remove console logs and display actual errors via toast
+            try{
+                const responseOne: AxiosResponse = await protectedInstance.post('/spot/presigned-url', fileInfo)
+
+                if(responseOne.status === 200){
+                    const presignedList: Array<{key: string, presigned_url: string}> = responseOne.data.message
+
+                    try{
+                        const uploadedPromises: Array<Promise<void | string>> = presignedList.map((presignedData, index: number) => {
+                            const file = uploadedPhotos[index]
+
+                            return axios.put(presignedData.presigned_url, file, {
+                                headers: {
+                                    "Content-Type": file.type
+                                }
+                            }).then(() => {
+                                return presignedData.key
+                            })
+                        })
+
+                        const uploadKeys: Array<void | string> = await Promise.all(uploadedPromises)
+                        const formDataObj = Object.fromEntries(formData)
+
+                        const responseTwo: AxiosResponse = await protectedInstance.post('/spot/create', {
+                            name: formDataObj.name,
+                            description: formDataObj.description,
+                            accessible: formDataObj.accessible ? true : false,
+                            tags: tags,
+                            keys: uploadKeys
+                        })
+
+                        if(responseTwo.status === 201){
+                            console.log(responseTwo.data)
+                            resetForm()
+                        }
+                    }catch(error){
+                        const errors: string = AxiosErrorHelper(error)
+                        console.error(errors)
+                        
+                    }
+                }
+            }catch(error){
+                const errors: string = AxiosErrorHelper(error)
+                console.error(errors)
+            }finally{
+                setIsLoading(false)
+            }
+        }
     }
 
     const handleTags = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -61,7 +119,7 @@ export default function CreateSpotFormStepThree({previewPhotos}: Step3Type): JSX
                 
                 {/* Navigation Buttons */}
                 <button 
-                    className="hidden bottom-1/2 left-2 absolute group-hover:flex hover:bg-neutral-500/40 disabled:opacity-50 p-1 rounded-full text-white/80 hover:text-white transition-colors cursor-pointer"
+                    className="hidden bottom-1/2 left-2 absolute group-hover:flex group-hover:bg-neutral-500/40 disabled:opacity-50 p-1 rounded-full text-white/80 hover:text-white transition-colors cursor-pointer"
                     type="button"
                     onClick={() => setCurrentPhoto(Math.max(0, currentPhoto - 1))}
                     disabled={currentPhoto === 0}
@@ -71,7 +129,7 @@ export default function CreateSpotFormStepThree({previewPhotos}: Step3Type): JSX
                 </button>
                 
                 <button 
-                    className="hidden right-2 bottom-1/2 absolute group-hover:flex hover:bg-neutral-500/40 disabled:opacity-50 p-1 rounded-full text-white/80 hover:text-white transition-colors cursor-pointer"
+                    className="hidden right-2 bottom-1/2 absolute group-hover:flex group-hover:bg-neutral-500/40 disabled:opacity-50 p-1 rounded-full text-white/80 hover:text-white transition-colors cursor-pointer"
                     type="button"
                     onClick={() => setCurrentPhoto(Math.min(previewPhotos.length - 1, currentPhoto + 1))}
                     disabled={currentPhoto === previewPhotos.length - 1}
@@ -97,7 +155,7 @@ export default function CreateSpotFormStepThree({previewPhotos}: Step3Type): JSX
             {/* RIGHT SIDE: Form Region */}
             <form 
                 id="create-spot-form"
-                action={handleSpotFormClick}
+                onSubmit={handleSpotFormClick}
                 className="flex flex-col bg-white dark:bg-graphite border-neutral-200 dark:border-white/10 border-l w-1/2 h-full overflow-y-auto overscroll-y-contain transition-colors"
                 aria-label="Spot Details Form"
             >

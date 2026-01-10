@@ -3,7 +3,7 @@ from .auth import auth_bp
 from .profile import profile_bp
 from .follow import follow_bp
 from .block import block_bp
-from .post import post_bp
+from .spot import spot_bp
 from .visit import visit_bp
 from .user_info import user_info_bp
 from .user_settings import user_settings_bp
@@ -14,7 +14,7 @@ routes = [
     profile_bp,
     follow_bp,
     block_bp,
-    post_bp,
+    spot_bp,
     visit_bp,
     user_info_bp,
     user_settings_bp,
