@@ -45,7 +45,7 @@ class Spot(db.Model):
     trending_score = ColumnProperty((4 * share_count)+(2*save_count)+((1 * average_rating ) + (1.5 * total_num_of_ratings))) #will be used to calculate a score for trending spot to keep track of which spot is trending
     hashtags = Column(ARRAY(String)) #different from hastags, can put tags on spot like ('graffiti', 'red', 'streetwear','dark')
 
-    #* Color pallete willl be added later
+    #* Color pallete will be added later
     # color_pallette = Column(String())
     accessibility = Column(Boolean, default=False) #is it accessible to people who are handicapped. True = yes, False = no
     num_of_edits = Column(Integer, default=0)

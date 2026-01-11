@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, X, Accessibility } from "lucide-react";
 import type { PreviewPhotosState, UploadedPhotosState } from "../CreateSpotForm";
 import { AxiosErrorHelper, protectedInstance } from "../../../../util/axios_api_helpers";
 import axios, { type AxiosResponse } from "axios";
+import { useTaskStore } from "../../../../store/taskStateStore";
 
 type Step3Type = {
     previewPhotos: PreviewPhotosState
@@ -13,6 +14,7 @@ type Step3Type = {
 
 export default function CreateSpotFormStepThree({previewPhotos, uploadedPhotos, resetForm, setIsLoading}: Step3Type): JSX.Element{
 
+    const addTask = useTaskStore((state) => state.addTask)
     const [currentPhoto, setCurrentPhoto] = useState<number>(0)
     const [tags, setTags] = useState<Array<string | undefined>>([])
     const [tagInput, setTagInput] = useState<string>('')
@@ -59,13 +61,16 @@ export default function CreateSpotFormStepThree({previewPhotos, uploadedPhotos, 
                         const responseTwo: AxiosResponse = await protectedInstance.post('/spot/create', {
                             name: formDataObj.name,
                             description: formDataObj.description,
-                            accessible: formDataObj.accessible ? true : false,
-                            tags: tags,
+                            accessibility: formDataObj.accessible ? true : false,
+                            hashtags: tags,
                             keys: uploadKeys
                         })
 
                         if(responseTwo.status === 201){
-                            console.log(responseTwo.data)
+                            const dataTwo = responseTwo.data
+                            const { task_id, name, post_type } = dataTwo;
+
+                            addTask(task_id, post_type, name);
                             resetForm()
                         }
                     }catch(error){

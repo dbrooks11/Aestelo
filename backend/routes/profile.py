@@ -9,7 +9,7 @@ from models.block_profile import BlockProfile
 from models.followers_and_following import Follow
 from models.auth import AuthUser
 from schemas.user_schema import user_profile_schema, profile_can_edit, partial_schema ,profile_viewing, ValidationError
-from util.storage import upload_to_r2, delete_file_r2
+from util.storage import upload_to_s3, delete_file_s3
 from util.photo_processing import photo_processing_one_img
 from util.decorators import profile_check_current__banned_removed
 
@@ -86,7 +86,7 @@ def profile_me():
                             if isinstance(profile_photo_compressed, list):
                                 return jsonify({'error': {photo_field_name: profile_photo_compressed[0]}}),400
                             
-                            new_photo_path: str = upload_to_r2(file_obj=profile_photo_compressed, user_id=user_profile.id, folder=photo_field_name)
+                            new_photo_path: str = upload_to_s3(file_obj=profile_photo_compressed, user_id=user_profile.id, folder=photo_field_name)
                     
 
                 if banner_field_name in form_files:
@@ -99,7 +99,7 @@ def profile_me():
                                 return jsonify({'error': {banner_field_name: profile_banner_compressed[0]}}), 400
                             
                             
-                            new_banner_path: str = upload_to_r2(file_obj=profile_banner_compressed, user_id=user_profile.id, folder=banner_field_name)
+                            new_banner_path: str = upload_to_s3(file_obj=profile_banner_compressed, user_id=user_profile.id, folder=banner_field_name)
                     
             except Exception as e:
                 current_app.logger.error(f"Image processing failed: {str(e)}")
@@ -123,9 +123,9 @@ def profile_me():
 
             try:
                 if new_photo_path and old_photo_path:
-                    delete_file_r2(old_photo_path)
+                    delete_file_s3(old_photo_path)
                 if new_banner_path and old_banner_path:
-                    delete_file_r2(old_banner_path)
+                    delete_file_s3(old_banner_path)
             except Exception as e:
                 current_app.logger.warning(f"Failed to delete old images: {str(e)}")
                 return jsonify({'error': str(e)})
@@ -138,9 +138,9 @@ def profile_me():
 
             try:
                 if new_photo_path: 
-                    delete_file_r2(new_photo_path)
+                    delete_file_s3(new_photo_path)
                 if new_banner_path: 
-                    delete_file_r2(new_banner_path)
+                    delete_file_s3(new_banner_path)
             except:
                 pass
 

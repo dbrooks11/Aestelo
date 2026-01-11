@@ -4,6 +4,7 @@ from flask import current_app
 from datetime import datetime, timezone
 import secrets
 import os
+import uuid
 
 s3 = boto3.client(
         service_name="s3",
@@ -14,19 +15,19 @@ s3 = boto3.client(
         config=Config(signature_version='s3v4')
         )
 
-def generate_presigned_url(filename: str, filetype: str, user_id: str, folder: str):
+def generate_presigned_url(filename: str, filetype: str, user_id: str, folder: str, expires_in: int):
    
     raw_filename_key = temporary_file_path_presigned(user_id=user_id, folder=folder, filename=filename)
 
     try:
         response = s3.generate_presigned_url(
             'put_object',
-            Params={
+            Params = {
                 'Bucket': current_app.config['R2_BUCKET_NAME'],
                 'Key':raw_filename_key,
                 'ContentType': filetype
             },
-            ExpiresIn=1800
+            ExpiresIn = expires_in if expires_in else 3600
         )
 
         return {'key': raw_filename_key, 'presigned_url': response } 
@@ -43,30 +44,34 @@ def temporary_file_path_presigned(user_id: str, folder: str, filename: str):
 
     return unique_filename
 
-def download_file(file_name: str):
+
+def download_file(file_path: str) -> str:
+    bucket = current_app.config['R2_BUCKET_NAME']
+    local_filename = f"/tmp/{uuid.uuid4().hex}_{os.path.basename(file_path)}"
+    
     try:
-        response = s3.generate_presigned_url(
-            'get_object',
-            Params={
-                'Bucket': current_app.config['R2_BUCKET_NAME'],
-                'Key': file_name
-            },
-            ExpiresIn=3600
+        s3.download_file(
+            Bucket=bucket, 
+            Key=file_path, 
+            Filename=local_filename
         )
+        
+        return local_filename
 
-        return response 
     except Exception as e:
-        raise Exception(str(e))
+        if os.path.exists(local_filename):
+            os.remove(local_filename)
+        raise Exception(f"Download failed for {file_path}: {str(e)}")
 
 
-def upload_to_r2(file_obj, user_id: str, folder: str):
+def upload_to_s3(file_obj, folder: str):
 
     bucket = current_app.config['R2_BUCKET_NAME']
     
     try:
         timestamp = datetime.now(timezone.utc).strftime('%d%m%Y_%H%M%S')
         short_id = secrets.token_urlsafe(16) 
-        unique_filename = f"{folder}/{user_id}/{timestamp}_{short_id}.webp"
+        unique_filename = f"{folder}/{timestamp}_{short_id}.webp"
     
         file_obj.seek(0)
         
@@ -89,7 +94,7 @@ def upload_to_r2(file_obj, user_id: str, folder: str):
     
 
 
-def delete_file_r2(file_path):
+def delete_file_s3(file_path: str):
     bucket = current_app.config['R2_BUCKET_NAME']
 
     try:

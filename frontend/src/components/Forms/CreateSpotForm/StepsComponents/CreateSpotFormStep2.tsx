@@ -6,7 +6,7 @@ import ScrollContainer from "react-indiana-drag-scroll";
 
 
 type Step2Type = {
-    setUploadedPhotos: Dispatch<SetStateAction<UploadedPhotosState>>;
+    setUploadedPhotos: Dispatch<SetStateAction<UploadedPhotosState>>
     uploadedPhotos: UploadedPhotosState
     previewPhotos:PreviewPhotosState
     setPreviewPhotos: (value: PreviewPhotosState) => void

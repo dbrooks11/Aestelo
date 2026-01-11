@@ -9,7 +9,7 @@ from schemas.visit_schema import visit_schema, visit_media_schema,partial_schema
 from routes.auth_required_wrapper import admin_required
 from util.photo_processing import photo_processing, get_decimal_coordinates
 from util.validation import photo_validation
-from util.storage import upload_to_r2
+from util.storage import upload_to_s3
 from util.outlier_coords import average_location
 from util.decorators import (profile_both_check_banned_removed, block_and_follow_check, profile_current_check_visit, 
                              profile_check_current__banned_removed)
@@ -178,7 +178,7 @@ def upload_photos():
             gps = pht_data['gps']
             lat, long, alt = get_decimal_coordinates(gps)
             if not lat or not long:
-                failed_photo_url = upload_to_r2(pht_data['photo'], current_user, folder='failed_photos')
+                failed_photo_url = upload_to_s3(pht_data['photo'], current_user, folder='failed_photos')
                 failed_photos.append({
                     'failed_photo_url': failed_photo_url,
                     'reason': 'No metadata found',
@@ -219,8 +219,8 @@ def upload_photos():
         
         uploaded_photos = []
         for pht_data_r2 in proccessed_photos:
-            photo_url = upload_to_r2(pht_data_r2['photo_bytes'], current_user, folder='visits')
-            thumb_url = upload_to_r2(pht_data_r2['thumbnail_bytes'], current_user, folder = 'visit_thumbnails')
+            photo_url = upload_to_s3(pht_data_r2['photo_bytes'], current_user, folder='visits')
+            thumb_url = upload_to_s3(pht_data_r2['thumbnail_bytes'], current_user, folder = 'visit_thumbnails')
             
             uploaded_photos.append({
                 'photo_url': photo_url,

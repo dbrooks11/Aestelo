@@ -8,6 +8,8 @@ from celery import shared_task
 #TODO: Put name for compressed files. Use users ID from route and a label (profile photo, banner, etc)
 
 register_heif_opener()
+file_types = ('JPEG', 'PNG', 'HEIF', 'HEIC')
+
 
 def get_decimal_coordinates(gps_info):
 
@@ -20,36 +22,66 @@ def get_decimal_coordinates(gps_info):
 
         return float(f'{decimal:.6f}')
     
-    def get_altitude(alt_meters, alt_ref):
-        if alt_ref == 1:
-            alt_meters = -alt_meters
-
-        return float(alt_meters)
-    
-
     photo_lat = gps_info.get(2)
     photo_lat_ref = gps_info.get(1)
     
     photo_long = gps_info.get(4)
     photo_long_ref = gps_info.get(3)
 
-    photo_alt = gps_info.get(6)
-    photo_alt_ref = gps_info.get(5)
-
-    latitude, longitude, altitude = None, None, None
+    latitude, longitude = None, None
     
     if photo_lat and photo_long:
         latitude = dms_to_decimal(photo_lat, photo_lat_ref)
         longitude = dms_to_decimal(photo_long, photo_long_ref)
         
-        if photo_alt:
-            altitude = get_altitude(photo_alt,photo_alt_ref)
-            return latitude, longitude, altitude
-        return latitude, longitude, None
+        return latitude, longitude
 
-    return latitude,longitude,altitude
+    return None, None
 
 
+def photo_processing_one_img_metadata(file, current_user_id: str):
+    try:
+        img = Image.open(file)
+
+        if img.format not in file_types:
+            raise Exception(f"Invalid format: {img.format}. Must be JPEG, PNG, HEIC, or HEIF")
+    
+        img.verify()
+        img = Image.open(file)  
+
+    except DecompressionBombError:
+        current_app.logger.warning(f"User {current_user_id} attempted Decompression Bomb upload.")
+        raise DecompressionBombError("Image is too large or complex.")
+    
+    except OSError:
+        raise OSError(f"photo {file}: could not be opened")
+    except Exception as e:
+        raise Exception(f"photo {file}: Failed to process - {str(e)}")
+    
+    img = ImageOps.exif_transpose(img)
+
+    if img.mode not in ['RGB', 'RGBA']:
+        img = img.convert('RGB')
+    
+    exif = img.getexif()
+    gps = exif.get_ifd(ExifTags.IFD.GPSInfo)
+
+    # TODO: handle user chosen aspect size instead
+    max_width = 1080
+    max_height = 1350
+    if img.width > max_width or img.height > max_height:
+        img.thumbnail(size=(max_width, max_height), resample=Image.Resampling.LANCZOS)
+        
+    output = io.BytesIO()
+    img.save(output, format="WEBP", quality=90, method=6, exif= b'', subsampling=0)
+    output.seek(0)
+    return {
+        'file': output,
+        'gps': gps,
+        'width': img.size[0],
+        'height': img.size[1],
+        'type': 'photo' if img.format in file_types else None
+    }
 
 
 def photo_processing(*photos: tuple):
@@ -71,7 +103,7 @@ def photo_processing(*photos: tuple):
             im = Image.open(io.BytesIO(photo))
             
             # Check format
-            if im.format not in ['JPEG', 'PNG', 'HEIF']:
+            if im.format not in file_types:
                 errors.append(f"photo {pht_count}: Invalid format '{im.format}'. Must be JPEG, PNG, or HEIF")
                 continue
 
@@ -139,14 +171,13 @@ def photo_processing(*photos: tuple):
     
 
 # TODO: raise errors instead of returning them
-@shared_task
 def photo_processing_one_img(img_file, is_banner: bool, current_user_id: str):
 
     error = []
     try:
         img = Image.open(img_file)
 
-        if img.format not in ('JPEG', 'PNG', 'HEIF', 'HEIC'):
+        if img.format not in file_types:
             error.append(f"Invalid format: {img.format}. Must be JPEG, PNG, HEIC, or HEIF")
             return error
     

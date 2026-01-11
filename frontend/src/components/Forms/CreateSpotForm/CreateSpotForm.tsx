@@ -34,7 +34,9 @@ const steps: Array<Steps> = [
     }
 ]
 
-// TODO: add progress barfor form
+// TODO: let user choose aspect ratio. send it to backend
+// TODO: add caution indicator thing about meta data and about limit of 20mb per photo
+// TODO: add progress bar for form
 
 // TODO: create save draft feature and add a table for drafts
 export default function CreateSpotForm({isCreateSpotModalOpen, setIsCreateSpotModalOpen}: CreateSpotForm): JSX.Element{
@@ -61,7 +63,7 @@ export default function CreateSpotForm({isCreateSpotModalOpen, setIsCreateSpotMo
         setStep(1)
         setIsCreateSpotModalOpen(false)
     }
-    console.log(isLoading)
+    
     return(
         <Modal 
             showModal={isCreateSpotModalOpen} 

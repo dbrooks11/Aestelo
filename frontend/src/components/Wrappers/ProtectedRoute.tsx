@@ -3,8 +3,11 @@ import { useState, type JSX,} from "react";
 import { useAuth } from "../../context/AuthContext";
 import MainFloatingNavBar from "../MainFloatingNavBar";
 import CreateSpotForm from "../Forms/CreateSpotForm/CreateSpotForm";
+import GlobalProgressTaskDrawer from "../GlobalTaskProgressDrawer";
+
 
 export type CreateSpotFormModalOpenType = boolean
+export type SpotAndVisitProgressType = Array<object>
 
 export default function ProtectedRoute(): JSX.Element{
     const [isCreateSpotModalOpen, setIsCreateSpotModalOpen] = useState<CreateSpotFormModalOpenType>(false)
@@ -27,7 +30,9 @@ export default function ProtectedRoute(): JSX.Element{
             <Outlet/>
         </div>
         <MainFloatingNavBar openModal={() => setIsCreateSpotModalOpen(true)}/>
-        <CreateSpotForm isCreateSpotModalOpen={isCreateSpotModalOpen} setIsCreateSpotModalOpen={setIsCreateSpotModalOpen}/>
+        <CreateSpotForm isCreateSpotModalOpen={isCreateSpotModalOpen} setIsCreateSpotModalOpen={setIsCreateSpotModalOpen} 
+        />
+        <GlobalProgressTaskDrawer/>
     </>
     
 )

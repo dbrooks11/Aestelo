@@ -25,35 +25,45 @@ class SpotSchema(ma.SQLAlchemyAutoSchema):
     trending_score = fields.Integer(validate=[(validate.Range(min=0))], dump_only=True)
 
 
-    name = fields.Str(validate= [validate.Regexp(r"^[a-zA-Z\s]+$",error="Name can only contain letters")])
+    name = fields.Str(validate= [validate.Regexp(r"^(?!.*[-']{2})[a-zA-Z ][-a-zA-Z ']*[a-zA-Z ]$",error="Name can only contain letters")])
     description = fields.Str(validate=[validate.Length(max = 200)])
+    accessibility = fields.Bool()
     hashtags = fields.List(
-        fields.Str(validate=validate.Regexp(r'^[a-zA-Z0-9_#]+$', error="Hashtags can only contain letters, numbers, and underscores")),
+        fields.Str(validate=validate.Regexp(r'^[a-zA-Z0-9_]+$', error="Hashtags can only contain letters, numbers, and underscores")),
         validate=validate.Length(max=10)
     )
+   
 
     @validates('hashtags')
     def validate_hashtags(self, value, **kwargs):
         if value:
+            checked_tags = []
+
             for hashtag in value:
-                if len(hashtag) > 100:
-                    raise ValidationError("Each hashtag must be 100 characters or less")
-                if hashtag.count('#') > 1:
-                    raise ValidationError("Hashtag can only contain one #")
-                if hashtag[0] != '#':
-                    raise ValidationError("Hashtags must begin with a #")
+                tag_length = 50
+                if len(hashtag) > tag_length:
+                    raise ValidationError(f'Each hashtag must be {tag_length} characters or less')
+                
+                if hashtag in checked_tags:
+                    raise ValidationError(f'Duplicate hashtags are not allowed. Duplicated tag: {hashtag}')
+                
+                checked_tags.append(hashtag)
         return value
 
     @validates('name')
     def validate_first_name(self, value, **kwargs):
-        if not value or value.strip() == '':
-            return value
+        if not value or value.strip() == '' or len(value) == 0:
+            raise ValidationError("Spot name can not be empty")
         
         if "  " in value:
             raise ValidationError("Invalid spot name")
         
         if value.startswith(("'", '-')) or value.endswith(("'", '-')):
-            raise ValidationError("Name cannot start or end with apostrophe or hyphen")
+            raise ValidationError("Name cannot start or end with an apostrophe or a hyphen")
+        
+        spot_name_length = 40
+        if(len(value) > spot_name_length):
+            raise ValidationError(f'Spot name must be {spot_name_length} characters or less')
         
         return value.strip()
     
@@ -61,25 +71,23 @@ class SpotSchema(ma.SQLAlchemyAutoSchema):
     def validate_bio(self,value, **kwargs):
         if '\x00' in value:
             raise ValidationError('Description contains invalid characters')
-        return value
+        
+        spot_description_length = 200
+        if len(value) > spot_description_length:
+            raise ValidationError(f'Spot description must be {spot_description_length} characters or less')
 
-    @pre_load
-    def strip_strings(self, data, **kwargs):
-        for key, value in data.items():
-            if isinstance(value, str):
-                data[key] = value.strip()
-        return data
+        return value.strip()
 
     def get_coordinates(self, obj):
         if not obj.coordinates:
             return None
-        
-        # to_shape converts the binary WKBElement to a Python Shapely object
+    
         point = to_shape(obj.coordinates)
         return {
             "latitude": point.y,
             "longitude": point.x
         }
+    
 class SpotMediaSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = SpotMedia
