@@ -57,11 +57,11 @@ export default function CreateSpotFormStepTwo({setUploadedPhotos, uploadedPhotos
                             decoding="async"
                             src={photo} 
                             className="w-full h-full object-cover"
-                            
+                            draggable={false}
                             >
                         </img>
                         <div 
-                            className='top-1 left-1 absolute flex justify-center items-center bg-black/60 rounded-full w-6 h-6 text-white pointer-events-none'
+                            className='top-1 left-1 absolute flex justify-center items-center bg-black/60 rounded-full w-6 h-6 text-white select-none pointer-events-none'
                         >
                             {index + 1}
                         </div>
@@ -108,7 +108,6 @@ export default function CreateSpotFormStepTwo({setUploadedPhotos, uploadedPhotos
             setIsDeleting(false)
             return
         }
-
         const currentFiles = Array.from(uploadedPhotos || [])
         const filesToKeep = currentFiles.filter((_, index) => !deletedPhotos.includes(index))
 
@@ -124,7 +123,6 @@ export default function CreateSpotFormStepTwo({setUploadedPhotos, uploadedPhotos
 
         setUploadedPhotos(arrayToFileList(filesToKeep))
         setPreviewPhotos(previewsToKeep)
-
         setDeletedPhotos([])
         setIsDeleting(false)
         setCurrentPhoto(0)

@@ -84,8 +84,7 @@ def upload_to_s3(file_obj, folder: str):
             }
         )
         
-        return unique_filename
-        
+        return unique_filename  
     except ClientError as ce:
         current_app.logger.error(f"R2 Upload Failed: {ce}")
         raise ClientError(f"An error occurred: {ce}")

@@ -1,11 +1,13 @@
 from celery import shared_task
-from models.spot import SpotMedia
-from models.visit import VisitMedia
+from models.spot import SpotMedia, Spot
+from models.visit import VisitMedia, Visit
 from util.photo_processing import photo_processing_one_img_metadata,get_decimal_coordinates
 from util.storage import s3, delete_file_s3, download_file, upload_to_s3
+from util.outlier_coords import reject_post_type
 import os
 from typing import Literal
 from exstensions import db
+
 
 @shared_task(bind=True, ignore_result=False)
 def process_photos_with_metadata(self, key: str, post_type_id: int, user_id: str, upload_s3_foldername: str, post_type: Literal['spot', 'visit'], order: int):
@@ -16,6 +18,8 @@ def process_photos_with_metadata(self, key: str, post_type_id: int, user_id: str
     try:
         metadata = s3.head_object(Bucket=bucket, Key=key)
         file_size = metadata.get('ContentLength')
+
+        #TODO: make worker download file to temp folder and not ram
         
         if file_size > 20 * 1024 * 1024:
             delete_file_s3(file_path=key)
@@ -27,38 +31,41 @@ def process_photos_with_metadata(self, key: str, post_type_id: int, user_id: str
                 file=local_file_path,
                 current_user_id=user_id
             )
-        print(f'This is the reulst of celery processing: {result}')
         
-        latitude, longitude = get_decimal_coordinates(result.get('gps'))
-
-        if not latitude or not longitude:
-            raise Exception( f'No location data provided for {key}')
-
-        print(f'These are the coords: {longitude},{latitude}')
+        latitude, longitude = get_decimal_coordinates(gps_info=result.get('gps'), key=key)
 
         uploaded_filepath = upload_to_s3(file_obj=result.get('file'), folder=upload_s3_foldername)
 
         if(post_type == 'spot'):
-            media = SpotMedia(
-                spot_id=post_type_id,
-                uploaded_by=user_id,
-                sort_order=order,
-                photo_path=uploaded_filepath,
-                photo_type=result.get('type'),
-                width=result.get('width'),
-                height=result.get('height')
-            )
+            is_duplicate = db.session.query(SpotMedia.query.filter_by(spot_id=post_type_id, photo_path=uploaded_filepath).exists()
+            ).scalar()
+
+            if not is_duplicate:
+                media = SpotMedia(
+                    spot_id=post_type_id,
+                    uploaded_by=user_id,
+                    sort_order=order,
+                    photo_path=uploaded_filepath,
+                    photo_type=result.get('type'),
+                    width=result.get('width'),
+                    height=result.get('height')
+                )
+            
         
         if(post_type == 'visit'):
-            media = VisitMedia(
-                visit_id=post_type_id,
-                uploaded_by=user_id,
-                sort_order=order,
-                photo_path=uploaded_filepath,
-                photo_type=result.get('type'),
-                width=result.get('width'),
-                height=result.get('height')
-            )
+            is_duplicate = db.session.query(VisitMedia.query.filter_by(visit_id=post_type_id, photo_path=uploaded_filepath).exists()
+            ).scalar()
+
+            if not is_duplicate:
+                media = VisitMedia(
+                    visit_id=post_type_id,
+                    uploaded_by=user_id,
+                    sort_order=order,
+                    photo_path=uploaded_filepath,
+                    photo_type=result.get('type'),
+                    width=result.get('width'),
+                    height=result.get('height')
+                )
         
         db.session.add(media)
         db.session.commit()
@@ -70,4 +77,8 @@ def process_photos_with_metadata(self, key: str, post_type_id: int, user_id: str
         db.session.rollback()
         if local_file_path and os.path.exists(local_file_path):
             os.remove(local_file_path)
+        try:
+            reject_post_type(post_type_id=post_type_id, post_type=post_type)
+        except Exception as e:
+            raise Exception(str(e))
         raise Exception(str(e))

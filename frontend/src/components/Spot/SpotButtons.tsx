@@ -1,4 +1,4 @@
-import { useMemo, type ComponentType, type JSX, type SVGProps } from "react";
+import { useMemo, type CSSProperties, type ComponentType, type JSX, type SVGProps } from "react";
 import { Star,ExternalLink, Bookmark, type LucideProps} from "lucide-react"
 import VIconRounded from "../DynamicSvgs/VIconRounded"
 import { handleNumStats } from "../../util/StatConverter";
@@ -16,49 +16,54 @@ type SpotButtonType = {
     data: number
 }
 
-const spotButtons: Array<SpotButtonType> = [
-    {
-        order: 1,
-        title: 'Share',
-        position: 'left',
-        icon: ExternalLink,
-        color: '#c084fc',
-        data: 999999999
-    },
-    {
-        order: 2,
-        title: 'Save',
-        position: 'left',
-        color: '#60a5fa',
-        // fillColor: '#60a5fa',
-        icon: Bookmark,
-        data: 96000
-    },
-    {
-        order: 3,
-        title: 'Rate',
-        color: '#fbbf24',
-        // fillColor: '#facc15',
-        position: 'left',
-        icon: Star,
-        data: 9876
-    },
-    {
-        order: 4,
-        title: 'Visits',
-        color: '#22c55e',
-        // fillColor: '#22c55e',
-        position: 'right',
-        icon: VIconRounded,
-        data: 318099
-    },
-    
-]
+type SpotButtonProps = {
+    shareCount: number,
+    saveCount: number,
+    totalNumOfRatings: number
+    visitCount: number
+}
 
+export default function SpotButtons({shareCount, saveCount, 
+    totalNumOfRatings, visitCount
+}: SpotButtonProps): JSX.Element{
 
-
-
-export default function SpotButtons(): JSX.Element{
+    const spotButtons: Array<SpotButtonType> = [
+        {
+            order: 1,
+            title: 'Share',
+            position: 'left',
+            icon: ExternalLink,
+            color: '#c084fc',
+            data: shareCount
+        },
+        {
+            order: 2,
+            title: 'Save',
+            position: 'left',
+            color: '#60a5fa',
+            // fillColor: '#60a5fa',
+            icon: Bookmark,
+            data: saveCount
+        },
+        {
+            order: 3,
+            title: 'Rate',
+            color: '#fbbf24',
+            // fillColor: '#facc15',
+            position: 'left',
+            icon: Star,
+            data: totalNumOfRatings
+        },
+        {
+            order: 4,
+            title: 'Visit',
+            color: '#22c55e',
+            // fillColor: '#22c55e',
+            position: 'right',
+            icon: VIconRounded,
+            data: visitCount
+        },
+    ]   
 
     
 
@@ -79,7 +84,7 @@ export default function SpotButtons(): JSX.Element{
                                 <button
                                     key={btn.title}
                                     title={btn.title}
-                                    style={{'--btn-color': btn.color, '--btn-fill-color': btn.fillColor} as React.CSSProperties}
+                                    style={{'--btn-color': btn.color, '--btn-fill-color': btn.fillColor} as CSSProperties}
                                     className="group flex items-center gap-1 hover:dark:text-white hover:text-black transition-colors cursor-pointer"
                                 >
                                     {/* TODO: change stroke and fill to be on when user completes action */}
@@ -88,8 +93,7 @@ export default function SpotButtons(): JSX.Element{
                                         className={`group-hover:stroke-(--btn-color) ${btn.fillColor && 'fill-(--btn-fill-color)'} transition-colors`}
                                     >
                                     </btn.icon>
-                                    {/* TODO: replace hardcoded stat with real data */}
-                                    <span className="font-medium text-xs">{handleNumStats(1219994)}</span>
+                                    <span className="font-medium text-xs">{handleNumStats(btn.data)}</span>
                                 </button>
                             )
                     })}

@@ -1,17 +1,16 @@
 from flask import Blueprint, request, jsonify
 from exstensions import db
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models.spot import Spot, SpotMedia
+from models.spot import Spot
 from schemas.spot_schema import spot_schema
-from util.photo_processing import photo_processing, get_decimal_coordinates
 from util.outlier_coords import average_location_batch
-from util.validation import photo_validation
 from util.storage import generate_presigned_url
 from util.celery_task import process_photos_with_metadata
 from marshmallow import ValidationError
 from celery.result import AsyncResult, GroupResult
 from celery import chord,group
 from exstensions import celery
+from sqlalchemy.orm import joinedload
 
 spot_bp = Blueprint('spot', __name__, url_prefix='/spot')
 
@@ -28,6 +27,7 @@ def spot_task_progress():
     
     
 @spot_bp.route('/status/<group_id>', methods=['GET'])
+@jwt_required()
 def get_batch_progress(group_id):
     group_result = GroupResult.restore(group_id, app=celery)
 
@@ -125,7 +125,7 @@ def create_spot():
         if(keys):
             photo_tasks = [
                 process_photos_with_metadata.s(
-                    key=key, post_type_id=spot.id, user_id=current_user, upload_s3_foldername=f'spot/{current_user}/spot_{spot.id}',post_type='spot', order=order
+                    key=key, post_type_id=spot.id, user_id=current_user, upload_s3_foldername=f'spot/spot_{spot.id}',post_type='spot', order=order
                     ) for order, key in enumerate(keys, start=1)
             ]
 
@@ -143,4 +143,32 @@ def create_spot():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
-    
+
+
+
+@spot_bp.route('/me', methods=['GET'])
+@jwt_required()
+def get_user_spots():
+    current_user = get_jwt_identity()
+
+    try:
+        page = request.args.get('page', default=1, type=int)
+        per_page = request.args.get('per_page', default=10, type=int)
+
+        spots = Spot.query.filter_by(user_profile_id=current_user).options(joinedload(Spot.spot_media)).order_by(Spot.date_posted.desc())
+
+        paginated_spots = spots.paginate(
+            page=page,
+            per_page=per_page
+        )
+
+        results = spot_schema.dump(paginated_spots.items, many=True)
+
+        return jsonify({
+            'spots': results,
+            'total': paginated_spots.total,
+            'total_pages': paginated_spots.pages,
+            'current_page': paginated_spots.page
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

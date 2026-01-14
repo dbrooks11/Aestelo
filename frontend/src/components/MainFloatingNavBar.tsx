@@ -1,5 +1,5 @@
 import { useState, type ComponentType, type JSX, type SVGProps } from "react";
-import { ChevronUp, House, Search, SquarePlus, Map, User, Sun, Moon, type LucideProps } from "lucide-react";
+import { ChevronUp, House, Search, MapPinPlus, Map, User, Sun, Moon, type LucideProps } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 import cn from "../util/tailwind_merger";
@@ -78,7 +78,7 @@ export default function MainFloatingNavBar({openModal}: {openModal: () => void})
         {
             order: 4,
             label: 'Spot',
-            icon: SquarePlus,
+            icon: MapPinPlus,
             action: openModal
         },
         {

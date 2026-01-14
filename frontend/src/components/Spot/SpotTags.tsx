@@ -2,10 +2,8 @@ import { useEffect, useRef, type JSX } from "react";
 import ScrollContainer from "react-indiana-drag-scroll";
 
 
-const testTags: Array<string> = []
 
-
-export default function SpotTags(): JSX.Element{
+export default function SpotTags({tags}: {tags: Array<string>}): JSX.Element{
 
     const scrollRef = useRef<HTMLElement>(null)
 
@@ -67,7 +65,7 @@ export default function SpotTags(): JSX.Element{
     
     return(
         <div className="flex w-full h-10 text-[10px] text-white dark:bg-slate/50 bg-stone-50 dark:border-white/5 border-border-light border-y">
-            {handleTags(testTags)} 
+            {handleTags(tags)} 
         </div>  
     )
 }

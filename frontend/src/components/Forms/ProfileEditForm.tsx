@@ -38,34 +38,34 @@ export default function EditProfileForm({
 
   const handleProfileFileChange = (e: ChangeEvent<HTMLInputElement>, isFor: ('banner' | 'photo')) => {
     let tempUrl = ''
-    if(e.target.files){
+    const file = e.target.files
+    if(file && file.length === 1){
       if(isFor === 'photo'){
         if(profilePhotoPreview !== undefined) URL.revokeObjectURL(profilePhotoPreview)
-        tempUrl = URL.createObjectURL(e.target.files[0])
+        tempUrl = URL.createObjectURL(file[0])
         setProfilePhotoPreview(tempUrl)
       }
       else if(isFor === 'banner'){
         if(profileBannerPreview !== undefined) URL.revokeObjectURL(profileBannerPreview)
-        tempUrl = URL.createObjectURL(e.target.files[0])
+        tempUrl = URL.createObjectURL(file[0])
         setProfileBannerPreview(tempUrl)
       }
     }
   }
+
 
   useEffect(() => {
     return () => {
       if (profilePhotoPreview) {
         URL.revokeObjectURL(profilePhotoPreview)
         setProfilePhotoPreview(undefined)
-        console.log('running profile link removal')
       }
       if (profileBannerPreview) {
         URL.revokeObjectURL(profileBannerPreview)
         setProfileBannerPreview(undefined)
-        console.log('running banner link removal')
       }
     }
-  },)
+  },[])
 
   //TODO: Add field for links and badges(maybe) in the future
   const handleEditProfileFormClick = async (formData: FormData): Promise<void> => {

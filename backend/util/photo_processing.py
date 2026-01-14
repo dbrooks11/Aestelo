@@ -11,7 +11,7 @@ register_heif_opener()
 file_types = ('JPEG', 'PNG', 'HEIF', 'HEIC')
 
 
-def get_decimal_coordinates(gps_info):
+def get_decimal_coordinates(gps_info, key):
 
     def dms_to_decimal(dms,ref):
         degrees, minutes, seconds = dms
@@ -36,7 +36,8 @@ def get_decimal_coordinates(gps_info):
         
         return latitude, longitude
 
-    return None, None
+    if not photo_lat or not photo_long:
+        raise Exception( f'No location data provided for {key}')
 
 
 def photo_processing_one_img_metadata(file, current_user_id: str):

@@ -12,7 +12,7 @@ export default function SpotPhotoCounter({progress, total}: SpotPhotoCounterProp
 
     return(
         <div 
-            className="right-1 bottom-2 absolute"
+            className="right-1 bottom-2 absolute z-20"
             >
             <CircularProgress
                 current={progress}

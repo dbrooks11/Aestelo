@@ -1,10 +1,11 @@
 import {type JSX} from 'react'
 import { Tabs, Tab } from '../Tabs'
 import { MapPin, Map, MapPinned, BookMarked } from 'lucide-react'
-
-
+import FetchSpots from './DataFetching/FetchSpots'
 
 export default function ProfileTabs(): JSX.Element {
+
+  
 
   return (
       <Tabs 
@@ -14,48 +15,7 @@ export default function ProfileTabs(): JSX.Element {
       tabsStyle='dark:text-neutral-500 font-bold hover:dark:text-white hover:text-accents-deep'
       >
         <Tab label={'Spots'} icon={<MapPin className='md:hidden'/>}>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
-          <p>Post says hello</p>
+          <FetchSpots/>
         </Tab>
         <Tab label={'Visits'} icon={<MapPinned className='md:hidden'/>}>
           <p>Visits says goodbye</p>

@@ -15,16 +15,13 @@ from util.decorators import profile_check_current__banned_removed
 
 profile_bp = Blueprint('profile',__name__, url_prefix='/profile')
 
-#done testing
+#TODO: use bg workers and presigned urls for updating profile photos
 @profile_bp.route('/me', methods = ['GET','PATCH'])
 @jwt_required()
 def profile_me():
     current_user = get_jwt_identity()
     
-    user_profile = UserProfile.query.options(load_only(UserProfile.username,
-                                                       UserProfile.bio,
-                                                       UserProfile.profile_photo,
-                                                       UserProfile.profile_banner)).get(current_user)
+    user_profile = UserProfile.query.options(load_only(UserProfile.username, UserProfile.bio,UserProfile.profile_photo, UserProfile.profile_banner)).get(current_user)
 
     if request.method == 'GET':
         try:
@@ -86,7 +83,7 @@ def profile_me():
                             if isinstance(profile_photo_compressed, list):
                                 return jsonify({'error': {photo_field_name: profile_photo_compressed[0]}}),400
                             
-                            new_photo_path: str = upload_to_s3(file_obj=profile_photo_compressed, user_id=user_profile.id, folder=photo_field_name)
+                            new_photo_path: str = upload_to_s3(file_obj=profile_photo_compressed, folder=f'{photo_field_name}/{current_user}')
                     
 
                 if banner_field_name in form_files:
@@ -99,7 +96,7 @@ def profile_me():
                                 return jsonify({'error': {banner_field_name: profile_banner_compressed[0]}}), 400
                             
                             
-                            new_banner_path: str = upload_to_s3(file_obj=profile_banner_compressed, user_id=user_profile.id, folder=banner_field_name)
+                            new_banner_path: str = upload_to_s3(file_obj=profile_banner_compressed,folder=f'{banner_field_name}/{current_user}')
                     
             except Exception as e:
                 current_app.logger.error(f"Image processing failed: {str(e)}")
@@ -145,7 +142,8 @@ def profile_me():
                 pass
 
             return jsonify({'error': 'Failed to update profile'}), 500
-        
+    
+
 
 #Partially done, test blocking and following functionality
 @profile_bp.route('/<string:id>', methods = ['GET'])
@@ -178,58 +176,4 @@ def user_profile(id, user_profile):
             return jsonify({'error': 'Failed to fetch profile'}), 500
         
     return jsonify({'user_profile':profile_viewing.dump(user_profile)}), 200
-    
-    
-#TODO: test when music is added       
-# @profile_bp.route('/add-track', methods = ['POST'])
-# @jwt_required()
-# @profile_check_current__banned_removed
-# def add_track_profile(user_profile):
-    
-#     if not user_profile.is_prem_account:
-#         return jsonify({'message':'Premium account required'}), 403
-    
-#     track_data = request.get_json()
-
-#     if not track_data or 'music_track_id' not in track_data:
-#         return jsonify({'error':'Invalid track data'}), 400
-
-#     try:
-#         track = MusicTrack.query.get(track_data.get('music_track_id'))
-
-#         if track:
-#             track.times_used += 1
-#             user_profile.music_track_id = track.music_track_id
-#         else:
-#             new_track = set_track(track_data=track_data)
-#             user_profile.music_track_id = new_track.music_track_id
-#             db.session.add(new_track)
-        
-#         result = music_track_schema.dump(track) if track else music_track_schema.dump(new_track)
-#         db.session.commit()
-#         return jsonify({'message':'Track added successfully',
-#                         'track': result}), 201
-#     except Exception:
-#         db.session.rollback()
-#         return jsonify({'error':'Failed to add track'}), 500
-
-
-# @profile_bp.route('/remove-track', methods = ['DELETE'])
-# @jwt_required()
-# @profile_check_current__banned_removed
-# def remove_track_profile(user_profile):
-#     if not user_profile.is_prem_account:
-#         return jsonify({'message':'Premium account required'}), 403
-    
-#     if user_profile.music_track_id is None:
-#         return jsonify({'message':'No track playing on your profile. Please add a track first.'}), 400
-
-#     try:
-#         user_profile.music_track_id = None
-#         db.session.commit()
-#         return jsonify({'message':'Track removed successfully'}), 200
-#     except Exception as e:
-#         db.session.rollback()
-#         return jsonify({'error':'Failed to remove track',
-#                         'errors': str(e)}), 500
     

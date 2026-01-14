@@ -2,14 +2,18 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Ellipsis } from "lucide-react";
 import { useState, type JSX } from "react";
 
-export default function SpotDescripton(): JSX.Element{
+type SpotDesciptionProps = {
+    description: string
+}
+
+export default function SpotDescripton({description}: SpotDesciptionProps): JSX.Element{
 
     const [showDescription, setShowDescription] = useState<boolean>(false)
     
 
     return(
         <div 
-            className="bottom-1 left-2 absolute flex  text-white text-xs cursor-pointer "
+            className="bottom-1 left-2 absolute flex  text-white text-xs cursor-pointer z-20"
 
         >
             <AnimatePresence mode="wait">
@@ -37,7 +41,7 @@ export default function SpotDescripton(): JSX.Element{
                     }}
                     >
                             <p className="text-shadow-2xs">
-                                Breastfeeding is good for babies and moms. Infants that are breastfed get antibodies from their mothers against common illnesses. Breastfed babies have less chance of being obese as an adult. Breastfeeding a baby lets the infant-mother pair bond in a very unique way. Mother’s who breastfeed lower their chances of developing breast cancer. Usually, mothers who breastfeed lose their pregnancy weight more quickly and easily. The benefits of breastfeeding are numerous.
+                                {description}
                             </p>
                 </motion.div>: 
                 <motion.button

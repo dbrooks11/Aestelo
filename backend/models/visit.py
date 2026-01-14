@@ -37,23 +37,9 @@ class Visit(db.Model):
     removed_at = Column(DateTime)
     removed_by = Column(UUID)
 
-    def to_dict(self):
-        return {
-            "visit_id": self.visit_id,
-            "spot_id": self.spot_id,
-            "user_profile_id": self.user_profile_id,
-            'music_track_id':self.music_track_id,
-            "caption": self.caption,
-            "hashtags": self.hashtags,
-            "date_posted": self.date_posted,
-            "like_count": self.like_count,
-            "share_count": self.share_count,
-            "num_of_edits": self.num_of_edits,
-            "is_deleted": self.is_deleted,
-            "deleted_at": self.deleted_at,
-            "num_reports": self.num_reports,
-            "is_removed": self.is_removed
-        }
+    status = Column(String(), default='processing')
+
+    visit_media = relationship('VisitMedia', backref='visit', cascade='all, delete-orphan')
     
     @classmethod
     def active(cls):
@@ -72,7 +58,7 @@ class VisitMedia(db.Model):
     sort_order = Column(Integer)
 
     photo_path = Column(Text)
-    photo_type = Column(String(15), default = 'photo') #stores what type of media is uploaed, photo, video, 360 video, etc
+    photo_type = Column(String(15), default = 'photo') 
     width =  Column(Integer)
     height = Column(Integer)
 

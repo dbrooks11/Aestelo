@@ -1,10 +1,11 @@
 from geopy.distance import distance
-from models.spot import Spot, SpotMedia
-from models.visit import Visit, VisitMedia
+from models.spot import Spot
+from models.visit import Visit
 from util.storage import delete_file_s3
 from exstensions import db
 from celery import shared_task
 from datetime import datetime, timezone
+from sqlalchemy.orm import joinedload
 
 @shared_task
 def average_location(coords, post_type_id: int, post_type: str):
@@ -38,7 +39,6 @@ def average_location_batch(results, post_type_id: int, post_type:str):
     ]
     try:
         if not coords:
-            print("No valid GPS data found.")
             return reject_post_type(post_type_id=post_type_id, post_type=post_type)
         
         avg_lat = sum(c['latitude'] for c in coords) / len(coords)
@@ -56,47 +56,60 @@ def average_location_batch(results, post_type_id: int, post_type:str):
         final_lat = sum(c['latitude'] for c in filtered) / len(filtered)
         final_long = sum(c['longitude'] for c in filtered) / len(filtered)
 
-    
         item = None
         if post_type == 'spot':
-            # TODO: make this a join query
-            item = Spot.query.get(post_type_id)
-            media_items = SpotMedia.query.filter_by(spot_id=post_type_id).all()
+            item = Spot.query.filter_by(id = post_type_id).options(
+                joinedload(Spot.spot_media)
+            ).first()
+            media_count = len(item.spot_media)
         elif post_type == 'visit':
-            item = Visit.query.get(post_type_id)
-            media_items = VisitMedia.query.filter_by(visit_id=post_type_id).all()
+            item = Visit.query.filter_by(id=post_type_id).options(
+                joinedload(Visit.visit_media)
+            ).first()
+            media_count = len(item.visit_media)
         
         if item:
             item.coordinates = f'POINT({final_long} {final_lat})'
             item.date_posted = datetime.now(timezone.utc)
-            item.total_num_of_photos = len(media_items)
+            item.total_num_of_photos = media_count
+            item.status = 'success'
             db.session.commit()
 
         return {'latitude': final_lat, 'longitude': final_long}
 
     except Exception as e:
         db.session.rollback()
+        try:
+            reject_post_type(post_type_id=post_type_id, post_type=post_type)
+        except Exception as e:
+            raise Exception(str(e))
         raise Exception(str(e))
 
-def reject_post_type(post_type_id: int, post_type: str):
-    if(post_type == 'spot'):
-        spot = Spot.query.get(post_type_id)
-        if spot:
-            media_items = SpotMedia.query.filter_by(spot_id=post_type_id).all()
-            for media in media_items:
-                delete_file_s3(media.photo_path)
-                db.session.delete(media)
-            
-            db.session.delete(spot)
-            db.session.commit()
 
-    if(post_type == 'visit'):
-        visit = Visit.query.get(post_type_id)
-        if visit:
-            media_items = VisitMedia.query.filter_by(visit_id=post_type_id).all()
-            for media in media_items:
-                delete_file_s3(media.photo_path)
-                db.session.delete(media)
-            
-            db.session.delete(visit)
-            db.session.commit()
+def reject_post_type(post_type_id: int, post_type: str):
+    try:
+        if(post_type == 'spot'):
+            spot = Spot.query.filter_by(id=post_type_id).options(
+                joinedload(Spot.spot_media)
+            ).first()
+            if spot:
+                if spot.spot_media:
+                    for media in spot.spot_media:
+                        delete_file_s3(media.photo_path)
+                
+                db.session.delete(spot)
+                db.session.commit()
+
+        if(post_type == 'visit'):
+            visit = Visit.query.filter_by(id=post_type_id).options(
+                joinedload(Visit.visit_media)
+            ).first()
+            if visit:
+                if visit.visit_media:
+                    for media in visit.visit_media:
+                        delete_file_s3(media.photo_path)
+                
+                db.session.delete(visit)
+                db.session.commit()
+    except Exception:
+        raise Exception(f'Deletion of {post_type} {post_type_id} failed')
