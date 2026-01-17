@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type JSX } from "react";
 import Modal from "../../Modal";
 import { type CreateSpotFormModalOpenType } from "../../Wrappers/ProtectedRoute";
 import { ArrowRight,ChevronLeft } from "lucide-react";
+import ToasterCustom from "../../Toast";
 import CreateSpotFormStepOne from "./StepsComponents/CreateSpotFormStep1";
 import CreateSpotFormStepTwo from "./StepsComponents/CreateSpotFormStep2";
 import CreateSpotFormStepThree from "./StepsComponents/CreateSpotFormStep3";
@@ -210,6 +211,7 @@ export default function CreateSpotForm({isCreateSpotModalOpen, setIsCreateSpotMo
                 
                 </section>
             </div>
+            <ToasterCustom toasterId="spotForm"/>
         </Modal>
     )
 }

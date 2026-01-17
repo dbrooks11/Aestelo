@@ -3,6 +3,7 @@ import {type JSX, useState, useEffect} from 'react'
 import { AxiosErrorHelper, protectedInstance } from '../util/axios_api_helpers'
 import toast, { Toaster } from 'react-hot-toast'
 import Post from '../components/Spot/Spot'
+import Spot from '../components/Spot/Spot'
 
 export default function FeedPage(): JSX.Element {
 
@@ -40,7 +41,7 @@ export default function FeedPage(): JSX.Element {
   return (
     <main>
         {!isLoading ? 
-            <Post/>
+            <div>hello</div>
 
         : "Loading feed..."}
         <Toaster toasterId='feed'/>

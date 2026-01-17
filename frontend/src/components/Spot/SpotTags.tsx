@@ -57,7 +57,7 @@ export default function SpotTags({tags}: {tags: Array<string>}): JSX.Element{
                     className="flex items-center ml-4 dark:text-neutral-600 text-black/40 italic gap-1 pointer-events-none"
                 >
                     <span className="w-1.5 h-1.5 rounded-full dark:bg-neutral-700 bg-black/40"></span>
-                    No tags
+                    No hashtags
                 </span>
                 )
         }

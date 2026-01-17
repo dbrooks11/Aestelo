@@ -1,19 +1,20 @@
 import { AnimatePresence, motion } from "framer-motion";
+import cn from "../../util/tailwind_merger";
 import { Ellipsis } from "lucide-react";
 import { useState, type JSX } from "react";
 
 type SpotDesciptionProps = {
     description: string
+    className?: string
 }
 
-export default function SpotDescripton({description}: SpotDesciptionProps): JSX.Element{
+export default function SpotDescripton({description, className}: SpotDesciptionProps): JSX.Element{
 
     const [showDescription, setShowDescription] = useState<boolean>(false)
-    
 
     return(
         <div 
-            className="bottom-1 left-2 absolute flex  text-white text-xs cursor-pointer z-20"
+            className={`${cn('bottom-1 left-2 absolute flex text-white text-xs cursor-pointer z-20 max-w-3/4', className)}`}
 
         >
             <AnimatePresence mode="wait">
@@ -29,7 +30,7 @@ export default function SpotDescripton({description}: SpotDesciptionProps): JSX.
                     animate={{opacity: 1}}
                     exit={{opacity: 0}}
                     transition={{duration: 0.1}}
-                    className= 'flex dark:bg-black/10 bg-white/10 backdrop-blur-[2px] p-1 borderborder-neutral-300/40 h-min overflow-y-scroll no-scrollbar  max-w-55 max-h-30 overscroll-contain'
+                    className= 'flex dark:bg-black/10 bg-white/10 backdrop-blur-[2px] p-1 border border-neutral-300/40 overflow-y-auto no-scrollbar overscroll-contain max-h-25'
                     onClick={(e) => {
                         e.stopPropagation()
                         setShowDescription(false)}}
@@ -40,7 +41,7 @@ export default function SpotDescripton({description}: SpotDesciptionProps): JSX.
                         }
                     }}
                     >
-                            <p className="text-shadow-2xs">
+                            <p className="text-shadow-2xs max-w-full wrap-break-word">
                                 {description}
                             </p>
                 </motion.div>: 
@@ -59,10 +60,10 @@ export default function SpotDescripton({description}: SpotDesciptionProps): JSX.
                     onClick={(e) => {
                         e.stopPropagation()
                         setShowDescription(true)}}
-                    className= 'flex items-center dark:bg-black/10 bg-white/10 backdrop-blur-[2px] px-0.5 border-neutral-300/40 h-5 cursor-pointer'
+                    className= 'flex items-center dark:bg-black/10 bg-white/10 backdrop-blur-[2px] px-0.5 border-neutral-300/40 cursor-pointer h-5'
                     >
                     <span aria-hidden='true' className="">[</span>
-                    <span aria-hidden='true' className="mt-0.5"><Ellipsis/></span>
+                    <span aria-hidden='true' className="mt-0.5 flex shrink"><Ellipsis className="w-full h-full"/></span>
                     <span aria-hidden='true' className="">]</span>
                 </motion.button>}
             </AnimatePresence>

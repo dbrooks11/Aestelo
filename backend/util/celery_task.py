@@ -31,9 +31,9 @@ def process_photos_with_metadata(self, key: str, post_type_id: int, user_id: str
                 file=local_file_path,
                 current_user_id=user_id
             )
-        
+        print(f'This is result from photo preocessing: {result}')
         latitude, longitude = get_decimal_coordinates(gps_info=result.get('gps'), key=key)
-
+        print(f'This is lat and long: lat {latitude}, long {longitude}')
         uploaded_filepath = upload_to_s3(file_obj=result.get('file'), folder=upload_s3_foldername)
 
         if(post_type == 'spot'):

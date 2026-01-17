@@ -32,7 +32,7 @@ export default function CreateSpotFormStepOne({setStep, setUploadedPhotos, setPr
                 htmlFor="photos"
                 className="group relative bg-neutral-100/60 hover:bg-neutral-200/40 hover:dark:bg-neutral-800/80 dark:bg-neutral-800/50 mx-10 my-6 border-2 border-neutral-400/60 dark:border-white/30 border-dashed rounded-md w-auto h-full overflow-hidden transition-colors hover:cursor-pointer">
                 <input 
-                    type="file" accept="image/png, image/jpeg, image/heic, image/heif"  
+                    type="file"  
                     name="photos" 
                     id="photos"
                     className="hidden" 

@@ -4,6 +4,7 @@ import type { PreviewPhotosState, UploadedPhotosState } from "../CreateSpotForm"
 import { AxiosErrorHelper, protectedInstance } from "../../../../util/axios_api_helpers";
 import axios, { type AxiosResponse } from "axios";
 import { useTaskStore } from "../../../../store/taskStateStore";
+import toast from "react-hot-toast";
 
 type Step3Type = {
     previewPhotos: PreviewPhotosState
@@ -20,6 +21,10 @@ export default function CreateSpotFormStepThree({previewPhotos, uploadedPhotos, 
     const [tagInput, setTagInput] = useState<string>('')
     const [spotNameInput, setSpotNameInput] = useState<number>(0)
     const [descriptionInput, setDescriptionInput] = useState<number>(0)
+
+    const spotNameMaxChars = 40
+    const descriptionMaxChars = 200
+    const tagsMaxChars = 50
 
     const handleSpotFormClick = async(e: FormEvent<HTMLFormElement>): Promise<void> => {
         e.preventDefault()
@@ -75,13 +80,17 @@ export default function CreateSpotFormStepThree({previewPhotos, uploadedPhotos, 
                         }
                     }catch(error){
                         const errors: string = AxiosErrorHelper(error)
-                        console.error(errors)
+                        toast.error(errors, {
+                            toasterId: 'spotForm'
+                        })
                         
                     }
                 }
             }catch(error){
                 const errors: string = AxiosErrorHelper(error)
-                console.error(errors)
+                toast.error(errors, {
+                    toasterId: 'spotForm'
+                })
             }finally{
                 setIsLoading(false)
             }
@@ -90,7 +99,7 @@ export default function CreateSpotFormStepThree({previewPhotos, uploadedPhotos, 
 
     const handleTags = (e: KeyboardEvent<HTMLInputElement>) => {
         if((e.key === 'Enter' || e.key === ' ') && tagInput?.trim()){
-            if(tagInput.length > 50 || tagInput.includes('#')) return
+            if(tagInput.length > tagsMaxChars || tagInput.includes('#')) return
             if(!tags.includes(tagInput.trim())){
                 setTags((prevTags) => {
                     return [...prevTags, tagInput.trim()]
@@ -174,7 +183,14 @@ export default function CreateSpotFormStepThree({previewPhotos, uploadedPhotos, 
                             id="name" 
                             name="name"
                             maxLength={40}
-                            onChange={(e) => setSpotNameInput((e.target.value).length)}
+                            onChange={(e) => {
+                                const value = e.target.value
+
+                                if(value.length > spotNameMaxChars){
+                                    e.target.value = value.slice(0, spotNameMaxChars)
+                                }
+                                setSpotNameInput((e.target.value).length)
+                            }}
                             aria-describedby="name-char-count"
                             className="bg-transparent px-4 py-2 border border-neutral-200 focus:border-neutral-400 focus:dark:border-white/20 dark:border-white/10 rounded-md outline-none text-neutral-900 dark:placeholder:text-white/20 dark:text-white placeholder:text-neutral-400 placeholder:text-sm transition-colors"
                             placeholder="e.g. Hidden Skate Park"
@@ -194,7 +210,15 @@ export default function CreateSpotFormStepThree({previewPhotos, uploadedPhotos, 
                         <textarea 
                             id="description" 
                             name="description" 
-                            onChange={(e) => setDescriptionInput((e.target.value).length)}
+                            onChange={(e) => {
+                                const value = e.target.value
+
+                                if(value.length > descriptionMaxChars){
+                                    e.target.value = value.slice(0, descriptionMaxChars)
+                                }
+
+                                setDescriptionInput((e.target.value).length)
+                            }}
                             aria-describedby="desc-char-count"
                             className="bg-transparent px-4 py-2 border border-neutral-200 focus:border-neutral-400 focus:dark:border-white/20 dark:border-white/10 rounded-md outline-none min-h-[120px] text-neutral-900 dark:placeholder:text-white/20 dark:text-white placeholder:text-neutral-400 placeholder:text-sm transition-colors resize-none" 
                             maxLength={200}

@@ -44,9 +44,11 @@ def create_app():
 
     
     #todo: TEMPORARY CORS Attributes
+    mobile_ip=os.getenv('IP_FOR_MOBILE_TESTING')
     CORS(app, 
      origins=["http://localhost:5173", 
               "http://127.0.0.1:5173",
+              mobile_ip,
               "null"],
      allow_headers=[
               "Content-Type", 

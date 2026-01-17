@@ -7,9 +7,9 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     watch: {
-      usePolling: true, // Fixes hot reload in Docker
+      usePolling: true,
     },
-    host: true, // Needed for Docker port mapping
+    host: true, 
     strictPort: true,
     port: 5173, 
   }

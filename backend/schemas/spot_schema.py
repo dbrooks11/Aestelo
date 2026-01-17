@@ -27,7 +27,7 @@ class SpotSchema(ma.SQLAlchemyAutoSchema):
     accessibility = fields.Bool()
     hashtags = fields.List(
         fields.Str(validate=validate.Regexp(r'^[a-zA-Z0-9_]+$', error="Hashtags can only contain letters, numbers, and underscores")),
-        validate=validate.Length(max=10)
+        validate=validate.Length(max=15, error='Spot can not have more than 15 tags')
     )
     
    

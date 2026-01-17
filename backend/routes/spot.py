@@ -153,7 +153,7 @@ def get_user_spots():
 
     try:
         page = request.args.get('page', default=1, type=int)
-        per_page = request.args.get('per_page', default=10, type=int)
+        per_page = request.args.get('per_page', default=12, type=int)
 
         spots = Spot.query.filter_by(user_profile_id=current_user).options(joinedload(Spot.spot_media)).order_by(Spot.date_posted.desc())
 

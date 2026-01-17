@@ -160,7 +160,7 @@ export default function MainFloatingNavBar({openModal}: {openModal: () => void})
     }
 
     return (
-        <div className="right-6 bottom-6 z-50 fixed flex flex-col items-center gap-4"> 
+        <div className="right-6 bottom-6 z-200 fixed flex flex-col items-center gap-4"> 
             
             <AnimatePresence>
                 {isNavOpen && (

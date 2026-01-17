@@ -10,7 +10,7 @@ export default function ProfileTabs(): JSX.Element {
   return (
       <Tabs 
       tabsAndContentContainerStyle='w-full mt-12'
-      tabsContainerStyle='sticky top-16 dark:bg-charcoal/65 bg-bg-light-secondary/65 backdrop-blur-lg '
+      tabsContainerStyle='sticky top-16 dark:bg-charcoal/65 bg-bg-light-secondary/65 backdrop-blur-lg z-30'
       activeTabStyle='dark:text-white text-accents-deep border-b-2 border-b-accents-primary'
       tabsStyle='dark:text-neutral-500 font-bold hover:dark:text-white hover:text-accents-deep'
       >
