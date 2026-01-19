@@ -8,6 +8,7 @@ import { protectedInstance } from "../../util/axios_api_helpers";
 import { useFormStatus } from "react-dom";
 import { AxiosErrorHelper } from "../../util/axios_api_helpers";
 import Modal from "../Modal";
+import { useSpotMutation } from "../../hooks/SpotHooks/useSpotMutation";
 
 type EditProfileFormProps = {
   profile_banner_url: ProfileDataType['profile_banner_url']
@@ -19,6 +20,7 @@ type EditProfileFormProps = {
   showModal: boolean
 }
 
+// TODO: put the css back to respective elements
 const editProfileFormScreenGuideButtonStyle = 'flex gap-2 py-1 px-2 items-center rounded-md hover:dark:text-text-main-dark hover:text-text-main-light cursor-pointer'
 const editProfileFormScreenGuideButtonActiveStyle = 'dark:bg-bg-secondary-dark bg-bg-secondary-light dark:text-text-main-dark text-text-main-light shadow-sm'
 const editProfileFormContainerStyle = 'border dark:bg-charcoal dark:border-border-color-dark bg-black/10 border-border-color-light rounded-lg text-sm'
@@ -28,6 +30,8 @@ const editProfileFormTinyText = 'text-[10px] text-text-muted-light dark:text-tex
 export default function EditProfileForm({
   username, bio, profile_photo_url, profile_banner_url,
   setProfileData, setShowModal, showModal }: EditProfileFormProps): JSX.Element {
+  
+  const { updateAllSpotsInCache} = useSpotMutation()
   
   const [usernameIndicator, setUsernameIndictor] = useState<boolean>(false)
   const [charCounterBio, setCharCounterBio] = useState<number>(bio.length) 
@@ -92,6 +96,7 @@ export default function EditProfileForm({
           )
         })
         setShowModal(false)
+        updateAllSpotsInCache({'username': data.updated_fields.username})
         toast.success(data.message, {
           toasterId: 'profile'
         })
@@ -148,7 +153,11 @@ export default function EditProfileForm({
 
 
   return (   
-    <Modal showModal={showModal} closeModal={() => setShowModal(false)}>
+    <Modal 
+      showModal={showModal} 
+      closeModal={() => setShowModal(false)}
+      dialogClassName="px-4"
+    >
       
       {/* Form Header */}
       <div className="flex justify-between dark:bg-bg-secondary-dark p-3 border-border-color-light dark:border-border-color-dark border-b rounded-t-2xl">
@@ -177,25 +186,24 @@ export default function EditProfileForm({
         >
               
           {/* Profile Picture */}
-          <div className='flex items-center gap-[5%] md:gap-45 mt-6 w-full'>
+          <div className='flex items-center gap-[10%] md:gap-45 mt-6 w-full'>
             <label htmlFor='profile_photo' className={editProfileFormLabelStyle}>Profile Picture</label>
             
             <div className={cn(`${editProfileFormContainerStyle} relative`, 'rounded-full')}>
-              <div className="w-35 h-35">
+              <div className="w-30 h-30 md:w-35 md:h-35">
                 <img
                   src={profilePhotoPreview ? profilePhotoPreview : profile_photo_url}
                   className='rounded-full w-full h-full object-cover pointer-events-none'
                   alt="Profile Picture Preview"
                 ></img>
+                <label 
+                  htmlFor='profile_photo' 
+                  className='bottom-0 right-1 absolute bg-black/15 dark:bg-white/10 backdrop-blur-sm p-2 rounded-full w-9 cursor-pointer'
+                  aria-label="Change Profile Picture Button"
+                >
+                  <PencilLine className='w-full h-full' strokeWidth={1} aria-hidden="true" />
+                </label>
               </div>
-              
-              <label 
-                htmlFor='profile_photo' 
-                className='top-25 left-25 absolute bg-black/15 dark:bg-white/10 backdrop-blur-sm p-2 rounded-full w-9 cursor-pointer'
-                aria-label="Change Profile Picture Button"
-              >
-                <PencilLine className='w-full h-full' strokeWidth={1} aria-hidden="true" />
-              </label>
             </div>
 
             <input

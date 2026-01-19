@@ -9,35 +9,45 @@ type ModalProps = {
     closeOnBgClick?: boolean
     children: ReactNode
     className?: string
+    dialogClassName?: string
+    preventDefault?: boolean
+    preventPropagation?: boolean
 }
 
 
 export default function Modal({showModal, closeModal, closeOnBgClick ,
-  children, className}: ModalProps): JSX.Element {    
+  children, className, dialogClassName, preventDefault, preventPropagation}: ModalProps): JSX.Element {    
     const dialogRef = useRef<HTMLDialogElement>(null)
 
     useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
+      const dialog = dialogRef.current;
+      if (!dialog) return;
 
-    if (showModal) {
-      dialog.showModal()
-      document.body.style.overflow = "hidden"
-    } else {
-      dialog.close()
-      document.body.style.overflow = "unset"
-    }
-
-    return () =>{
+      if (showModal) {
+        dialog.showModal()
+        document.body.style.overflow = "hidden"
+      } else {
+        dialog.close()
         document.body.style.overflow = "unset"
-    }
+      }
+
+      return () =>{
+          document.body.style.overflow = "unset"
+      }
   }, [showModal]);
 
     return(
     <dialog
       ref={dialogRef}
-      onClick={closeOnBgClick ? (e) => e.target === dialogRef.current && closeModal() : undefined}
-      className="bg-transparent backdrop:bg-black/30 backdrop-blur-xs px-4 min-w-full min-h-full"
+      onClick={
+        (e) => {
+          if(preventPropagation) e.stopPropagation()
+          if(preventDefault) e.preventDefault()
+          if(closeOnBgClick && e.target === dialogRef.current) closeModal()
+        }
+        
+      }
+      className={`${cn('bg-transparent backdrop:bg-black/30 backdrop-blur-xs min-w-full min-h-full md:overflow-y-auto', dialogClassName)}`}
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"

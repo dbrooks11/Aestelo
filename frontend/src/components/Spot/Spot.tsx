@@ -28,6 +28,7 @@ export default function Spot({spot, className}): JSX.Element{
     const [progress, setProgress] = useState<number>(1)
     const [total, setTotal ] = useState<number>(spot.total_num_of_photos)
     const [ openRateSelector, setOpenRateSelector] = useState<boolean>(false)
+    const [holdAverageRating, setHoldAverageRating] = useState<number>(spot.average_rating)
 
     // TODO: change username prop in header to users username for header
     return(
@@ -45,9 +46,9 @@ export default function Spot({spot, className}): JSX.Element{
                 <SpotHeader
                     name={spot.name}
                     accessibility={spot.accessibility}
-                    averageRating={spot.average_rating}
-                    username={'chocolate'}
+                    username={spot.username}
                     datePosted={spot.date_posted}
+                    holdAverageRating={holdAverageRating}
                 />
 
                 {/* Arrow Buttons */}
@@ -105,6 +106,7 @@ export default function Spot({spot, className}): JSX.Element{
                     ratingChoice={spot.rating_choice}
                     openRateSelector={openRateSelector}
                     setOpenRateSelector={setOpenRateSelector}
+                    setHoldAverageRating={setHoldAverageRating}
                 />   
             </div>
         </div>

@@ -1,8 +1,10 @@
-import { useMemo, useState, type CSSProperties, type ComponentType, type JSX, type SVGProps, Fragment, type Dispatch, type SetStateAction, useCallback } from "react";
+import { useMemo, useState, type CSSProperties, type ComponentType, type JSX, 
+    type SVGProps, Fragment, type Dispatch, type SetStateAction, useCallback} from "react";
 import { Star,ExternalLink, Bookmark, type LucideProps} from "lucide-react"
 import VIconRounded from "../DynamicSvgs/VIconRounded"
 import { handleNumStats } from "../../util/StatConverter";
 import { AxiosErrorHelper, protectedInstance } from "../../util/axios_api_helpers";
+import { useSpotMutation } from "../../hooks/SpotHooks/useSpotMutation";
 
 
 type IconComponent = ComponentType<LucideProps | SVGProps<SVGSVGElement>>;
@@ -15,7 +17,7 @@ type SpotButtonType = {
     fillColor?: string
     icon: IconComponent
     data: number
-    handler?: (value: any) => void //TODO: remove from being optional when done
+    handler?: (value: unknown) => void //TODO: remove from being optional when done
 }
 
 type SpotButtonProps = {
@@ -27,31 +29,46 @@ type SpotButtonProps = {
     ratingChoice: number
     openRateSelector: boolean
     setOpenRateSelector: Dispatch<SetStateAction<boolean>>
+    setHoldAverageRating: Dispatch<SetStateAction<number>>
 }
 
 export default function SpotButtons({shareCount, saveCount, 
-    ratingCount, visitCount, spotId, ratingChoice, openRateSelector, setOpenRateSelector
+    ratingCount, visitCount, spotId, ratingChoice, openRateSelector, setOpenRateSelector,
+    setHoldAverageRating
 }: SpotButtonProps): JSX.Element{
 
     const [ratingCountHolder, setRatingCountHolder] = useState<number>(ratingCount ? ratingCount : 0)
     const [isRated, setIsRated] = useState<boolean>(ratingChoice ? true : false)
     const [rating, setRating] = useState<number>(ratingChoice ? ratingChoice : 0)
 
+    const {updateSpotInCache} = useSpotMutation()
+
+    
+
     const onRateClick = useCallback(async(num: number) => {
         try{
-            
+            let response = undefined
             if(num > 0 && num <= 5){
                 const wasRated = isRated
                 
                 setIsRated(true)
-                if(!wasRated) setRatingCountHolder((prev) => prev + 1)
-                const response = await protectedInstance.post(`/spot/rate/${spotId}`, {
+                response = await protectedInstance.post(`/spot/rate/${spotId}`, {
                     rating_choice: num
                 })
 
                 if(response.status === 201){
-                    setRating(response.data.rating)
+                    const newRating = response.data.rating
+                    const newAverage = response.data.new_average
+                    const newRatingCount = response.data.new_total_ratings
+                    if(!wasRated) setRatingCountHolder(newRatingCount)
+                    setRating(newRating)
+                    setHoldAverageRating(newAverage)
                     setOpenRateSelector(false)
+                    updateSpotInCache(spotId, {
+                        rating_choice: newRating,
+                        total_num_of_ratings: newRatingCount,
+                        average_rating: newAverage
+                    })
                 }else{
                     setIsRated(false)
                     if(!wasRated) setRatingCountHolder((prev) => prev - 1)
@@ -59,23 +76,31 @@ export default function SpotButtons({shareCount, saveCount,
                 
             } else if(num === 0) {
                 setIsRated(false)
-                setRatingCountHolder((prev) => Math.max(0, prev - 1))
-                const response = await protectedInstance.delete(`/spot/rate/${spotId}`)
+                response = await protectedInstance.delete(`/spot/rate/${spotId}`)
                  
 
                 if(response.status === 200) {
+                    const newAverage = response.data.new_average
+                    const newRatingCount = response.data.new_total_ratings
                     setRating(0)
+                    setRatingCountHolder(newRatingCount)
+                    setHoldAverageRating(newAverage)
                     setOpenRateSelector(false)
+                    updateSpotInCache(spotId, {
+                        rating_choice: null,
+                        total_num_of_ratings: newRatingCount,
+                        average_rating: newAverage
+                    })
                 }else{
                     setIsRated(true)
                     setRatingCountHolder((prev) => Math.max(0, prev + 1))
                 }   
-            }   
+            } 
         }catch(error){
             const newError = AxiosErrorHelper(error)
             console.error(newError)
         } 
-    }, [isRated, setOpenRateSelector, spotId])
+    }, [isRated, setOpenRateSelector, spotId, updateSpotInCache])
 
     const rateButtonHandler = useCallback(() => {
         if(isRated){

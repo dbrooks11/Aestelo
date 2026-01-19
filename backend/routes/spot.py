@@ -3,9 +3,9 @@ from datetime import datetime, timezone
 from exstensions import db
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.spot import Spot
+from models.user import UserProfile
 from models.rating import Rating
 from schemas.spot_schema import spot_schema
-from schemas.rating_schema import rating_schema
 from util.outlier_coords import average_location_batch
 from util.storage import generate_presigned_url
 from util.celery_task import process_photos_with_metadata
@@ -13,8 +13,8 @@ from marshmallow import ValidationError
 from celery.result import AsyncResult, GroupResult
 from celery import chord,group
 from exstensions import celery
-from sqlalchemy.orm import joinedload
-from sqlalchemy import exists, case
+from sqlalchemy.orm import joinedload, load_only
+from sqlalchemy import case
 
 spot_bp = Blueprint('spot', __name__, url_prefix='/spot')
 
@@ -159,6 +159,8 @@ def get_user_spots():
         page = request.args.get('page', default=1, type=int)
         per_page = request.args.get('per_page', default=12, type=int)
 
+        username = UserProfile.query.with_entities(UserProfile.username).filter_by(id=current_user).first()
+
         spots = db.session.query(Spot, Rating).outerjoin(
             Rating, 
             (Rating.user_profile_id==current_user) & (Rating.spot_id==Spot.id)
@@ -179,6 +181,8 @@ def get_user_spots():
             spot_data = spot_schema.dump(spot)
 
             spot_data['rating_choice'] = rating.rating_choice if rating else None
+            spot_data['username'] = username[0]
+            
 
             results.append(spot_data)
 
@@ -193,7 +197,7 @@ def get_user_spots():
         return jsonify({'error': str(e)}), 500
     
 
-# TODO: add check for if a user made a visit at a spot. add ability to update rating if already rated
+# TODO: add check for if a user made a visit at a spot
 @spot_bp.route('/rate/<spot_id>', methods=['POST', 'DELETE'])
 @jwt_required()
 def rate_spot(spot_id):
@@ -241,8 +245,12 @@ def rate_spot(spot_id):
 
                 db.session.add(rating)
             db.session.commit()
+
+            updated_spot = Spot.query.with_entities(Spot.average_rating, Spot.total_num_of_ratings).filter_by(id=spot_id).first()
             return jsonify({'message': 'Rating added/updated successfully',
-                            'rating': rate}), 201
+                            'rating': rate,
+                            'new_average': updated_spot[0],
+                            'new_total_ratings': updated_spot[1]}), 201
         except Exception:
             return jsonify({'error': 'This spot is already rated'}), 500
 
@@ -260,7 +268,11 @@ def rate_spot(spot_id):
                 })
                 db.session.delete(is_rated)
                 db.session.commit()
-                return jsonify({'message': 'Rating removed successfully'}), 200
+
+                updated_spot = Spot.query.with_entities(Spot.average_rating, Spot.total_num_of_ratings).filter_by(id=spot_id).first()
+                return jsonify({'message': 'Rating removed successfully',
+                                'new_average': updated_spot[0],
+                                'new_total_ratings': updated_spot[1]}), 200
             else:
                 return jsonify({'message': 'No rating to remove'}), 200
         except Exception as e:

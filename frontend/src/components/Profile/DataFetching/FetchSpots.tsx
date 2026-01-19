@@ -3,7 +3,7 @@ import { useInfiniteQuery} from '@tanstack/react-query'
 import { protectedInstance } from "../../../util/axios_api_helpers";
 import Spot from "../../Spot/Spot";
 import SpotSimple from "../../Spot/SpotSimple/SpotSimple";
-import { AnimatePresence, motion } from "framer-motion";
+import Modal from "../../Modal";
 
 const fetchSpots = async({pageParam = 1}) => {
   const response = await protectedInstance.get(`/spot/me?page=${pageParam}`)
@@ -44,14 +44,11 @@ export default function FetchSpots(): JSX.Element{
     if(node && observerContainerRef.current) observerContainerRef.current.observe(node)
   }, [isFetchingNextPage, hasNextPage, fetchNextPage])
 
-  const handleSpotClick = () => {
-
-  }
-
   return(
+    /* eslint-disable @typescript-eslint/no-explicit-any */
       <section className="md:m-2 flex flex-col">
         {/* 1. THE GRID (Only Thumbnails) */}
-        <div className="grid md:grid-cols-4 grid-cols-3 md:gap-2 gap-1 relative">
+        <div className="grid md:grid-cols-4 grid-cols-3 md:gap-2 gap-0.5 relative">
           {data?.pages.map((page) =>
             page.spots.map((spot: any) => (
               <SpotSimple
@@ -64,36 +61,22 @@ export default function FetchSpots(): JSX.Element{
           )}
         </div>
 
-          {/* 2. THE MODAL (Full View Overlay) */}
-        <AnimatePresence>
+        {/* 2. THE MODAL (Full View Overlay) */}
+        <Modal
+          closeModal={() => setSelectedSpot(undefined)}
+          showModal={selectedSpot ? true : false}
+          closeOnBgClick={true}
+          className="flex flex-col w-fit h-fit rounded-none bg-none border-none"
+          preventDefault={true}
+          preventPropagation={true}
+        >
         {selectedSpot && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
-            
-            {/* Backdrop (Click to close) */}
-            <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setSelectedSpot(undefined)}
-                className="absolute inset-0 bg-black/20 backdrop-blur-xs"
+            <Spot 
+                spot={selectedSpot} 
+                className={''}
             />
-
-            {/* The Full Spot Card */}
-            <motion.div 
-                layoutId={`spot-${selectedSpot.id}`}
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                className="relative z-10"
-            >
-                <Spot 
-                    spot={selectedSpot} 
-                    className={''}
-                />
-            </motion.div>
-          </div>
           )}
-        </AnimatePresence>
+        </Modal>
         <div 
           ref={observerCallback}
           className="w-full h-5 invisible"
