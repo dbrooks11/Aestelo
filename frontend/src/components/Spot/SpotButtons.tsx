@@ -44,27 +44,31 @@ export default function SpotButtons({shareCount, saveCount,
                 const wasRated = isRated
                 
                 setIsRated(true)
+                if(!wasRated) setRatingCountHolder((prev) => prev + 1)
                 const response = await protectedInstance.post(`/spot/rate/${spotId}`, {
                     rating_choice: num
                 })
 
                 if(response.status === 201){
                     setRating(response.data.rating)
-                    if(!wasRated) setRatingCountHolder((prev) => prev + 1)
-                    setIsRated(true)
                     setOpenRateSelector(false)
-                    console.log(response.data.message)
+                }else{
+                    setIsRated(false)
+                    if(!wasRated) setRatingCountHolder((prev) => prev - 1)
                 }
                 
             } else if(num === 0) {
                 setIsRated(false)
-                const response = await protectedInstance.delete(`/spot/rate/${spotId}`) 
+                setRatingCountHolder((prev) => Math.max(0, prev - 1))
+                const response = await protectedInstance.delete(`/spot/rate/${spotId}`)
+                 
 
                 if(response.status === 200) {
-                    setIsRated(false)
-                    setRatingCountHolder((prev) => Math.max(0, prev - 1))
                     setRating(0)
-                    console.log(response.data.message)
+                    setOpenRateSelector(false)
+                }else{
+                    setIsRated(true)
+                    setRatingCountHolder((prev) => Math.max(0, prev + 1))
                 }   
             }   
         }catch(error){
@@ -122,10 +126,8 @@ export default function SpotButtons({shareCount, saveCount,
         },
     ], [shareCount, saveCount, ratingCountHolder, visitCount, rateButtonHandler])    
 
-    
-
     const {leftButtons, rightButtons} = useMemo(() => {
-        const sortedButtons = spotButtons.sort((btn1, btn2) => btn1.order - btn2.order)
+        const sortedButtons = [...spotButtons].sort((btn1, btn2) => btn1.order - btn2.order)
         return{
             leftButtons: sortedButtons.filter(btn => btn.position === 'left'),
             rightButtons: sortedButtons.filter(btn => btn.position === 'right')
@@ -170,6 +172,7 @@ export default function SpotButtons({shareCount, saveCount,
                                                     <label 
                                                         htmlFor={`${num}`}
                                                         onClick={(e) => {
+                                                            e.preventDefault()
                                                             e.stopPropagation()
                                                             onRateClick(num)
                                                         }}

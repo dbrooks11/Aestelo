@@ -1,10 +1,11 @@
-import { type JSX } from "react";
+import { useRef, type JSX } from "react";
 
 
 
-export default function SpotPhoto({spot, progress, openRateSelector, setOpenRateSelector}): JSX.Element{
+export default function SpotPhoto({spot, progress, setOpenRateSelector}): JSX.Element{
 
-    const mediaList = spot.spot_media.sort((a:{sort_order: number}, b:{sort_order: number}) => a.sort_order - b.sort_order)
+    const mediaList = [...spot.spot_media].sort((a:{sort_order: number}, b:{sort_order: number}) => a.sort_order - b.sort_order)
+    const lastTapRef = useRef<number>(0)
 
     return(
         <div className="relative aspect-4/5 object-cover flex flex-1">
@@ -16,7 +17,16 @@ export default function SpotPhoto({spot, progress, openRateSelector, setOpenRate
                 return (<img
                     key={index}
                     src={item.photo_path_url}
-                    onDoubleClick={() => setOpenRateSelector((prev) => !prev)}
+                    onTouchStart={() => {
+                        const date = new Date()
+                        const time = date.getTime()
+                        const doubleTapDelay = 25
+                        if (time - lastTapRef.current < doubleTapDelay) {
+                            setOpenRateSelector((prev: boolean) => !prev)
+                        }
+                        lastTapRef.current = time
+                    }}
+                    onDoubleClick={() => setOpenRateSelector((prev: boolean) => !prev)}
                     loading={index === progress - 1 ? "eager" : "lazy"} 
                     className={`
                         absolute inset-0 w-full h-full object-cover

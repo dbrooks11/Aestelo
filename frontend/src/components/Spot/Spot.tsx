@@ -87,7 +87,6 @@ export default function Spot({spot, className}): JSX.Element{
                 <SpotPhoto
                     spot={spot}
                     progress={progress}
-                    openRateSelector={openRateSelector}
                     setOpenRateSelector={setOpenRateSelector}
                 />
                 

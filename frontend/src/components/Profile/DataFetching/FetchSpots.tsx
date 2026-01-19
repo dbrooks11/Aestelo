@@ -2,7 +2,7 @@ import { useCallback, useRef, useState, type JSX } from "react";
 import { useInfiniteQuery} from '@tanstack/react-query'
 import { protectedInstance } from "../../../util/axios_api_helpers";
 import Spot from "../../Spot/Spot";
-import SpotSimple from "../../Spot/SpotSimple";
+import SpotSimple from "../../Spot/SpotSimple/SpotSimple";
 import { AnimatePresence, motion } from "framer-motion";
 
 const fetchSpots = async({pageParam = 1}) => {

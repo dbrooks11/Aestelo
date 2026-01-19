@@ -1,9 +1,9 @@
 import { type JSX } from "react";
 import { Accessibility, GalleryVerticalEnd } from "lucide-react";
-import cn from "../../util/tailwind_merger";
-import SpotHeader from "./SpotHeader";
-import SpotDescripton from "./SpotDesciption";
-import SpotPhoto from "./SpotPhoto";
+import cn from "../../../util/tailwind_merger";
+import SpotHeader from "../SpotHeader";
+import SpotDescripton from "../SpotDesciption";
+import SpotThumbnail from "./SpotThumbnail";
 
 export default function SpotSimple({spot, className, onClick}): JSX.Element{
     return(
@@ -29,9 +29,8 @@ export default function SpotSimple({spot, className, onClick}): JSX.Element{
             />}
 
             {/* Photos */}
-            <SpotPhoto
+            <SpotThumbnail
                 spot={spot}
-                progress={1}
             />
 
             {spot.spot_media.length > 1 && <GalleryVerticalEnd

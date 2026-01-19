@@ -221,6 +221,7 @@ def rate_spot(spot_id):
                     )
                 })
                 is_rated.rating_choice = rate
+                is_rated.created_at = datetime.now(timezone.utc)
             
             else:
                 rating = Rating(
@@ -261,7 +262,7 @@ def rate_spot(spot_id):
                 db.session.commit()
                 return jsonify({'message': 'Rating removed successfully'}), 200
             else:
-                return jsonify({'message': 'Rating unchanged'}), 200
+                return jsonify({'message': 'No rating to remove'}), 200
         except Exception as e:
             db.session.rollback()
             return jsonify({'error': str(e)}), 500
