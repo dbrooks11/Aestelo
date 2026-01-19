@@ -8,13 +8,8 @@ class RatingSchema(ma.SQLAlchemyAutoSchema):
         model = Rating
         load_instance = True
         include_fk = True
-    
-    rating_id = fields.Int(dump_only=True)
-    created_at = fields.DateTime(dump_only=True)
-    user_profile_id = fields.UUID(dump_only=True)  
-    post_id = fields.Int(dump_only=True)
 
     rating_choice = fields.Int(validate=validate.Range(min=1, max=5))
 
 
-rating_schema = RatingSchema(only = ('rating_choice'))
+rating_schema = RatingSchema()

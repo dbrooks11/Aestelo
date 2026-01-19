@@ -2,9 +2,9 @@ import { type JSX } from "react";
 
 
 
-export default function SpotPhoto({spot, progress}): JSX.Element{
-    const mediaList = spot.spot_media.sort((a:{sort_order: number}, b:{sort_order: number}) => a.sort_order - b.sort_order)
+export default function SpotPhoto({spot, progress, openRateSelector, setOpenRateSelector}): JSX.Element{
 
+    const mediaList = spot.spot_media.sort((a:{sort_order: number}, b:{sort_order: number}) => a.sort_order - b.sort_order)
 
     return(
         <div className="relative aspect-4/5 object-cover flex flex-1">
@@ -16,6 +16,7 @@ export default function SpotPhoto({spot, progress}): JSX.Element{
                 return (<img
                     key={index}
                     src={item.photo_path_url}
+                    onDoubleClick={() => setOpenRateSelector((prev) => !prev)}
                     loading={index === progress - 1 ? "eager" : "lazy"} 
                     className={`
                         absolute inset-0 w-full h-full object-cover

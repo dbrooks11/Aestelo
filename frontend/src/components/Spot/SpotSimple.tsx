@@ -35,7 +35,7 @@ export default function SpotSimple({spot, className, onClick}): JSX.Element{
             />
 
             {spot.spot_media.length > 1 && <GalleryVerticalEnd
-                className="absolute bottom-0 right-1  md:bottom-2 md:right-2 z-10 dark:stroke-white stroke-black w-4 lg:w-6"
+                className="absolute bottom-0 right-1  md:bottom-2 md:right-2 z-10 stroke-white w-4 lg:w-6"
                 strokeWidth={1.5}
             />}
 

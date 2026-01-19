@@ -17,7 +17,7 @@ class SpotSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Spot
         include_fk = True
-        exclude = ('is_deleted','deleted_at','num_reports','is_removed','removed_at', 'trending_score', 'num_of_edits')
+        exclude = ('is_deleted','deleted_at','num_reports','is_removed','removed_at', 'trending_score', 'num_of_edits','status')
 
     coordinates = fields.Method("get_coordinates")
     spot_media = fields.Nested(SpotMediaSchema, many=True)

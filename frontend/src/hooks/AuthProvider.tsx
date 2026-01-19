@@ -35,6 +35,7 @@ export default function AuthProvider({ children }: {children: ReactNode}): JSX.E
         checkAuth()
     }, [])
 
+
     useEffect(() => {
         const authInterceptor = protectedInstance.interceptors.response.use(
             (response) => response,

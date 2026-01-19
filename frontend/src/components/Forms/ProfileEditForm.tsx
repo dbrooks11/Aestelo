@@ -221,7 +221,7 @@ export default function EditProfileForm({
                 role="button"
                 tabIndex={0}
               >
-                <Upload size={20} aria-hidden="true" /> Change Image
+                <Upload size={20} aria-hidden="true" /> Change Banner
               </label>
             </div>
 

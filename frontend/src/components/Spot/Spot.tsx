@@ -27,6 +27,7 @@ export default function Spot({spot, className}): JSX.Element{
 
     const [progress, setProgress] = useState<number>(1)
     const [total, setTotal ] = useState<number>(spot.total_num_of_photos)
+    const [ openRateSelector, setOpenRateSelector] = useState<boolean>(false)
 
     // TODO: change username prop in header to users username for header
     return(
@@ -36,7 +37,9 @@ export default function Spot({spot, className}): JSX.Element{
         >
             
             {/* Images and Header container */}
-            <div className="relative flex flex-1">
+            <div 
+                className="relative flex flex-1"
+            >
                 
                 {/* Header */}
                 <SpotHeader
@@ -84,6 +87,8 @@ export default function Spot({spot, className}): JSX.Element{
                 <SpotPhoto
                     spot={spot}
                     progress={progress}
+                    openRateSelector={openRateSelector}
+                    setOpenRateSelector={setOpenRateSelector}
                 />
                 
             </div>
@@ -95,8 +100,12 @@ export default function Spot({spot, className}): JSX.Element{
                 <SpotButtons
                     shareCount={spot.share_count}
                     saveCount={spot.save_count}
-                    totalNumOfRatings={spot.total_num_of_ratings}
+                    ratingCount={spot.total_num_of_ratings}
                     visitCount={spot.visit_count}
+                    spotId={spot.id}
+                    ratingChoice={spot.rating_choice}
+                    openRateSelector={openRateSelector}
+                    setOpenRateSelector={setOpenRateSelector}
                 />   
             </div>
         </div>

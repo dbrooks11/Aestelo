@@ -57,7 +57,7 @@ export default function FetchSpots(): JSX.Element{
               <SpotSimple
                 key={spot.id}
                 spot={spot}
-                onClick={() => setSelectedSpot(spot)} // Pass the whole object
+                onClick={() => setSelectedSpot(spot)}
                 className="w-full aspect-4/5 hover:scale-102 cursor-pointer transition-transform object-cover rounded-xs overflow-hidden"
               />
             ))
@@ -96,7 +96,7 @@ export default function FetchSpots(): JSX.Element{
         </AnimatePresence>
         <div 
           ref={observerCallback}
-          className="w-full h-5"
+          className="w-full h-5 invisible"
         ></div>
       </section>
   )

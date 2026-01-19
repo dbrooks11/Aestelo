@@ -1,8 +1,11 @@
 from flask import Blueprint, request, jsonify
+from datetime import datetime, timezone
 from exstensions import db
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.spot import Spot
+from models.rating import Rating
 from schemas.spot_schema import spot_schema
+from schemas.rating_schema import rating_schema
 from util.outlier_coords import average_location_batch
 from util.storage import generate_presigned_url
 from util.celery_task import process_photos_with_metadata
@@ -11,6 +14,7 @@ from celery.result import AsyncResult, GroupResult
 from celery import chord,group
 from exstensions import celery
 from sqlalchemy.orm import joinedload
+from sqlalchemy import exists, case
 
 spot_bp = Blueprint('spot', __name__, url_prefix='/spot')
 
@@ -155,14 +159,29 @@ def get_user_spots():
         page = request.args.get('page', default=1, type=int)
         per_page = request.args.get('per_page', default=12, type=int)
 
-        spots = Spot.query.filter_by(user_profile_id=current_user).options(joinedload(Spot.spot_media)).order_by(Spot.date_posted.desc())
+        spots = db.session.query(Spot, Rating).outerjoin(
+            Rating, 
+            (Rating.user_profile_id==current_user) & (Rating.spot_id==Spot.id)
+        ).filter(
+            Spot.user_profile_id==current_user
+        ).options(
+            joinedload(Spot.spot_media)
+        ).order_by(Spot.date_posted.desc())
 
         paginated_spots = spots.paginate(
             page=page,
             per_page=per_page
         )
 
-        results = spot_schema.dump(paginated_spots.items, many=True)
+        results =[]
+
+        for spot, rating in paginated_spots.items:
+            spot_data = spot_schema.dump(spot)
+
+            spot_data['rating_choice'] = rating.rating_choice if rating else None
+
+            results.append(spot_data)
+
 
         return jsonify({
             'spots': results,
@@ -172,3 +191,77 @@ def get_user_spots():
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+
+# TODO: add check for if a user made a visit at a spot. add ability to update rating if already rated
+@spot_bp.route('/rate/<spot_id>', methods=['POST', 'DELETE'])
+@jwt_required()
+def rate_spot(spot_id):
+    current_user = get_jwt_identity()
+  
+    is_rated = Rating.query.filter_by(spot_id=spot_id, user_profile_id=current_user).first()
+
+    if request.method == 'POST':
+        data = request.get_json()
+        rate = data.get('rating_choice')
+
+        if not rate or not isinstance(rate, int) or not (1 <= rate <= 5) :
+            return jsonify({'error': 'Invalid rating (1-5 required)'}), 400
+
+        if is_rated and is_rated.rating_choice == rate:
+            return jsonify({'message': 'Rating unchanged'}), 200
+        
+        try: 
+
+            if is_rated:
+                Spot.query.filter_by(id=spot_id).update({
+                    'average_rating': case(
+                        (Spot.total_num_of_ratings == 0, rate),
+                    else_=(((Spot.average_rating * Spot.total_num_of_ratings) - is_rated.rating_choice) + rate) / (Spot.total_num_of_ratings)
+                    )
+                })
+                is_rated.rating_choice = rate
+            
+            else:
+                rating = Rating(
+                    user_profile_id=current_user,
+                    spot_id=spot_id,
+                    rating_choice=rate,
+                    created_at=datetime.now(timezone.utc)
+                )
+
+                Spot.query.filter_by(id=spot_id).update({
+                    'total_num_of_ratings': Spot.total_num_of_ratings + 1,
+                    'average_rating': case(
+                        (Spot.total_num_of_ratings == 0, rate),
+                    else_=((Spot.average_rating * Spot.total_num_of_ratings) + rate) / (Spot.total_num_of_ratings + 1)
+                    )
+                })
+
+                db.session.add(rating)
+            db.session.commit()
+            return jsonify({'message': 'Rating added/updated successfully',
+                            'rating': rate}), 201
+        except Exception:
+            return jsonify({'error': 'This spot is already rated'}), 500
+
+    elif request.method == 'DELETE':
+        try:
+            if is_rated:
+                Spot.query.filter_by(id=spot_id).update({
+                    'total_num_of_ratings': Spot.total_num_of_ratings - 1,
+                    'average_rating': case(
+                        (Spot.total_num_of_ratings <= 1, 0),
+                    else_=(
+                        ((Spot.average_rating * Spot.total_num_of_ratings) - is_rated.rating_choice) / (Spot.total_num_of_ratings - 1)
+                    )
+                    )
+                })
+                db.session.delete(is_rated)
+                db.session.commit()
+                return jsonify({'message': 'Rating removed successfully'}), 200
+            else:
+                return jsonify({'message': 'Rating unchanged'}), 200
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
