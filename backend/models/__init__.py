@@ -1,5 +1,6 @@
 from . import (
     auth,
+    collection_item,
     spot,
     user, 
     location, 
@@ -10,6 +11,5 @@ from . import (
     followers_and_following, 
     block_profile,
     collection,
-    saved,
     token_blacklist
 )

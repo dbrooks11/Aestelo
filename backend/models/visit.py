@@ -1,7 +1,6 @@
 from exstensions import db
 from sqlalchemy import Column, ForeignKey, BigInteger, String, Integer, Text, DateTime, Boolean, ARRAY, func
 from sqlalchemy.orm import relationship
-from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import UUID
 from geoalchemy2 import Geography
 
@@ -18,8 +17,8 @@ class Visit(db.Model):
     
     coordinates = Column(Geography(geometry_type='POINT', srid=4326, spatial_index=True))
 
-    music_track_id = Column(String(50), ForeignKey('music_track.id'), nullable=True)
-    caption = Column(String(200))
+    music_track_id = Column(Text, ForeignKey('music_track.id'), nullable=True)
+    caption = Column(Text) #limit to 200 chars
     hashtags = Column(ARRAY(String))
     date_posted = Column(DateTime(timezone=True), server_default=func.now())
     like_count = Column(BigInteger, default=0)
@@ -57,7 +56,7 @@ class VisitMedia(db.Model):
     sort_order = Column(Integer)
 
     photo_path = Column(Text)
-    photo_type = Column(String(15), default = 'photo') 
+    photo_type = Column(Text, default = 'photo') 
     width =  Column(Integer)
     height = Column(Integer)
 

@@ -66,7 +66,7 @@ export default function FetchSpots(): JSX.Element{
           closeModal={() => setSelectedSpot(undefined)}
           showModal={selectedSpot ? true : false}
           closeOnBgClick={true}
-          className="flex flex-col w-fit h-fit rounded-none bg-none border-none"
+          className="flex flex-col w-fit h-fit rounded-none bg-none border-none my-16 md:my-20"
           preventDefault={true}
           preventPropagation={true}
         >

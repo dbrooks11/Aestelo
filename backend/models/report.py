@@ -1,6 +1,5 @@
 from exstensions import db
-from sqlalchemy import Column, ForeignKey, BigInteger, String, DateTime, UniqueConstraint, Index, func
-from datetime import datetime, timezone
+from sqlalchemy import Column, ForeignKey, BigInteger, DateTime, UniqueConstraint, Index, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 
 class Report(db.Model):
@@ -13,15 +12,15 @@ class Report(db.Model):
     reporter_id = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), nullable=False)
     
     # What's being reported
-    reported_type = Column(String(20), nullable=False)  # 'user', 'spot', 'visit'
-    reported_id = Column(String(50), nullable=False)  # The ID of whatever is reported
+    reported_type = Column(Text, nullable=False)  # 'user', 'spot', 'visit'
+    reported_id = Column(UUID(as_uuid=True), nullable=False)  # The ID of whatever is reported
     
     # Report details
-    reason = Column(String(50), nullable=False)  # 'spam', 'harassment', 'inappropriate', etc.
-    description = Column(String(500))  # Optional elaboration
+    reason = Column(Text, nullable=False)  # 'spam', 'harassment', 'inappropriate', etc.
+    description = Column(Text)  # Optional elaboration
     
     # Moderation tracking
-    status = Column(String(20), default='pending')  # 'pending', 'reviewed', 'dismissed', 'actioned'
+    status = Column(Text, default='pending')  # 'pending', 'reviewed', 'dismissed', 'actioned'
     reviewed_by = Column(UUID(as_uuid=True))
     reviewed_at = Column(DateTime(timezone=True), nullable=True)
     

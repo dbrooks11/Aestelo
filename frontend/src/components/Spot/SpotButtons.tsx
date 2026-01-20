@@ -174,7 +174,7 @@ export default function SpotButtons({shareCount, saveCount,
                                     >
                                     </btn.icon>
                                     <span className="font-medium text-xs">{handleNumStats(btn.data)}</span>
-                                    {(btn.title === 'Rate' && openRateSelector) && <div className="-top-12 left-[50%] absolute flex flex-row-reverse justify-center items-center dark:bg-off-slate px-2 border dark:border-neutral-700 rounded-xs h-10 -translate-x-1/2">
+                                    {(btn.title === 'Rate' && openRateSelector) && <div className="-top-16 left-[50%] absolute flex flex-row-reverse justify-center items-center dark:bg-off-slate border dark:border-neutral-700 rounded-xs p-2 -translate-x-1/2 shadow-lg z-20">
                                         {[5,4,3,2,1].map((num) => {
                                             
                                             return (
@@ -198,7 +198,7 @@ export default function SpotButtons({shareCount, saveCount,
                                                     >
                                                         <btn.icon
                                                             strokeWidth={1}
-                                                            className={`stroke-current fill-inherit`}
+                                                            className={`stroke-current fill-inherit w-8 h-8`}
                                                         >
                                                         </btn.icon>
                                                     </label>

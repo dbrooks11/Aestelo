@@ -24,10 +24,10 @@ class Spot(db.Model):
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), nullable=False, index=True)
     
     id = Column(BigInteger, primary_key=True)
-    name = Column(String(40))
+    name = Column(Text)
     coordinates = Column(Geography(geometry_type='POINT', srid=4326, spatial_index=True))
     date_posted = Column(DateTime(timezone=True), index=True)
-    description = Column(String(200))
+    description = Column(Text)
     total_num_of_photos = Column(Integer)
 
     visit_count = Column(Integer, default=0) 
@@ -49,7 +49,7 @@ class Spot(db.Model):
     num_reports = Column(Integer, default=0)
     is_removed = Column(Boolean, default=False) #removed due to moderaters, admin, etc (does NOT mean deleted by user_profile)
     removed_at = Column(DateTime(timezone=True))
-    status = Column(String(), default='processing')
+    status = Column(Text, default='processing')
     
     
     spot_media = relationship('SpotMedia', backref='spot', cascade='all, delete-orphan')
@@ -74,7 +74,7 @@ class SpotMedia(db.Model):
     sort_order = Column(BigInteger)
 
     photo_path = Column(Text)
-    photo_type = Column(String(15), default = 'photo') #stores what type of media is uploaed, photo, video, 360 video, etc
+    photo_type = Column(Text, default = 'photo') #stores what type of media is uploaed, photo, video, 360 video, etc
     width =  Column(Integer)
     height = Column(Integer)
 

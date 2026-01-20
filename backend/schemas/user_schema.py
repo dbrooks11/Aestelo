@@ -30,10 +30,6 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
     facebook= fields.Str(validate=validate.URL())
     tiktok= fields.Str(validate=validate.URL())
     twitter_x= fields.Str(validate=validate.URL())
-
-    is_prem_account = fields.Bool(dump_only=True)
-    music_track_id = fields.Str()
-
         
     @validates('username')
     def validate_username(self, value, **kwargs):
@@ -173,8 +169,8 @@ class UserSubscriptionSchema(ma.SQLAlchemyAutoSchema):
 user_profile_schema = UserProfileSchema()
 username_only = UserProfileSchema(only = ('username', 'profile_photo'))
 profile_can_edit = UserProfileSchema(only = ('username','bio','profile_banner','profile_photo', 'instagram','facebook','tiktok','twitter_x'))
-profile_viewing = UserProfileSchema(only = ('username','bio','banner_theme','profile_photo','post_count','visit_count','follower_count','following_count', 'instagram','facebook','tiktok','twitter_x','music_track_id'))
-partial_schema = UserProfileSchema(only = ('id','banner_theme','username','profile_photo'))
+profile_viewing = UserProfileSchema(only = ('username','bio','profile_photo','post_count','visit_count','follower_count','following_count', 'instagram','facebook','tiktok','twitter_x','music_track_id'))
+partial_schema = UserProfileSchema(only = ('id','username','profile_photo'))
 user_info_schema = UserInfoSchema(only = ('age','first_name','last_name','date_of_birth','gender','height_ft','height_in'))
 user_settings_schema = UserSettingsSchema()
 user_subscription_schema = UserSubscriptionSchema()

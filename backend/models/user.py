@@ -1,7 +1,6 @@
 from exstensions import db
 from flask import current_app
 from sqlalchemy.orm import relationship
-from datetime import datetime, timezone
 from sqlalchemy import (Column, ForeignKey, BigInteger, 
                         String, Integer, Float, Text, DateTime, Boolean, func)
 from sqlalchemy.dialects.postgresql import UUID
@@ -19,14 +18,12 @@ from sqlalchemy.dialects.postgresql import UUID
 class UserProfile(db.Model):
     
     id = Column(UUID(as_uuid=True), ForeignKey('auth_user.id'), primary_key=True)
-    banner_theme = Column(String(30))
+    music_track_id = Column(Text, ForeignKey('music_track.id'))
 
-    music_track_id = Column(String(50), ForeignKey('music_track.id'))
-
-    username = Column(String(30))
+    username = Column(Text)
     profile_photo = Column(Text)
     profile_banner = Column(Text)
-    bio = Column(String(150))
+    bio = Column(Text)
 
     instagram = Column(Text)
     is_verified_instagram = Column(Boolean, default=False)
@@ -78,55 +75,6 @@ class UserProfile(db.Model):
     follower = relationship('Follow',primaryjoin='UserProfile.id == Follow.follower_id',backref='follower')
     following = relationship('Follow',primaryjoin='UserProfile.id == Follow.following_id',backref='following')
     
-
-    def to_dict(self):
-        return {
-            'id': str(self.user_id),
-            'banner_theme': self.banner_theme,
-            'music_track_id':self.music_track_id,
-            'username': self.username,
-            'profile_photo': self.profile_photo,
-            'bio': self.bio,
-            'instagram': self.instagram,
-            'is_verified_instagram': self.is_verified_instagram,
-            'facebook': self.facebook,
-            'is_verified_facebook': self.is_verified_facebook,
-            'twitter_x': self.twitter_x,
-            'is_verified_twitter_x': self.is_verified_twitter_x,
-            'tiktok': self.tiktok,
-            'is_verified_tiktok': self.is_verified_tiktok,
-            'follower_count': self.follower_count,
-            'following_count': self.following_count,
-            'is_private': self.is_private,
-            'show_online_status': self.show_online_status,
-            'is_business_account': self.is_business_account,
-            'is_banned': self.is_banned,
-            'banned_at': self.banned_at,
-            'banned_reason': self.banned_reason,
-            'num_reports_made': self.num_reports_made,
-            'num_reports': self.num_reports,
-            'profile_created_at':self.profile_created_at
-        }
-    def to_dict_public(self):
-        return{
-            'banner_theme': self.banner_theme,
-            'username': self.username,
-            'profile_photo': self.profile_photo,
-            'bio': self.bio,
-            'instagram': self.instagram,
-            'facebook': self.facebook,
-            'twitter_x': self.twitter_x,
-            'tiktok': self.tiktok,
-            'follower_count': self.follower_count,
-            'following_count': self.following_count,
-            'show_online_status': self.show_online_status,
-        }
-    def to_dict_private(self):
-        return{
-            'banner_theme': self.banner_theme,
-            'username': self.username,
-            'profile_photo': self.profile_photo,
-        }
     
     @classmethod
     def active(cls):
@@ -156,17 +104,17 @@ class UserProfile(db.Model):
 class UserInfo(db.Model):
 
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'),primary_key=True)
-    first_name = Column(String(30))
-    last_name = Column(String(30))
-    email = Column(String(150))
+    first_name = Column(Text) #limit to 30
+    last_name = Column(Text) #limit to 30
+    email = Column(Text) #limit to 150 chars when checking
     date_of_birth = Column(DateTime(timezone=True))
     age = Column(Integer, default=0)
-    gender = Column(String(15), default= 'Not specified')
+    gender = Column(Text, default= 'Not specified')
     height_ft = Column(Integer, default=0)
     height_in = Column(Integer, default=0)
     
-    state = Column(String(20))
-    city = Column(String(25))
+    state = Column(Text)
+    city = Column(Text)
     
 
     def to_dict(self):
@@ -216,7 +164,7 @@ class UserRole(db.Model):
 class UserSettings(db.Model):
 
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), primary_key=True)
-    language_preference = Column(String(50))
+    language_preference = Column(Text)
     email_notifications = Column(Boolean, default=False)
     push_notifications = Column(Boolean, default=False)
     location_sharing = Column(Boolean, default=False)
@@ -244,13 +192,13 @@ class UserSettings(db.Model):
 class UserSubscription(db.Model):
 
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), primary_key=True)
-    tier = Column(String(10), default='free') #free, premium, business
+    tier = Column(Text, default='free') #free, premium, business
     price = Column(Float, default=0.00)
     started_at= Column(DateTime(timezone=True), server_default=func.now())
     expires_at = Column(DateTime(timezone=True))
     auto_renew = Column(Boolean, default=False)
     payment_method_id = Column(UUID(as_uuid=True)) 
-    billing_cycle = Column(String(10), default='monthly')  #monthly or yearly
+    billing_cycle = Column(Text, default='monthly')  #monthly or yearly
     trial_used = Column(Boolean, default=False)
     
     def to_dict(self):
