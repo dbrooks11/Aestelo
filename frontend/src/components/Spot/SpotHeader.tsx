@@ -13,8 +13,6 @@ type SpotHeaderProps = {
 
 export default function SpotHeader({name, accessibility,
     username, datePosted, className, holdAverageRating}: SpotHeaderProps): JSX.Element{
-    
-    const localDate = new Date(datePosted + 'Z').toLocaleString()
 
     // TODO: show date from users local time (2mins ago, 4 hours ago, etc)
     const handleDateTime = () => {
@@ -43,7 +41,7 @@ export default function SpotHeader({name, accessibility,
                 </>}
                 <span>•</span>
                 {/* on hover, show full data posted */}
-                <span className="text-white/90">{localDate}</span>
+                <span className="text-white/90">{datePosted}</span>
             </div>}
         </div>
     )

@@ -1,6 +1,6 @@
 from exstensions import db
 from datetime import datetime, timezone
-from sqlalchemy import (Column, ForeignKey, BigInteger, Integer, DateTime, UniqueConstraint, Index)
+from sqlalchemy import (Column, ForeignKey, BigInteger, Integer, DateTime, UniqueConstraint, Index, func)
 from sqlalchemy.dialects.postgresql import UUID
 
 
@@ -15,7 +15,7 @@ class Rating(db.Model):
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), nullable=False)
     spot_id = Column(BigInteger, ForeignKey('spot.id'), nullable=False)
     rating_choice = Column(Integer, default=0, nullable=True)
-    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
     
 
     def to_dict(self):

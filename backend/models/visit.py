@@ -1,6 +1,5 @@
 from exstensions import db
-from sqlalchemy import Column, ForeignKey, BigInteger, String, Integer, Text, DateTime, Boolean, ARRAY
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import Column, ForeignKey, BigInteger, String, Integer, Text, DateTime, Boolean, ARRAY, func
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import UUID
@@ -22,7 +21,7 @@ class Visit(db.Model):
     music_track_id = Column(String(50), ForeignKey('music_track.id'), nullable=True)
     caption = Column(String(200))
     hashtags = Column(ARRAY(String))
-    date_posted = Column(DateTime, default=datetime.now(timezone.utc))
+    date_posted = Column(DateTime(timezone=True), server_default=func.now())
     like_count = Column(BigInteger, default=0)
     share_count = Column(Integer, default=0)
 
@@ -30,11 +29,11 @@ class Visit(db.Model):
 
     num_of_edits = Column(Integer, default=0) # user_profile can edit their vistit only 3 times (caption, photo, hashtag, song, etc)
     is_deleted = Column(Boolean, default=False) #is the spot deleted by user_profile
-    deleted_at = Column(DateTime)
+    deleted_at = Column(DateTime(timezone=True))
     deleted_by = Column(UUID(as_uuid=True))
     num_reports = Column(Integer, default=0)
     is_removed = Column(Boolean, default=False) #removed due to moderaters, admin, etc (does NOT mean deleted by user_profile)
-    removed_at = Column(DateTime)
+    removed_at = Column(DateTime(timezone=True))
     removed_by = Column(UUID)
 
     status = Column(String(), default='processing')

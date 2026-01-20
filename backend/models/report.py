@@ -1,5 +1,5 @@
 from exstensions import db
-from sqlalchemy import Column, ForeignKey, BigInteger, String, DateTime, UniqueConstraint, Index
+from sqlalchemy import Column, ForeignKey, BigInteger, String, DateTime, UniqueConstraint, Index, func
 from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -23,9 +23,9 @@ class Report(db.Model):
     # Moderation tracking
     status = Column(String(20), default='pending')  # 'pending', 'reviewed', 'dismissed', 'actioned'
     reviewed_by = Column(UUID(as_uuid=True))
-    reviewed_at = Column(DateTime, nullable=True)
+    reviewed_at = Column(DateTime(timezone=True), nullable=True)
     
-    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     def to_dict(self):
         return {

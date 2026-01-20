@@ -3,7 +3,7 @@ from flask import current_app
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from sqlalchemy import (Column, ForeignKey, BigInteger, 
-                        String, Integer, Float, Text, DateTime, Boolean)
+                        String, Integer, Float, Text, DateTime, Boolean, func)
 from sqlalchemy.dialects.postgresql import UUID
 #TODO: Stuff to do/link to user_profile
 #socials
@@ -57,12 +57,12 @@ class UserProfile(db.Model):
     banned_by = Column(UUID(as_uuid=True))
 
     is_deleted = Column(Boolean, default=False)
-    deleted_at = Column(DateTime)
+    deleted_at = Column(DateTime(timezone=True))
 
     num_reports_made = Column(Integer, default=0)
     num_reports = Column(Integer, default=0)
 
-    profile_created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    profile_created_at = Column(DateTime, server_default=func.now())
 
 
     user_info = relationship('UserInfo', uselist=False ,backref='user_profile')
@@ -159,7 +159,7 @@ class UserInfo(db.Model):
     first_name = Column(String(30))
     last_name = Column(String(30))
     email = Column(String(150))
-    date_of_birth = Column(DateTime)
+    date_of_birth = Column(DateTime(timezone=True))
     age = Column(Integer, default=0)
     gender = Column(String(15), default= 'Not specified')
     height_ft = Column(Integer, default=0)
@@ -194,7 +194,7 @@ class UserRole(db.Model):
     is_admin = Column(Boolean, default=False)
     is_moderator = Column(Boolean, default=False)
     is_owner = Column(Boolean, default=False)
-    granted_at = Column(DateTime)
+    granted_at = Column(DateTime(timezone=True))
     granted_by = Column(UUID(as_uuid=True))
 
     def to_dict(self):
@@ -246,8 +246,8 @@ class UserSubscription(db.Model):
     user_profile_id = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), primary_key=True)
     tier = Column(String(10), default='free') #free, premium, business
     price = Column(Float, default=0.00)
-    started_at= Column(DateTime, default=datetime.now(timezone.utc))
-    expires_at = Column(DateTime)
+    started_at= Column(DateTime(timezone=True), server_default=func.now())
+    expires_at = Column(DateTime(timezone=True))
     auto_renew = Column(Boolean, default=False)
     payment_method_id = Column(UUID(as_uuid=True)) 
     billing_cycle = Column(String(10), default='monthly')  #monthly or yearly

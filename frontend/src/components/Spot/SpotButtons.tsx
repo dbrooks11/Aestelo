@@ -37,22 +37,21 @@ export default function SpotButtons({shareCount, saveCount,
     setHoldAverageRating
 }: SpotButtonProps): JSX.Element{
 
-    const [ratingCountHolder, setRatingCountHolder] = useState<number>(ratingCount ? ratingCount : 0)
+    const [ratingCountHolder, setRatingCountHolder] = useState<number>(ratingCount)
     const [isRated, setIsRated] = useState<boolean>(ratingChoice ? true : false)
     const [rating, setRating] = useState<number>(ratingChoice ? ratingChoice : 0)
 
     const {updateSpotInCache} = useSpotMutation()
 
-    
-
     const onRateClick = useCallback(async(num: number) => {
+        const prevRated = isRated
         try{
             let response = undefined
             if(num > 0 && num <= 5){
                 const wasRated = isRated
                 
                 setIsRated(true)
-                response = await protectedInstance.post(`/spot/rate/${spotId}`, {
+                response = await protectedInstance.post(`/spot/rate/${39}`, {
                     rating_choice: num
                 })
 
@@ -69,16 +68,12 @@ export default function SpotButtons({shareCount, saveCount,
                         total_num_of_ratings: newRatingCount,
                         average_rating: newAverage
                     })
-                }else{
-                    setIsRated(false)
-                    if(!wasRated) setRatingCountHolder((prev) => prev - 1)
                 }
                 
             } else if(num === 0) {
                 setIsRated(false)
                 response = await protectedInstance.delete(`/spot/rate/${spotId}`)
                  
-
                 if(response.status === 200) {
                     const newAverage = response.data.new_average
                     const newRatingCount = response.data.new_total_ratings
@@ -91,16 +86,14 @@ export default function SpotButtons({shareCount, saveCount,
                         total_num_of_ratings: newRatingCount,
                         average_rating: newAverage
                     })
-                }else{
-                    setIsRated(true)
-                    setRatingCountHolder((prev) => Math.max(0, prev + 1))
-                }   
+                }  
             } 
         }catch(error){
+            setIsRated(prevRated)
             const newError = AxiosErrorHelper(error)
             console.error(newError)
         } 
-    }, [isRated, setOpenRateSelector, spotId, updateSpotInCache])
+    }, [isRated, setOpenRateSelector, spotId, updateSpotInCache, setHoldAverageRating])
 
     const rateButtonHandler = useCallback(() => {
         if(isRated){

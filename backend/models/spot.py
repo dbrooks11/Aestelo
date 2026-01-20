@@ -26,14 +26,14 @@ class Spot(db.Model):
     id = Column(BigInteger, primary_key=True)
     name = Column(String(40))
     coordinates = Column(Geography(geometry_type='POINT', srid=4326, spatial_index=True))
-    date_posted = Column(DateTime)
+    date_posted = Column(DateTime(timezone=True), index=True)
     description = Column(String(200))
     total_num_of_photos = Column(Integer)
 
     visit_count = Column(Integer, default=0) 
     average_rating = Column(Float, default=0.0)
     total_num_of_ratings = Column(Integer, default=0)
-    last_rated_at = Column(DateTime)
+    last_rated_at = Column(DateTime(timezone=True))
 
     save_count = Column(Integer, default=0)
     share_count = Column(Integer, default=0)
@@ -45,10 +45,10 @@ class Spot(db.Model):
     accessibility = Column(Boolean, default=False) 
     num_of_edits = Column(Integer, default=0)
     is_deleted = Column(Boolean, default=False) #is the spot deleted by user_profile
-    deleted_at = Column(DateTime)
+    deleted_at = Column(DateTime(timezone=True))
     num_reports = Column(Integer, default=0)
     is_removed = Column(Boolean, default=False) #removed due to moderaters, admin, etc (does NOT mean deleted by user_profile)
-    removed_at = Column(DateTime)
+    removed_at = Column(DateTime(timezone=True))
     status = Column(String(), default='processing')
     
     

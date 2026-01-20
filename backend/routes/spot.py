@@ -13,8 +13,8 @@ from marshmallow import ValidationError
 from celery.result import AsyncResult, GroupResult
 from celery import chord,group
 from exstensions import celery
-from sqlalchemy.orm import joinedload, load_only
-from sqlalchemy import case
+from sqlalchemy.orm import joinedload
+from sqlalchemy import case, cast, Numeric, func
 
 spot_bp = Blueprint('spot', __name__, url_prefix='/spot')
 
@@ -209,7 +209,7 @@ def rate_spot(spot_id):
         data = request.get_json()
         rate = data.get('rating_choice')
 
-        if not rate or not isinstance(rate, int) or not (1 <= rate <= 5) :
+        if not rate or not isinstance(rate, int) or not (1 <= rate <= 5):
             return jsonify({'error': 'Invalid rating (1-5 required)'}), 400
 
         if is_rated and is_rated.rating_choice == rate:
@@ -221,7 +221,7 @@ def rate_spot(spot_id):
                 Spot.query.filter_by(id=spot_id).update({
                     'average_rating': case(
                         (Spot.total_num_of_ratings == 0, rate),
-                    else_=(((Spot.average_rating * Spot.total_num_of_ratings) - is_rated.rating_choice) + rate) / (Spot.total_num_of_ratings)
+                    else_=func.round(cast((((Spot.average_rating * Spot.total_num_of_ratings) - is_rated.rating_choice) + rate) / (Spot.total_num_of_ratings), Numeric), 1)
                     )
                 })
                 is_rated.rating_choice = rate
@@ -239,7 +239,7 @@ def rate_spot(spot_id):
                     'total_num_of_ratings': Spot.total_num_of_ratings + 1,
                     'average_rating': case(
                         (Spot.total_num_of_ratings == 0, rate),
-                    else_=((Spot.average_rating * Spot.total_num_of_ratings) + rate) / (Spot.total_num_of_ratings + 1)
+                    else_=func.round(cast(((Spot.average_rating * Spot.total_num_of_ratings) + rate) / (Spot.total_num_of_ratings + 1), Numeric), 1)
                     )
                 })
 
@@ -261,9 +261,9 @@ def rate_spot(spot_id):
                     'total_num_of_ratings': Spot.total_num_of_ratings - 1,
                     'average_rating': case(
                         (Spot.total_num_of_ratings <= 1, 0),
-                    else_=(
-                        ((Spot.average_rating * Spot.total_num_of_ratings) - is_rated.rating_choice) / (Spot.total_num_of_ratings - 1)
-                    )
+                    else_=func.round(cast(
+                        ((Spot.average_rating * Spot.total_num_of_ratings) - is_rated.rating_choice) / (Spot.total_num_of_ratings - 1), Numeric
+                    ), 1)
                     )
                 })
                 db.session.delete(is_rated)

@@ -15,15 +15,15 @@ class AuthUser(db.Model):
     password_encrypted = Column(String(255), nullable=False)
 
     email_confirmed = Column(Boolean, default=False)
-    email_confirmed_at = Column(DateTime)
-    email_change_sent_at = Column(DateTime)  #for email sending
+    email_confirmed_at = Column(DateTime(timezone=True))
+    email_change_sent_at = Column(DateTime(timezone=True))  #for email sending
 
-    password_change_sent_at = Column(DateTime) #for email sending
-    password_confirmed_at = Column(DateTime)
-    last_sign_in_at = Column(DateTime)
+    password_change_sent_at = Column(DateTime(timezone=True)) #for email sending
+    password_confirmed_at = Column(DateTime(timezone=True))
+    last_sign_in_at = Column(DateTime(timezone=True))
 
     failed_login_attempts = Column(Integer, default=0)
-    locked_until = Column(DateTime, nullable=True)
+    locked_until = Column(DateTime(timezone=True), nullable=True)
 
 
 
