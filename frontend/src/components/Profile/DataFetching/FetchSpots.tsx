@@ -15,6 +15,7 @@ export default function FetchSpots(): JSX.Element{
   const observerContainerRef = useRef<IntersectionObserver | null>(null)
   const [selectedSpot, setSelectedSpot] = useState<object | undefined>(undefined)
 
+
   const {data, fetchNextPage, hasNextPage, isFetchingNextPage} = useInfiniteQuery(
     {
       queryKey: ['mySpots'],
@@ -43,6 +44,9 @@ export default function FetchSpots(): JSX.Element{
 
     if(node && observerContainerRef.current) observerContainerRef.current.observe(node)
   }, [isFetchingNextPage, hasNextPage, fetchNextPage])
+ 
+  const collections = data?.pages[0]?.collections || []
+  
 
   return(
     /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -73,6 +77,7 @@ export default function FetchSpots(): JSX.Element{
         {selectedSpot && (
             <Spot 
                 spot={selectedSpot} 
+                collections={collections}
                 className={''}
             />
           )}

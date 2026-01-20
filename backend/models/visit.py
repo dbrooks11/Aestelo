@@ -22,6 +22,7 @@ class Visit(db.Model):
     hashtags = Column(ARRAY(String))
     date_posted = Column(DateTime(timezone=True), server_default=func.now())
     like_count = Column(BigInteger, default=0)
+    save_count = Column(BigInteger, default=0)
     share_count = Column(Integer, default=0)
 
     total_num_of_photos = Column(Integer)

@@ -5,6 +5,8 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.spot import Spot
 from models.user import UserProfile
 from models.rating import Rating
+from models.collection import CollectionItem
+from models.visit import Visit
 from schemas.spot_schema import spot_schema
 from util.outlier_coords import average_location_batch
 from util.storage import generate_presigned_url
@@ -33,6 +35,9 @@ def spot_task_progress():
 @spot_bp.route('/status/<group_id>', methods=['GET'])
 @jwt_required()
 def get_batch_progress(group_id):
+    if not group_id:
+        return jsonify({'error': 'Invalid data'}), 400
+
     group_result = GroupResult.restore(group_id, app=celery)
 
     if not group_result:
@@ -159,9 +164,25 @@ def get_user_spots():
         page = request.args.get('page', default=1, type=int)
         per_page = request.args.get('per_page', default=12, type=int)
 
-        username = UserProfile.query.with_entities(UserProfile.username).filter_by(id=current_user).first()
+        username_and_collections = UserProfile.query.options(
+            joinedload(UserProfile.collection)
+        ).get(current_user)
 
-        spots = db.session.query(Spot, Rating).outerjoin(
+        print(username_and_collections.collection)
+
+        is_saved = db.session.query(CollectionItem).filter(
+            CollectionItem.spot_id == Spot.id,
+            CollectionItem.saved_by == current_user
+        ).exists()
+
+        has_visited = db.session.query(Visit).filter(
+            Visit.spot_id == Spot.id,
+            Visit.user_profile_id == current_user
+        ).exists()
+
+        spots = db.session.query(
+            Spot, Rating, is_saved.label('is_saved'), has_visited.label('has_visited')
+        ).outerjoin(
             Rating, 
             (Rating.user_profile_id==current_user) & (Rating.spot_id==Spot.id)
         ).filter(
@@ -177,11 +198,16 @@ def get_user_spots():
 
         results =[]
 
-        for spot, rating in paginated_spots.items:
+        if username_and_collections.collection:
+            collections = [{'id': c.id, 'name': c.name, 'is_default': c.is_default} for c in username_and_collections.collection]
+
+        for spot, rating, is_saved, has_visited in paginated_spots.items:
             spot_data = spot_schema.dump(spot)
 
             spot_data['rating_choice'] = rating.rating_choice if rating else None
-            spot_data['username'] = username[0]
+            spot_data['username'] = username_and_collections.username
+            spot_data['is_saved'] = is_saved
+            spot_data['has_visited'] = has_visited
             
 
             results.append(spot_data)
@@ -189,6 +215,7 @@ def get_user_spots():
 
         return jsonify({
             'spots': results,
+            'collections': collections,
             'total': paginated_spots.total,
             'total_pages': paginated_spots.pages,
             'current_page': paginated_spots.page
@@ -202,6 +229,9 @@ def get_user_spots():
 @jwt_required()
 def rate_spot(spot_id):
     current_user = get_jwt_identity()
+
+    if not spot_id:
+        return jsonify({'error': 'Invalid data'}), 400
   
     is_rated = Rating.query.filter_by(spot_id=spot_id, user_profile_id=current_user).first()
 
@@ -278,3 +308,9 @@ def rate_spot(spot_id):
         except Exception as e:
             db.session.rollback()
             return jsonify({'error': str(e)}), 500
+        
+
+
+
+
+    

@@ -4,6 +4,7 @@ from .profile import profile_bp
 from .follow import follow_bp
 from .block import block_bp
 from .spot import spot_bp
+from .collection import collection_bp
 from .visit import visit_bp
 from .user_info import user_info_bp
 from .user_settings import user_settings_bp
@@ -19,6 +20,7 @@ routes = [
     user_info_bp,
     user_settings_bp,
     music_bp,
+    collection_bp
 ]
 
 def register_blueprints(app):

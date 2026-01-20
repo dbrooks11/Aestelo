@@ -10,3 +10,13 @@ class Collection(db.Model):
     description = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     is_public = Column(Boolean, default=False)
+    is_default = Column(Boolean, default=False)
+
+
+class CollectionItem(db.Model):
+    id = Column(BigInteger, primary_key=True)
+    collection_id = Column(BigInteger, ForeignKey('collection.id'))
+    spot_id = Column(BigInteger, ForeignKey('spot.id'), nullable=True)
+    visit_id = Column(BigInteger, ForeignKey('visit.id'), nullable=True)
+    saved_by = Column(UUID(as_uuid=True), nullable=False)
+    saved_at = Column(DateTime(timezone=True), server_default=func.now())

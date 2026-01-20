@@ -74,6 +74,7 @@ class UserProfile(db.Model):
     report = relationship('Report', backref='user_profile')
     follower = relationship('Follow',primaryjoin='UserProfile.id == Follow.follower_id',backref='follower')
     following = relationship('Follow',primaryjoin='UserProfile.id == Follow.following_id',backref='following')
+    collection = relationship('Collection', backref='user_profile')
     
     
     @classmethod

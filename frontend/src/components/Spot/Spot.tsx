@@ -2,7 +2,7 @@ import { useState, type JSX} from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import cn from "../../util/tailwind_merger"
 import SpotTags from "./SpotTags"
-import SpotButtons from "./SpotButtons"
+import SpotButtons from "./SpotButtons/SpotButtons"
 import SpotDescripton from "./SpotDesciption"
 import SpotHeader from "./SpotHeader"
 import SpotPhotoCounter from "./SpotPhotoCount"
@@ -23,12 +23,14 @@ import SpotPhoto from "./SpotPhoto"
 // }
 
 
-export default function Spot({spot, className}): JSX.Element{
+export default function Spot({spot, collections,  className}): JSX.Element{
 
+    
     const [progress, setProgress] = useState<number>(1)
     const [total, setTotal ] = useState<number>(spot.total_num_of_photos)
     const [ openRateSelector, setOpenRateSelector] = useState<boolean>(false)
     const [holdAverageRating, setHoldAverageRating] = useState<number>(spot.average_rating)
+
     // TODO: change username prop in header to users username for header
     return(
         
@@ -47,7 +49,7 @@ export default function Spot({spot, className}): JSX.Element{
                     accessibility={spot.accessibility}
                     username={spot.username}
                     datePosted={spot.date_posted}
-                    holdAverageRating={holdAverageRating}
+                    averageRating={holdAverageRating}
                 />
 
                 {/* Arrow Buttons */}
@@ -106,6 +108,9 @@ export default function Spot({spot, className}): JSX.Element{
                     openRateSelector={openRateSelector}
                     setOpenRateSelector={setOpenRateSelector}
                     setHoldAverageRating={setHoldAverageRating}
+                    isSaved={spot.is_saved}
+                    hasVisited={spot.has_visited}
+                    collections={collections}
                 />   
             </div>
         </div>

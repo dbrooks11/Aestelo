@@ -1,6 +1,5 @@
 from . import (
     auth,
-    collection_item,
     spot,
     user, 
     location, 

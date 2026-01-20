@@ -17,11 +17,12 @@ import random
 from sqlalchemy.orm import load_only
 from sqlalchemy import exists
 from werkzeug.security import check_password_hash, generate_password_hash
-from schemas.user_schema import ValidationError, username_only
+from schemas.user_schema import ValidationError
 from schemas.auth_schema import username_pass_only,email_pass_only,email_pass_confirm_pass
 from models.user import UserProfile, UserInfo, UserSettings, UserRole, UserSubscription
 from models.token_blacklist import TokenBlackList
 from models.auth import AuthUser
+from models.collection import Collection
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -90,8 +91,16 @@ def signup():
             user_settings=UserSettings(),
             user_role=UserRole(),
             user_subscription=UserSubscription()
+            
         )
 
+        default_collection = Collection(
+            user_id=user_id,
+            name='Default',
+            is_default=True
+        )
+
+        db.session.add(default_collection)
         db.session.add(new_user)
         db.session.add(new_user_profile)
         db.session.commit()

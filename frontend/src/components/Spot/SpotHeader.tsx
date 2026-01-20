@@ -1,6 +1,6 @@
 import { Accessibility, Star } from "lucide-react";
 import cn from "../../util/tailwind_merger";
-import { type JSX } from "react";
+import { useState, type JSX } from "react";
 
 type SpotHeaderProps = {
     name: string
@@ -8,11 +8,12 @@ type SpotHeaderProps = {
     username: string | undefined
     datePosted: string | undefined
     className?: string
-    holdAverageRating: number
+    averageRating: number
 }
 
 export default function SpotHeader({name, accessibility,
-    username, datePosted, className, holdAverageRating}: SpotHeaderProps): JSX.Element{
+    username, datePosted, className, averageRating}: SpotHeaderProps): JSX.Element{
+
 
     // TODO: show date from users local time (2mins ago, 4 hours ago, etc)
     const handleDateTime = () => {
@@ -32,7 +33,7 @@ export default function SpotHeader({name, accessibility,
                 }
             </div>
             {<div className="flex justify-center items-center gap-2 text-nowrap">
-                <span className="flex items-center gap-0.5 text-white/90 truncate"><Star strokeWidth={1} className="w-5 h-5 fill-yellow-400 stroke-yellow-400"/>{holdAverageRating}</span>
+                <span className="flex items-center gap-0.5 text-white/90 truncate"><Star strokeWidth={1} className="w-5 h-5 fill-yellow-400 stroke-yellow-400"/>{averageRating}</span>
                 {username && 
                 <>
                     <span>•</span>
