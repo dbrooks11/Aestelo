@@ -145,7 +145,6 @@ def profile_me():
     
 
 
-#Partially done, test blocking and following functionality
 @profile_bp.route('/<string:id>', methods = ['GET'])
 @jwt_required()
 @profile_check_current__banned_removed

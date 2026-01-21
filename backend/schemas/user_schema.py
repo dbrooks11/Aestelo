@@ -1,4 +1,3 @@
-# schemas/user.py
 from exstensions import ma, db
 from models.user import UserProfile, UserInfo, UserRole, UserSettings, UserSubscription
 from marshmallow import validates, ValidationError, fields, validate
@@ -59,8 +58,6 @@ class UserInfoSchema(ma.SQLAlchemyAutoSchema):
         model = UserInfo
         include_fk = True
     
-    # System-managed
-    user_profile_id = fields.UUID(dump_only=True)
     age = fields.Int()
     first_name = fields.Str(validate=[validate.Length(max=30), validate.Regexp(r"^[A-Z][a-zA-Z '.-]*[A-Za-z][^-' ]+$",error="Name can only contain letters, spaces, apostrophe, and hyphen")])
     last_name = fields.Str(validate=[validate.Length(max=30), validate.Regexp(r"^[A-Z][a-zA-Z '.-]*[A-Za-z][^-' ]+$",error="Name can only contain letters, spaces, apostrophe, and hyphen")])
@@ -130,7 +127,6 @@ class UserRoleSchema(ma.SQLAlchemyAutoSchema):
         model = UserRole
         include_fk = True
 
-    user_profile_id = fields.UUID(dump_only=True)
     is_admin = fields.Bool(dump_only=True)
     is_moderator = fields.Bool(dump_only=True)
     is_owner = fields.Bool(dump_only=True)
@@ -143,7 +139,6 @@ class UserSettingsSchema(ma.SQLAlchemyAutoSchema):
         model = UserSettings
         include_fk = True
     
-    user_profile_id = fields.UUID(dump_only=True)
     language_preference = fields.Str(validate=validate.OneOf(['English', 'Spanish']))
     
 
@@ -152,8 +147,7 @@ class UserSubscriptionSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserSubscription
         include_fk = True
- 
-    user_profile_id = fields.UUID(dump_only=True)
+
     tier = fields.Str(dump_only=True)
     price = fields.Float(dump_only=True)
     started_at = fields.DateTime(dump_only=True)

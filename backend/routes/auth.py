@@ -1,6 +1,5 @@
 
 from exstensions import db
-import uuid
 from datetime import datetime, timezone
 from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import(
@@ -19,10 +18,9 @@ from sqlalchemy import exists
 from werkzeug.security import check_password_hash, generate_password_hash
 from schemas.user_schema import ValidationError
 from schemas.auth_schema import username_pass_only,email_pass_only,email_pass_confirm_pass
-from models.user import UserProfile, UserInfo, UserSettings, UserRole, UserSubscription
+from models.user import UserProfile
 from models.token_blacklist import TokenBlackList
 from models.auth import AuthUser
-from models.collection import Collection
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -75,34 +73,13 @@ def signup():
         if not username:
             return jsonify({'error': 'Server busy, please try again'}), 500
 
-        user_id = uuid.uuid4()
-
         new_user = AuthUser(
-            id = user_id,
             username = username,
             email = validate_auth['email'],
             password_encrypted = generate_password_hash(validate_auth['password'])
         )
 
-        new_user_profile = UserProfile(
-            id=user_id,
-            username=username,
-            user_info=UserInfo(email=validate_auth['email']),
-            user_settings=UserSettings(),
-            user_role=UserRole(),
-            user_subscription=UserSubscription()
-            
-        )
-
-        default_collection = Collection(
-            user_id=user_id,
-            name='Default',
-            is_default=True
-        )
-
-        db.session.add(default_collection)
         db.session.add(new_user)
-        db.session.add(new_user_profile)
         db.session.commit()
 
         current_app.logger.info('Successful Signup')
@@ -247,19 +224,19 @@ def refresh():
 @auth_bp.route('/authenticate', methods = ['GET'])
 @jwt_required()
 def verify():
-    current_user_id = get_jwt_identity()
+    current_user = get_jwt_identity()
 
     try:
         user = UserProfile.query.options(load_only(UserProfile.username,
                                                     UserProfile.profile_photo
-                                                )).get(current_user_id)
+                                                )).get(current_user)
 
         if not user:
             return jsonify({'error': 'Failed to authenticate'}), 401
         
         return jsonify({
             'user': {
-                'id': current_user_id,
+                'id': current_user,
                 'username': user.username,
                 'profile_photo_url': user.profile_photo_url
             }

@@ -91,7 +91,7 @@ def save_item(collection_id):
             db.session.commit()
 
             if spot_id:
-                Spot.query.with_entities(Spot.save_count).filter_by(id=spot_id).first()
+                data = Spot.query.with_entities(Spot.save_count).filter_by(id=spot_id).first()
             elif visit_id:
                 data = Visit.query.with_entities(Visit.save_count).filter_by(id=visit_id).first()
             return jsonify({'message': 'Removed from collection successfully',

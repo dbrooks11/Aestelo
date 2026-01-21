@@ -27,7 +27,7 @@ def get_profile_visit_all(id, user_profile, current_user_profile):
         page = request.args.get('page', default=1, type=int)
         per_page = request.args.get('per_page', default=20, type=int)
 
-        visit_query = Visit.active().filter_by(user_profile_id = user_profile.id)
+        visit_query = Visit.active().filter_by(user_id = user_profile.id)
 
         paginated_visit = visit_query.paginate(
             page=page,
@@ -55,10 +55,10 @@ def get_profile_visit_all(id, user_profile, current_user_profile):
 def get_profile_visit(id, visit_id, user_profile, current_user_profile):
 
     try:
-        visit = Visit.active().filter_by(user_profile_id = user_profile.id, visit_id = visit_id).first()
+        visit = Visit.active().filter_by(user_id = user_profile.id, visit_id = visit_id).first()
         result = visit_schema.dump(visit)
 
-        if visit is None or (visit.user_profile_id != user_profile.id):
+        if visit is None or (visit.user_id != user_profile.id):
             return jsonify({'error': 'Visit not found'}), 404
         
         return jsonify({'visit': result}), 200
@@ -325,7 +325,7 @@ def create_visit(spot_id):
         
         new_visit = Visit(
             spot_id = spot.spot_id,
-            user_profile_id = current_user_profile.id,
+            user_id = current_user_profile.id,
             refined_location = valid_visit_data.get('refined_location'),
             music_track_id = valid_visit_data.get('music_track_id'),
             caption = valid_visit_data.get('caption'),

@@ -121,7 +121,7 @@ def create_spot():
             return jsonify({'error': e.messages}), 400
 
         spot = Spot(
-            user_profile_id = current_user,
+            user_id = current_user,
             name=data.get('name'),
             description=data.get('description'),
             accessibility=data.get('accessibility'),
@@ -177,16 +177,16 @@ def get_user_spots():
 
         has_visited = db.session.query(Visit).filter(
             Visit.spot_id == Spot.id,
-            Visit.user_profile_id == current_user
+            Visit.user_id == current_user
         ).exists()
 
         spots = db.session.query(
             Spot, Rating, is_saved.label('is_saved'), has_visited.label('has_visited')
         ).outerjoin(
             Rating, 
-            (Rating.user_profile_id==current_user) & (Rating.spot_id==Spot.id)
+            (Rating.user_id==current_user) & (Rating.spot_id==Spot.id)
         ).filter(
-            Spot.user_profile_id==current_user
+            Spot.user_id==current_user
         ).options(
             joinedload(Spot.spot_media)
         ).order_by(Spot.date_posted.desc())
@@ -233,7 +233,7 @@ def rate_spot(spot_id):
     if not spot_id:
         return jsonify({'error': 'Invalid data'}), 400
   
-    is_rated = Rating.query.filter_by(spot_id=spot_id, user_profile_id=current_user).first()
+    is_rated = Rating.query.filter_by(spot_id=spot_id, user_id=current_user).first()
 
     if request.method == 'POST':
         data = request.get_json()
@@ -259,7 +259,7 @@ def rate_spot(spot_id):
             
             else:
                 rating = Rating(
-                    user_profile_id=current_user,
+                    user_id=current_user,
                     spot_id=spot_id,
                     rating_choice=rate,
                     created_at=datetime.now(timezone.utc)

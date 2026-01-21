@@ -1,4 +1,6 @@
 from exstensions import db
+from models.auth import AuthUser
+from models.music_track import MusicTrack
 from flask import current_app
 from sqlalchemy.orm import relationship
 from sqlalchemy import (Column, ForeignKey, BigInteger, 
@@ -17,8 +19,8 @@ from sqlalchemy.dialects.postgresql import UUID
 
 class UserProfile(db.Model):
     
-    id = Column(UUID(as_uuid=True), ForeignKey('auth_user.id'), primary_key=True)
-    music_track_id = Column(Text, ForeignKey('music_track.id'))
+    id = Column(UUID(as_uuid=True), ForeignKey(AuthUser.id), primary_key=True)
+    music_track_id = Column(Text, ForeignKey(MusicTrack.id))
 
     username = Column(Text)
     profile_photo = Column(Text)
@@ -50,7 +52,7 @@ class UserProfile(db.Model):
 
     is_banned = Column(Boolean, default=False)
     banned_at = Column(DateTime)
-    banned_reason = Column(String(255))
+    banned_reason = Column(Text)
     banned_by = Column(UUID(as_uuid=True))
 
     is_deleted = Column(Boolean, default=False)
@@ -104,7 +106,7 @@ class UserProfile(db.Model):
     
 class UserInfo(db.Model):
 
-    user_profile_id = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'),primary_key=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey(UserProfile.id),primary_key=True)
     first_name = Column(Text) #limit to 30
     last_name = Column(Text) #limit to 30
     email = Column(Text) #limit to 150 chars when checking
@@ -116,22 +118,6 @@ class UserInfo(db.Model):
     
     state = Column(Text)
     city = Column(Text)
-    
-
-    def to_dict(self):
-        return {
-            'user_profile_id': str(self.user_profile_id),
-            'first_name': self.first_name,
-            'last_name': self.last_name,
-            'email': self.email,
-            'date_of_birth': self.date_of_birth,
-            'age': self.age,
-            'gender': self.gender,
-            'height_ft': self.height_ft,
-            'height_in': self.height_in,
-            'state': self.state,
-            'city': self.city
-    }
 
     def save(self):
         db.session.add(self)
@@ -139,22 +125,12 @@ class UserInfo(db.Model):
 
 class UserRole(db.Model):
 
-    user_profile_id = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), primary_key=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey(UserProfile.id), primary_key=True)
     is_admin = Column(Boolean, default=False)
     is_moderator = Column(Boolean, default=False)
     is_owner = Column(Boolean, default=False)
     granted_at = Column(DateTime(timezone=True))
     granted_by = Column(UUID(as_uuid=True))
-
-    def to_dict(self):
-        return {
-            'user_profile_id': str(self.user_profile_id),
-            'is_admin': self.is_admin,
-            'is_moderator': self.is_moderator,
-            'is_owner': self.is_owner,
-            'granted_at': self.granted_at,
-            'granted_by':self.granted_by
-        }
     
     def save(self):
         db.session.add(self)
@@ -164,7 +140,7 @@ class UserRole(db.Model):
 
 class UserSettings(db.Model):
 
-    user_profile_id = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), primary_key=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey(UserProfile.id), primary_key=True)
     language_preference = Column(Text)
     email_notifications = Column(Boolean, default=False)
     push_notifications = Column(Boolean, default=False)
@@ -172,17 +148,6 @@ class UserSettings(db.Model):
     data_usage_consent = Column(Boolean, default=False)
     marketing_consent = Column(Boolean , default=False)
     theme_preference = Column(Boolean, default=True) #True = Dawn mode, False = Twilight Mode (light mode or dark mode)
-
-    def to_dict(self):
-        return {
-            'user_profile_id': str(self.user_profile_id),
-            'email_notifications': self.email_notifications,
-            'push_notifications': self.push_notifications,
-            'location_sharing': self.location_sharing,
-            'data_usage_consent': self.data_usage_consent,
-            'marketing_consent': self.marketing_consent,
-            'theme_preference': self.theme_preference
-    }
 
     def save(self):
         db.session.add(self)
@@ -192,7 +157,7 @@ class UserSettings(db.Model):
 
 class UserSubscription(db.Model):
 
-    user_profile_id = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), primary_key=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey(UserProfile.id), primary_key=True)
     tier = Column(Text, default='free') #free, premium, business
     price = Column(Float, default=0.00)
     started_at= Column(DateTime(timezone=True), server_default=func.now())
@@ -201,19 +166,6 @@ class UserSubscription(db.Model):
     payment_method_id = Column(UUID(as_uuid=True)) 
     billing_cycle = Column(Text, default='monthly')  #monthly or yearly
     trial_used = Column(Boolean, default=False)
-    
-    def to_dict(self):
-        return {
-            'user_profile_id': str(self.user_profile_id),
-            'tier': self.tier,
-            'price': self.price,
-            'started_at': self.started_at,
-            'expires_at': self.expires_at,
-            'auto_renew': self.auto_renew,
-            'payment_method_id': self.payment_method_id,
-            'billing_cycle': self.billing_cycle,
-            'trial_used': self.trial_used
-    }
 
     def save(self):
         db.session.add(self)

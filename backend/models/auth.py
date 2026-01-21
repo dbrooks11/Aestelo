@@ -28,5 +28,3 @@ class AuthUser(db.Model):
 
 
     user_profile = relationship("UserProfile", backref='auth_user')
-    
-

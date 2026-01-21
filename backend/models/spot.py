@@ -1,4 +1,5 @@
 from exstensions import db
+from models.user import UserProfile
 from sqlalchemy import Column, ForeignKey, BigInteger, String, Integer, Float, Text, DateTime, Boolean, ARRAY
 from geoalchemy2 import Geography
 from sqlalchemy.orm import relationship, ColumnProperty
@@ -21,7 +22,7 @@ save_count
 '''
 
 class Spot(db.Model):
-    user_profile_id = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), nullable=False, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey(UserProfile.id), nullable=False, index=True)
     
     id = Column(BigInteger, primary_key=True)
     name = Column(Text)
@@ -67,8 +68,8 @@ class Spot(db.Model):
 
 
 class SpotMedia(db.Model):
-    spot_id = Column(BigInteger, ForeignKey('spot.id'), index=True)
-    uploaded_by = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), index=True)
+    spot_id = Column(BigInteger, ForeignKey(Spot.id), index=True)
+    uploaded_by = Column(UUID(as_uuid=True), ForeignKey(UserProfile.id), index=True)
 
     id =Column(BigInteger, primary_key=True)
     sort_order = Column(BigInteger)

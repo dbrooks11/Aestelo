@@ -14,7 +14,7 @@ user_info_bp = Blueprint('user_info', __name__, url_prefix='/profile/info')
 @profile_check_current__banned_removed
 def get_info(user_profile):
     try:
-        user_info = UserInfo.query.filter_by(user_profile_id = user_profile.id).first()
+        user_info = UserInfo.query.filter_by(user_id = user_profile.id).first()
 
         if not user_info:
             return jsonify({'error': 'Information not found'}), 404
@@ -36,7 +36,7 @@ def edit_info(user_profile):
     current_user = get_jwt_identity()
 
     try:
-        user_info = UserInfo.query.filter_by(user_profile_id = user_profile.id).first()
+        user_info = UserInfo.query.filter_by(user_id = user_profile.id).first()
 
         data = request.get_json()
 

@@ -14,7 +14,7 @@ user_settings_bp = Blueprint('user_settings', __name__, url_prefix='/profile/set
 @profile_check_current__banned_removed
 def get_settings(user_profile):
     try:
-        user_settings = UserSettings.query.filter_by(user_profile_id = user_profile.id).first()
+        user_settings = UserSettings.query.filter_by(user_id = user_profile.id).first()
 
         result = user_settings_schema.dump(user_settings)
 
@@ -32,7 +32,7 @@ def get_settings(user_profile):
 def edit_settings(user_profile):
     
     try:
-        user_settings = UserSettings.query.filter_by(user_profile_id = user_profile.id).first()
+        user_settings = UserSettings.query.filter_by(user_id = user_profile.id).first()
 
         data = request.get_json()
 

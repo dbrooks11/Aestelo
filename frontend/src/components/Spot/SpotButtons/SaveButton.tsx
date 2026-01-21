@@ -26,13 +26,16 @@ export default function SaveButton(props: SaveButton): JSX.Element{
 
         const defaultCollection = props.collections.find((item) => item.is_default === true)
         const prevSaved = props.isSavedState
+        const prevSaveCount = props.saveCountState
 
-        console.log(collectionId)
-        console.log(defaultCollection)
-
-        if(collectionId === undefined && defaultCollection.id === undefined) return
+        if(collectionId === undefined && defaultCollection === undefined) return
 
         try{
+            props.setIsSavedState(!prevSaved)
+
+            if(!prevSaved) props.setSaveCountState(prev => prev + 1)
+            else props.setSaveCountState(prev => prev - 1)
+
             const response = await protectedInstance.post(`/collection/${collectionId ? collectionId : defaultCollection && defaultCollection.id}`, {
                 spot_id: props.spotId
             })
@@ -41,8 +44,6 @@ export default function SaveButton(props: SaveButton): JSX.Element{
                 const data = response.data
                 const isSaved = data.saved
                 const newSpotSaveCount = data.spot_save_count
-                props.setIsSavedState(isSaved)
-                props.setSaveCountState(newSpotSaveCount)
                 updateSpotInCache(props.spotId, {
                     save_count: newSpotSaveCount,
                     is_saved: isSaved
@@ -51,6 +52,7 @@ export default function SaveButton(props: SaveButton): JSX.Element{
             }
         }catch(error){
             const newError = AxiosErrorHelper(error)
+            props.setSaveCountState(prevSaveCount)
             props.setIsSavedState(prevSaved)
             console.error(newError)
         }

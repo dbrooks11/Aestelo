@@ -1,4 +1,3 @@
-# schemas/visit.py
 from exstensions import ma
 from models.visit import Visit, VisitMedia
 from marshmallow import validates, ValidationError, fields, validate, pre_load
@@ -15,7 +14,6 @@ class VisitSchema(ma.SQLAlchemyAutoSchema):
     like_count = fields.Int(dump_only=True)
     share_count = fields.Int(dump_only=True)
     num_of_edits = fields.Int(validate=validate.Range(max=3, error='Visit can only be edited 3 times'))
-    user_profile_id = fields.UUID(dump_only=True) 
     music_track_id = fields.Str(allow_none=True)
     total_num_of_photos = fields.Int()
     

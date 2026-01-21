@@ -1,8 +1,8 @@
 import logging
 from logging.config import fileConfig
-
+from geoalchemy2 import alembic_helpers
 from flask import current_app
-import geoalchemy2
+
 from alembic import context
 
 # this is the Alembic Config object, which provides
@@ -65,16 +65,17 @@ def run_migrations_offline():
     """
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=url, target_metadata=get_metadata(), literal_binds=True
+        url=url, 
+        target_metadata=get_metadata(), 
+        literal_binds=True,
+        include_object=alembic_helpers.include_object,
+        process_revision_directives=alembic_helpers.writer,
+        render_item=alembic_helpers.render_item
     )
 
     with context.begin_transaction():
         context.run_migrations()
 
-def include_object(object, name, type_, reflected, compare_to):
-    if type_ == "table" and name == 'spatial_ref_sys':
-        return False
-    return True
 
 def run_migrations_online():
     """Run migrations in 'online' mode.
@@ -88,6 +89,9 @@ def run_migrations_online():
     # when there are no changes to the schema
     # reference: http://alembic.zzzcomputing.com/en/latest/cookbook.html
     def process_revision_directives(context, revision, directives):
+
+        alembic_helpers.writer(context=context, revision=revision,directives=directives)
+
         if getattr(config.cmd_opts, 'autogenerate', False):
             script = directives[0]
             if script.upgrade_ops.is_empty():
@@ -104,7 +108,8 @@ def run_migrations_online():
         context.configure(
             connection=connection,
             target_metadata=get_metadata(),
-            include_object=include_object,
+            include_object=alembic_helpers.include_object,
+            render_item=alembic_helpers.render_item,
             **conf_args
         )
 

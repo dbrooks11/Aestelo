@@ -1,8 +1,7 @@
 from . import (
     auth,
     spot,
-    user, 
-    location, 
+    user,
     music_track, 
     rating, 
     visit, 

@@ -1,15 +1,13 @@
 from exstensions import db
-from sqlalchemy import Column, ForeignKey, BigInteger, DateTime, UniqueConstraint, Index, Text, func
+from sqlalchemy import Column, ForeignKey, BigInteger, DateTime, Text, func
 from sqlalchemy.dialects.postgresql import UUID
+from models.user import UserProfile
 
 class Report(db.Model):
-    __table_args__ = (Index('idx_report_item', 'reported_type', 'reported_id'), 
-                    Index('idx_report_status', 'status'),
-                    UniqueConstraint('reporter_id', 'reported_type', 'reported_id', name='unique_report'),
-                    ) 
+    __table_args__ = () 
     
     report_id = Column(BigInteger, primary_key=True, autoincrement=True)
-    reporter_id = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), nullable=False)
+    reporter_id = Column(UUID(as_uuid=True), ForeignKey(UserProfile.id), nullable=False)
     
     # What's being reported
     reported_type = Column(Text, nullable=False)  # 'user', 'spot', 'visit'
@@ -25,20 +23,6 @@ class Report(db.Model):
     reviewed_at = Column(DateTime(timezone=True), nullable=True)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    def to_dict(self):
-        return {
-            'report_id': self.report_id,
-            'reporter_id': self.reporter_id,
-            'reported_type': self.reported_type,
-            'reported_id': self.reported_id,
-            'reason': self.reason,
-            'description': self.description,
-            'status': self.status,
-            'reviewed_by': self.reviewed_by,
-            'reviewed_at': self.reviewed_at,
-            'created_at': self.created_at
-    }
 
     def save(self):
         db.session.add(self)

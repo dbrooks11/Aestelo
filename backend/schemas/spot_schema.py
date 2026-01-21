@@ -1,6 +1,6 @@
 from exstensions import ma
 from marshmallow import (fields, validates, 
-                         ValidationError, validate, pre_load)
+                         ValidationError, validate)
 from models.spot import Spot,SpotMedia
 from geoalchemy2.shape import to_shape
 

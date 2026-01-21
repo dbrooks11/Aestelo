@@ -1,23 +1,22 @@
 from exstensions import db
+from models.spot import Spot
+from models.user import UserProfile
+from models.music_track import MusicTrack
 from sqlalchemy import Column, ForeignKey, BigInteger, String, Integer, Text, DateTime, Boolean, ARRAY, func
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from geoalchemy2 import Geography
 
 
-
-
-
-#The spot under a locations spots
 class Visit(db.Model):
     id = Column(BigInteger, primary_key=True)
     
-    spot_id = Column(BigInteger, ForeignKey('spot.id'), nullable=False)
-    user_profile_id = Column(UUID(as_uuid=True),  ForeignKey('user_profile.id'), nullable=False)
+    spot_id = Column(BigInteger, ForeignKey(Spot.id), nullable=False)
+    user_id = Column(UUID(as_uuid=True),  ForeignKey(UserProfile.id), nullable=False, index=True)
     
     coordinates = Column(Geography(geometry_type='POINT', srid=4326, spatial_index=True))
 
-    music_track_id = Column(Text, ForeignKey('music_track.id'), nullable=True)
+    music_track_id = Column(Text, ForeignKey(MusicTrack.id), nullable=True)
     caption = Column(Text) #limit to 200 chars
     hashtags = Column(ARRAY(String))
     date_posted = Column(DateTime(timezone=True), server_default=func.now())
@@ -36,7 +35,7 @@ class Visit(db.Model):
     removed_at = Column(DateTime(timezone=True))
     removed_by = Column(UUID)
 
-    status = Column(String(), default='processing')
+    status = Column(Text, default='processing')
 
     visit_media = relationship('VisitMedia', backref='visit', cascade='all, delete-orphan')
     
@@ -50,8 +49,8 @@ class Visit(db.Model):
 
 
 class VisitMedia(db.Model):
-    visit_id = Column(BigInteger, ForeignKey('visit.id'), nullable=False)
-    uploaded_by = Column(UUID(as_uuid=True), ForeignKey('user_profile.id'), nullable=False)
+    visit_id = Column(BigInteger, ForeignKey(Visit.id), nullable=False)
+    uploaded_by = Column(UUID(as_uuid=True), ForeignKey(UserProfile.id), nullable=False)
 
     id =Column(BigInteger, primary_key=True)
     sort_order = Column(Integer)

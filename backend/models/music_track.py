@@ -25,20 +25,6 @@ class MusicTrack(db.Model):
     visit = relationship('Visit', backref='music_track')
     user_profile = relationship('UserProfile', backref='music_track')
 
-    def to_dict(self):
-        return {
-            'music_track_id': self.music_track_id,
-            'track_name': self.track_name,
-            'artist_name': self.artist_name,
-            'album_name': self.album_name,
-            'album_art_url': self.album_art_url,
-            'preview_url': self.preview_url,
-            'music_url': self.music_url,
-            'duration_ms': self.duration_ms,
-            'duration_formatted':self.duration_formatted,
-            'release_date': self.release_date,
-            'times_used': self.times_used
-        }
 
     def save(self):
         db.session.add(self)

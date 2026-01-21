@@ -62,30 +62,6 @@
 #     removal_reason = Column(String(255))
 #     recoverable_until = Column(DateTime)
 
-
-   
-
-#     def to_dict(self):
-#         return {
-#             'removed_spot_id': self.removed_spot_id,
-#             'posted_by': self.posted_by,
-#             'date_posted': self.date_posted,
-#             'description': self.description,
-#             'total_num_of_photos': self.total_num_of_photos,
-#             'average_rating': self.average_rating,
-#             'total_num_of_ratings': self.total_num_of_ratings,
-#             'last_rated_at': self.last_rated_at,
-#             'save_count': self.save_count,
-#             'share_count': self.share_count,
-#             'trending_score': self.trending_score,
-#             'num_reports': self.num_reports,
-#             'is_removed': self.is_removed,
-#             'location_id': self.location_id,
-#             'removed_at': self.removed_at,
-#             'removed_by': self.removed_by,
-#             'removal_reason': self.removal_reason,
-#             'recoverable_until': self.recoverable_until
-#         }
  
 
    
@@ -113,27 +89,4 @@
 #     removed_by = Column(String(15))  # 'user', 'admin', 'moderator'
 #     removal_reason = Column(String(255))
 #     recoverable_until = Column(DateTime)
-
-
-#     def to_dict(self):
-#         return {
-#             'removed_visit_id': self.removed_visit_id,
-#             'user_id': self.user_id,
-#             'song_id': self.song_id,
-#             'song_artist': self.song_artist,
-#             'song_name': self.song_name,
-#             'caption': self.caption,
-#             'hashtags': self.hashtags,
-#             'date_posted': self.date_posted,
-#             'like_count': self.like_count,
-#             'share_count': self.share_count,
-#             'num_of_edits': self.num_of_edits,
-#             'is_deleted': self.is_deleted,
-#             'num_reports': self.num_reports,
-#             'is_removed': self.is_removed,
-#             'removed_at': self.removed_at,
-#             'removed_by': self.removed_by,
-#             'removal_reason': self.removal_reason,
-#             'recoverable_until': self.recoverable_until
-#     }
 
