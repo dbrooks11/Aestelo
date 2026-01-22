@@ -11,21 +11,20 @@ if TYPE_CHECKING:
 
 
 
-
 class AuthUser(db.Model):
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     username: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
     email: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
     password_encrypted: Mapped[str] = mapped_column(String(255), nullable=False)
 
     email_confirmed: Mapped[bool] = mapped_column(Boolean, default=False)
-    email_confirmed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    email_change_sent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    email_confirmed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    email_change_sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
 
     password_change_sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     password_confirmed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
-    last_sign_in_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    last_sign_in_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
 
     failed_login_attempts: Mapped[Optional[int]] = mapped_column(Integer, default=0)
     locked_until: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))

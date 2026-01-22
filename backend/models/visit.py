@@ -41,7 +41,7 @@ class Visit(db.Model):
     
     like_count: Mapped[int] = mapped_column(BigInteger, default=0)
     save_count: Mapped[int] = mapped_column(BigInteger, default=0)
-    share_count: Mapped[int] = mapped_column(Integer, default=0)
+    share_count: Mapped[int] = mapped_column(BigInteger, default=0)
 
     total_num_of_photos: Mapped[Optional[int]] = mapped_column(Integer)
 

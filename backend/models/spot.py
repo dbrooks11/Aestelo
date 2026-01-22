@@ -27,16 +27,16 @@ class Spot(db.Model):
         index=True
     )
 
-    name: Mapped[Optional[str]] = mapped_column(Text)
-    coordinates: Mapped[Optional[Geography]] = mapped_column(
+    name: Mapped[str] = mapped_column(Text)
+    coordinates: Mapped[Geography] = mapped_column(
         Geography(geometry_type='POINT', srid=4326, spatial_index=True)
     )
-    date_posted: Mapped[Optional[datetime]] = mapped_column(
+    date_posted: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 
         index=True
     )
     description: Mapped[Optional[str]] = mapped_column(Text)
-    total_num_of_photos: Mapped[Optional[int]] = mapped_column(Integer)
+    total_num_of_photos: Mapped[int] = mapped_column(Integer)
 
     visit_count: Mapped[int] = mapped_column(Integer, default=0) 
     average_rating: Mapped[float] = mapped_column(Float, default=0.0)
