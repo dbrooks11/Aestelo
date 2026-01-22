@@ -1,4 +1,4 @@
-from exstensions import ma
+from extensions import ma
 from marshmallow import (fields, validates, 
                          ValidationError, validate)
 from models.spot import Spot,SpotMedia

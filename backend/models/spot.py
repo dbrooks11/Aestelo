@@ -1,96 +1,117 @@
-from exstensions import db
-from models.user import UserProfile
-from sqlalchemy import Column, ForeignKey, BigInteger, String, Integer, Float, Text, DateTime, Boolean, ARRAY
+import uuid
+from datetime import datetime
+from typing import TYPE_CHECKING, Optional
+from sqlalchemy import (
+    BigInteger, Boolean, DateTime, Float, ForeignKey, Integer, 
+    String, Text
+)
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property
 from geoalchemy2 import Geography
-from sqlalchemy.orm import relationship, ColumnProperty
-from sqlalchemy.dialects.postgresql import UUID
 from flask import current_app
+from extensions import db
 
-'''
-# Rating fields
-average_rating
-total_ratings
-rating_count
-created_at
-last_rated_at
-
-# Filter fields  
-category
-has_photos
-visit_count
-save_count
-'''
+if TYPE_CHECKING:
+    from models.user import UserProfile
+    from models.visit import Visit
+    from models.rating import Rating
 
 class Spot(db.Model):
-    user_id = Column(UUID(as_uuid=True), ForeignKey(UserProfile.id), nullable=False, index=True)
-    
-    id = Column(BigInteger, primary_key=True)
-    name = Column(Text)
-    coordinates = Column(Geography(geometry_type='POINT', srid=4326, spatial_index=True))
-    date_posted = Column(DateTime(timezone=True), index=True)
-    description = Column(Text)
-    total_num_of_photos = Column(Integer)
+    __tablename__ = "spot"
 
-    visit_count = Column(Integer, default=0) 
-    average_rating = Column(Float, default=0.0)
-    total_num_of_ratings = Column(Integer, default=0)
-    last_rated_at = Column(DateTime(timezone=True))
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), 
+        ForeignKey("user_profile.id"), 
+        nullable=False, 
+        index=True
+    )
 
-    save_count = Column(Integer, default=0)
-    share_count = Column(Integer, default=0)
-    trending_score = ColumnProperty((4 * share_count)+(2*save_count)+((1 * average_rating ) + (1.5 * total_num_of_ratings))) #will be used to calculate a score for trending spot to keep track of which spot is trending
-    hashtags = Column(ARRAY(String)) 
+    name: Mapped[Optional[str]] = mapped_column(Text)
+    coordinates: Mapped[Optional[Geography]] = mapped_column(
+        Geography(geometry_type='POINT', srid=4326, spatial_index=True)
+    )
+    date_posted: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), 
+        index=True
+    )
+    description: Mapped[Optional[str]] = mapped_column(Text)
+    total_num_of_photos: Mapped[Optional[int]] = mapped_column(Integer)
 
-    #* Color pallete will be added later
-    # color_pallette = Column(String())
-    accessibility = Column(Boolean, default=False) 
-    num_of_edits = Column(Integer, default=0)
-    is_deleted = Column(Boolean, default=False) #is the spot deleted by user_profile
-    deleted_at = Column(DateTime(timezone=True))
-    num_reports = Column(Integer, default=0)
-    is_removed = Column(Boolean, default=False) #removed due to moderaters, admin, etc (does NOT mean deleted by user_profile)
-    removed_at = Column(DateTime(timezone=True))
-    status = Column(Text, default='processing')
+    visit_count: Mapped[int] = mapped_column(Integer, default=0) 
+    average_rating: Mapped[float] = mapped_column(Float, default=0.0)
+    total_num_of_ratings: Mapped[int] = mapped_column(Integer, default=0)
+
+    save_count: Mapped[int] = mapped_column(Integer, default=0)
+    share_count: Mapped[int] = mapped_column(Integer, default=0)
     
+    hashtags: Mapped[Optional[list[str]]] = mapped_column(ARRAY(String)) 
+    accessibility: Mapped[bool] = mapped_column(Boolean, default=False) 
+    num_of_edits: Mapped[int] = mapped_column(Integer, default=0)
     
-    spot_media = relationship('SpotMedia', backref='spot', cascade='all, delete-orphan')
-    visit = relationship('Visit', backref='spot', cascade='all, delete-orphan')
-    rating = relationship('Rating', backref='spot', cascade='all, delete-orphan')
+    is_deleted: Mapped[bool] = mapped_column(Boolean, default=False)
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    num_reports: Mapped[int] = mapped_column(Integer, default=0)
+    is_removed: Mapped[bool] = mapped_column(Boolean, default=False)
+    removed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    status: Mapped[str] = mapped_column(Text, default='processing')
+
+    trending_score: Mapped[float] = column_property(
+        (4 * share_count) + (2 * save_count) + ((1 * average_rating) + (1.5 * total_num_of_ratings))
+    )
+
+    user_profile: Mapped["UserProfile"] = relationship("UserProfile", back_populates="spot")
+    spot_media: Mapped[list["SpotMedia"]] = relationship(
+        "SpotMedia", 
+        back_populates="spot", 
+        cascade="all, delete-orphan"
+    )
+    visit: Mapped[list["Visit"]] = relationship(
+        "Visit", 
+        back_populates="spot", 
+        cascade="all, delete-orphan"
+    )
+    rating: Mapped[list["Rating"]] = relationship(
+        "Rating", 
+        back_populates="spot", 
+        cascade="all, delete-orphan"
+    )
 
     @classmethod
     def active(cls):
-        return cls.query.filter_by(is_deleted = False, is_removed = False)
+        return cls.query.filter_by(is_deleted=False, is_removed=False)
 
     def save(self):
         db.session.add(self)
         db.session.commit()
 
 
-
 class SpotMedia(db.Model):
-    spot_id = Column(BigInteger, ForeignKey(Spot.id), index=True)
-    uploaded_by = Column(UUID(as_uuid=True), ForeignKey(UserProfile.id), index=True)
+    __tablename__ = "spot_media"
 
-    id =Column(BigInteger, primary_key=True)
-    sort_order = Column(BigInteger)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    spot_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("spot.id"), index=True)
+    uploaded_by: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), 
+        ForeignKey("user_profile.id"), 
+        index=True
+    )
 
-    photo_path = Column(Text)
-    photo_type = Column(Text, default = 'photo') #stores what type of media is uploaed, photo, video, 360 video, etc
-    width =  Column(Integer)
-    height = Column(Integer)
+    sort_order: Mapped[int] = mapped_column(BigInteger)
+    photo_path: Mapped[str] = mapped_column(Text)
+    photo_type: Mapped[str] = mapped_column(Text, default='photo')
+    width: Mapped[Optional[int]] = mapped_column(Integer)
+    height: Mapped[Optional[int]] = mapped_column(Integer)
+
+    spot: Mapped["Spot"] = relationship("Spot", back_populates="spot_media")
+    user_profile: Mapped["UserProfile"] = relationship("UserProfile", back_populates="spot_media")
 
     def save(self):
         db.session.add(self)
         db.session.commit()
 
     @property
-    def photo_path_url(self):
+    def photo_path_url(self) -> Optional[str]:
         if not self.photo_path:
             return None
-        public_url = f"{current_app.config['R2_PUBLIC_URL']}/{self.photo_path}"
-        return public_url
-
-
-
-
-
+        return f"{current_app.config['R2_PUBLIC_URL']}/{self.photo_path}"

@@ -1,9 +1,9 @@
-from exstensions import db
+from extensions import db
 from models.user import UserProfile
 from sqlalchemy import exists
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
-from models.followers_and_following import Follow
+from models import Follow
 from util.decorators import profile_both_check_banned_removed, block_and_follow_check
 from schemas.user_schema import partial_schema
 

@@ -1,4 +1,4 @@
-from exstensions import ma
+from extensions import ma
 from models.visit import Visit, VisitMedia
 from marshmallow import validates, ValidationError, fields, validate, pre_load
 from geoalchemy2.shape import to_shape

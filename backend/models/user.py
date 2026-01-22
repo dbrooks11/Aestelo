@@ -1,11 +1,13 @@
-from exstensions import db
-from models.auth import AuthUser
-from models.music_track import MusicTrack
+import uuid
+from datetime import datetime
+from extensions import db
+from typing import Optional, TYPE_CHECKING
+if TYPE_CHECKING:
+    from models import Spot,SpotMedia,Visit,VisitMedia,Rating,Report,Collection,Follow, AuthUser
 from flask import current_app
-from sqlalchemy.orm import relationship
-from sqlalchemy import (Column, ForeignKey, BigInteger, 
-                        String, Integer, Float, Text, DateTime, Boolean, func)
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy import (ForeignKey, BigInteger, Integer, Float, Text, DateTime, func, UUID)
+
 #TODO: Stuff to do/link to user_profile
 #socials
 #allow messages from -put in user_profile settings
@@ -18,83 +20,83 @@ from sqlalchemy.dialects.postgresql import UUID
 
 
 class UserProfile(db.Model):
-    
-    id = Column(UUID(as_uuid=True), ForeignKey(AuthUser.id), primary_key=True)
-    music_track_id = Column(Text, ForeignKey(MusicTrack.id))
+    __tablename__ = 'user_profile'
 
-    username = Column(Text)
-    profile_photo = Column(Text)
-    profile_banner = Column(Text)
-    bio = Column(Text)
+    music_track_id: Mapped[Optional[str]] = mapped_column(Text, ForeignKey('music_track.id'))
 
-    instagram = Column(Text)
-    is_verified_instagram = Column(Boolean, default=False)
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('auth_user.id'), primary_key=True)
+    username: Mapped[str] = mapped_column(Text)
+    profile_photo: Mapped[Optional[str]] = mapped_column(Text)
+    username: Mapped[str] = mapped_column(Text)
+    profile_photo: Mapped[Optional[str]] = mapped_column(Text)
+    profile_banner: Mapped[Optional[str]] = mapped_column(Text)
+    bio: Mapped[Optional[str]] = mapped_column(Text)
 
-    facebook =Column(Text)
-    is_verified_facebook = Column(Boolean, default=False)
+    # Social Media
+    instagram: Mapped[Optional[str]] = mapped_column(Text)
+    is_verified_instagram: Mapped[bool] = mapped_column(default=False)
 
-    twitter_x= Column(Text)
-    is_verified_twitter_x = Column(Boolean, default=False)
+    facebook: Mapped[Optional[str]] = mapped_column(Text)
+    is_verified_facebook: Mapped[bool] = mapped_column(default=False)
 
-    tiktok = Column(Text)
-    is_verified_tiktok = Column(Boolean, default=False)
+    twitter_x: Mapped[Optional[str]] = mapped_column(Text)
+    is_verified_twitter_x: Mapped[bool] = mapped_column(default=False)
 
-    spot_count = Column(Integer, default=0)
-    visit_count = Column(Integer, default=0)
-    
-    follower_count = Column(BigInteger, default=0)
-    following_count = Column(BigInteger, default=0)
+    tiktok: Mapped[Optional[str]] = mapped_column(Text)
+    is_verified_tiktok: Mapped[bool] = mapped_column(default=False)
 
-    is_private = Column(Boolean, default=False)
-    show_online_status = Column(Boolean, default=False)
-    is_business_account = Column(Boolean, default=False)
-    is_prem_account = Column(Boolean, default=False)
+    # Counters
+    spot_count: Mapped[int] = mapped_column(default=0)
+    visit_count: Mapped[int] = mapped_column(default=0)
+    follower_count: Mapped[int] = mapped_column(BigInteger, default=0)
+    following_count: Mapped[int] = mapped_column(BigInteger, default=0)
 
-    is_banned = Column(Boolean, default=False)
-    banned_at = Column(DateTime)
-    banned_reason = Column(Text)
-    banned_by = Column(UUID(as_uuid=True))
+    # Account Status
+    is_private: Mapped[bool] = mapped_column(default=False)
+    show_online_status: Mapped[bool] = mapped_column(default=False)
+    is_business_account: Mapped[bool] = mapped_column(default=False)
+    is_prem_account: Mapped[bool] = mapped_column(default=False)
 
-    is_deleted = Column(Boolean, default=False)
-    deleted_at = Column(DateTime(timezone=True))
+    # Banning & Moderation
+    is_banned: Mapped[bool] = mapped_column(default=False)
+    banned_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    banned_reason: Mapped[Optional[str]] = mapped_column(Text)
+    banned_by: Mapped[Optional[uuid.UUID]] = mapped_column(default=None)
 
-    num_reports_made = Column(Integer, default=0)
-    num_reports = Column(Integer, default=0)
+    # Soft Deletion & Reports
+    is_deleted: Mapped[bool] = mapped_column(default=False)
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    num_reports_made: Mapped[int] = mapped_column(default=0)
+    num_reports: Mapped[int] = mapped_column(default=0)
 
-    profile_created_at = Column(DateTime, server_default=func.now())
+    # Timestamps
+    profile_created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
-
-    user_info = relationship('UserInfo', uselist=False ,backref='user_profile')
-    user_settings = relationship('UserSettings', uselist=False ,backref= 'user_profile')
-    user_role = relationship('UserRole', uselist=False, backref='user_profile')
-    user_subscription = relationship('UserSubscription', uselist=False ,backref= 'user_profile')
-    spot = relationship('Spot', backref='user_profile')
-    spot_media = relationship('SpotMedia', backref='user_profile')
-    visit = relationship('Visit', backref='user_profile')
-    visit_media = relationship('VisitMedia', backref='user_profile')
-    rating = relationship('Rating', backref='user_profile')
-    report = relationship('Report', backref='user_profile')
-    follower = relationship('Follow',primaryjoin='UserProfile.id == Follow.follower_id',backref='follower')
-    following = relationship('Follow',primaryjoin='UserProfile.id == Follow.following_id',backref='following')
-    collection = relationship('Collection', backref='user_profile')
-    
+    auth: Mapped['AuthUser'] = relationship('AuthUser', back_populates='user_profile')
+    user_info: Mapped["UserInfo"] = relationship("UserInfo", uselist=False, back_populates="user_profile")
+    user_settings: Mapped["UserSettings"] = relationship("UserSettings", uselist=False, back_populates="user_profile")
+    user_role: Mapped["UserRole"] = relationship("UserRole", uselist=False, back_populates="user_profile")
+    user_subscription: Mapped["UserSubscription"] = relationship("UserSubscription", uselist=False, back_populates="user_profile")
+    spot: Mapped[list["Spot"]] = relationship("Spot", back_populates="user_profile")
+    spot_media: Mapped[list["SpotMedia"]] = relationship("SpotMedia", back_populates="user_profile")
+    visit: Mapped[list["Visit"]] = relationship("Visit", back_populates="user_profile")
+    visit_media: Mapped[list["VisitMedia"]] = relationship("VisitMedia", back_populates="user_profile")
+    rating: Mapped[list["Rating"]] = relationship("Rating", back_populates="user_profile")
+    report: Mapped[list["Report"]] = relationship("Report", back_populates="user_profile")
+    collection: Mapped[list["Collection"]] = relationship("Collection", back_populates="user_profile")
+    follower: Mapped[list["Follow"]] = relationship("Follow", foreign_keys="Follow.follower_id", back_populates="follower")
+    following: Mapped[list["Follow"]] = relationship("Follow", foreign_keys="Follow.following_id", back_populates="following")
     
     @classmethod
     def active(cls):
         return cls.query.filter_by(is_banned = False, is_deleted = False)
-
-
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
-
+    
     @property
     def profile_photo_url(self):
         if not self.profile_photo:
             return None
         public_url = f"{current_app.config['R2_PUBLIC_URL']}/{self.profile_photo}"
         return public_url
-    
 
     @property
     def profile_banner_url(self):
@@ -105,70 +107,78 @@ class UserProfile(db.Model):
         
     
 class UserInfo(db.Model):
+    __tablename__ = 'user_info'
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('user_profile.id'), primary_key=True)
 
-    user_id = Column(UUID(as_uuid=True), ForeignKey(UserProfile.id),primary_key=True)
-    first_name = Column(Text) #limit to 30
-    last_name = Column(Text) #limit to 30
-    email = Column(Text) #limit to 150 chars when checking
-    date_of_birth = Column(DateTime(timezone=True))
-    age = Column(Integer, default=0)
-    gender = Column(Text, default= 'Not specified')
-    height_ft = Column(Integer, default=0)
-    height_in = Column(Integer, default=0)
+    # Name & Email
+    first_name: Mapped[Optional[str]] = mapped_column(Text)
+    last_name: Mapped[Optional[str]] = mapped_column(Text)
+    email: Mapped[Optional[str]] = mapped_column(Text)
+
+    # Personal Details
+    date_of_birth: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    age: Mapped[int] = mapped_column(Integer, default=0)
+    gender: Mapped[str] = mapped_column(Text, default='Not specified')
     
-    state = Column(Text)
-    city = Column(Text)
+    # Physical attributes
+    height_ft: Mapped[int] = mapped_column(Integer, default=0)
+    height_in: Mapped[int] = mapped_column(Integer, default=0)
 
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
+    # Location
+    state: Mapped[Optional[str]] = mapped_column(Text)
+    city: Mapped[Optional[str]] = mapped_column(Text)
+
+    user_profile: Mapped["UserProfile"] = relationship(UserProfile, back_populates="user_info")
 
 class UserRole(db.Model):
+    __tablename__ = 'user_role'
 
-    user_id = Column(UUID(as_uuid=True), ForeignKey(UserProfile.id), primary_key=True)
-    is_admin = Column(Boolean, default=False)
-    is_moderator = Column(Boolean, default=False)
-    is_owner = Column(Boolean, default=False)
-    granted_at = Column(DateTime(timezone=True))
-    granted_by = Column(UUID(as_uuid=True))
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('user_profile.id'), primary_key=True)
+    is_admin: Mapped[bool] = mapped_column(default=False)
+    is_moderator: Mapped[bool] = mapped_column(default=False)
+    is_owner: Mapped[bool] = mapped_column(default=False)
+    granted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    granted_by: Mapped[Optional[uuid.UUID]] = mapped_column()
+
+    user_profile: Mapped["UserProfile"] = relationship(UserProfile, back_populates="user_role")
     
     def save(self):
         db.session.add(self)
         db.session.commit()
-        
-
 
 class UserSettings(db.Model):
+    __tablename__ = 'user_settings'
 
-    user_id = Column(UUID(as_uuid=True), ForeignKey(UserProfile.id), primary_key=True)
-    language_preference = Column(Text)
-    email_notifications = Column(Boolean, default=False)
-    push_notifications = Column(Boolean, default=False)
-    location_sharing = Column(Boolean, default=False)
-    data_usage_consent = Column(Boolean, default=False)
-    marketing_consent = Column(Boolean , default=False)
-    theme_preference = Column(Boolean, default=True) #True = Dawn mode, False = Twilight Mode (light mode or dark mode)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('user_profile.id'), primary_key=True)
+    language_preference: Mapped[Optional[str]] = mapped_column(Text)
+    email_notifications: Mapped[bool] = mapped_column(default=False)
+    push_notifications: Mapped[bool] = mapped_column(default=False)
+    location_sharing: Mapped[bool] = mapped_column(default=False)
+    data_usage_consent: Mapped[bool] = mapped_column(default=False)
+    marketing_consent: Mapped[bool] = mapped_column(default=False)
+    theme_preference: Mapped[bool] = mapped_column(default=True)
 
+    user_profile: Mapped["UserProfile"] = relationship(UserProfile, back_populates="user_settings")
+    
     def save(self):
         db.session.add(self)
         db.session.commit()
-    
-
 
 class UserSubscription(db.Model):
+    __tablename__ = 'user_subscription'
 
-    user_id = Column(UUID(as_uuid=True), ForeignKey(UserProfile.id), primary_key=True)
-    tier = Column(Text, default='free') #free, premium, business
-    price = Column(Float, default=0.00)
-    started_at= Column(DateTime(timezone=True), server_default=func.now())
-    expires_at = Column(DateTime(timezone=True))
-    auto_renew = Column(Boolean, default=False)
-    payment_method_id = Column(UUID(as_uuid=True)) 
-    billing_cycle = Column(Text, default='monthly')  #monthly or yearly
-    trial_used = Column(Boolean, default=False)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('user_profile.id'), primary_key=True)
+    tier: Mapped[str] = mapped_column(Text, default='free')
+    price: Mapped[float] = mapped_column(Float, default=0.00)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    auto_renew: Mapped[bool] = mapped_column(default=False)
+    payment_method_id: Mapped[Optional[uuid.UUID]] = mapped_column() 
+    billing_cycle: Mapped[str] = mapped_column(Text, default='monthly')
+    trial_used: Mapped[bool] = mapped_column(default=False)
+
+    user_profile: Mapped["UserProfile"] = relationship(UserProfile, back_populates="user_subscription")
 
     def save(self):
         db.session.add(self)
         db.session.commit()
-
-

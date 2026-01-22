@@ -1,20 +1,14 @@
 from flask import Blueprint, request, jsonify
 from datetime import datetime, timezone
-from exstensions import db
+from extensions import db
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models.spot import Spot
-from models.user import UserProfile
-from models.rating import Rating
-from models.collection import CollectionItem
-from models.visit import Visit
+from models import Spot, UserProfile, Rating, CollectionItem, Visit
 from schemas.spot_schema import spot_schema
-from util.outlier_coords import average_location_batch
-from util.storage import generate_presigned_url
-from util.celery_task import process_photos_with_metadata
+from util import average_location_batch, generate_presigned_url, process_photos_with_metadata
 from marshmallow import ValidationError
 from celery.result import AsyncResult, GroupResult
 from celery import chord,group
-from exstensions import celery
+from extensions import celery
 from sqlalchemy.orm import joinedload
 from sqlalchemy import case, cast, Numeric, func
 
@@ -167,8 +161,6 @@ def get_user_spots():
         username_and_collections = UserProfile.query.options(
             joinedload(UserProfile.collection)
         ).get(current_user)
-
-        print(username_and_collections.collection)
 
         is_saved = db.session.query(CollectionItem).filter(
             CollectionItem.spot_id == Spot.id,

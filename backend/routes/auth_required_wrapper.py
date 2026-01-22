@@ -1,7 +1,7 @@
 from functools import wraps
 from flask_jwt_extended import get_jwt_identity
-from models.user import UserRole
-from flask import request, jsonify
+from models import UserRole
+from flask import jsonify
 
 
 def admin_required(func):

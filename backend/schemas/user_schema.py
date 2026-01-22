@@ -1,4 +1,4 @@
-from exstensions import ma, db
+from extensions import ma, db
 from models.user import UserProfile, UserInfo, UserRole, UserSettings, UserSubscription
 from marshmallow import validates, ValidationError, fields, validate
 from sqlalchemy import exists

@@ -1,12 +1,11 @@
 from celery import shared_task
-from models.spot import SpotMedia, Spot
-from models.visit import VisitMedia, Visit
+from models import SpotMedia,VisitMedia
 from util.photo_processing import photo_processing_one_img_metadata,get_decimal_coordinates
 from util.storage import s3, delete_file_s3, download_file, upload_to_s3
 from util.outlier_coords import reject_post_type
 import os
 from typing import Literal
-from exstensions import db
+from extensions import db
 
 
 @shared_task(bind=True, ignore_result=False)

@@ -1,5 +1,5 @@
 
-from exstensions import db
+from extensions import db
 from datetime import datetime, timezone
 from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import(
@@ -16,11 +16,10 @@ import random
 from sqlalchemy.orm import load_only
 from sqlalchemy import exists
 from werkzeug.security import check_password_hash, generate_password_hash
-from schemas.user_schema import ValidationError
+from schemas import ValidationError
 from schemas.auth_schema import username_pass_only,email_pass_only,email_pass_confirm_pass
-from models.user import UserProfile
-from models.token_blacklist import TokenBlackList
-from models.auth import AuthUser
+from models import UserProfile, AuthUser, TokenBlackList
+from util import DatabaseService
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -46,7 +45,7 @@ def signup():
         return jsonify({'error': 'Account already exist'}), 409
     
     try:
-        validate_auth = email_pass_confirm_pass.load(data)
+        email_pass_confirm_pass.load(data)
     except ValidationError as error:
         error_messages = []
         for field, messages in error.messages.items():
@@ -73,14 +72,12 @@ def signup():
         if not username:
             return jsonify({'error': 'Server busy, please try again'}), 500
 
-        new_user = AuthUser(
-            username = username,
-            email = validate_auth['email'],
-            password_encrypted = generate_password_hash(validate_auth['password'])
+        DatabaseService.create_user_with_stack(
+            db.session, 
+            email=email, 
+            username=username,
+            password_encrypted=generate_password_hash(password)
         )
-
-        db.session.add(new_user)
-        db.session.commit()
 
         current_app.logger.info('Successful Signup')
         return jsonify({'message':'Account created successfully'}), 201

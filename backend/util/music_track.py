@@ -4,7 +4,6 @@ import base64
 import requests 
 from dotenv import load_dotenv
 from models.music_track import MusicTrack
-# from flask import current_app
 
 
 _token_cache = {

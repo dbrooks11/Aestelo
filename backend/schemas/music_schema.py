@@ -1,5 +1,5 @@
 # schemas/user.py
-from exstensions import ma
+from extensions import ma
 from models.music_track import MusicTrack
 from marshmallow import fields
 

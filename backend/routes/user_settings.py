@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
-from exstensions import db
-from models.user import UserSettings
+from extensions import db
+from models import UserSettings
 from schemas.user_schema import user_settings_schema, ValidationError
 
 from util.decorators import profile_check_current__banned_removed

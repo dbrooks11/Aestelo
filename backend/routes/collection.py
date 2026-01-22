@@ -1,9 +1,7 @@
 from flask import Blueprint, request, jsonify
-from exstensions import db
+from extensions import db
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models.collection import Collection, CollectionItem
-from models.spot import Spot
-from models.visit import Visit
+from models import Spot, Visit, Collection, CollectionItem
 from sqlalchemy import exists, case
 
 collection_bp = Blueprint('collection', __name__, url_prefix='/collection')

@@ -1,4 +1,4 @@
-from exstensions import db
+from extensions import db
 from sqlalchemy import Column, String, Integer, BigInteger
 from sqlalchemy.orm import relationship
 

@@ -1,8 +1,7 @@
 from geopy.distance import distance
-from models.spot import Spot
-from models.visit import Visit
+from models import Spot, Visit
 from util.storage import delete_file_s3
-from exstensions import db
+from extensions import db
 from celery import shared_task
 from datetime import datetime, timezone
 from sqlalchemy.orm import joinedload

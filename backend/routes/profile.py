@@ -3,14 +3,10 @@ from io import BytesIO
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import exists
 from sqlalchemy.orm import load_only
-from exstensions import db
-from models.user import UserProfile
-from models.block_profile import BlockProfile
-from models.followers_and_following import Follow
-from models.auth import AuthUser
+from extensions import db
+from models import UserProfile, BlockProfile, Follow, AuthUser
 from schemas.user_schema import user_profile_schema, profile_can_edit, partial_schema ,profile_viewing, ValidationError
-from util.storage import upload_to_s3, delete_file_s3
-from util.photo_processing import photo_processing_one_img
+from util import upload_to_s3, delete_file_s3, photo_processing_one_img
 from util.decorators import profile_check_current__banned_removed
 
 profile_bp = Blueprint('profile',__name__, url_prefix='/profile')

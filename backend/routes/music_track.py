@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
-from exstensions import db
+from extensions import db
 from models.user import UserProfile, UserInfo, UserSettings, UserRole
 from models.visit import Visit
 from models.music_track import MusicTrack

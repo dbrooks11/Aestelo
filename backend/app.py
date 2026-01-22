@@ -5,9 +5,8 @@ from flask_cors import CORS
 from config import Config, configure_logging
 from colorama import init
 import models
-from models import listeners
 from models.token_blacklist import TokenBlackList
-from exstensions import db, ma, jwt, limiter,mg, celery_init_app
+from extensions import db, ma, jwt, limiter,mg, celery_init_app
 from routes import register_blueprints
 from flask import g, request
 from PIL import Image

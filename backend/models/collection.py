@@ -1,25 +1,31 @@
-from exstensions import db
-from sqlalchemy import (Column, ForeignKey, BigInteger, Text, DateTime, Boolean, func)
+import uuid
+from typing import Optional, TYPE_CHECKING
+if TYPE_CHECKING:
+    from models import UserProfile
+from datetime import datetime
+from extensions import db
+from sqlalchemy import (ForeignKey, BigInteger, Text, DateTime, Boolean, func)
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
-from models.spot import Spot
-from models.visit import Visit
-from models.user import UserProfile
 
 
 class Collection(db.Model):
-    id = Column(BigInteger, primary_key=True)
-    user_id = Column(UUID(as_uuid=True), ForeignKey(UserProfile.id), index=True)
-    name = Column(Text)
-    description = Column(Text)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    is_public = Column(Boolean, default=False)
-    is_default = Column(Boolean, default=False)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('user_profile.id'), index=True)
+    name: Mapped[str] = mapped_column(Text)
+    description: Mapped[Optional[str]] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    is_public: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_default: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    user_profile: Mapped["UserProfile"] = relationship("UserProfile", back_populates="collection")
 
 
 class CollectionItem(db.Model):
-    id = Column(BigInteger, primary_key=True)
-    collection_id = Column(BigInteger, ForeignKey(Collection.id))
-    spot_id = Column(BigInteger, ForeignKey(Spot.id), nullable=True)
-    visit_id = Column(BigInteger, ForeignKey(Visit.id), nullable=True)
-    saved_by = Column(UUID(as_uuid=True), nullable=False)
-    saved_at = Column(DateTime(timezone=True), server_default=func.now())
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    collection_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('collection.id'), nullable=False)
+    spot_id: Mapped[Optional[int]] = mapped_column(BigInteger, ForeignKey('spot.id'), nullable=True)
+    visit_id: Mapped[Optional[int]] = mapped_column(BigInteger, ForeignKey('visit.id'), nullable=True)
+    saved_by: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    saved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    

@@ -1,18 +1,18 @@
-from exstensions import db
-from sqlalchemy import (Column, ForeignKey, BigInteger, 
-                     Index, UniqueConstraint)
+import uuid
+from extensions import db
+from sqlalchemy import (ForeignKey, BigInteger,Index, UniqueConstraint)
 from sqlalchemy.dialects.postgresql import UUID
-from models.user import UserProfile
+from sqlalchemy.orm import Mapped, mapped_column
 
 class BlockProfile(db.Model):
-    __table_args__ = (Index('idx_block_user_blocker_blocked','blocker_id','blocked_id'),
-                      Index('idx_block_user_blocked', 'blocked_id'), 
+    __tablename__ = 'block_profile'
+    __table_args__ = (Index('idx_block_profile_blocker_id_blocked_id','blocker_id','blocked_id'), 
                       UniqueConstraint('blocker_id','blocked_id', name = 'block_profile_unique'))
                       
     
-    id = Column(BigInteger, primary_key=True)
-    blocker_id = Column(UUID(as_uuid=True), ForeignKey(UserProfile.id), nullable=False)
-    blocked_id = Column(UUID(as_uuid=True), ForeignKey(UserProfile.id), nullable=False)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    blocker_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('user_profile.id'), nullable=False)
+    blocked_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('user_profile.id'), nullable=False)
 
     def save(self):
         db.session.add(self)

@@ -1,10 +1,8 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime, timezone
-from exstensions import db
-from models.user import UserProfile
-from models.visit import Visit, VisitMedia
-from models.spot import Spot
+from extensions import db
+from models import UserProfile, Visit, VisitMedia, Spot
 from schemas.visit_schema import visit_schema, visit_media_schema,partial_schema,ValidationError
 from routes.auth_required_wrapper import admin_required
 from util.photo_processing import photo_processing, get_decimal_coordinates

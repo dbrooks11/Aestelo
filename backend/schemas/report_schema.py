@@ -1,5 +1,5 @@
 # schemas/report.py
-from exstensions import ma
+from extensions import ma
 from models.report import Report
 from marshmallow import validates, ValidationError, fields, validate, pre_load
 

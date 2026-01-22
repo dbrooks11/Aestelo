@@ -1,13 +1,9 @@
 from functools import wraps
 from flask import jsonify, request
 from flask_jwt_extended import get_jwt_identity
-from models.user import UserProfile
-from models.spot import Spot
-from models.visit import Visit
-from models.followers_and_following import Follow
-from models.block_profile import BlockProfile
+from models import UserProfile, Spot,Visit,Follow,BlockProfile
 from sqlalchemy import exists, and_, or_
-from exstensions import db
+from extensions import db
 
 def profile_active_not_permitted(func):
     @wraps(func)
