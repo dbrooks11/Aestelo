@@ -55,6 +55,7 @@ def average_location_batch(results, post_type_id: int, post_type:str):
         final_lat = sum(c['latitude'] for c in filtered) / len(filtered)
         final_long = sum(c['longitude'] for c in filtered) / len(filtered)
 
+        # TODO: change query to use count instaed of joinedLoad
         item = None
         if post_type == 'spot':
             item = Spot.query.filter_by(id = post_type_id).options(
@@ -66,8 +67,14 @@ def average_location_batch(results, post_type_id: int, post_type:str):
                 joinedload(Visit.visit_media)
             ).first()
             media_count = len(item.visit_media)
+
+        print(f'This is ITEM: {item}')
+
+        if not item:
+            raise Exception(f'Failed to create {post_type}')
         
         if item:
+            print('EXECUTING ITEM STUFF')
             item.coordinates = f'POINT({final_long} {final_lat})'
             item.date_posted = datetime.now(timezone.utc)
             item.total_num_of_photos = media_count

@@ -31,6 +31,8 @@ export default function SaveButton(props: SaveButton): JSX.Element{
         if(collectionId === undefined && defaultCollection === undefined) return
 
         try{
+            console.log(prevSaved)
+            
             props.setIsSavedState(!prevSaved)
 
             if(!prevSaved) props.setSaveCountState(prev => prev + 1)

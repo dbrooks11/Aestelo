@@ -59,7 +59,7 @@ export default function FetchSpots(): JSX.Element{
                 key={spot.id}
                 spot={spot}
                 onClick={() => setSelectedSpot(spot)}
-                className="w-full aspect-4/5 hover:scale-102 cursor-pointer transition-transform object-cover rounded-xs overflow-hidden"
+                className="w-full aspect-4/5 md:hover:scale-102 cursor-pointer transition-transform object-cover rounded-xs overflow-hidden"
               />
             ))
           )}

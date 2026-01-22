@@ -1,13 +1,12 @@
 import uuid
 from extensions import db
-from sqlalchemy import (ForeignKey, BigInteger,Index, UniqueConstraint)
+from sqlalchemy import (ForeignKey, BigInteger,Index)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 class BlockProfile(db.Model):
     __tablename__ = 'block_profile'
-    __table_args__ = (Index('idx_block_profile_blocker_id_blocked_id','blocker_id','blocked_id'), 
-                      UniqueConstraint('blocker_id','blocked_id', name = 'block_profile_unique'))
+    __table_args__ = (Index(None,'blocker_id','blocked_id', unique=True),)
                       
     
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)

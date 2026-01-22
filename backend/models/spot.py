@@ -12,14 +12,13 @@ from flask import current_app
 from extensions import db
 
 if TYPE_CHECKING:
-    from models.user import UserProfile
-    from models.visit import Visit
-    from models.rating import Rating
+    from models import UserProfile, Visit, Rating
+   
 
 class Spot(db.Model):
     __tablename__ = "spot"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), 
         ForeignKey("user_profile.id"), 
@@ -28,15 +27,15 @@ class Spot(db.Model):
     )
 
     name: Mapped[str] = mapped_column(Text)
-    coordinates: Mapped[Geography] = mapped_column(
+    coordinates: Mapped[Optional[Geography]] = mapped_column(
         Geography(geometry_type='POINT', srid=4326, spatial_index=True)
     )
-    date_posted: Mapped[datetime] = mapped_column(
+    date_posted: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), 
         index=True
     )
     description: Mapped[Optional[str]] = mapped_column(Text)
-    total_num_of_photos: Mapped[int] = mapped_column(Integer)
+    total_num_of_photos: Mapped[Optional[int]] = mapped_column(Integer)
 
     visit_count: Mapped[int] = mapped_column(Integer, default=0) 
     average_rating: Mapped[float] = mapped_column(Float, default=0.0)
@@ -89,7 +88,7 @@ class Spot(db.Model):
 class SpotMedia(db.Model):
     __tablename__ = "spot_media"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     spot_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("spot.id"), index=True)
     uploaded_by: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), 

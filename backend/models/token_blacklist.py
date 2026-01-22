@@ -6,7 +6,7 @@ from sqlalchemy import (BigInteger,String, DateTime, func)
 class TokenBlackList(db.Model):
     __tablename__ = 'token_black_list'
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     jti: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     create_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 

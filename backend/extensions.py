@@ -9,13 +9,18 @@ from celery import Celery, Task
 from flask import Flask
 
 convention = {
-    "ix": 'ix_%(table_name)s_%(column_0_name)s', 
-    "uq": "uq_%(table_name)s_%(column_0_name)s",
-    "ck": "ck_%(table_name)s_%(constraint_name)s",
-    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
-    "pk": "pk_%(table_name)s"
+    'all_column_names': lambda constraint, table: '_'.join(
+        [column.name for column in constraint.columns.values()]
+    ),
+    'ix': 'ix_%(table_name)s_%(all_column_names)s',
+    'uq': 'uq_%(table_name)s_%(all_column_names)s',
+    'ck': 'ck_%(table_name)s_%(constraint_name)s',
+    'fk': 'fk_%(table_name)s_%(all_column_names)s_%(referred_table_name)s',
+    'pk': 'pk_%(table_name)s',
 }
-metadata_db = MetaData(naming_convention=convention)
+metadata_db = MetaData(
+    naming_convention=convention
+)
 
 db = SQLAlchemy(metadata=metadata_db)
 ma = Marshmallow()
@@ -23,7 +28,7 @@ jwt = JWTManager()
 mg = Migrate()
 celery = Celery()
 
-# TODO: use redis for rate limit storage
+# TODO: use redis for rate limit storage & change default rate limit
 limiter = Limiter(
     get_remote_address,
     default_limits=["10000 per day", "10000 per hour"],

@@ -8,12 +8,12 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from extensions import db
 
 if TYPE_CHECKING:
-    from models.user import UserProfile
+    from models import UserProfile
 
 class Report(db.Model):
     __tablename__ = "report" 
 
-    report_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     
     reporter_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), 

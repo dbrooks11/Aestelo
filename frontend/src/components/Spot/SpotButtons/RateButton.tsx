@@ -26,12 +26,14 @@ export default function RateButton(props: RateButtonProps): JSX.Element{
 
     const onRateClick = useCallback(async(num: number) => {
         const prevRated = props.isRated
+        const prevRateCount = props.ratingCountHolder
         try{
             let response = undefined
             if(num > 0 && num <= 5){
                 const wasRated = props.isRated
                 
                 props.setIsRated(true)
+                if(!prevRated) props.setRatingCountHolder(prev => prev + 1)
                 response = await protectedInstance.post(`/spot/rate/${props.spotId}`, {
                     rating_choice: num
                 })
@@ -53,6 +55,7 @@ export default function RateButton(props: RateButtonProps): JSX.Element{
                 
             } else if(num === 0) {
                 props.setIsRated(false)
+                if(prevRateCount) props.setRatingCountHolder(prev => prev - 1)
                 response = await protectedInstance.delete(`/spot/rate/${props.spotId}`)
                  
                 if(response.status === 200) {
@@ -71,6 +74,7 @@ export default function RateButton(props: RateButtonProps): JSX.Element{
             } 
         }catch(error){
             props.setIsRated(prevRated)
+            props.setRatingCountHolder(prevRateCount)
             const newError = AxiosErrorHelper(error)
             console.error(newError)
         } 

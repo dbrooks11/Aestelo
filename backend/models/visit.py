@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class Visit(db.Model):
     __tablename__ = "visit"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     
     # Use strings for ForeignKeys to break circular imports
     spot_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("spot.id"), nullable=False)
@@ -77,7 +77,7 @@ class Visit(db.Model):
 class VisitMedia(db.Model):
     __tablename__ = "visit_media"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     visit_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("visit.id"), nullable=False)
     uploaded_by: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), 

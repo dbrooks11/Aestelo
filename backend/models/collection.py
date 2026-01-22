@@ -4,13 +4,15 @@ if TYPE_CHECKING:
     from models import UserProfile
 from datetime import datetime
 from extensions import db
-from sqlalchemy import (ForeignKey, BigInteger, Text, DateTime, Boolean, func)
+from sqlalchemy import (ForeignKey, BigInteger, Text, DateTime, Boolean,UniqueConstraint, func)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 
 
 class Collection(db.Model):
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    __table_args__ = (UniqueConstraint('user_id', 'name'),)
+    
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('user_profile.id'), index=True)
     name: Mapped[str] = mapped_column(Text)
     description: Mapped[Optional[str]] = mapped_column(Text)
@@ -22,7 +24,10 @@ class Collection(db.Model):
 
 
 class CollectionItem(db.Model):
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    __table_args__ = (UniqueConstraint('collection_id', 'spot_id'),
+                      UniqueConstraint('collection_id', 'visit_id'),)
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     collection_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('collection.id'), nullable=False)
     spot_id: Mapped[Optional[int]] = mapped_column(BigInteger, ForeignKey('spot.id'), nullable=True)
     visit_id: Mapped[Optional[int]] = mapped_column(BigInteger, ForeignKey('visit.id'), nullable=True)

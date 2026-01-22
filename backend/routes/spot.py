@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from datetime import datetime, timezone
 from extensions import db
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -273,8 +273,9 @@ def rate_spot(spot_id):
                             'rating': rate,
                             'new_average': updated_spot[0],
                             'new_total_ratings': updated_spot[1]}), 201
-        except Exception:
-            return jsonify({'error': 'This spot is already rated'}), 500
+        except Exception as e:
+            current_app.logger.error(str(e))
+            return jsonify({'error': 'This spot is already rated'}), 409
 
     elif request.method == 'DELETE':
         try:
@@ -299,7 +300,8 @@ def rate_spot(spot_id):
                 return jsonify({'message': 'No rating to remove'}), 200
         except Exception as e:
             db.session.rollback()
-            return jsonify({'error': str(e)}), 500
+            current_app.logger.error(str(e))
+            return jsonify({'error': 'Failed to remove rating'}), 500
         
 
 
