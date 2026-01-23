@@ -14,7 +14,7 @@ export default function SpotDescripton({description, className}: SpotDesciptionP
 
     return(
         <div 
-            className={`${cn('bottom-1 left-2 absolute flex text-white text-xs cursor-pointer z-20 max-w-3/4', className)}`}
+            className={`${cn('bottom-1 left-2 absolute flex text-white text-xs cursor-pointer z-20 max-w-3/4 text-[0.75em]', className)}`}
 
         >
             <AnimatePresence mode="wait">
@@ -60,11 +60,11 @@ export default function SpotDescripton({description, className}: SpotDesciptionP
                     onClick={(e) => {
                         e.stopPropagation()
                         setShowDescription(true)}}
-                    className= 'flex items-center dark:bg-black/10 bg-white/10 backdrop-blur-[2px] px-0.5 border-neutral-300/40 cursor-pointer h-5'
+                    className= 'flex items-center dark:bg-black/10 bg-white/10 backdrop-blur-[2px] px-0.5 border-neutral-300/40 cursor-pointer h-[1.75em] select-none'
                     >
-                    <span aria-hidden='true' className="">[</span>
-                    <span aria-hidden='true' className="mt-0.5 flex shrink"><Ellipsis className="w-full h-full"/></span>
-                    <span aria-hidden='true' className="">]</span>
+                    <span aria-hidden='true' className="text-[1.25em]">[</span>
+                    <span aria-hidden='true' className="mt-[0.25em] flex shrink"><Ellipsis className="w-[1.75em] h-[1.75em]"/></span>
+                    <span aria-hidden='true' className="text-[1.25em]">]</span>
                 </motion.button>}
             </AnimatePresence>
         </div>

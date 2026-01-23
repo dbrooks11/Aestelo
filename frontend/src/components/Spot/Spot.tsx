@@ -22,20 +22,23 @@ import SpotPhoto from "./SpotPhoto"
 
 // }
 
+export type rateSelectorState = boolean
+export type averageRatingState = number
+
 
 export default function Spot({spot, collections,  className}): JSX.Element{
 
     
     const [progress, setProgress] = useState<number>(1)
     const [total, setTotal ] = useState<number>(spot.total_num_of_photos)
-    const [ openRateSelector, setOpenRateSelector] = useState<boolean>(false)
+    const [openRateSelector, setOpenRateSelector] = useState<boolean>(false)
     const [holdAverageRating, setHoldAverageRating] = useState<number>(spot.average_rating)
 
     // TODO: change username prop in header to users username for header
     return(
         
         <div 
-            className={`${cn('flex flex-col dark:bg-off-slate bg-white border dark:border-border-dark border-border-light rounded-sm w-90', className)}`}
+            className={`${cn('flex flex-col dark:bg-off-slate bg-white border dark:border-border-dark border-border-light rounded-sm w-80 text-sm sm:w-90 sm:text-base', className)}`}
         >
             
             {/* Images and Header container */}
@@ -56,7 +59,7 @@ export default function Spot({spot, collections,  className}): JSX.Element{
                 <div 
                     className="absolute flex left-1 bottom-[50%]">
                     <button 
-                        className=" w-7 h-7 flex items-center justify-center rounded-full bg-black/10 backdrop-blur-[2px] text-white/70 border border-white/10  active:scale-90 cursor-pointer shadow-2xl z-20" 
+                        className=" w-[1.75em] h-[1.75em] flex items-center justify-center rounded-full bg-black/10 backdrop-blur-[2px] text-white/70 border border-white/10  active:scale-90 cursor-pointer shadow-2xl z-20" 
                         onClick={() => setProgress(Math.max(1, progress - 1))}
                         aria-label="previous button"
                     >
@@ -65,7 +68,7 @@ export default function Spot({spot, collections,  className}): JSX.Element{
                 </div>
                 <div className="absolute flex right-1 bottom-[50%]">
                     <button 
-                        className=" w-7 h-7 flex items-center justify-center rounded-full bg-black/10 backdrop-blur-[2px] text-white/70 border border-white/10  active:scale-90 cursor-pointer z-20" 
+                        className=" w-[1.75em] h-[1.75em] flex items-center justify-center rounded-full bg-black/10 backdrop-blur-[2px] text-white/70 border border-white/10  active:scale-90 cursor-pointer z-20" 
                         onClick={() => setProgress(Math.min(total, progress + 1))}
                         aria-label="next button"
                     >
@@ -94,7 +97,7 @@ export default function Spot({spot, collections,  className}): JSX.Element{
                 
             </div>
             {/* Action button and tags container */}
-            <div className="flex flex-col dark:bg-off-slate w-full min-h-25">
+            <div className="flex flex-col dark:bg-off-slate w-full min-h-[6.5em]">
                 <SpotTags
                     tags={spot.hashtags}
                 />
@@ -108,6 +111,7 @@ export default function Spot({spot, collections,  className}): JSX.Element{
                     openRateSelector={openRateSelector}
                     setOpenRateSelector={setOpenRateSelector}
                     setHoldAverageRating={setHoldAverageRating}
+                    holdAverageRating={holdAverageRating}
                     isSaved={spot.is_saved}
                     hasVisited={spot.has_visited}
                     collections={collections}

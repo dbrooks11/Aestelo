@@ -40,7 +40,7 @@ export default function SpotSimple({spot, className, onClick}): JSX.Element{
 
             {spot.accessibility &&
                 <Accessibility 
-                    className="w-3 h-3 bg-blue-500/80 p-0.5 rounded-xs shrink-0 absolute lg:hidden top-1 left-1 z-10 text-white/70"
+                    className="w-3 h-3 sm:w-4 sm:h-4 bg-blue-500/80 p-0.5 rounded-xs shrink-0 absolute lg:hidden top-1 left-1 z-10 text-white/70"
                 />
             }
             </div>

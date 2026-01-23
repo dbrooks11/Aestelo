@@ -1,21 +1,25 @@
-import { useCallback, type Dispatch, type JSX, type SetStateAction } from "react";
+import { useCallback, useRef, useState, type JSX} from "react";
 import { Bookmark} from "lucide-react";
 import SpotButtonBase from "./SpotButtonBase";
 import { useSpotMutation } from "../../../hooks/SpotHooks/useSpotMutation";
 import { AxiosErrorHelper, protectedInstance } from "../../../util/axios_api_helpers";
+import axios from "axios";
 
 type SaveButton =  {
-    setIsSavedState: Dispatch<SetStateAction<boolean>>
-    isSavedState: boolean
+    isSaved: boolean
+    saveCount: number
     spotId: number
-    saveCountState: number
-    setSaveCountState: Dispatch<SetStateAction<number>>
     collections: Array<{is_default: boolean, id: number}>
 }
 
+// TODO: add functionality to change saved item to different collection
 export default function SaveButton(props: SaveButton): JSX.Element{
 
+    const [isSavedState, setIsSavedState] = useState<boolean>(props.isSaved)
+    const [saveCountState, setSaveCountState] = useState<number>(props.saveCount)
+
     const {updateSpotInCache} = useSpotMutation()
+    const controllerRef = useRef<AbortController | null>(null)
 
     const color = "#60a5fa"
     const fillColor = "#60a5fa"
@@ -25,22 +29,26 @@ export default function SaveButton(props: SaveButton): JSX.Element{
         if(props.collections.length === 0) return
 
         const defaultCollection = props.collections.find((item) => item.is_default === true)
-        const prevSaved = props.isSavedState
-        const prevSaveCount = props.saveCountState
+        const prevSaved = isSavedState
+        const prevSaveCount = saveCountState
 
         if(collectionId === undefined && defaultCollection === undefined) return
 
+        if(controllerRef.current){
+            controllerRef.current.abort()
+        }
+        const controller = new AbortController()
+        controllerRef.current = controller
+
         try{
-            console.log(prevSaved)
             
-            props.setIsSavedState(!prevSaved)
+            setIsSavedState(!prevSaved)
+            setSaveCountState((prev: number) => !prevSaved ? prev + 1: prev - 1)
 
-            if(!prevSaved) props.setSaveCountState(prev => prev + 1)
-            else props.setSaveCountState(prev => prev - 1)
-
-            const response = await protectedInstance.post(`/collection/${collectionId ? collectionId : defaultCollection && defaultCollection.id}`, {
-                spot_id: props.spotId
-            })
+            const response = await protectedInstance.post(`/collection/${collectionId ? collectionId : defaultCollection && defaultCollection.id}`, 
+                {spot_id: props.spotId},
+                {signal: controller.signal}
+            )
 
             if(response.status === 200 || response.status === 201){
                 const data = response.data
@@ -50,16 +58,16 @@ export default function SaveButton(props: SaveButton): JSX.Element{
                     save_count: newSpotSaveCount,
                     is_saved: isSaved
                 })
-                console.log(data.message)
             }
         }catch(error){
             const newError = AxiosErrorHelper(error)
-            props.setSaveCountState(prevSaveCount)
-            props.setIsSavedState(prevSaved)
+            if(axios.isCancel(newError)) return
+            setSaveCountState(prevSaveCount)
+            setIsSavedState(prevSaved)
             console.error(newError)
         }
             
-    }, [props, updateSpotInCache])
+    }, [props, updateSpotInCache, isSavedState, saveCountState])
 
     return(
         <div className="flex relative">
@@ -76,13 +84,13 @@ export default function SaveButton(props: SaveButton): JSX.Element{
             <SpotButtonBase
                 title="Save"
                 icon={Bookmark}
-                data={props.saveCountState}
+                data={saveCountState}
                 color={color}
                 onClick={(e) => {
                     e.stopPropagation();
                     onSaveClick(undefined);
                 }}
-                isActive={props.isSavedState}
+                isActive={isSavedState}
                 fillColor={fillColor} 
             />
         </div>

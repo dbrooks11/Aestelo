@@ -8,7 +8,7 @@ export default function SpotPhoto({spot, progress, setOpenRateSelector}): JSX.El
     const lastTapRef = useRef<number>(0)
 
     return(
-        <div className="relative aspect-4/5 object-cover flex flex-1">
+        <div className="relative aspect-4/5 object-cover flex flex-1 select-none">
             {mediaList.map((item: {photo_path_url: string}, index: number) => {
                 const shouldRender = Math.abs(index - (progress - 1)) <= 1
                 

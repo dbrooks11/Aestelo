@@ -1,8 +1,8 @@
-"""initial migration
+"""new intital migration
 
-Revision ID: 5ed24d28a06c
+Revision ID: bff2c1b41f8b
 Revises: 
-Create Date: 2026-01-22 07:07:55.786288
+Create Date: 2026-01-22 09:29:11.022935
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ from geoalchemy2 import Geography
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '5ed24d28a06c'
+revision = 'bff2c1b41f8b'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -101,11 +101,10 @@ def upgrade():
     sa.Column('blocked_id', sa.UUID(), nullable=False),
     sa.ForeignKeyConstraint(['blocked_id'], ['user_profile.id'], name=op.f('fk_block_profile_blocked_id_user_profile')),
     sa.ForeignKeyConstraint(['blocker_id'], ['user_profile.id'], name=op.f('fk_block_profile_blocker_id_user_profile')),
-    sa.PrimaryKeyConstraint('id', name=op.f('pk_block_profile')),
-    sa.UniqueConstraint('blocker_id', 'blocked_id', name='block_profile_unique')
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_block_profile'))
     )
     with op.batch_alter_table('block_profile', schema=None) as batch_op:
-        batch_op.create_index('idx_block_profile_blocker_id_blocked_id', ['blocker_id', 'blocked_id'], unique=False)
+        batch_op.create_index(batch_op.f('ix_block_profile_blocker_id_blocked_id'), ['blocker_id', 'blocked_id'], unique=True)
 
     op.create_table('collection',
     sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
@@ -116,7 +115,8 @@ def upgrade():
     sa.Column('is_public', sa.Boolean(), nullable=False),
     sa.Column('is_default', sa.Boolean(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['user_profile.id'], name=op.f('fk_collection_user_id_user_profile')),
-    sa.PrimaryKeyConstraint('id', name=op.f('pk_collection'))
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_collection')),
+    sa.UniqueConstraint('user_id', 'name', name=op.f('uq_collection_user_id_name'))
     )
     with op.batch_alter_table('collection', schema=None) as batch_op:
         batch_op.create_index(batch_op.f('ix_collection_user_id'), ['user_id'], unique=False)
@@ -127,11 +127,10 @@ def upgrade():
     sa.Column('following_id', sa.UUID(), nullable=False),
     sa.ForeignKeyConstraint(['follower_id'], ['user_profile.id'], name=op.f('fk_follow_follower_id_user_profile')),
     sa.ForeignKeyConstraint(['following_id'], ['user_profile.id'], name=op.f('fk_follow_following_id_user_profile')),
-    sa.PrimaryKeyConstraint('id', name=op.f('pk_follow')),
-    sa.UniqueConstraint('follower_id', 'following_id', name='unique_follow')
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_follow'))
     )
     with op.batch_alter_table('follow', schema=None) as batch_op:
-        batch_op.create_index('idx_follow_follower_id_following_id', ['follower_id', 'following_id'], unique=False)
+        batch_op.create_index(batch_op.f('ix_follow_follower_id_following_id'), ['follower_id', 'following_id'], unique=True)
 
     op.create_table('report',
     sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
@@ -233,11 +232,13 @@ def upgrade():
     sa.Column('spot_id', sa.BigInteger(), nullable=False),
     sa.Column('rating_choice', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.CheckConstraint('rating_choice >= 1 AND rating_choice <= 5', name=op.f('ck_rating_rating_range')),
     sa.ForeignKeyConstraint(['spot_id'], ['spot.id'], name=op.f('fk_rating_spot_id_spot')),
     sa.ForeignKeyConstraint(['user_id'], ['user_profile.id'], name=op.f('fk_rating_user_id_user_profile')),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_rating')),
-    sa.UniqueConstraint('user_id', 'spot_id', name='unique_rating')
+    sa.UniqueConstraint('user_id', 'spot_id', name=op.f('uq_rating_user_id_spot_id'))
     )
+
     op.create_table('spot_media',
     sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
     sa.Column('spot_id', sa.BigInteger(), nullable=False),
@@ -296,7 +297,9 @@ def upgrade():
     sa.ForeignKeyConstraint(['collection_id'], ['collection.id'], name=op.f('fk_collection_item_collection_id_collection')),
     sa.ForeignKeyConstraint(['spot_id'], ['spot.id'], name=op.f('fk_collection_item_spot_id_spot')),
     sa.ForeignKeyConstraint(['visit_id'], ['visit.id'], name=op.f('fk_collection_item_visit_id_visit')),
-    sa.PrimaryKeyConstraint('id', name=op.f('pk_collection_item'))
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_collection_item')),
+    sa.UniqueConstraint('collection_id', 'spot_id', name=op.f('uq_collection_item_collection_id_spot_id')),
+    sa.UniqueConstraint('collection_id', 'visit_id', name=op.f('uq_collection_item_collection_id_visit_id'))
     )
     op.create_table('visit_media',
     sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
@@ -341,7 +344,7 @@ def downgrade():
     op.drop_geospatial_table('spot')
     op.drop_table('report')
     with op.batch_alter_table('follow', schema=None) as batch_op:
-        batch_op.drop_index('idx_follow_follower_id_following_id')
+        batch_op.drop_index(batch_op.f('ix_follow_follower_id_following_id'))
 
     op.drop_table('follow')
     with op.batch_alter_table('collection', schema=None) as batch_op:
@@ -349,7 +352,7 @@ def downgrade():
 
     op.drop_table('collection')
     with op.batch_alter_table('block_profile', schema=None) as batch_op:
-        batch_op.drop_index('idx_block_profile_blocker_id_blocked_id')
+        batch_op.drop_index(batch_op.f('ix_block_profile_blocker_id_blocked_id'))
 
     op.drop_table('block_profile')
     op.drop_table('user_profile')

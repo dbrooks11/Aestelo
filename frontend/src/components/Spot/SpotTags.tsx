@@ -64,7 +64,7 @@ export default function SpotTags({tags}: {tags: Array<string>}): JSX.Element{
     }
     
     return(
-        <div className="flex w-full h-10 text-[10px] text-white dark:bg-slate/50 bg-stone-50 dark:border-white/5 border-border-light border-y">
+        <div className="flex w-full h-[3.75em] text-[0.7em] text-white dark:bg-slate/50 bg-stone-50 dark:border-white/5 border-border-light border-y">
             {handleTags(tags)} 
         </div>  
     )

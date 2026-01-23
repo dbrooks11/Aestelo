@@ -7,7 +7,7 @@ export default function SpotThumbnail({spot}): JSX.Element{
     const thumbnail = [...spot.spot_media].find((photo) => photo.sort_order === 1)
     
     return(
-        <div className="relative aspect-4/5 object-cover flex flex-1">
+        <div className="relative aspect-4/5 object-cover flex flex-1 select-none">
             <img
                 src={thumbnail?.photo_path_url}
                 loading="lazy"

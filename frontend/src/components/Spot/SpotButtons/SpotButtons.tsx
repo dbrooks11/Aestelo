@@ -1,4 +1,4 @@
-import { useMemo, useState, type ComponentType, type JSX, 
+import { useMemo, type ComponentType, type JSX, 
     type SVGProps, type Dispatch, type SetStateAction,
     type ReactNode,
     Fragment} from "react";
@@ -7,6 +7,7 @@ import VIconRounded from "../../DynamicSvgs/VIconRounded"
 import SaveButton from "./SaveButton";
 import RateButton from "./RateButton";
 import SpotButtonBase from "./SpotButtonBase";
+import { type averageRatingState, type rateSelectorState } from "../Spot";
 
 
 type IconComponent = ComponentType<LucideProps | SVGProps<SVGSVGElement>>;
@@ -38,8 +39,9 @@ type SpotButtonProps = {
     spotId: number
     ratingChoice: number
     openRateSelector: boolean
-    setOpenRateSelector: Dispatch<SetStateAction<boolean>>
-    setHoldAverageRating: Dispatch<SetStateAction<number>>
+    setOpenRateSelector: Dispatch<SetStateAction<rateSelectorState>>
+    setHoldAverageRating: Dispatch<SetStateAction<averageRatingState>>
+    holdAverageRating: averageRatingState
     hasVisited: boolean,
     isSaved: boolean,
     collections: Array<Collection>
@@ -47,15 +49,14 @@ type SpotButtonProps = {
 
 export default function SpotButtons({shareCount, saveCount, 
     ratingCount, visitCount, spotId, ratingChoice, openRateSelector, setOpenRateSelector,
-    setHoldAverageRating, hasVisited, isSaved, collections
+    setHoldAverageRating, holdAverageRating,  hasVisited, isSaved, collections
 }: SpotButtonProps): JSX.Element{
 
-    const [ratingCountHolder, setRatingCountHolder] = useState<number>(ratingCount)
-    const [isRated, setIsRated] = useState<boolean>(ratingChoice ? true : false)
-    const [rating, setRating] = useState<number>(ratingChoice ? ratingChoice : 0)
-    const [isSavedState, setIsSavedState] = useState<boolean>(isSaved)
+
+    
+    
     // const [hasVisitedState, setHasVisitedState] = useState<boolean>(hasVisited)
-    const [saveCountState, setSaveCountState] = useState<number>(saveCount)    
+        
 
 
     const spotButtons: Array<SpotButtonType> = useMemo(() => 
@@ -76,11 +77,9 @@ export default function SpotButtons({shareCount, saveCount,
             component: (
                 <SaveButton 
                     spotId={spotId}
-                    isSavedState={isSavedState}
-                    saveCountState={saveCountState}
-                    setSaveCountState={setSaveCountState}
-                    setIsSavedState={setIsSavedState} 
                     collections={collections}
+                    isSaved={isSaved}
+                    saveCount={saveCount}
                 />
             )
         },
@@ -89,15 +88,12 @@ export default function SpotButtons({shareCount, saveCount,
             position: 'left',
             component: (
                 <RateButton 
-                    rating={rating}
-                    ratingCountHolder={ratingCountHolder}
                     spotId={spotId}
                     openRateSelector={openRateSelector}
-                    isRated={isRated}
-                    setIsRated={setIsRated}
-                    setRatingCountHolder={setRatingCountHolder}
-                    setRating={setRating}
+                    ratingChoice={ratingChoice}
+                    ratingCount={ratingCount}
                     setHoldAverageRating={setHoldAverageRating}
+                    holdAverageRating={holdAverageRating}
                     setOpenRateSelector={setOpenRateSelector}
                     
                 />
@@ -113,8 +109,8 @@ export default function SpotButtons({shareCount, saveCount,
             data: visitCount,
             handler: () => console.log("Visit logic here")
         },
-    ], [shareCount, ratingCountHolder, visitCount, saveCountState, rating, openRateSelector,
-    collections, isSavedState, spotId, isRated, setHoldAverageRating, setOpenRateSelector])    
+    ], [shareCount, openRateSelector, collections, spotId, setHoldAverageRating, setOpenRateSelector, isSaved,
+         ratingChoice, ratingCount, saveCount, visitCount])    
 
     const {leftButtons, rightButtons} = useMemo(() => {
         const sortedButtons = [...spotButtons].sort((btn1, btn2) => btn1.order - btn2.order)

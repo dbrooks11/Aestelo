@@ -96,5 +96,9 @@
  dark-gray for hover borders, stronger dividers.
  */
 
-
+  --animate-infinite-scroll: infinite-scroll 8s linear infinite;;
+  @keyframes infinite-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
 }

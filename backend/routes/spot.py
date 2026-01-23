@@ -200,7 +200,6 @@ def get_user_spots():
             spot_data['username'] = username_and_collections.username
             spot_data['is_saved'] = is_saved
             spot_data['has_visited'] = has_visited
-            
 
             results.append(spot_data)
 

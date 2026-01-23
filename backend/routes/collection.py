@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from extensions import db
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Spot, Visit, Collection, CollectionItem
@@ -97,4 +97,5 @@ def save_item(collection_id):
                             'visit_save_count': data[0] if visit_id else None,
                             'saved': False}), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        current_app.logger.error(str(e))
+        return jsonify({'error': 'Failed to save/unsave item'}), 500

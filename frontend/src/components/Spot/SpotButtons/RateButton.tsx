@@ -1,49 +1,66 @@
-import { Fragment, useCallback, type CSSProperties, type Dispatch, type JSX, type SetStateAction } from "react";
+import { Fragment, useCallback, useRef, useState, type CSSProperties, type Dispatch, type JSX, type SetStateAction } from "react";
 import SpotButtonBase from "./SpotButtonBase";
 import { Star } from "lucide-react";
+import { type rateSelectorState, type averageRatingState } from "../Spot";
 import { AxiosErrorHelper, protectedInstance } from "../../../util/axios_api_helpers";
 import { useSpotMutation } from "../../../hooks/SpotHooks/useSpotMutation";
+import axios from "axios";
 
 type RateButtonProps = {
-    rating: number
     spotId: number
     openRateSelector: boolean
+    ratingCount: number
+    ratingChoice: number
     onClick?: () => void
-    setRating: Dispatch<SetStateAction<number>>
-    setHoldAverageRating: Dispatch<SetStateAction<number>>
-    setIsRated: Dispatch<SetStateAction<boolean>>
-    isRated: boolean
-    setRatingCountHolder: Dispatch<SetStateAction<number>>
-    setOpenRateSelector: Dispatch<SetStateAction<boolean>>
-    ratingCountHolder: number
+    setHoldAverageRating: Dispatch<SetStateAction<averageRatingState>>
+    holdAverageRating: number
+    setOpenRateSelector: Dispatch<SetStateAction<rateSelectorState>>
 }
 
 export default function RateButton(props: RateButtonProps): JSX.Element{
+    const [ratingCountHolder, setRatingCountHolder] = useState<number>(props.ratingCount)
+    const [isRated, setIsRated] = useState<boolean>(props.ratingChoice ? true : false)
+    const [rating, setRating] = useState<number>(props.ratingChoice ? props.ratingChoice : 0)
 
     const {updateSpotInCache} = useSpotMutation()
+    const controllerRef = useRef<AbortController | null>(null)
     const color = "#fbbf24"
     const fillColor = "#fbbf24"
 
     const onRateClick = useCallback(async(num: number) => {
-        const prevRated = props.isRated
-        const prevRateCount = props.ratingCountHolder
+        const prevRated = isRated
+        const prevRateCount = ratingCountHolder
+        const prevAverageRating = props.holdAverageRating
+
+        if(controllerRef.current){
+            controllerRef.current.abort()
+        }
+
+        const controller = new AbortController()
+        controllerRef.current = controller
+
+        const range = num > 0 && num <= 5
+        const isNotSameRating = num !== rating
         try{
             let response = undefined
-            if(num > 0 && num <= 5){
-                const wasRated = props.isRated
-                
-                props.setIsRated(true)
-                if(!prevRated) props.setRatingCountHolder(prev => prev + 1)
-                response = await protectedInstance.post(`/spot/rate/${props.spotId}`, {
-                    rating_choice: num
-                })
+            if(range && isNotSameRating){
+                const wasRated = isRated
+
+                setIsRated(true)
+                if(!prevRated) {
+                    setRatingCountHolder(prev => prev + 1)
+                }
+                response = await protectedInstance.post(`/spot/rate/${props.spotId}`, 
+                    {rating_choice: num},
+                    {signal: controller.signal}
+                )
 
                 if(response.status === 201){
                     const newRating = response.data.rating
                     const newAverage = response.data.new_average
                     const newRatingCount = response.data.new_total_ratings
-                    if(!wasRated) props.setRatingCountHolder(newRatingCount)
-                    props.setRating(newRating)
+                    if(!wasRated) setRatingCountHolder(newRatingCount)
+                    setRating(newRating)
                     props.setHoldAverageRating(newAverage)
                     props.setOpenRateSelector(false)
                     updateSpotInCache(props.spotId, {
@@ -52,17 +69,21 @@ export default function RateButton(props: RateButtonProps): JSX.Element{
                         average_rating: newAverage
                     })
                 }
+
                 
             } else if(num === 0) {
-                props.setIsRated(false)
-                if(prevRateCount) props.setRatingCountHolder(prev => prev - 1)
-                response = await protectedInstance.delete(`/spot/rate/${props.spotId}`)
+                setIsRated(false)
+                if(prevRateCount) {
+                    setRatingCountHolder(prev => prev - 1)
+                    props.setHoldAverageRating(prev => prev - num)
+                }
+                response = await protectedInstance.delete(`/spot/rate/${props.spotId}`, {signal: controller.signal})
                  
                 if(response.status === 200) {
                     const newAverage = response.data.new_average
                     const newRatingCount = response.data.new_total_ratings
-                    props.setRating(0)
-                    props.setRatingCountHolder(newRatingCount)
+                    setRating(0)
+                    setRatingCountHolder(newRatingCount)
                     props.setHoldAverageRating(newAverage)
                     props.setOpenRateSelector(false)
                     updateSpotInCache(props.spotId, {
@@ -73,20 +94,22 @@ export default function RateButton(props: RateButtonProps): JSX.Element{
                 }  
             } 
         }catch(error){
-            props.setIsRated(prevRated)
-            props.setRatingCountHolder(prevRateCount)
             const newError = AxiosErrorHelper(error)
+            if(axios.isCancel(newError)) return
+            props.setHoldAverageRating(prevAverageRating)
+            setIsRated(prevRated)
+            setRatingCountHolder(prevRateCount)
             console.error(newError)
         } 
-    }, [props, updateSpotInCache])
+    }, [props, updateSpotInCache, isRated, ratingCountHolder, rating])
 
     const rateButtonHandler = useCallback(() => {
-        if(props.isRated){
+        if(isRated){
             onRateClick(0)
         }else{
             props.setOpenRateSelector((prev) => !prev)
         }
-    },[props, onRateClick])
+    },[props, onRateClick, isRated])
 
     return (
         <div 
@@ -101,7 +124,7 @@ export default function RateButton(props: RateButtonProps): JSX.Element{
                                 type="radio"
                                 name="rating"
                                 id={`${num}`}
-                                defaultChecked={props.rating === num}
+                                defaultChecked={rating === num}
                                 className="hidden peer"
                                 value={num}
                             ></input>
@@ -131,13 +154,13 @@ export default function RateButton(props: RateButtonProps): JSX.Element{
             <SpotButtonBase
                 title="Rate"
                 icon={Star}
-                data={props.ratingCountHolder}
+                data={ratingCountHolder}
                 color={color}
                 onClick={(e) => {
                     e.stopPropagation()
                     rateButtonHandler()
                 }}
-                isActive={props.isRated}
+                isActive={isRated}
                 fillColor={fillColor} 
             />
         </div>

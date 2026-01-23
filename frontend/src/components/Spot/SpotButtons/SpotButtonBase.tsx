@@ -27,7 +27,7 @@ export default function SpotButtonBase({
       title={title}
       onClick={onClick}
       style={{ '--btn-color': color, '--btn-fill-color': fillColor } as CSSProperties}
-      className='group relative flex items-center gap-1 hover:dark:text-white hover:text-black transition-colors cursor-pointer'
+      className='group relative flex items-center gap-1 hover:dark:text-white hover:text-black transition-colors cursor-pointer select-none'
     >
       {Icon && <Icon
         strokeWidth={1}
