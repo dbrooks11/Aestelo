@@ -60,10 +60,10 @@ export default function SpotHeader({name, accessibility,
     }
 
     return(
-        <div className={`${cn("top-1/24 left-1/2 -translate-x-1/2 absolute flex flex-col justify-center items-center gap-[0.25em] border-neutral-300/30 bg-black/10 backdrop-blur-[2px] px-2 py-1 border text-[0.75em] text-white z-20 max-w-[94%] w-max overflow-x-hidden", className)}`}>
+        <div className={`${cn("top-1/24 left-1/2 -translate-x-1/2 absolute flex flex-col justify-center items-center gap-[0.25em] border-neutral-300/30 bg-black/10 backdrop-blur-[2px] px-2 py-1 border text-[0.75em] text-white z-20 max-w-[94%] w-full", className)}`}>
 
             {/* Name & Accessibility */}
-            <div className="flex items-center gap-2 px-2 font-semibold text-nowrap">
+            <div className="flex items-center justify-center gap-2 px-2 font-semibold min-w-0 w-full">
                 <span className="truncate text-shadow-2xs">{name}</span> 
                 {/* TODO: on hover show label saying place is accessible (based on the user who posted) */}
                 {accessibility && 
@@ -86,9 +86,12 @@ export default function SpotHeader({name, accessibility,
                     <span className="select-none">•</span>
                     {/* TODO: on hover show small profile preview of user. on click send to profile */}
                     <div className="text-rose-400 font-medium max-w-[150px] overflow-hidden text-[1em]">
-                        <div className="flex w-max animate-infinite-scroll hover:[animation-play-state:paused]">
-                            <span className="pr-4">{username}</span>
-                            <span className="pr-4" aria-hidden='true'>{username}</span>
+                        <div className="flex">
+                            <span 
+                                className="truncate"
+                            >
+                                @{username}
+                            </span>
                         </div>
                     </div>
                     

@@ -26,33 +26,30 @@ def spot_task_progress():
                         'progress': task.info.get('progress', 0)}), 200
     
     
-@spot_bp.route('/status/<group_id>', methods=['GET'])
+@spot_bp.route('/status/<task_id>', methods=['GET'])
 @jwt_required()
-def get_batch_progress(group_id):
-    if not group_id:
-        return jsonify({'error': 'Invalid data'}), 400
-
-    group_result = GroupResult.restore(group_id, app=celery)
-
-    if not group_result:
-        return jsonify({'state': 'UNKNOWN', 'progress': 0}), 200
-
-    if group_result.ready():
-        if group_result.successful():
+def get_batch_progress(task_id):
+    result = AsyncResult(task_id, app=celery)
+    group_id = result.parent.id
+    group_res = GroupResult.restore(group_id, app=celery)
+    
+    if result.ready():
+        if result.successful():
             return jsonify({'state': 'SUCCESS', 'progress': 100}), 200
         else:
-            try:
-                group_result.join()
-            except Exception as e:
-                return jsonify({'state': 'FAILURE', 'error': str(e)}), 200
-            return jsonify({'state': 'FAILURE'}), 200
+            return jsonify({'state': 'FAILURE', 'error': str(result.result)}), 200
 
-    total_tasks = len(group_result.children) if group_result.children else 0
+    
+    
+    if not group_res:
+        return jsonify({'state': 'PENDING', 'progress': 0}), 200
+
+    total_tasks = len(group_res.children) if group_res.children else 0
     cumulative_progress = 0
     completed_count = 0
 
     if total_tasks > 0:
-        for task in group_result.children:
+        for task in group_res.children:
             if task.ready():
                 cumulative_progress += 100
                 completed_count += 1
@@ -60,8 +57,6 @@ def get_batch_progress(group_id):
                 info = task.info
                 if isinstance(info, dict):
                     cumulative_progress += info.get('progress', 0)
-            else:
-                pass
         
         progress = int(cumulative_progress / total_tasks)
     else:
@@ -112,6 +107,7 @@ def create_spot():
                 partial=True
             )
         except ValidationError as e:
+            print(e.messages)
             return jsonify({'error': e.messages}), 400
 
         spot = Spot(
@@ -124,25 +120,28 @@ def create_spot():
 
         db.session.add(spot)
         db.session.commit()
+
+        type = 'spot'
     
         if(keys):
             photo_tasks = [
                 process_photos_with_metadata.s(
-                    key=key, post_type_id=spot.id, user_id=current_user, upload_s3_foldername=f'spot/spot_{spot.id}',post_type='spot', order=order
+                    key=key, post_type_id=spot.id, user_id=current_user, upload_s3_foldername=f'{type}/{type}_{spot.id}',post_type=type, order=order
                     ) for order, key in enumerate(keys, start=1)
             ]
 
             job_group = group(photo_tasks)
-            callback_task = average_location_batch.s(post_type_id=spot.id, post_type='spot')
+            callback_task = average_location_batch.s(post_type_id=spot.id, post_type=type)
 
             task = chord(job_group)(callback_task)
             group_res = task.parent
             group_res.save()
+            
         
         return jsonify({'message': 'Your spot is being created',
                         'name': data.get('name'),
                         'post_type': 'spot',
-                        'task_id': group_res.id}), 201
+                        'task_id': task.id}), 201
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
@@ -178,9 +177,10 @@ def get_user_spots():
             Rating, 
             (Rating.user_id==current_user) & (Rating.spot_id==Spot.id)
         ).filter(
-            Spot.user_id==current_user
+            Spot.user_id==current_user,
+            Spot.status == 'success'
         ).options(
-            joinedload(Spot.spot_media)
+            joinedload(Spot.media)
         ).order_by(Spot.date_posted.desc())
 
         paginated_spots = spots.paginate(

@@ -2,6 +2,7 @@ from extensions import ma
 from marshmallow import (fields, validates, 
                          ValidationError, validate)
 from models.spot import Spot,SpotMedia
+from schemas.user_schema import UserProfileSimpleSchema
 from geoalchemy2.shape import to_shape
 
 
@@ -20,9 +21,11 @@ class SpotSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('is_deleted','deleted_at','num_reports','is_removed','removed_at', 'trending_score', 'num_of_edits','status')
 
     coordinates = fields.Method("get_coordinates")
-    spot_media = fields.Nested(SpotMediaSchema, many=True)
 
-    name = fields.Str(validate= [validate.Regexp(r"^(?!.*[-']{2})[a-zA-Z ][-a-zA-Z ']*[a-zA-Z ]$",error="Name can only contain letters")])
+    media = fields.Nested(SpotMediaSchema, many=True)
+    username = fields.Pluck(UserProfileSimpleSchema, 'username', attribute='user_profile')
+
+    name = fields.Str(validate= [validate.Regexp(r"^([a-zA-Z](?!.*[-' ]{2})[a-zA-Z-' ]*[a-zA-Z]|[a-zA-Z])$",error="Name can only contain letters")])
     description = fields.Str(validate=[validate.Length(max = 200)])
     accessibility = fields.Bool()
     hashtags = fields.List(

@@ -4,7 +4,7 @@ import { useRef, type JSX } from "react";
 
 export default function SpotPhoto({spot, progress, setOpenRateSelector}): JSX.Element{
 
-    const mediaList = [...spot.spot_media].sort((a:{sort_order: number}, b:{sort_order: number}) => a.sort_order - b.sort_order)
+    const mediaList = [...spot.media].sort((a:{sort_order: number}, b:{sort_order: number}) => a.sort_order - b.sort_order)
     const lastTapRef = useRef<number>(0)
 
     return(

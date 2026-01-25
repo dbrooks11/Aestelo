@@ -51,7 +51,11 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
             raise ValidationError('Bio contains invalid characters')
         return value
         
-
+class UserProfileSimpleSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = UserProfile
+        include_fk = True
+        fields = ('username',)
 
 class UserInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

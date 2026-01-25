@@ -1,9 +1,7 @@
 # schemas/auth_schema.py
-from extensions import ma, db
+from extensions import ma
 from models.auth import AuthUser
 from marshmallow import validates,validates_schema, ValidationError, fields, validate
-from sqlalchemy import exists
-from datetime import datetime
 
 
 min_password_length = 8

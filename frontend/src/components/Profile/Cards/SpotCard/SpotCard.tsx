@@ -1,14 +1,15 @@
 import { type JSX } from "react";
 import { Accessibility, GalleryVerticalEnd } from "lucide-react";
-import cn from "../../../util/tailwind_merger";
-import SpotHeader from "../SpotHeader";
-import SpotDescripton from "../SpotDesciption";
+import cn from "../../../../util/tailwind_merger";
+import SpotHeader from "../../../Spot/SpotHeader";
+import SpotDescripton from "../../../Spot/SpotDesciption";
 import SpotThumbnail from "./SpotThumbnail";
 
-export default function SpotSimple({spot, className, onClick}): JSX.Element{
+export default function SpotCard({spot, className, onClick, includeUsername}): JSX.Element{
+    
     return(
         <div 
-            className={`${cn('flex flex-col dark:bg-off-slate bg-white border dark:border-border-dark border-border-light rounded-sm', className)}`}
+            className={`${cn('flex flex-col dark:bg-off-slate bg-white border dark:border-border-dark border-border-light rounded-sm text- xl:text-base', className)}`}
             onClick={onClick}
         >
             <div className="relative flex flex-1">
@@ -18,7 +19,7 @@ export default function SpotSimple({spot, className, onClick}): JSX.Element{
                 name={spot.name}
                 accessibility={spot.accessibility}
                 datePosted={spot.date_posted}
-                username={undefined}
+                username={includeUsername ? spot.username : undefined}
                 averageRating={spot.average_rating}
                 className="hidden lg:flex"
             />
@@ -33,14 +34,14 @@ export default function SpotSimple({spot, className, onClick}): JSX.Element{
                 spot={spot}
             />
 
-            {spot.spot_media.length > 1 && <GalleryVerticalEnd
-                className="absolute bottom-0 right-1  md:bottom-2 md:right-2 z-10 stroke-white w-4 lg:w-6"
+            {spot.media.length > 1 && <GalleryVerticalEnd
+                className="absolute bottom-0 right-1  md:bottom-2 md:right-2 z-10 stroke-white w-[1.25em] lg:w-[1.5em]"
                 strokeWidth={1.5}
             />}
 
             {spot.accessibility &&
                 <Accessibility 
-                    className="w-3 h-3 sm:w-4 sm:h-4 bg-blue-500/80 p-0.5 rounded-xs shrink-0 absolute lg:hidden top-1 left-1 z-10 text-white/70"
+                    className="w-[1em] h-[1em] sm:w-[1.25em] sm:h-[1.25em] bg-blue-500/80 p-0.5 rounded-xs shrink-0 absolute lg:hidden top-1 left-1 z-10 text-white/70"
                 />
             }
             </div>

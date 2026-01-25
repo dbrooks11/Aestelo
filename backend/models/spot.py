@@ -12,7 +12,7 @@ from flask import current_app
 from extensions import db
 
 if TYPE_CHECKING:
-    from models import UserProfile, Visit, Rating
+    from models import UserProfile, Visit, Rating, CollectionItem
    
 
 class Spot(db.Model):
@@ -60,7 +60,8 @@ class Spot(db.Model):
     )
 
     user_profile: Mapped["UserProfile"] = relationship("UserProfile", back_populates="spot")
-    spot_media: Mapped[list["SpotMedia"]] = relationship(
+    collection_item: Mapped["CollectionItem"] = relationship("CollectionItem", back_populates="spot")
+    media: Mapped[list["SpotMedia"]] = relationship(
         "SpotMedia", 
         back_populates="spot", 
         cascade="all, delete-orphan"
@@ -89,7 +90,7 @@ class SpotMedia(db.Model):
     __tablename__ = "spot_media"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
-    spot_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("spot.id"), index=True)
+    spot_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("spot.id", ondelete='CASCADE'), index=True)
     uploaded_by: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), 
         ForeignKey("user_profile.id"), 
@@ -102,7 +103,7 @@ class SpotMedia(db.Model):
     width: Mapped[Optional[int]] = mapped_column(Integer)
     height: Mapped[Optional[int]] = mapped_column(Integer)
 
-    spot: Mapped["Spot"] = relationship("Spot", back_populates="spot_media")
+    spot: Mapped["Spot"] = relationship("Spot", back_populates="media")
     user_profile: Mapped["UserProfile"] = relationship("UserProfile", back_populates="spot_media")
 
     def save(self):

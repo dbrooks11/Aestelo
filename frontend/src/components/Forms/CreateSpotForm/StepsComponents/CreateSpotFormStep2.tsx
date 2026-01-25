@@ -156,6 +156,7 @@ export default function CreateSpotFormStepTwo({setUploadedPhotos, uploadedPhotos
                     {isDeleting ? (
                             <div className="bottom-2 slide-in-from-bottom-2 absolute flex gap-2 animate-in fade-in">
                                 <button
+                                    type="button"
                                     onClick={() => {
                                         setIsDeleting(false);
                                         setDeletedPhotos([]);
@@ -165,6 +166,7 @@ export default function CreateSpotFormStepTwo({setUploadedPhotos, uploadedPhotos
                                     Cancel
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={handlePhotoDeletion}
                                     className="flex items-center gap-2 bg-red-700 hover:bg-red-600 px-4 py-2 rounded-full font-bold text-white text-xs transition-colors cursor-pointer"
                                 >

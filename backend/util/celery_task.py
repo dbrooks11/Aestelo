@@ -11,6 +11,7 @@ from extensions import db
 @shared_task(bind=True, ignore_result=False)
 def process_photos_with_metadata(self, key: str, post_type_id: int, user_id: str, upload_s3_foldername: str, post_type: Literal['spot', 'visit'], order: int):
 
+    uploaded_filepath = None
     bucket = os.environ.get('R2_BUCKET_NAME')
     local_file_path = None
 
@@ -30,9 +31,9 @@ def process_photos_with_metadata(self, key: str, post_type_id: int, user_id: str
                 file=local_file_path,
                 current_user_id=user_id
             )
-        print(f'This is result from photo preocessing: {result}')
+        
         latitude, longitude = get_decimal_coordinates(gps_info=result.get('gps'), key=key)
-        print(f'This is lat and long: lat {latitude}, long {longitude}')
+        
         uploaded_filepath = upload_to_s3(file_obj=result.get('file'), folder=upload_s3_foldername)
 
         if(post_type == 'spot'):
@@ -76,8 +77,6 @@ def process_photos_with_metadata(self, key: str, post_type_id: int, user_id: str
         db.session.rollback()
         if local_file_path and os.path.exists(local_file_path):
             os.remove(local_file_path)
-        try:
-            reject_post_type(post_type_id=post_type_id, post_type=post_type)
-        except Exception as e:
-            raise Exception(str(e))
+        if uploaded_filepath:
+            delete_file_s3(file_path=uploaded_filepath)
         raise Exception(str(e))

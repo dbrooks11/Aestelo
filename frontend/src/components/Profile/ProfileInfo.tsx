@@ -8,7 +8,7 @@ import { UserPen } from 'lucide-react'
 
 type BaseProfileInfoParams = Pick<ProfileDataType , 'username' | 'profile_photo_url' | 'bio' 
                                             | 'following_count' | 'follower_count'
-                                            | 'post_count' | 'visit_count' | 'instagram'
+                                            | 'spot_count' | 'visit_count' | 'instagram'
                                             | 'tiktok' | 'twitter_x' | 'facebook'>
 
 type ProfileInfoParams = BaseProfileInfoParams & {
@@ -29,7 +29,7 @@ export default function ProfileInfo(props: ProfileInfoParams):JSX.Element {
 
   return (
     <section className='z-10 relative justify-items-center mt-50 md:mt-60 w-full'>
-        <div className='z-10 flex flex-col pb-8 border-b border-b-neutral-300 dark:border-b-neutral-800 w-5/6'>
+        <div className='z-10 flex flex-col pb-8 w-5/6'>
             <section className='flex md:flex-row flex-col items-center gap-6 px-4 relative'>
                 
                 {/* Profile Picture */}
@@ -76,14 +76,14 @@ export default function ProfileInfo(props: ProfileInfoParams):JSX.Element {
 
                         {/* Posts / Visits */}
                         <div className='flex gap-4 pl-4 border-black dark:border-white border-l-2'>
-                            <span className={followsAndPostCountStyle} aria-label={`${props.follower_count} Posts`}>
-                                Posts
-                                <span className={followsAndPostCountStyle} aria-hidden="true">{` ${props.follower_count}`}</span>
+                            <span className={followsAndPostCountStyle} aria-label={`${props.spot_count} Spots`}>
+                                Spots
+                                <span className={followsAndPostCountStyle} aria-hidden="true">{` ${props.spot_count}`}</span>
                             </span> 
                             
-                            <span className={followsAndPostCountStyle} aria-label={`${props.following_count} Visits`}>
+                            <span className={followsAndPostCountStyle} aria-label={`${props.visit_count} Visits`}>
                                 Visits
-                                <span className={followsAndPostCountStyle} aria-hidden="true">{` ${props.following_count}`}</span>
+                                <span className={followsAndPostCountStyle} aria-hidden="true">{` ${props.visit_count}`}</span>
                             </span>
                         </div>
                     </div>

@@ -73,7 +73,7 @@ export default function CreateSpotFormStepThree({previewPhotos, uploadedPhotos, 
 
                         if(responseTwo.status === 201){
                             const dataTwo = responseTwo.data
-                            const { task_id, name, post_type } = dataTwo;
+                            const {task_id, name, post_type } = dataTwo;
 
                             addTask(task_id, post_type, name);
                             resetForm()
@@ -88,7 +88,7 @@ export default function CreateSpotFormStepThree({previewPhotos, uploadedPhotos, 
                 }
             }catch(error){
                 const errors: string = AxiosErrorHelper(error)
-                toast.error(errors, {
+                toast.error(JSON.stringify(errors), {
                     toasterId: 'spotForm'
                 })
             }finally{
@@ -99,7 +99,7 @@ export default function CreateSpotFormStepThree({previewPhotos, uploadedPhotos, 
 
     const handleTags = (e: KeyboardEvent<HTMLInputElement>) => {
         if((e.key === 'Enter' || e.key === ' ') && tagInput?.trim()){
-            if(tagInput.length > tagsMaxChars || tagInput.includes('#')) return
+            if(tagInput.length > tagsMaxChars || tagInput.includes('#') || tagInput.includes(' ')) return
             if(!tags.includes(tagInput.trim())){
                 setTags((prevTags) => {
                     return [...prevTags, tagInput.trim()]

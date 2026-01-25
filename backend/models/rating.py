@@ -11,13 +11,14 @@ from sqlalchemy.dialects.postgresql import UUID
 
 
 class Rating(db.Model):
+    __tablename__ = 'rating'
     __table_args__ = (UniqueConstraint('user_id', 'spot_id'), 
                       CheckConstraint('rating_choice >= 1 AND rating_choice <= 5', name='rating_range'),
                       )
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('user_profile.id'), nullable=False)
-    spot_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('spot.id'), nullable=False)
+    spot_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('spot.id', ondelete='CASCADE'), nullable=False)
     rating_choice: Mapped[int] = mapped_column(Integer, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 

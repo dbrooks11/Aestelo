@@ -29,6 +29,9 @@ def profile_me():
         
         try:
             form_data = request.form.to_dict()
+
+            if not form_data.items:
+                return jsonify({'error': 'Invalid data'}), 403
             
             if form_data.get('username') == user_profile.username:
                 form_data.pop('username')

@@ -5,13 +5,15 @@ type TabsProps = {
     children: Array<JSX.Element>
     tabsAndContentContainerStyle?: string 
     tabsContainerStyle?: string 
+    tabContentStyle?: string
     tabsStyle?: string
     activeTabStyle?: string
     tabsIconStyle?: string
     tabsLabelStyle?: string 
 }
 
-const Tabs = ({children, tabsAndContentContainerStyle, tabsContainerStyle, tabsStyle, activeTabStyle, tabsIconStyle, tabsLabelStyle}: TabsProps) => {
+const Tabs = ({children, tabsAndContentContainerStyle, tabsContainerStyle, tabsStyle, activeTabStyle, 
+    tabsIconStyle, tabsLabelStyle, tabContentStyle}: TabsProps) => {
 
     const [activeTab, setActiveTab] = useState(children[0].props.label)
     const tabsContentRef = useRef<HTMLElement | null>(null)
@@ -60,7 +62,10 @@ const Tabs = ({children, tabsAndContentContainerStyle, tabsContainerStyle, tabsS
                             
                             className={`${isActive ? `${cn('', activeTabStyle)}` : ''}  ${child.props.icon && child.props.label ? 'gap-4' : ''} ${cn('flex justify-center items-center p-3 w-1/4 cursor-pointer', tabsStyle)}`}
                             
-                            onClick={(e) => handleTabClick(e, child.props.label)}
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                handleTabClick(e, child.props.label)
+                            }}
                         >
                             {/* Icon - Hidden on desktop, visible on mobile */}
                             <span 
@@ -81,7 +86,7 @@ const Tabs = ({children, tabsAndContentContainerStyle, tabsContainerStyle, tabsS
             </div>
 
             {/* Tab Content */}
-            <section ref={tabsContentRef} className="mt-4">
+            <section ref={tabsContentRef} className={tabContentStyle}>
                 {children.map((child, index) => {
                     const isActive = child.props.label === activeTab;
                     const panelId = `panel-${index}`;
@@ -111,6 +116,7 @@ type TabProps= {
     icon?: ReactElement
     label?: string
     children: ReactNode
+    className?: string
 }
 
 

@@ -95,6 +95,7 @@ export default function CreateSpotForm({isCreateSpotModalOpen, setIsCreateSpotMo
                 
                 <div className="flex items-center gap-4">
                     <button
+                        type="button"
                         disabled={isLoading}
                         className="disabled:opacity-50 px-4 py-1.5 rounded-full text-neutral-400 not-disabled:hover:text-neutral-500 not-disabled:dark:hover:text-neutral-300 text-sm text-center transition-colors not-disabled:cursor-pointer disabled:cursor-not-allowed"
                         onClick={() => setShowConfirmation(true)}
@@ -105,6 +106,7 @@ export default function CreateSpotForm({isCreateSpotModalOpen, setIsCreateSpotMo
                     {/* {step > 1 && <button>Save Draft</button>} */}
                     {(step !== 1 && step !== steps.length) && 
                     <button 
+                        type="button"
                         className="flex justify-center items-center gap-1 p-1 rounded-full text-neutral-700 hover:dark:text-white hover:text-neutral-900 dark:text-neutral-200 cursor-pointer"
                         onClick={() => {
                             setStep((prev) => {
@@ -187,6 +189,7 @@ export default function CreateSpotForm({isCreateSpotModalOpen, setIsCreateSpotMo
                             <div className="flex gap-3 mt-2 w-full">
                                 {/* Cancel / Keep Editing Button */}
                                 <button 
+                                    type="button"
                                     className="flex-1 bg-neutral-100 hover:bg-neutral-200 dark:bg-white/5 dark:hover:bg-white/10 px-4 py-2 border border-neutral-200 dark:border-white/10 rounded-lg font-medium text-neutral-700 dark:text-white transition-colors cursor-pointer"
                                     onClick={() => setShowConfirmation(false)}
                                     autoFocus
@@ -196,6 +199,7 @@ export default function CreateSpotForm({isCreateSpotModalOpen, setIsCreateSpotMo
                                 
                                 {/* Confirm / Discard Button */}
                                 <button 
+                                    type="button"
                                     className="flex-1 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 px-4 py-2 border border-red-200 dark:border-red-500/20 rounded-lg font-medium text-red-600 dark:text-red-400 transition-colors cursor-pointer"
                                     onClick={() => {
                                         dialogRef.current?.close()

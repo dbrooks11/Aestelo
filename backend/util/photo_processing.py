@@ -14,7 +14,7 @@ file_types = ('JPEG', 'PNG', 'HEIF', 'HEIC')
 def get_decimal_coordinates(gps_info, key):
     
     if not gps_info:
-        raise Exception(f'No GPS info found for {key}')
+        return None, None
 
     def to_float(value):
         try:
@@ -48,8 +48,7 @@ def get_decimal_coordinates(gps_info, key):
             
             return float(f'{decimal:.6f}')
         except Exception as e:
-            print(f"DMS Conversion Error: {e}")
-            return None
+            return None, None
 
     try:
         photo_lat = gps_info.get(2)
@@ -58,21 +57,18 @@ def get_decimal_coordinates(gps_info, key):
         photo_long_ref = gps_info.get(3)
 
         if not photo_lat or not photo_long:
-            raise Exception(f'No location data provided for {key}')
+            return None, None
 
         latitude = dms_to_decimal(photo_lat, photo_lat_ref)
         longitude = dms_to_decimal(photo_long, photo_long_ref)
 
-        if latitude is None or longitude is None:
-             raise Exception(f'Failed to decode coordinates for {key}')
-
-        if latitude == 0.0 and longitude == 0.0:
-             raise Exception(f'Invalid coordinates (0,0) for {key}')
+        if (latitude is None or longitude is None) or (latitude == 0.0 and longitude == 0.0):
+            return None, None
 
         return latitude, longitude
 
     except Exception as e:
-        raise Exception(f'GPS Parsing Error for {key}: {str(e)}')
+        return None, None
 
 
 def photo_processing_one_img_metadata(file, current_user_id: str):

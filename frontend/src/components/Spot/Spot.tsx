@@ -30,7 +30,6 @@ export default function Spot({spot, collections,  className}): JSX.Element{
 
     
     const [progress, setProgress] = useState<number>(1)
-    const [total, setTotal ] = useState<number>(spot.total_num_of_photos)
     const [openRateSelector, setOpenRateSelector] = useState<boolean>(false)
     const [holdAverageRating, setHoldAverageRating] = useState<number>(spot.average_rating)
 
@@ -69,7 +68,7 @@ export default function Spot({spot, collections,  className}): JSX.Element{
                 <div className="absolute flex right-1 bottom-[50%]">
                     <button 
                         className=" w-[1.75em] h-[1.75em] flex items-center justify-center rounded-full bg-black/10 backdrop-blur-[2px] text-white/70 border border-white/10  active:scale-90 cursor-pointer z-20" 
-                        onClick={() => setProgress(Math.min(total, progress + 1))}
+                        onClick={() => setProgress(Math.min(spot.total_num_of_photos, progress + 1))}
                         aria-label="next button"
                     >
                         <ChevronRight/>
@@ -81,11 +80,10 @@ export default function Spot({spot, collections,  className}): JSX.Element{
                 {spot.description && <SpotDescripton
                     description={spot.description}
                 />}
-                {/* TODO: fix screen snapping when description is toggled */}
                     
                 <SpotPhotoCounter
                     progress={progress}
-                    total={total}
+                    total={spot.total_num_of_photos}
                 />
             
                 {/* Photos */}

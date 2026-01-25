@@ -2,8 +2,8 @@ import { useCallback, useRef, useState, type JSX } from "react";
 import { useInfiniteQuery} from '@tanstack/react-query'
 import { protectedInstance } from "../../../util/axios_api_helpers";
 import Spot from "../../Spot/Spot";
-import SpotSimple from "../../Spot/SpotSimple/SpotSimple";
 import Modal from "../../Modal";
+import SpotCard from "../Cards/SpotCard/SpotCard";
 
 const fetchSpots = async({pageParam = 1}) => {
   const response = await protectedInstance.get(`/spot/me?page=${pageParam}`)
@@ -50,12 +50,12 @@ export default function FetchSpots(): JSX.Element{
 
   return(
     /* eslint-disable @typescript-eslint/no-explicit-any */
-      <section className="md:m-2 flex flex-col">
+      <>
         {/* 1. THE GRID (Only Thumbnails) */}
-        <div className="grid md:grid-cols-4 grid-cols-3 md:gap-2 gap-0.5 relative">
+        <div className="grid md:grid-cols-4 grid-cols-3 md:gap-2 gap-0.5 md:p-2">
           {data?.pages.map((page) =>
             page.spots.map((spot: any) => (
-              <SpotSimple
+              <SpotCard
                 key={spot.id}
                 spot={spot}
                 onClick={() => setSelectedSpot(spot)}
@@ -86,6 +86,6 @@ export default function FetchSpots(): JSX.Element{
           ref={observerCallback}
           className="w-full h-5 invisible"
         ></div>
-      </section>
+      </>
   )
 }

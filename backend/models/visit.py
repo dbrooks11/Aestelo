@@ -11,7 +11,7 @@ from geoalchemy2 import Geography
 from extensions import db
 
 if TYPE_CHECKING:
-    from models import UserProfile, Spot
+    from models import UserProfile, Spot, CollectionItem
 
 class Visit(db.Model):
     __tablename__ = "visit"
@@ -57,7 +57,8 @@ class Visit(db.Model):
 
     status: Mapped[str] = mapped_column(Text, default='processing')
 
-    visit_media: Mapped[list["VisitMedia"]] = relationship(
+    collection_item: Mapped['CollectionItem'] = relationship('CollectionItem', back_populates='visit')
+    media: Mapped[list["VisitMedia"]] = relationship(
         "VisitMedia", 
         back_populates="visit", 
         cascade="all, delete-orphan"
@@ -78,7 +79,7 @@ class VisitMedia(db.Model):
     __tablename__ = "visit_media"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
-    visit_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("visit.id"), nullable=False)
+    visit_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("visit.id", ondelete='CASCADE'), nullable=False)
     uploaded_by: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), 
         ForeignKey("user_profile.id"), 
@@ -91,7 +92,7 @@ class VisitMedia(db.Model):
     width: Mapped[Optional[int]] = mapped_column(Integer)
     height: Mapped[Optional[int]] = mapped_column(Integer)
 
-    visit: Mapped["Visit"] = relationship("Visit", back_populates="visit_media")
+    visit: Mapped["Visit"] = relationship("Visit", back_populates="media")
     user_profile: Mapped["UserProfile"] = relationship("UserProfile", back_populates="visit_media")
 
     def save(self):

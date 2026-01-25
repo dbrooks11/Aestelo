@@ -39,7 +39,7 @@ export type ProfileDataType = {
 
   follower_count: number,
   following_count: number,
-  post_count: number,
+  spot_count: number,
   visit_count: number,
 
   profile_created_at: Date
@@ -95,7 +95,7 @@ export default function ProfilePage(): JSX.Element {
           following_count={profileData?.following_count ? profileData.following_count : 0}
           username= {profileData?.username ? profileData.username : ''}
           bio = {profileData?.bio ? profileData.bio : ""}
-          post_count={profileData?.post_count ? profileData.post_count : 0}
+          spot_count={profileData?.spot_count ? profileData.spot_count : 0}
           visit_count={profileData?.visit_count ? profileData.visit_count : 0}
           instagram = {profileData?.instagram ? profileData.instagram : undefined}
           tiktok = {profileData?.tiktok ? profileData.tiktok : undefined}

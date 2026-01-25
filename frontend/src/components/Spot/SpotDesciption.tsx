@@ -14,7 +14,7 @@ export default function SpotDescripton({description, className}: SpotDesciptionP
 
     return(
         <div 
-            className={`${cn('bottom-1 left-2 absolute flex text-white text-xs cursor-pointer z-20 max-w-3/4 text-[0.75em]', className)}`}
+            className={`${cn('bottom-1 left-2 absolute flex text-white cursor-pointer z-20 max-w-3/4 text-[0.75em]', className)}`}
 
         >
             <AnimatePresence mode="wait">
