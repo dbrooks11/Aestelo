@@ -3,12 +3,6 @@ from dotenv import load_dotenv
 from datetime import timedelta
 
 load_dotenv()
-load_dotenv('env_backend/.env.backend_cloudflare')
-load_dotenv('env_backend/.env.backend_supabase')
-load_dotenv('env_backend/.env.backend_sightengine')
-load_dotenv('env_backend/.env.backend_sendgrid')
-load_dotenv('env_backend/.env.backend_celery')
-load_dotenv('env_backend/.env.development')
 
 class Config:
     # Flask
@@ -65,11 +59,7 @@ class ProductionConfig(Config):
     JWT_COOKIE_SECURE = True
     JWT_COOKIE_SAMESITE = 'Strict'
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
-    CELERY = dict(
-        broker_url=os.environ.get('CELERY_BROKER_URL_PROD'),
-        result_backend=os.environ.get('CELERY_RESULT_BACKEND_PROD'),
-        task_ignore_result=False,
-    )
+
 
 config_dict = {
     'development': DevelopmentConfig,
