@@ -60,7 +60,7 @@ export default function SpotHeader({name, accessibility,
     }
 
     return(
-        <div className={`${cn("top-1/24 left-1/2 -translate-x-1/2 absolute flex flex-col justify-center items-center gap-[0.25em] border-neutral-300/30 bg-black/10 backdrop-blur-[2px] px-2 py-1 border text-[0.75em] text-white z-20 max-w-[94%] w-full", className)}`}>
+        <div className={`${cn("top-1/24 left-1/2 -translate-x-1/2 absolute flex flex-col justify-center items-center gap-[0.25em] border-neutral-300/30 bg-black/10 backdrop-blur-[2px] px-2 py-1 border text-[0.75em] text-white z-20 max-w-[94%] ", className)}`}>
 
             {/* Name & Accessibility */}
             <div className="flex items-center justify-center gap-2 px-2 font-semibold min-w-0 w-full">

@@ -45,23 +45,19 @@ def temporary_file_path_presigned(user_id: str, folder: str, filename: str):
     return unique_filename
 
 
-def download_file(file_path: str) -> str:
-    bucket = current_app.config['R2_BUCKET_NAME']
-    local_filename = f"/tmp/{uuid.uuid4().hex}_{os.path.basename(file_path)}"
+def download_file_from_s3(key: str, local_path: str) -> str:
+    bucket = os.environ.get('R2_BUCKET_NAME')
     
     try:
         s3.download_file(
             Bucket=bucket, 
-            Key=file_path, 
-            Filename=local_filename
+            Key=key, 
+            Filename=local_path
         )
-        
-        return local_filename
-
     except Exception as e:
-        if os.path.exists(local_filename):
-            os.remove(local_filename)
-        raise Exception(f"Download failed for {file_path}: {str(e)}")
+        if os.path.exists(local_path):
+            os.remove(local_path)
+        raise Exception(f"Download failed for {key}: {str(e)}")
 
 
 def upload_to_s3(file_obj, folder: str):

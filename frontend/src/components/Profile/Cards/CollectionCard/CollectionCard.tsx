@@ -1,6 +1,5 @@
 import { type JSX } from "react";
 import { Lock } from "lucide-react";
-import { protectedInstance } from "../../../../util/axios_api_helpers";
 
 
 export default function CollectionCard({collection, setViewCollection, viewCollection}): JSX.Element{

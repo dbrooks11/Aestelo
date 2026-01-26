@@ -1,16 +1,14 @@
-# Use a lightweight Node image
-FROM node:22-alpine
-
+# STAGE 1: Build
+FROM node:22-alpine AS build
 WORKDIR /app
-
-# Copy package files first
 COPY package*.json ./
 RUN npm install
-
-# Copy the rest
 COPY . .
+RUN npm run build
 
-EXPOSE 5173
-
-# "--host" is required for Vite to work in Docker
-CMD ["npm", "run", "dev", "--", "--host"]
+# STAGE 2: Production Server (Nginx)
+FROM nginx:stable-alpine
+# Copy the build output to nginx
+COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

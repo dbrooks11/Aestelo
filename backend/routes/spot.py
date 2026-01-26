@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app
+from itsdangerous import URLSafeSerializer
 from datetime import datetime, timezone
 from extensions import db
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -13,6 +14,15 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy import case, cast, Numeric, func
 
 spot_bp = Blueprint('spot', __name__, url_prefix='/spot')
+
+def generate_task_token(user_id: str, task_id: str, group_id:str):
+    token = URLSafeSerializer(current_app.config['SECRET_KEY'])
+
+    return token.dump({
+        'user_id': user_id,
+        'task_id': task_id,
+        'group_id': group_id
+    })
 
 @spot_bp.route('/task/progress', methods=['POST'])
 @jwt_required()
@@ -29,27 +39,23 @@ def spot_task_progress():
 @spot_bp.route('/status/<task_id>', methods=['GET'])
 @jwt_required()
 def get_batch_progress(task_id):
-    result = AsyncResult(task_id, app=celery)
-    group_id = result.parent.id
-    group_res = GroupResult.restore(group_id, app=celery)
+    task_check = AsyncResult(task_id, app=celery)
     
-    if result.ready():
-        if result.successful():
+    if task_check.ready():
+        if task_check.successful():
             return jsonify({'state': 'SUCCESS', 'progress': 100}), 200
         else:
-            return jsonify({'state': 'FAILURE', 'error': str(result.result)}), 200
+            return jsonify({'state': 'FAILURE', 'error': str(task_check.result)}), 200
 
-    
-    
-    if not group_res:
+    if not task_check:
         return jsonify({'state': 'PENDING', 'progress': 0}), 200
 
-    total_tasks = len(group_res.children) if group_res.children else 0
+    total_tasks = len(task_check.children) if task_check.children else 0
     cumulative_progress = 0
     completed_count = 0
 
     if total_tasks > 0:
-        for task in group_res.children:
+        for task in task_check.children:
             if task.ready():
                 cumulative_progress += 100
                 completed_count += 1
@@ -137,11 +143,12 @@ def create_spot():
             group_res = task.parent
             group_res.save()
             
+            token = generate_task_token(current_user, task.id, group_res.id)
         
         return jsonify({'message': 'Your spot is being created',
                         'name': data.get('name'),
                         'post_type': 'spot',
-                        'task_id': task.id}), 201
+                        'task_token': token}), 201
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500

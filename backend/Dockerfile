@@ -1,12 +1,23 @@
 # Use a lightweight Python image
 FROM python:3.12-slim
 
-# Set working directory inside the container
+# Prevent Python from writing .pyc files and ensure logs are sent straight to terminal
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
 WORKDIR /app
 
-# Copy requirements first (to cache dependencies)
+# Install system dependencies (required for some Python packages)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Install gunicorn for production
+RUN pip install gunicorn
 
 # Copy the rest of the app
 COPY . .
@@ -14,6 +25,4 @@ COPY . .
 # Expose the Flask port
 EXPOSE 5000
 
-# Run Flask globally on 0.0.0.0 so Docker can see it
-# --debug enables hot reloading
-CMD ["flask", "run", "--host=0.0.0.0", "--debug"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:create_app()"]
