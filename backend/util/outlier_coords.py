@@ -10,7 +10,6 @@ from flask import current_app
 long = 'longitude'
 lat = 'latitude'
 
-@shared_task
 def average_location(coords, post_type_id: int, post_type: str):
     if not coords:
         return reject_post_type(post_type_id=post_type_id, post_type=post_type)
@@ -34,7 +33,7 @@ def average_location(coords, post_type_id: int, post_type: str):
     return {lat: avg_lat, long: avg_long}
 
 
-@shared_task
+@shared_task(name='location_batch')
 def average_location_batch(results, post_type_id: int, post_type:str):
     
     try:

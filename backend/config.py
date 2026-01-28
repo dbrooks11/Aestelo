@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from datetime import timedelta
+from kombu import Queue
 
 load_dotenv()
 
@@ -9,6 +10,8 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY')
     JSON_SORT_KEYS = False
     MAX_CONTENT_LENGTH = 200 * 1024 * 1024
+    MAX_FILE_SIZE = 20 * 1024 * 1024
+   
     
     # Database
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
@@ -39,10 +42,23 @@ class Config:
 
     #CELERY
     CELERY = dict(
-        broker_url=os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0'),
-        result_backend=os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0'),
+        broker_url=os.getenv('CELERY_BROKER_URL', 'redis://redis:6379/0'),
+        result_backend=os.getenv('CELERY_RESULT_BACKEND', 'redis://redis:6379/0'),
         task_ignore_result=False,
     )
+
+    CELERY_WORKER_PREFETCH_MULTIPLIER = 1 
+    CELERY_TASK_QUEUES = (
+        Queue('default', routing_key='default'),
+        Queue('media_processing')
+    )
+
+    # Define Functions (Map tasks to queues)
+    CELERY_TASK_ROUTES = {
+        'process_photos_metadata': {'queue': 'media_processing'},
+        'location_batch': {'queue': 'media_processing'}
+        # 'app.tasks.send_email': {'queue': 'default'}, can be added when emails and such are set up
+    }
 
     #SIGHTENGINE
     SIGHTENGINE_WORKFLOW_ID = os.environ.get('SIGHTENGINE_WORKFLOW_ID')

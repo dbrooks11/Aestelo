@@ -46,11 +46,11 @@ export default function FetchCollectionItems({collection_id}:{collection_id: num
     console.log(data?.pages)
     return(
         /* eslint-disable @typescript-eslint/no-explicit-any */
-        <div className="grid md:grid-cols-4 grid-cols-3 md:gap-2 gap-0.5 md:p-2">
+        <div className="grid md:grid-cols-4 grid-cols-3 lg:grid-cols-6 md:gap-2 gap-0.5 md:p-2">
             {data?.pages.map((page) => {
                 return page.collection_items.map((item: any) => {
                     return (
-                        item.spot && <SpotCard spot={item.spot} className={undefined} onClick={undefined} includeUsername={true}/> 
+                        item.spot && <SpotCard key={item.spot.id} spot={item.spot} className={'text-sm lg:text-[15px]'} onClick={undefined} includeUsername={true}/> 
                     )
                 })
             })}

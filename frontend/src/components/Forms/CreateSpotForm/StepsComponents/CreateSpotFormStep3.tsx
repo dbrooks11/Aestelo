@@ -73,9 +73,9 @@ export default function CreateSpotFormStepThree({previewPhotos, uploadedPhotos, 
 
                         if(responseTwo.status === 201){
                             const dataTwo = responseTwo.data
-                            const {task_id, name, post_type } = dataTwo;
+                            const {task_token, name, post_type } = dataTwo;
 
-                            addTask(task_id, post_type, name);
+                            addTask(task_token, post_type, name);
                             resetForm()
                         }
                     }catch(error){
@@ -88,7 +88,7 @@ export default function CreateSpotFormStepThree({previewPhotos, uploadedPhotos, 
                 }
             }catch(error){
                 const errors: string = AxiosErrorHelper(error)
-                toast.error(JSON.stringify(errors), {
+                toast.error(errors, {
                     toasterId: 'spotForm'
                 })
             }finally{

@@ -75,8 +75,8 @@ export default function SpotHeader({name, accessibility,
             {<div className="flex justify-center items-center gap-2 text-nowrap max-w-full">
 
                 {/* Rating */}
-                <span className="flex items-center gap-0.5 text-white/90 truncate select-none shrink-0 text-[1.2em]">
-                    <Star strokeWidth={1} className="w-[1.25em] h-[1.25em]  fill-yellow-400 stroke-yellow-400"/>
+                <span className="flex items-center gap-0.5 text-white/90 truncate select-none shrink-0 text-[1.25em]">
+                    <Star strokeWidth={1} className="w-[1.35em] h-[1.35em]  fill-yellow-400 stroke-yellow-400"/>
                     {averageRating}
                 </span>
 

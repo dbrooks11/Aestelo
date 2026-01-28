@@ -25,9 +25,7 @@ class UserProfile(db.Model):
     music_track_id: Mapped[Optional[str]] = mapped_column(Text, ForeignKey('music_track.id'))
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('auth_user.id'), primary_key=True)
-    username: Mapped[str] = mapped_column(Text)
-    profile_photo: Mapped[Optional[str]] = mapped_column(Text)
-    username: Mapped[str] = mapped_column(Text)
+    username: Mapped[str] = mapped_column(Text, unique=True)
     profile_photo: Mapped[Optional[str]] = mapped_column(Text)
     profile_banner: Mapped[Optional[str]] = mapped_column(Text)
     bio: Mapped[Optional[str]] = mapped_column(Text)

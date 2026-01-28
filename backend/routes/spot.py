@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify, current_app
-from itsdangerous import URLSafeSerializer
+import os
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from datetime import datetime, timezone
 from extensions import db
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -16,9 +17,9 @@ from sqlalchemy import case, cast, Numeric, func
 spot_bp = Blueprint('spot', __name__, url_prefix='/spot')
 
 def generate_task_token(user_id: str, task_id: str, group_id:str):
-    token = URLSafeSerializer(current_app.config['SECRET_KEY'])
+    token = URLSafeTimedSerializer(os.environ.get('SECRET_KEY'))
 
-    return token.dump({
+    return token.dumps({
         'user_id': user_id,
         'task_id': task_id,
         'group_id': group_id
@@ -36,37 +37,66 @@ def spot_task_progress():
                         'progress': task.info.get('progress', 0)}), 200
     
     
-@spot_bp.route('/status/<task_id>', methods=['GET'])
+@spot_bp.route('/status/<task_token>', methods=['GET'])
 @jwt_required()
-def get_batch_progress(task_id):
-    task_check = AsyncResult(task_id, app=celery)
+def get_batch_progress(task_token):
+    if not task_token:
+        return ({'error': 'invalid'}), 400
+
+    current_user = get_jwt_identity()
     
-    if task_check.ready():
-        if task_check.successful():
+    serializer = URLSafeTimedSerializer(os.environ.get('SECRET_KEY'))
+
+    try:
+        data = serializer.loads(task_token, max_age=3600)
+    except SignatureExpired:
+        return jsonify({'error': 'Token expired'}), 401
+    except BadSignature:
+        return jsonify({'error': 'Invalid Token'}), 401
+
+    if not data or data.get('user_id') != current_user:
+        return jsonify({'error': 'Access denied'}), 403
+
+    chord_id = data.get('task_id') 
+    group_id = data.get('group_id')
+
+    chord_result = AsyncResult(chord_id, app=celery)
+    if not chord_result:
+        return jsonify({'state': 'PENDING', 'progress': 0}), 200
+    
+    if chord_result.ready():
+        if chord_result.successful():
             return jsonify({'state': 'SUCCESS', 'progress': 100}), 200
         else:
-            return jsonify({'state': 'FAILURE', 'error': str(task_check.result)}), 200
+            return jsonify({'state': 'FAILURE', 'error': str(chord_result.result)}), 200
+        
+    group_result = GroupResult.restore(group_id)
 
-    if not task_check:
+    if not group_result:
         return jsonify({'state': 'PENDING', 'progress': 0}), 200
-
-    total_tasks = len(task_check.children) if task_check.children else 0
+    
+    results = group_result.results
+    total_tasks = len(results)
     cumulative_progress = 0
     completed_count = 0
 
-    if total_tasks > 0:
-        for task in task_check.children:
-            if task.ready():
+    for task in results:
+        if task.ready():
+            if task.successful():
                 cumulative_progress += 100
                 completed_count += 1
-            elif task.state == 'PROCESSING':
+            else:
+                cumulative_progress += 0 
+        else:
+            if task.state == 'PROCESSING':
                 info = task.info
                 if isinstance(info, dict):
                     cumulative_progress += info.get('progress', 0)
-        
-        progress = int(cumulative_progress / total_tasks)
-    else:
-        progress = 0
+            elif task.state == 'SUCCESS':
+                cumulative_progress += 100
+                completed_count += 1
+
+    progress = int(cumulative_progress / total_tasks) if total_tasks > 0 else 0
 
     return jsonify({
         'state': 'PROCESSING',
@@ -140,8 +170,7 @@ def create_spot():
             callback_task = average_location_batch.s(post_type_id=spot.id, post_type=type)
 
             task = chord(job_group)(callback_task)
-            group_res = task.parent
-            group_res.save()
+            group_res = task.parent.save()
             
             token = generate_task_token(current_user, task.id, group_res.id)
         

@@ -1,44 +1,74 @@
 from celery import shared_task
+from botocore.exceptions import BotoCoreError
+from celery.exceptions import SoftTimeLimitExceeded
 import tempfile
 from models import SpotMedia,VisitMedia
 from util.photo_processing import photo_processing_one_img_metadata,get_decimal_coordinates
 from util.storage import s3, download_file_from_s3, upload_to_s3
 import os
+from config import Config
 from typing import Literal
 from extensions import db
 
+SSD_TEMP_DIR = os.environ.get('SSD_TMP_DIR', '/tmp')
+MAX_FILE_SIZE = Config.MAX_FILE_SIZE
 
-@shared_task(bind=True, ignore_result=False)
+if not os.path.exists(SSD_TEMP_DIR):
+    os.makedirs(SSD_TEMP_DIR, exist_ok=True)
+
+def remove_file_ssd(file_paths: list = []):
+    if file_paths:
+        for file in file_paths:
+            if file and os.path.exists(file):
+                os.remove(file)
+
+
+@shared_task(name='process_photos_metadata', bind=True, ignore_result=False, acks_late=True, time_limit=300, soft_time_limit=270, retry_backoff=True, max_retries=3,
+autoretry_for=(ConnectionError, TimeoutError, BotoCoreError), )
 def process_photos_with_metadata(self, key: str, post_type_id: int, user_id: str, upload_s3_foldername: str, post_type: Literal['spot', 'visit'], order: int):
     uploaded_filepath = None
     local_file_path = None
+    result_path = None
     bucket = os.environ.get('R2_BUCKET_NAME')
+    file_paths = []
+
+    if post_type == 'spot':
+        MediaModel = SpotMedia
+        fk_field = 'spot_id'
+    elif post_type == 'visit':
+        MediaModel = VisitMedia
+        fk_field = 'visit_id'
 
     try:
+        existing_media = MediaModel.query.filter_by(**{fk_field: post_type_id, "sort_order": order}
+        ).first()
+
+        if existing_media:
+            uploaded_filepath = existing_media.photo_path
+            return {"success": True, "path": uploaded_filepath, "duplicate": True}
+
         metadata = s3.head_object(Bucket=bucket, Key=key)
         file_size = metadata.get('ContentLength')
 
-        if file_size > (20 * 1024 * 1024):
+        if file_size > MAX_FILE_SIZE:
             return {'success': False, 'error': 'File too big', 'key': key}
         try:
-            with tempfile.NamedTemporaryFile(suffix='.tmp',delete=False) as tmp:
+            with tempfile.NamedTemporaryFile(delete=False, dir=SSD_TEMP_DIR) as tmp:
                 local_file_path = tmp.name
                 download_file_from_s3(key, local_file_path)
 
-            result = photo_processing_one_img_metadata(file=local_file_path, current_user_id=user_id)
+            result = photo_processing_one_img_metadata(file_path=local_file_path, current_user_id=user_id)
+            result_path = result.get('file_path')
+            file_paths = [local_file_path, result_path]
             
             latitude, longitude = get_decimal_coordinates(gps_info=result.get('gps'), key=key)
             if latitude is None or longitude is None:
                 return {'success': False, 'error': 'No GPS metadata', 'key': key}
 
-            uploaded_filepath = upload_to_s3(file_obj=result.get('file'), folder=upload_s3_foldername)
+            # TODO: add check for if file is already uploaded to s3 incase a celery worker does a retry
+            uploaded_filepath = upload_to_s3(file=result_path, folder=upload_s3_foldername)
 
-            if post_type == 'spot':
-                MediaModel = SpotMedia
-                fk_field = 'spot_id'
-            elif post_type == 'visit':
-                MediaModel = VisitMedia
-                fk_field = 'visit_id'
+            
             
             media = MediaModel(**{
                 fk_field: post_type_id,
@@ -49,13 +79,9 @@ def process_photos_with_metadata(self, key: str, post_type_id: int, user_id: str
                 'width': result.get('width'),
                 'height': result.get('height')
             })
-            
+
             db.session.add(media)
             db.session.commit()
-
-            if os.path.exists(local_file_path):
-                os.remove(local_file_path)
-
             return {
                 'success': True,
                 'longitude': longitude, 
@@ -63,16 +89,25 @@ def process_photos_with_metadata(self, key: str, post_type_id: int, user_id: str
                 'path': uploaded_filepath
             }
         finally:
-            if local_file_path and os.path.exists(local_file_path):
-                os.remove(local_file_path)
+            remove_file_ssd(file_paths)
+
+    except SoftTimeLimitExceeded:
+        db.session.rollback()
+        remove_file_ssd(file_paths)
+        return {
+            'success': False,
+            'path': uploaded_filepath, 
+            'key': key 
+        }
 
     except Exception as e:
         db.session.rollback()
-        if local_file_path and os.path.exists(local_file_path):
-            os.remove(local_file_path)
+        remove_file_ssd(file_paths)
         return {
             'success': False, 
             'error': str(e), 
             'path': uploaded_filepath, 
             'key': key 
         }
+    
+        

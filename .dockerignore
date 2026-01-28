@@ -41,6 +41,7 @@ Thumbs.db
 uploads/*
 !uploads/.gitkeep
 logs/*
+render.yaml
 
 # Git
 .git

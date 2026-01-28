@@ -1,14 +1,21 @@
-import { useRef, type JSX } from "react";
+import { ImageOff, Loader2 } from "lucide-react";
+import { useMemo, useRef, useState, type JSX } from "react";
 
 
 
 export default function SpotPhoto({spot, progress, setOpenRateSelector}): JSX.Element{
 
-    const mediaList = [...spot.media].sort((a:{sort_order: number}, b:{sort_order: number}) => a.sort_order - b.sort_order)
+    const mediaList = useMemo(() => {
+        return [...spot.media].sort((a, b) => a.sort_order - b.sort_order);
+    }, [spot.media])
     const lastTapRef = useRef<number>(0)
+    const [isLoading, setIsLoading] = useState<boolean>(true)
+    const [onError, setOnError] = useState<boolean>(false)
 
     return(
-        <div className="relative aspect-4/5 object-cover flex flex-1 select-none">
+        <div className="relative flex flex-1 justify-center items-center stroke-white object-cover aspect-4/5 text-accents-primary/80 select-none">
+            {isLoading && <Loader2 className="animate-spin" size={34}/>}
+            {onError && <ImageOff size={34}/>}
             {mediaList.map((item: {photo_path_url: string}, index: number) => {
                 const shouldRender = Math.abs(index - (progress - 1)) <= 1
                 
@@ -28,6 +35,14 @@ export default function SpotPhoto({spot, progress, setOpenRateSelector}): JSX.El
                     }}
                     onDoubleClick={() => setOpenRateSelector((prev: boolean) => !prev)}
                     loading={index === progress - 1 ? "eager" : "lazy"} 
+                    onLoad={() => {
+                        setOnError(false)
+                        setIsLoading(false)
+                    }}
+                    onError={() => {
+                        setIsLoading(false)
+                        setOnError(true)
+                    }}
                     className={`
                         absolute inset-0 w-full h-full object-cover
                         ${index === progress - 1 ? 'opacity-100 z-10' : 'opacity-0 z-0'}

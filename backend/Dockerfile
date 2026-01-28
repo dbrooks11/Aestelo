@@ -1,28 +1,40 @@
-# Use a lightweight Python image
 FROM python:3.12-slim
 
-# Prevent Python from writing .pyc files and ensure logs are sent straight to terminal
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# Security: Prevent writing .pyc files and buffer stdout
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Install system dependencies (required for some Python packages)
+# 1. Install System Dependencies (as root)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    libjpeg-dev \
+    zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first
+# 2. Security: Create a Non-Root User
+RUN addgroup --system --gid 10001 appgroup && \
+    adduser --system --uid 10001 --ingroup appgroup appuser
+
+# 3. Create Temp Directory & Set Permissions
+RUN mkdir -p /app/uploads_tmp && \
+    chown -R appuser:appgroup /app/uploads_tmp
+
+# 4. Install Python Dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install gunicorn
 
-# Install gunicorn for production
-RUN pip install gunicorn
+# 5. Copy Application Code
+COPY --chown=appuser:appgroup . .
 
-# Copy the rest of the app
-COPY . .
+# 6. Security: Switch to Non-Root User
+USER appuser
 
-# Expose the Flask port
+# Expose the port (Flask default)
 EXPOSE 5000
 
+# Run the application
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:create_app()"]

@@ -24,6 +24,7 @@ export default function CollectionCard({collection, setViewCollection, viewColle
                         <img
                             key={index}
                             src={photo}
+                            loading="lazy"
                             className={`w-full h-full object-cover pointer-events-none select-none ${sizePhotosToGrid(index)}`}
                         >
                         </img>

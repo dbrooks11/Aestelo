@@ -4,7 +4,6 @@ from flask import current_app
 from datetime import datetime, timezone
 import secrets
 import os
-import uuid
 
 s3 = boto3.client(
         service_name="s3",
@@ -60,7 +59,7 @@ def download_file_from_s3(key: str, local_path: str) -> str:
         raise Exception(f"Download failed for {key}: {str(e)}")
 
 
-def upload_to_s3(file_obj, folder: str):
+def upload_to_s3(file, folder: str):
 
     bucket = current_app.config['R2_BUCKET_NAME']
     
@@ -68,11 +67,9 @@ def upload_to_s3(file_obj, folder: str):
         timestamp = datetime.now(timezone.utc).strftime('%d%m%Y_%H%M%S')
         short_id = secrets.token_urlsafe(16) 
         unique_filename = f"{folder}/{timestamp}_{short_id}.webp"
-    
-        file_obj.seek(0)
         
-        s3.upload_fileobj(
-            file_obj,
+        s3.upload_file(
+            file,
             bucket,
             unique_filename,
             ExtraArgs={

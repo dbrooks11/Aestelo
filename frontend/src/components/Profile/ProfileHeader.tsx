@@ -175,11 +175,6 @@ export default function ProfileHeader(props: ProfileHeaderProps): JSX.Element{
 
             {/* Hamburger menu */}
             <div className="flex gap-4">
-                {/* Theme Toggle (Hidden on mobile) */}
-                <div className="sm:hidden flex">
-                    <ThemeButton className={profileHeaderButtonStyle} />
-                </div>
-
                 {/* Profile Menu Toggle */}
                 <button 
                     className={profileHeaderButtonStyle} 

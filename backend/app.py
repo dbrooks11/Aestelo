@@ -21,6 +21,7 @@ def create_app(config_name=None):
 
     app = Flask(__name__)
     app.config.from_object(config_dict[config_name])
+    
 
     extensions(app)
 
@@ -82,12 +83,11 @@ def configure_security(app):
          allow_headers=["Content-Type", "X-CSRF-TOKEN", "X-CSRF-Token", "x-csrf-token"],
          methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 
-    # TODO: set content security policy for scripts in my app
+    #TODO: set content security policy for scripts in my app
     if not app.debug:
         Talisman(app,
             force_https=True,
             strict_transport_security=True,
-            strict_transport_security_max_age=31536000,
             strict_transport_security_include_subdomains=True,
             content_security_policy=None, 
             frame_options='DENY'

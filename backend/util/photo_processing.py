@@ -2,6 +2,7 @@ from PIL import ExifTags, ImageOps, Image, ImageFile
 from PIL.Image import DecompressionBombError
 from pillow_heif import register_heif_opener
 import io
+from tempfile import NamedTemporaryFile
 from flask import current_app
 
 
@@ -71,62 +72,62 @@ def get_decimal_coordinates(gps_info, key):
         return None, None
 
 
-def photo_processing_one_img_metadata(file, current_user_id: str):
+def photo_processing_one_img_metadata(file_path: str, current_user_id: str):
     try:
-        with Image.open(file) as img:
+        with Image.open(file_path) as img:
             try:
                 img.verify()
             except Exception:
                 raise Exception("Corrupt image file integrity check failed.")
             
-        img = Image.open(file)
+        with Image.open(file_path) as img:
 
-        if img.format not in ALLOWED_FORMATS:
-            raise Exception(f"Unsupported format: {img.format}")
-     
-        img = ImageOps.exif_transpose(img)
-
-        if img.mode not in ['RGB', 'RGBA', 'P']:
-            img = img.convert('RGBA')
+            if img.format not in ALLOWED_FORMATS:
+                raise Exception(f"Unsupported format: {img.format}")
         
-        exif = img.getexif()
-        if exif:
-            gps = exif.get_ifd(ExifTags.IFD.GPSInfo)
+            img = ImageOps.exif_transpose(img)
 
-        # TODO: handle user chosen aspect size instead
-        max_width, max_height = 1080, 1350
-        if img.width > max_width or img.height > max_height:
-            img.thumbnail(size=(max_width, max_height), resample=Image.Resampling.LANCZOS)
+            if img.mode not in ['RGB', 'RGBA', 'P']:
+                img = img.convert('RGBA')
             
-        output = io.BytesIO()
-        img.save(output, 
-                 format="WEBP", 
-                 quality=85, 
-                 method=6, 
-                 exif= b'', 
-                 subsampling=0,
-                 lossless=False
-                 )
-        output.seek(0)
-        return {
-            'file': output,
-            'gps': gps,
-            'width': img.size[0],
-            'height': img.size[1],
-            'type': 'photo'
-        }
+            exif = img.getexif()
+            if exif:
+                gps = exif.get_ifd(ExifTags.IFD.GPSInfo)
+
+            # TODO: handle user chosen aspect size instead
+            max_width, max_height = 1080, 1350
+            if img.width > max_width or img.height > max_height:
+                img.thumbnail(size=(max_width, max_height), resample=Image.Resampling.LANCZOS)
+            
+            file_type = "WEBP"
+            output = file_path + f'processed_{file_type.lower()}'
+            img.save(output, 
+                    format=file_type, 
+                    quality=85, 
+                    method=6, 
+                    exif= b'', 
+                    subsampling=0,
+                    lossless=False
+                    )
+            return {
+                'file_path': output,
+                'gps': gps,
+                'width': img.size[0],
+                'height': img.size[1],
+                'type': 'photo'
+            }
     except DecompressionBombError:
         current_app.logger.warning(f"User {current_user_id} attempted Decompression Bomb upload.")
         raise DecompressionBombError("Image is too large or complex.")
     except OSError:
-        raise OSError(f"photo {file}: could not be opened")
+        raise OSError(f"photo {file_path}: could not be opened")
     except Exception as e:
-            raise Exception(f"photo {file}: Failed to process - {str(e)}")
+            raise Exception(f"photo {file_path}: Failed to process - {str(e)}")
 
 
     
 
-# TODO: raise errors instead of returning them
+# TODO: raise errors instead of returning them and use SSD instead of ram
 def photo_processing_one_img(img_file, is_banner: bool, current_user_id: str):
 
     error = []

@@ -9,7 +9,7 @@ export default function SpotCard({spot, className, onClick, includeUsername}): J
     
     return(
         <div 
-            className={`${cn('flex flex-col dark:bg-off-slate bg-white border dark:border-border-dark border-border-light rounded-sm text- xl:text-base', className)}`}
+            className={`${cn('flex flex-col dark:bg-off-slate bg-white border dark:border-border-dark border-border-light rounded-sm text-sm lg:text-base', className)}`}
             onClick={onClick}
         >
             <div className="relative flex flex-1">

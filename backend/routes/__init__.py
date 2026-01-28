@@ -9,6 +9,7 @@ from .visit import visit_bp
 from .user_info import user_info_bp
 from .user_settings import user_settings_bp
 from .music_track import music_bp
+from .health import health_bp
 
 routes = [
     auth_bp,
@@ -20,7 +21,8 @@ routes = [
     user_info_bp,
     user_settings_bp,
     music_bp,
-    collection_bp
+    collection_bp,
+    health_bp
 ]
 
 def register_blueprints(app):

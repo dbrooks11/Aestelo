@@ -52,14 +52,15 @@ export default function FetchSpots(): JSX.Element{
     /* eslint-disable @typescript-eslint/no-explicit-any */
       <>
         {/* 1. THE GRID (Only Thumbnails) */}
-        <div className="grid md:grid-cols-4 grid-cols-3 md:gap-2 gap-0.5 md:p-2">
+        <div className="gap-0.5 md:gap-2 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 md:p-2">
           {data?.pages.map((page) =>
             page.spots.map((spot: any) => (
               <SpotCard
                 key={spot.id}
                 spot={spot}
                 onClick={() => setSelectedSpot(spot)}
-                className="w-full aspect-4/5 md:hover:scale-102 cursor-pointer transition-transform object-cover rounded-xs overflow-hidden"
+                includeUsername={undefined}
+                className="rounded-xs w-full object-cover aspect-4/5 overflow-hidden md:hover:scale-102 transition-transform cursor-pointer"
               />
             ))
           )}
@@ -70,12 +71,13 @@ export default function FetchSpots(): JSX.Element{
           closeModal={() => setSelectedSpot(undefined)}
           showModal={selectedSpot ? true : false}
           closeOnBgClick={true}
-          className="flex flex-col w-fit h-fit rounded-none bg-none border-none my-16 md:my-20"
+          className="flex flex-col bg-none my-16 md:my-20 border-none rounded-none w-fit h-fit"
           preventDefault={true}
           preventPropagation={true}
         >
         {selectedSpot && (
-            <Spot 
+            <Spot
+                key={selectedSpot.id}
                 spot={selectedSpot} 
                 collections={collections}
                 className={''}
@@ -84,7 +86,7 @@ export default function FetchSpots(): JSX.Element{
         </Modal>
         <div 
           ref={observerCallback}
-          className="w-full h-5 invisible"
+          className="invisible w-full h-5"
         ></div>
       </>
   )

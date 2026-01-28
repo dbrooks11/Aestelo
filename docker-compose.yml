@@ -1,5 +1,5 @@
 services:
-  # --- FLASK BACKEND ---
+  # --- FLASK BACKEND --- #
   backend:
     container_name: aestelo_backend
     build: ./backend
@@ -12,7 +12,7 @@ services:
       - FLASK_APP=app.py
       - FLASK_ENV=development
       - FLASK_DEBUG=1
-      - UPLOAD_FOLDER=/app/uploads_tmp 
+      - SSD_TMP_DIR=/app/uploads_tmp
     command: flask run --host=0.0.0.0 --debug
     env_file:
       - ./backend/.env.development
@@ -25,20 +25,47 @@ services:
       - redis
 
   #---- CELERY ----#
-  celery_worker:
+  celery_worker_heavy:
     build: ./backend
+    container_name: aestelo_celery_heavy
     volumes:
       - ./backend:/app
       - temp_uploads:/app/uploads_tmp
-    command: celery -A make_celery.celery_app worker --loglevel=info --concurrency=2
+    command: celery -A make_celery.celery_app worker -Q media_processing --loglevel=info --concurrency=4
     environment:
       - FLASK_ENV=development 
-      - UPLOAD_FOLDER=/app/uploads_tmp
+      - SSD_TMP_DIR=/app/uploads_tmp
     env_file:
       - ./backend/.env.development
     depends_on:
-      - backend
       - redis
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A make_celery.celery_app inspect ping -d celery@$$HOSTNAME | grep -q pong"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  celery_worker_light:
+    build: ./backend
+    container_name: aestelo_celery_light
+    volumes:
+      - ./backend:/app
+      - temp_uploads:/app/uploads_tmp
+    command: celery -A make_celery.celery_app worker -Q default,high_priority --loglevel=info --concurrency=4
+    environment:
+      - FLASK_ENV=development 
+      - SSD_TMP_DIR=/app/uploads_tmp
+    env_file:
+      - ./backend/.env.development
+    depends_on:
+      - redis
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A make_celery.celery_app inspect ping -d celery@$$HOSTNAME | grep -q pong"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # --- REACT FRONTEND ---
   frontend:
@@ -82,7 +109,8 @@ services:
       - ./backend/.env.development
     depends_on:
       - redis
-      - celery_worker
+      - celery_worker_heavy
+      - celery_worker_light
     volumes:
       - ./backend:/app
 
