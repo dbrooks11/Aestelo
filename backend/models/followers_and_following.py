@@ -1,9 +1,15 @@
 import uuid
+from typing import TYPE_CHECKING
+
 from extensions import db
-from sqlalchemy import (ForeignKey, BigInteger, Index, )
+from sqlalchemy import (
+    BigInteger,
+    ForeignKey,
+    Index,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from models import UserProfile
 

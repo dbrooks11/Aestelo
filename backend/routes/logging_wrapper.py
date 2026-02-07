@@ -1,9 +1,10 @@
 import logging
 import traceback
-from flask import jsonify
 from functools import wraps
-from werkzeug.exceptions import BadRequest, Unauthorized, Forbidden
-from sqlalchemy.exc import IntegrityError, DataError, OperationalError, SQLAlchemyError
+
+from flask import jsonify
+from sqlalchemy.exc import DataError, IntegrityError, OperationalError, SQLAlchemyError
+from werkzeug.exceptions import BadRequest, Forbidden, Unauthorized
 
 
 def handle_errors(func):

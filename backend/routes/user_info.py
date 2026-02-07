@@ -1,8 +1,8 @@
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
 from extensions import db
-from models import UserInfo, AuthUser
-from schemas.user_schema import user_info_schema, ValidationError
+from flask import Blueprint, jsonify, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
+from models import AuthUser, UserInfo
+from schemas.user_schema import ValidationError, user_info_schema
 from util.decorators import profile_check_current__banned_removed
 
 user_info_bp = Blueprint('user_info', __name__, url_prefix='/profile/info')

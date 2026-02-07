@@ -1,18 +1,25 @@
 import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
+
+from extensions import db
+from flask import current_app
+from geoalchemy2 import Geography
 from sqlalchemy import (
-    BigInteger, Boolean, DateTime, Float, ForeignKey, Integer, 
-    String, Text
+    BigInteger,
+    Boolean,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property
-from geoalchemy2 import Geography
-from flask import current_app
-from extensions import db
+from sqlalchemy.orm import Mapped, column_property, mapped_column, relationship
 
 if TYPE_CHECKING:
-    from models import UserProfile, Visit, Rating, CollectionItem
+    from models import CollectionItem, Rating, UserProfile, Visit
    
 
 class Spot(db.Model):

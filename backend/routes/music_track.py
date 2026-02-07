@@ -1,14 +1,14 @@
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required
-from extensions import db
-from models.user import UserProfile, UserInfo, UserSettings, UserRole
-from models.visit import Visit
-from models.music_track import MusicTrack
-from schemas.user_schema import user_profile_schema, ValidationError
-from schemas.music_schema import music_track_schema
-from util.music_track import search_track, set_track
 from datetime import datetime, timezone
 
+from extensions import db
+from flask import Blueprint, jsonify, request
+from flask_jwt_extended import jwt_required
+from models.music_track import MusicTrack
+from models.user import UserInfo, UserProfile, UserRole, UserSettings
+from models.visit import Visit
+from schemas.music_schema import music_track_schema
+from schemas.user_schema import ValidationError, user_profile_schema
+from util.music_track import search_track, set_track
 
 music_bp = Blueprint('music',__name__, url_prefix='/music')
 

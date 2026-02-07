@@ -1,12 +1,33 @@
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING, Optional
+
 from extensions import db
-from typing import Optional, TYPE_CHECKING
+
 if TYPE_CHECKING:
-    from models import Spot,SpotMedia,Visit,VisitMedia,Rating,Report,Collection,Follow, AuthUser
+    from models import (
+        AuthUser,
+        Collection,
+        Follow,
+        Rating,
+        Report,
+        Spot,
+        SpotMedia,
+        Visit,
+        VisitMedia,
+    )
 from flask import current_app
-from sqlalchemy.orm import relationship, Mapped, mapped_column
-from sqlalchemy import (ForeignKey, BigInteger, Integer, Float, Text, DateTime, func, UUID)
+from sqlalchemy import (
+    UUID,
+    BigInteger,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    Text,
+    func,
+)
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 #TODO: Stuff to do/link to user_profile
 #socials

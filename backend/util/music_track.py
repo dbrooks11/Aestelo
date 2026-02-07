@@ -1,10 +1,10 @@
-from datetime import datetime, timedelta
-import os
 import base64
-import requests 
+import os
+from datetime import datetime, timedelta
+
+import requests
 from dotenv import load_dotenv
 from models.music_track import MusicTrack
-
 
 _token_cache = {
     'access_token': None,

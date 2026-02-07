@@ -3,7 +3,7 @@ import ScrollContainer from "react-indiana-drag-scroll";
 
 
 
-export default function SpotTags({tags}: {tags: Array<string>}): JSX.Element{
+export default function Tags({tags}: {tags: Array<string>}): JSX.Element{
 
     const scrollRef = useRef<HTMLElement>(null)
 

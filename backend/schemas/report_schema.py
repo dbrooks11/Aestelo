@@ -1,7 +1,8 @@
 # schemas/report.py
 from extensions import ma
+from marshmallow import ValidationError, fields, pre_load, validate, validates
 from models.report import Report
-from marshmallow import validates, ValidationError, fields, validate, pre_load
+
 
 class ReportSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

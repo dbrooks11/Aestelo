@@ -1,11 +1,12 @@
 import uuid
 from datetime import datetime
-from extensions import db
-from sqlalchemy.orm import relationship
-from sqlalchemy import (String, DateTime, Boolean, Integer, Text)
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
 from typing import TYPE_CHECKING, Optional
+
+from extensions import db
+from sqlalchemy import Boolean, DateTime, Integer, String, Text
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 if TYPE_CHECKING:
     from models import UserProfile
 

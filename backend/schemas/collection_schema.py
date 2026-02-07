@@ -1,7 +1,9 @@
-from models import Collection, CollectionItem
-from schemas import SpotSchema, VisitSchema
-from marshmallow import fields
 from extensions import ma
+from marshmallow import fields
+from models import Collection, CollectionItem
+
+from schemas import SpotSchema, VisitSchema
+
 
 class CollectionSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

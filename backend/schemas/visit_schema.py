@@ -1,7 +1,9 @@
 from extensions import ma
-from models.visit import Visit, VisitMedia
-from marshmallow import validates, ValidationError, fields, validate, pre_load
 from geoalchemy2.shape import to_shape
+from marshmallow import ValidationError, fields, pre_load, validate, validates
+from models.visit import Visit, VisitMedia
+
+
 class VisitSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Visit

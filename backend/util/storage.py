@@ -1,9 +1,10 @@
-import boto3
-from botocore.client import Config, ClientError
-from flask import current_app
-from datetime import datetime, timezone
-import secrets
 import os
+import secrets
+from datetime import datetime, timezone
+
+import boto3
+from botocore.client import ClientError, Config
+from flask import current_app
 
 s3 = boto3.client(
         service_name="s3",

@@ -38,13 +38,16 @@ services:
     env_file:
       - ./backend/.env.development
     depends_on:
-      - redis
-      - backend
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_started
     healthcheck:
-      test: ["CMD-SHELL", "celery -A make_celery.celery_app inspect ping -d celery@$$HOSTNAME | grep -q pong"]
+      test: ["CMD-SHELL", "celery -A make_celery.celery_app inspect ping -d celery@aestelo_celery_heavy --timeout=10 2>&1 | grep -E 'celery@aestelo_celery_heavy.*OK|pong' || exit 1"]
       interval: 30s
-      timeout: 10s
-      retries: 3
+      timeout: 15s
+      retries: 5
+      start_period: 60s
 
   celery_worker_light:
     build: ./backend
@@ -59,13 +62,16 @@ services:
     env_file:
       - ./backend/.env.development
     depends_on:
-      - redis
-      - backend
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_started
     healthcheck:
-      test: ["CMD-SHELL", "celery -A make_celery.celery_app inspect ping -d celery@$$HOSTNAME | grep -q pong"]
+      test: ["CMD-SHELL", "celery -A make_celery.celery_app inspect ping -d celery@aestelo_celery_light --timeout=10 2>&1 | grep -E 'celery@aestelo_celery_light.*OK|pong' || exit 1"]
       interval: 30s
-      timeout: 10s
-      retries: 3
+      timeout: 15s
+      retries: 5
+      start_period: 60s
 
   # --- REACT FRONTEND ---
   frontend:
@@ -93,6 +99,11 @@ services:
     ports:
       - "6379:6379"
       - "8001:8001"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     volumes:
       - redis_data:/data 
   

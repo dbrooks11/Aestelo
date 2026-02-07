@@ -1,18 +1,22 @@
-from flask import Blueprint, request, jsonify, current_app
 import os
-from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from datetime import datetime, timezone
-from extensions import db
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import Spot, UserProfile, Rating, CollectionItem, Visit
-from schemas.spot_schema import spot_schema
-from util import average_location_batch, generate_presigned_url, process_photos_with_metadata
-from marshmallow import ValidationError
+
+from celery import chord, group
 from celery.result import AsyncResult, GroupResult
-from celery import chord,group
-from extensions import celery
+from extensions import celery, db
+from flask import Blueprint, current_app, jsonify, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
+from marshmallow import ValidationError
+from models import CollectionItem, Rating, Spot, UserProfile, Visit
+from schemas.spot_schema import spot_schema
+from sqlalchemy import Numeric, case, cast, func
 from sqlalchemy.orm import joinedload
-from sqlalchemy import case, cast, Numeric, func
+from util import (
+    average_location_batch,
+    generate_presigned_url,
+    process_photos_with_metadata,
+)
 
 spot_bp = Blueprint('spot', __name__, url_prefix='/spot')
 
@@ -143,7 +147,6 @@ def create_spot():
                 partial=True
             )
         except ValidationError as e:
-            print(e.messages)
             return jsonify({'error': e.messages}), 400
 
         spot = Spot(
@@ -169,6 +172,7 @@ def create_spot():
             job_group = group(photo_tasks)
             callback_task = average_location_batch.s(post_type_id=spot.id, post_type=type)
 
+            #TODO: add task ids to model for persistence
             task = chord(job_group)(callback_task)
             group_res = task.parent.save()
             

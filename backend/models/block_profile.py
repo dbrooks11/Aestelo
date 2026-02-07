@@ -1,8 +1,10 @@
 import uuid
+
 from extensions import db
-from sqlalchemy import (ForeignKey, BigInteger,Index)
+from sqlalchemy import BigInteger, ForeignKey, Index
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
+
 
 class BlockProfile(db.Model):
     __tablename__ = 'block_profile'

@@ -1,8 +1,8 @@
 import { type JSX } from "react";
 import { Accessibility, GalleryVerticalEnd } from "lucide-react";
 import cn from "../../../../util/tailwind_merger";
-import SpotHeader from "../../../Spot/SpotHeader";
-import SpotDescripton from "../../../Spot/SpotDesciption";
+import SpotHeader from "../../../ContentType/Spot/SpotHeader";
+import SpotDescripton from "../../../ContentType/ContentDesciptionOrCaption";
 import SpotThumbnail from "./SpotThumbnail";
 
 export default function SpotCard({spot, className, onClick, includeUsername}): JSX.Element{

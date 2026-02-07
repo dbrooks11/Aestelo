@@ -1,19 +1,19 @@
 import React, { type CSSProperties, type ElementType, type JSX } from 'react'
-import { handleNumStats } from '../../../util/StatConverter'
-import { type SpotButtonType } from './SpotButtons';
+import { handleNumStats } from '../../util/StatConverter'
+import { type ButtonType } from './PostTypeActionButtons';
 
-type SpotActionButtonProps = {
-  title: SpotButtonType['title']
+type ActionButtonProps = {
+  title: ButtonType['title']
   icon: ElementType | undefined
-  data: SpotButtonType['data']
-  color: SpotButtonType['color']
-  fillColor?: SpotButtonType['fillColor']
+  data: ButtonType['data']
+  color: ButtonType['color']
+  fillColor?: ButtonType['fillColor']
   onClick?: (e: React.MouseEvent) => void
   isActive?: boolean
   className?: string 
 }
 
-export default function SpotButtonBase({
+export default function ButtonBase({
     title,
     icon: Icon,
     data,
@@ -21,7 +21,7 @@ export default function SpotButtonBase({
     fillColor,
     onClick,
     isActive = false
-}: SpotActionButtonProps): JSX.Element {
+}: ActionButtonProps): JSX.Element {
   return (
     <button
       title={title}

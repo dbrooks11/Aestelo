@@ -1,13 +1,22 @@
 import uuid
 from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from models import UserProfile, Spot
-from datetime import datetime
-from extensions import db
-from sqlalchemy import (ForeignKey, BigInteger, Integer, DateTime, UniqueConstraint,CheckConstraint, func)
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import UUID
 
+if TYPE_CHECKING:
+    from models import Spot, UserProfile
+from datetime import datetime
+
+from extensions import db
+from sqlalchemy import (
+    BigInteger,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Integer,
+    UniqueConstraint,
+    func,
+)
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
 class Rating(db.Model):

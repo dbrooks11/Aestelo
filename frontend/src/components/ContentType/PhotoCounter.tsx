@@ -1,13 +1,13 @@
 import { type JSX } from "react";
 import { CircularProgress } from "../CircularProgressBar";
 
-type SpotPhotoCounterProps = {
+type PhotoCounterProps = {
     progress: number
     total: number
 
 }
 
-export default function SpotPhotoCounter({progress, total}: SpotPhotoCounterProps): JSX.Element{
+export default function PhotoCounter({progress, total}: PhotoCounterProps): JSX.Element{
     
 
     return(

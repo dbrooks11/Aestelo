@@ -1,13 +1,13 @@
 import { Fragment, useCallback, useRef, useState, type CSSProperties, type Dispatch, type JSX, type SetStateAction } from "react";
-import SpotButtonBase from "./SpotButtonBase";
+import ButtonBase from "../../ButtonBase";
 import { Star } from "lucide-react";
 import { type rateSelectorState, type averageRatingState } from "../Spot";
-import { AxiosErrorHelper, protectedInstance } from "../../../util/axios_api_helpers";
-import { useSpotMutation } from "../../../hooks/SpotHooks/useSpotMutation";
+import { AxiosErrorHelper, protectedInstance } from "../../../../util/axios_api_helpers";
+import { useSpotMutation } from "../../../../hooks/SpotHooks/useSpotMutation";
 import axios from "axios";
 
 type RateButtonProps = {
-    spotId: number
+    contentId: number
     openRateSelector: boolean
     ratingCount: number
     ratingChoice: number
@@ -50,7 +50,7 @@ export default function RateButton(props: RateButtonProps): JSX.Element{
                 if(!prevRated) {
                     setRatingCountHolder(prev => prev + 1)
                 }
-                response = await protectedInstance.post(`/spot/rate/${props.spotId}`, 
+                response = await protectedInstance.post(`/spot/rate/${props.contentId}`, 
                     {rating_choice: num},
                     {signal: controller.signal}
                 )
@@ -63,7 +63,7 @@ export default function RateButton(props: RateButtonProps): JSX.Element{
                     setRating(newRating)
                     props.setHoldAverageRating(newAverage)
                     props.setOpenRateSelector(false)
-                    updateSpotInCache(props.spotId, {
+                    updateSpotInCache(props.contentId, {
                         rating_choice: newRating,
                         total_num_of_ratings: newRatingCount,
                         average_rating: newAverage
@@ -77,7 +77,7 @@ export default function RateButton(props: RateButtonProps): JSX.Element{
                     setRatingCountHolder(prev => prev - 1)
                     props.setHoldAverageRating(prev => prev - num)
                 }
-                response = await protectedInstance.delete(`/spot/rate/${props.spotId}`, {signal: controller.signal})
+                response = await protectedInstance.delete(`/spot/rate/${props.contentId}`, {signal: controller.signal})
                  
                 if(response.status === 200) {
                     const newAverage = response.data.new_average
@@ -86,7 +86,7 @@ export default function RateButton(props: RateButtonProps): JSX.Element{
                     setRatingCountHolder(newRatingCount)
                     props.setHoldAverageRating(newAverage)
                     props.setOpenRateSelector(false)
-                    updateSpotInCache(props.spotId, {
+                    updateSpotInCache(props.contentId, {
                         rating_choice: null,
                         total_num_of_ratings: newRatingCount,
                         average_rating: newAverage
@@ -151,7 +151,7 @@ export default function RateButton(props: RateButtonProps): JSX.Element{
                     aria-hidden
                 ></div>
             </div>}
-            <SpotButtonBase
+            <ButtonBase
                 title="Rate"
                 icon={Star}
                 data={ratingCountHolder}

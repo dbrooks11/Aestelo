@@ -3,12 +3,12 @@ import cn from "../../util/tailwind_merger";
 import { Ellipsis } from "lucide-react";
 import { useState, type JSX } from "react";
 
-type SpotDesciptionProps = {
+type DesciptionProps = {
     description: string
     className?: string
 }
 
-export default function SpotDescripton({description, className}: SpotDesciptionProps): JSX.Element{
+export default function DescriptonOrCaption({description, className}: DesciptionProps): JSX.Element{
 
     const [showDescription, setShowDescription] = useState<boolean>(false)
 
@@ -21,11 +21,11 @@ export default function SpotDescripton({description, className}: SpotDesciptionP
                 {showDescription ? 
                 <motion.div 
                     key='description'
-                    id="spot-description-content"
+                    id="description-or-caption-content"
                     role="button"
                     tabIndex={0}
                     aria-expanded={true}
-                    aria-label="Spot description. Click to collapse."
+                    aria-label="Description/Caption. Click to collapse."
                     initial={{opacity: 0}}
                     animate={{opacity: 1}}
                     exit={{opacity: 0}}
@@ -49,9 +49,9 @@ export default function SpotDescripton({description, className}: SpotDesciptionP
                     key="button"
                     type="button"
                     role="button"
-                    aria-label="Show full description"
+                    aria-label="Show full description/caption"
                     aria-expanded={false}
-                    aria-controls="spot-description-content"
+                    aria-controls="description-or-caption-content"
                     tabIndex={0}
                     initial={{ opacity: 0}}
                     animate={{ opacity: 1 }}

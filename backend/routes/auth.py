@@ -1,25 +1,30 @@
 
-from extensions import db
+import random
 from datetime import datetime, timezone
-from flask import Blueprint, request, jsonify, current_app
-from flask_jwt_extended import(
-    create_access_token, 
+
+from extensions import db
+from flask import Blueprint, current_app, jsonify, request
+from flask_jwt_extended import (
+    create_access_token,
     create_refresh_token,
+    get_jwt,
+    get_jwt_identity,
+    jwt_required,
     set_access_cookies,
     set_refresh_cookies,
     unset_jwt_cookies,
-    jwt_required, 
-    get_jwt, 
-    get_jwt_identity
 )
-import random
-from sqlalchemy.orm import load_only
-from sqlalchemy import exists
-from werkzeug.security import check_password_hash, generate_password_hash
+from models import AuthUser, TokenBlackList, UserProfile
 from schemas import ValidationError
-from schemas.auth_schema import username_pass_only,email_pass_only,email_pass_confirm_pass
-from models import UserProfile, AuthUser, TokenBlackList
+from schemas.auth_schema import (
+    email_pass_confirm_pass,
+    email_pass_only,
+    username_pass_only,
+)
+from sqlalchemy import exists
+from sqlalchemy.orm import load_only
 from util import DatabaseService
+from werkzeug.security import check_password_hash, generate_password_hash
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 

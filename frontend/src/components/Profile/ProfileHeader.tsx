@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
 import { ArrowLeft, Ellipsis, X, Settings, LogOut } from "lucide-react"
 import { motion, useTransform, useScroll, AnimatePresence } from "framer-motion";
-import { ThemeButton} from "../../hooks/ThemeProvider";
 import { type ProfileDataType  } from "../../pages/ProfilePage";
 import type { AxiosResponse } from "axios";
 import { protectedInstance, AxisErrorHelperConsoleOnly } from "../../util/axios_api_helpers";

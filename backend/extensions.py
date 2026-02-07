@@ -1,12 +1,12 @@
-from flask_sqlalchemy import SQLAlchemy
-from flask_marshmallow import Marshmallow
+from celery import Celery, Task
+from flask import Flask
 from flask_jwt_extended import JWTManager
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
-from celery import Celery, Task
-from flask import Flask
 
 convention = {
     'all_column_names': lambda constraint, table: '_'.join(

@@ -1,11 +1,13 @@
+from datetime import datetime, timezone
+
+from celery import shared_task
+from extensions import db
+from flask import current_app
 from geopy.distance import distance
 from models import Spot, Visit
-from util.storage import delete_file_s3
-from extensions import db
-from celery import shared_task
-from datetime import datetime, timezone
 from sqlalchemy.orm import joinedload
-from flask import current_app
+
+from util.storage import delete_file_s3
 
 long = 'longitude'
 lat = 'latitude'

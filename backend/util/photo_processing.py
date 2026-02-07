@@ -1,10 +1,10 @@
-from PIL import ExifTags, ImageOps, Image, ImageFile
-from PIL.Image import DecompressionBombError
-from pillow_heif import register_heif_opener
 import io
 from tempfile import NamedTemporaryFile
-from flask import current_app
 
+from flask import current_app
+from PIL import ExifTags, Image, ImageFile, ImageOps
+from PIL.Image import DecompressionBombError
+from pillow_heif import register_heif_opener
 
 register_heif_opener()
 ALLOWED_FORMATS = ('JPEG', 'PNG', 'HEIF', 'HEIC')

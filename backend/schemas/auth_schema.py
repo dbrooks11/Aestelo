@@ -1,8 +1,7 @@
 # schemas/auth_schema.py
 from extensions import ma
+from marshmallow import ValidationError, fields, validate, validates, validates_schema
 from models.auth import AuthUser
-from marshmallow import validates,validates_schema, ValidationError, fields, validate
-
 
 min_password_length = 8
 max_password_length = 64

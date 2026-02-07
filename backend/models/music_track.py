@@ -1,6 +1,7 @@
 from extensions import db
-from sqlalchemy import Column, String, Integer, BigInteger
+from sqlalchemy import BigInteger, Column, Integer, String
 from sqlalchemy.orm import relationship
+
 
 class MusicTrack(db.Model):
 

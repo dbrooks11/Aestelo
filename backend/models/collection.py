@@ -1,13 +1,25 @@
 import uuid
+from typing import TYPE_CHECKING, Optional
+
 from flask import current_app
-from typing import Optional, TYPE_CHECKING
+
 if TYPE_CHECKING:
-    from models import UserProfile, Spot, Visit
+    from models import Spot, UserProfile, Visit
 from datetime import datetime
+
 from extensions import db
-from sqlalchemy import (ForeignKey, BigInteger, Text, DateTime, Boolean,UniqueConstraint,ARRAY, func)
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import (
+    ARRAY,
+    BigInteger,
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
 class Collection(db.Model):

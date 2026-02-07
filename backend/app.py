@@ -1,18 +1,17 @@
 
-from flask import Flask, jsonify
-from flask_talisman import Talisman
-from flask.logging import default_handler
-from logging.config import dictConfig
-from flask_cors import CORS
-from config import config_dict
-import models
-from models.token_blacklist import TokenBlackList
-from extensions import db, ma, jwt, limiter,mg, celery_init_app
-from routes import register_blueprints
-from flask import g, request
-import time
 import os
+import time
+from logging.config import dictConfig
 
+import models
+from config import config_dict
+from extensions import celery_init_app, db, jwt, limiter, ma, mg
+from flask import Flask, g, jsonify, request
+from flask.logging import default_handler
+from flask_cors import CORS
+from flask_talisman import Talisman
+from models.token_blacklist import TokenBlackList
+from routes import register_blueprints
 
 
 def create_app(config_name=None):

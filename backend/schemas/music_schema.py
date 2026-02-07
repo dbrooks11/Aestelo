@@ -1,7 +1,7 @@
 # schemas/user.py
 from extensions import ma
-from models.music_track import MusicTrack
 from marshmallow import fields
+from models.music_track import MusicTrack
 
 
 class MusicTrackSchema(ma.SQLAlchemyAutoSchema):

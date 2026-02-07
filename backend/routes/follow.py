@@ -1,11 +1,11 @@
 from extensions import db
-from models.user import UserProfile
-from sqlalchemy import exists
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required
 from models import Follow
-from util.decorators import profile_both_check_banned_removed, block_and_follow_check
+from models.user import UserProfile
 from schemas.user_schema import partial_schema
+from sqlalchemy import exists
+from util.decorators import block_and_follow_check, profile_both_check_banned_removed
 
 follow_bp = Blueprint('follow', __name__, url_prefix='/profile/follow')
 

@@ -1,9 +1,8 @@
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required
 from extensions import db
+from flask import Blueprint, jsonify, request
+from flask_jwt_extended import jwt_required
 from models import UserSettings
-from schemas.user_schema import user_settings_schema, ValidationError
-
+from schemas.user_schema import ValidationError, user_settings_schema
 from util.decorators import profile_check_current__banned_removed
 
 user_settings_bp = Blueprint('user_settings', __name__, url_prefix='/profile/settings')

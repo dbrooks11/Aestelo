@@ -1,9 +1,17 @@
-from flask import Blueprint, request, jsonify, current_app
 from extensions import db
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import Spot, Visit, Collection, CollectionItem, SpotMedia, VisitMedia, UserProfile
-from schemas import CollectionSchema, CollectionItemSchema
-from sqlalchemy import case, update, exists, select
+from flask import Blueprint, current_app, jsonify, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
+from models import (
+    Collection,
+    CollectionItem,
+    Spot,
+    SpotMedia,
+    UserProfile,
+    Visit,
+    VisitMedia,
+)
+from schemas import CollectionItemSchema, CollectionSchema
+from sqlalchemy import case, exists, select, update
 from sqlalchemy.orm import joinedload
 
 collection_bp = Blueprint('collection', __name__, url_prefix='/collection')

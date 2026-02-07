@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState, type JSX } from "react";
 import { useInfiniteQuery} from '@tanstack/react-query'
 import { protectedInstance } from "../../../util/axios_api_helpers";
-import Spot from "../../Spot/Spot";
+import Spot from "../../ContentType/Spot/Spot";
 import Modal from "../../Modal";
 import SpotCard from "../Cards/SpotCard/SpotCard";
 
@@ -52,7 +52,7 @@ export default function FetchSpots(): JSX.Element{
     /* eslint-disable @typescript-eslint/no-explicit-any */
       <>
         {/* 1. THE GRID (Only Thumbnails) */}
-        <div className="gap-0.5 md:gap-2 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 md:p-2">
+        <div className="gap-0.5 md:gap-1 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 md:p-2">
           {data?.pages.map((page) =>
             page.spots.map((spot: any) => (
               <SpotCard

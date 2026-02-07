@@ -1,14 +1,14 @@
 import { useCallback, useRef, useState, type JSX} from "react";
 import { Bookmark} from "lucide-react";
-import SpotButtonBase from "./SpotButtonBase";
-import { useSpotMutation } from "../../../hooks/SpotHooks/useSpotMutation";
-import { AxiosErrorHelper, protectedInstance } from "../../../util/axios_api_helpers";
+import ButtonBase from "../../ButtonBase";
+import { useSpotMutation } from "../../../../hooks/SpotHooks/useSpotMutation";
+import { AxiosErrorHelper, protectedInstance } from "../../../../util/axios_api_helpers";
 import axios from "axios";
 
 type SaveButton =  {
     isSaved: boolean
     saveCount: number
-    spotId: number
+    contentId: number
     collections: Array<{is_default: boolean, id: number}>
 }
 
@@ -46,7 +46,7 @@ export default function SaveButton(props: SaveButton): JSX.Element{
             setSaveCountState((prev: number) => !prevSaved ? prev + 1: prev - 1)
 
             const response = await protectedInstance.post(`/collection/${collectionId ? collectionId : defaultCollection && defaultCollection.id}`, 
-                {spot_id: props.spotId},
+                {spot_id: props.contentId},
                 {signal: controller.signal}
             )
 
@@ -54,7 +54,7 @@ export default function SaveButton(props: SaveButton): JSX.Element{
                 const data = response.data
                 const isSaved = data.saved
                 const newSpotSaveCount = data.spot_save_count
-                updateSpotInCache(props.spotId, {
+                updateSpotInCache(props.contentId, {
                     save_count: newSpotSaveCount,
                     is_saved: isSaved
                 })
@@ -81,7 +81,7 @@ export default function SaveButton(props: SaveButton): JSX.Element{
                     <span>Change</span>
                 </button>
             </div>
-            <SpotButtonBase
+            <ButtonBase
                 title="Save"
                 icon={Bookmark}
                 data={saveCountState}

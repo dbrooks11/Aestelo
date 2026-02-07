@@ -1,4 +1,13 @@
-from models import AuthUser, UserProfile, UserInfo, UserRole, UserSettings, UserSubscription, Collection
+from models import (
+    AuthUser,
+    Collection,
+    UserInfo,
+    UserProfile,
+    UserRole,
+    UserSettings,
+    UserSubscription,
+)
+
 
 class DatabaseService:
     @staticmethod

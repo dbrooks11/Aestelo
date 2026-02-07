@@ -1,11 +1,14 @@
 from extensions import db
-from models.user import UserProfile
-from sqlalchemy import exists
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required
 from models import BlockProfile, Follow
+from models.user import UserProfile
 from schemas.user_schema import partial_schema
-from util.decorators import profile_active_not_permitted, profile_check_current__banned_removed
+from sqlalchemy import exists
+from util.decorators import (
+    profile_active_not_permitted,
+    profile_check_current__banned_removed,
+)
 
 block_bp = Blueprint('block', __name__, url_prefix='/block')
 

@@ -1,9 +1,9 @@
 from extensions import ma
-from marshmallow import (fields, validates, 
-                         ValidationError, validate)
-from models.spot import Spot,SpotMedia
-from schemas.user_schema import UserProfileSimpleSchema
 from geoalchemy2.shape import to_shape
+from marshmallow import ValidationError, fields, validate, validates
+from models.spot import Spot, SpotMedia
+
+from schemas.user_schema import UserProfileSimpleSchema
 
 
 class SpotMediaSchema(ma.SQLAlchemyAutoSchema):

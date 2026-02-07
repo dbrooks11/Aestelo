@@ -1,10 +1,12 @@
-from extensions import ma, db
-from models.user import UserProfile, UserInfo, UserRole, UserSettings, UserSubscription
-from marshmallow import validates, ValidationError, fields, validate
-from sqlalchemy import exists
-from datetime import datetime
 import re
-    
+from datetime import datetime
+
+from extensions import db, ma
+from marshmallow import ValidationError, fields, validate, validates
+from models.user import UserInfo, UserProfile, UserRole, UserSettings, UserSubscription
+from sqlalchemy import exists
+
+
 class UserProfileSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserProfile

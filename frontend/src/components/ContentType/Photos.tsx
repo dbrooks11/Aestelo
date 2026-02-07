@@ -3,11 +3,11 @@ import { useMemo, useRef, useState, type JSX } from "react";
 
 
 
-export default function SpotPhoto({spot, progress, setOpenRateSelector}): JSX.Element{
+export default function Photos({media, progress, onClickFunctionality}): JSX.Element{
 
     const mediaList = useMemo(() => {
-        return [...spot.media].sort((a, b) => a.sort_order - b.sort_order);
-    }, [spot.media])
+        return [...media].sort((a, b) => a.sort_order - b.sort_order);
+    }, [media])
     const lastTapRef = useRef<number>(0)
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [onError, setOnError] = useState<boolean>(false)
@@ -29,11 +29,11 @@ export default function SpotPhoto({spot, progress, setOpenRateSelector}): JSX.El
                         const time = date.getTime()
                         const doubleTapDelay = 25
                         if (time - lastTapRef.current < doubleTapDelay) {
-                            setOpenRateSelector((prev: boolean) => !prev)
+                            onClickFunctionality((prev: boolean) => !prev)
                         }
                         lastTapRef.current = time
                     }}
-                    onDoubleClick={() => setOpenRateSelector((prev: boolean) => !prev)}
+                    onDoubleClick={() => onClickFunctionality((prev: boolean) => !prev)}
                     loading={index === progress - 1 ? "eager" : "lazy"} 
                     onLoad={() => {
                         setOnError(false)
