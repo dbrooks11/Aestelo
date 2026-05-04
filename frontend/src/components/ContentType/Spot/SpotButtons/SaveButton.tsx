@@ -74,7 +74,7 @@ export default function SaveButton(props: SaveButton): JSX.Element{
             <div className=" absolute hidden">
                 <div className="flex flex-col">
                     <span className="uppercase font-semibold">saved to</span>
-                    <span className="truncate">{'palcehodler'}</span>
+                    <span className="truncate">{'placehodler'}</span>
                 </div>
                 <button className="flex gap-2">
                     <Bookmark/>
