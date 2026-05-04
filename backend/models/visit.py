@@ -18,7 +18,7 @@ from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
-    from models import CollectionItem, Spot, UserProfile
+    from models import CollectionItem, Spot, UserProfile, Likes
 
 class Visit(db.Model):
     __tablename__ = "visit"
@@ -72,6 +72,7 @@ class Visit(db.Model):
     )
     user_profile: Mapped["UserProfile"] = relationship("UserProfile", back_populates="visit")
     spot: Mapped["Spot"] = relationship("Spot", back_populates="visit")
+    likes: Mapped["Likes"] = relationship('Likes', back_populates='visit')
     
     @classmethod
     def active(cls):

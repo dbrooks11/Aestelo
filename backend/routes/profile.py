@@ -11,7 +11,7 @@ from schemas.user_schema import (
     profile_viewing,
     user_profile_schema,
 )
-from sqlalchemy import exists
+from sqlalchemy import exists, select
 from sqlalchemy.orm import load_only
 from util import delete_file_s3, photo_processing_one_img, upload_to_s3
 from util.decorators import profile_check_current__banned_removed
@@ -19,19 +19,25 @@ from util.decorators import profile_check_current__banned_removed
 profile_bp = Blueprint('profile',__name__, url_prefix='/profile')
 
 #TODO: use bg workers and presigned urls for updating profile photos
+#TODO: update queries to use SQLAlchmeny2.0 syntax
 @profile_bp.route('/me', methods = ['GET','PATCH'])
 @jwt_required()
 def profile_me():
     current_user = get_jwt_identity()
     
-    user_profile = UserProfile.query.options(load_only(UserProfile.username, UserProfile.bio,UserProfile.profile_photo, UserProfile.profile_banner)).get(current_user)
-
+    user_profile = db.session.execute(select(UserProfile.username, UserProfile.bio,
+                                             UserProfile.profile_photo, UserProfile.profile_banner)
+                                             .where(UserProfile.id == current_user)).first()
+    
+    print(user_profile)
+    
     if request.method == 'GET':
         try:
             return jsonify({'my_profile': user_profile_schema.dump(user_profile)}), 200
         except Exception:
             return jsonify({'error': 'Failed to fetch profile'}), 500
     
+    # Use background job instead
     if request.method == 'PATCH':
         
         try:

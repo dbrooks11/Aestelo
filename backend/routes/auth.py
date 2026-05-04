@@ -21,7 +21,7 @@ from schemas.auth_schema import (
     email_pass_only,
     username_pass_only,
 )
-from sqlalchemy import exists
+from sqlalchemy import exists,select
 from sqlalchemy.orm import load_only
 from util import DatabaseService
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -46,7 +46,7 @@ def signup():
     if email is None or password is None or confirm_password is None:
         return jsonify({'error': 'Email, Password, and Confirmed Password are required'}), 401
 
-    if AuthUser.query.filter_by(email = email).first():
+    if db.session.execute(select(AuthUser).where(AuthUser.email == email)).first():
         return jsonify({'error': 'Account already exist'}), 409
     
     try:
@@ -67,7 +67,7 @@ def signup():
         while attempts < 3:
             username = f'user{random.randint(1, 999999999999999999999999)}'
             
-            username_exists = db.session.query(exists().where((AuthUser.username == username))).scalar()
+            username_exists = db.session.execute((select(exists().where(AuthUser.username == username)))).scalar()
             
             if not username_exists:
                 break
@@ -113,7 +113,8 @@ def login_email():
         current_app.logger.error('Login-email endpoint failed due to validation error of info')
         return jsonify({"error": ". ".join(error_messages)}), 401
 
-    authenticate_user = AuthUser.query.filter_by(email = validate_login['email']).first()
+    
+    authenticate_user = db.session.scalars(select(AuthUser).where(AuthUser.email == validate_login['email'])).first()
 
     if authenticate_user:
         user_hash = authenticate_user.password_encrypted
@@ -163,7 +164,7 @@ def login_username():
         current_app.logger.error('Login-username endpoint failed due to validation error of info')
         return jsonify({"error": ". ".join(error_messages)}), 401
 
-    authenticate_user = AuthUser.query.filter_by(username = validate_login['username']).first()
+    authenticate_user = db.session.scalars(select(AuthUser).where(AuthUser.username == validate_login['username'])).first()
 
     if authenticate_user:
         user_hash = authenticate_user.password_encrypted
@@ -223,16 +224,17 @@ def refresh():
     return response, 200
 
 
+#TODO: change this to only return true or false
 @auth_bp.route('/authenticate', methods = ['GET'])
 @jwt_required()
 def verify():
     current_user = get_jwt_identity()
 
     try:
-        user = UserProfile.query.options(load_only(UserProfile.username,
-                                                    UserProfile.profile_photo
-                                                )).get(current_user)
-
+        user = db.session.get(UserProfile, current_user, options=[
+            load_only(UserProfile.username, UserProfile.profile_photo)
+        ])
+        
         if not user:
             return jsonify({'error': 'Failed to authenticate'}), 401
         

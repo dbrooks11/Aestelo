@@ -9,8 +9,9 @@ from .followers_and_following import Follow
 from .block_profile import BlockProfile
 from .collection import Collection, CollectionItem
 from .token_blacklist import TokenBlackList
+from .likes import Likes
 
 
 __all__ = [AuthUser, UserProfile, UserInfo, UserRole, UserSettings, UserSubscription,
            Spot, SpotMedia,Visit, VisitMedia, MusicTrack, Rating, Report, Follow, BlockProfile, 
-           Collection, CollectionItem, TokenBlackList]
+           Collection, CollectionItem, TokenBlackList, Likes]

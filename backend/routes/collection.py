@@ -35,13 +35,13 @@ def save_item(collection_id):
     if spot_id:
         Model = Spot
         item_id = spot_id
-        thumbnail_query = SpotMedia.query.with_entities(SpotMedia.photo_path).filter_by(spot_id=spot_id, sort_order=1).first()
+        thumbnail_query = db.session.execute(select(SpotMedia.photo_path).where(SpotMedia.spot_id == spot_id,
+                                                                                SpotMedia.sort_order == 1)).first()
     elif visit_id:
         Model = Visit
         item_id = visit_id
-        thumbnail_query = VisitMedia.query.with_entities(
-                VisitMedia.photo_path
-            ).filter_by(visit_id=visit_id, sort_order=1).first()
+        thumbnail_query = db.session.execute(select(VisitMedia.photo_path).where(VisitMedia.visit_id == visit_id,
+                                                                                 VisitMedia.sort_order == 1)).first()
 
     thumbnail = thumbnail_query[0] if thumbnail_query else None
 
@@ -49,9 +49,8 @@ def save_item(collection_id):
             raise Exception
 
     try:
-        is_collection_owned = Collection.query.filter_by(
-            id=collection_id, user_id=current_user
-        ).first()
+        is_collection_owned = db.session.scalars(select(Collection).where(Collection.id == collection_id,
+                                                                          Collection.user_id == current_user)).first()
 
         if is_collection_owned:
             filters = {
@@ -63,7 +62,7 @@ def save_item(collection_id):
 
             filters = {k: v for k, v in filters.items() if v is not None}
 
-            is_saved = CollectionItem.query.filter_by(**filters).first()
+            is_saved = db.session.scalars(select(CollectionItem).filter_by(**filters)).first()
         else:
             return jsonify({'error': 'Collection not found'}), 404
         
@@ -139,9 +138,10 @@ def get_collections():
         page = request.args.get('page', default=1, type=int)
         per_page = request.args.get('per_page', default=6, type=int)
 
-        collections = Collection.query.filter_by(user_id=current_user)
+        collections = select(Collection).where(Collection.user_id == current_user)
 
-        paginated_collections = collections.paginate(
+        paginated_collections = db.paginate(
+            collections,
             page=page,
             per_page=per_page,
             error_out=False
@@ -172,33 +172,36 @@ def view_collection(collection_id):
     current_user = get_jwt_identity()
 
     try:
-        is_collection_owned = db.session.query(exists().where(Collection.id == collection_id, Collection.user_id == current_user)).scalar()
+        is_collection_owned = db.session.execute(exists().where(Collection.id == collection_id, Collection.user_id == current_user))
+        
 
         if not is_collection_owned:
             return jsonify({'error': 'You can not access this Collection'}), 403
         
         page = request.args.get('page', default=1, type=int)
         per_page = request.args.get('per_page', default=6, type=int)
+
+        collection_items = select(CollectionItem).options(joinedload(CollectionItem.spot)
+                                                          .joinedload(Spot.user_profile)
+                                                          .load_only(UserProfile.username),
+                                                          joinedload(CollectionItem.visit)
+                                                        ).where(CollectionItem.collection_id == collection_id).order_by(CollectionItem.saved_at.desc())
         
-        collection_items = db.paginate(
-                select(CollectionItem)
-                .options(joinedload(CollectionItem.spot).joinedload(Spot.user_profile).load_only(UserProfile.username),
-                         joinedload(CollectionItem.visit))
-                .where(CollectionItem.collection_id == collection_id)
-                .order_by(CollectionItem.saved_at.desc()),
+        paginated_collection_items = db.paginate(
+                collection_items,
                 page=page,
                 per_page=per_page,
                 error_out=False
         )
 
         schema = CollectionItemSchema()
-        result = schema.dump(collection_items.items, many=True)
+        result = schema.dump(paginated_collection_items.items, many=True)
 
         return jsonify({
                 'collection_items': result,
-                'total': collection_items.total,
-                'total_pages': collection_items.pages,
-                'current_page': collection_items.page
+                'total': paginated_collection_items.total,
+                'total_pages': paginated_collection_items.pages,
+                'current_page': paginated_collection_items.page
             }), 200
     except Exception as e:
         current_app.logger.warning(str(e))

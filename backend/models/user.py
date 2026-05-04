@@ -15,6 +15,7 @@ if TYPE_CHECKING:
         SpotMedia,
         Visit,
         VisitMedia,
+        Likes
     )
 from flask import current_app
 from sqlalchemy import (
@@ -105,6 +106,7 @@ class UserProfile(db.Model):
     collection: Mapped[list["Collection"]] = relationship("Collection", back_populates="user_profile")
     follower: Mapped[list["Follow"]] = relationship("Follow", foreign_keys="Follow.follower_id", back_populates="follower")
     following: Mapped[list["Follow"]] = relationship("Follow", foreign_keys="Follow.following_id", back_populates="following")
+    likes: Mapped[list["Likes"]] = relationship("Likes", back_populates='user_profile')
     
     @classmethod
     def active(cls):

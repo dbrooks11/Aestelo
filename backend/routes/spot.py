@@ -255,7 +255,7 @@ def get_user_spots():
         return jsonify({'error': str(e)}), 500
     
 
-# TODO: add check for if a user made a visit at a spot
+# TODO: add check for if a user made a visit at a spot. updated queires to return new values when query finishes
 @spot_bp.route('/rate/<spot_id>', methods=['POST', 'DELETE'])
 @jwt_required()
 def rate_spot(spot_id):
@@ -263,8 +263,8 @@ def rate_spot(spot_id):
 
     if not spot_id:
         return jsonify({'error': 'Invalid data'}), 400
-  
-    is_rated = Rating.query.filter_by(spot_id=spot_id, user_id=current_user).first()
+    
+    is_rated = db.session.query(Rating).filter(Rating.spot_id == spot_id, Rating.user_id == current_user).first()
 
     if request.method == 'POST':
         data = request.get_json()

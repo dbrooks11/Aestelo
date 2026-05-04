@@ -11,6 +11,7 @@ from flask.logging import default_handler
 from flask_cors import CORS
 from flask_talisman import Talisman
 from models.token_blacklist import TokenBlackList
+from sqlalchemy import select
 from routes import register_blueprints
 
 
@@ -20,6 +21,10 @@ def create_app(config_name=None):
 
     app = Flask(__name__)
     app.config.from_object(config_dict[config_name])
+
+    if config_name == 'production':
+        assert os.environ.get('SECRET_KEY'), "SECRET_KEY environment variable is required"
+        assert not app.debug, "DEBUG must be False in production"
     
 
     extensions(app)
@@ -74,8 +79,6 @@ def configure_security(app):
     if production_domain:
         origins.append(production_domain)
 
-    origins.append("null")
-
     CORS(app, 
          origins=origins,
          supports_credentials=True,
@@ -118,7 +121,7 @@ def register_jwt_handlers(app):
     @jwt.token_in_blocklist_loader
     def token_in_blocklist_callback(jwt_header, jwt_data):
         jti = jwt_data['jti']
-        token = db.session.query(TokenBlackList).filter(TokenBlackList.jti == jti).scalar()
+        token = db.session.execute(select(TokenBlackList).where(TokenBlackList.jti == jti)).first()
         return token is not None  # True => revoked
 
 

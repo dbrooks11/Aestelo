@@ -4,7 +4,7 @@ from datetime import timedelta
 from dotenv import load_dotenv
 from kombu import Queue
 
-load_dotenv()
+
 
 class Config:
     # Flask
@@ -74,8 +74,6 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     DEBUG = False
     JWT_COOKIE_SECURE = True
-    JWT_COOKIE_SAMESITE = 'Strict'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
 
 
 config_dict = {
