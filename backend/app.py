@@ -2,14 +2,15 @@
 import os
 import time
 from logging.config import dictConfig
-
+from datetime import datetime, timezone
+import uuid
 import models
 from config import config_dict
 from extensions import celery_init_app, db, jwt, limiter, ma, mg
 from flask import Flask, g, jsonify, request
-from flask.logging import default_handler
 from flask_cors import CORS
 from flask_talisman import Talisman
+from util.loggin_config import configure_logging
 from models.token_blacklist import TokenBlackList
 from sqlalchemy import select
 from routes import register_blueprints
@@ -28,12 +29,21 @@ def create_app(config_name=None):
     
 
     extensions(app)
-
+    configure_logging(app)
     register_blueprints(app)
     register_jwt_handlers(app)
     configure_security(app)
-    configure_logging(app)
 
+    @app.before_request
+    def assign_request_id():
+        g.request_id = request.headers.get('X-Request-ID', str(uuid.uuid4()))
+        g.start_time = datetime.now(timezone.utc)
+
+    @app.after_request
+    def add_request_id_header(response):
+        response.headers['X-Request-ID'] = g.request_id
+        return response
+    
     @app.before_request
     def start_timer():
         g.start = time.time()
@@ -123,26 +133,3 @@ def register_jwt_handlers(app):
         jti = jwt_data['jti']
         token = db.session.execute(select(TokenBlackList).where(TokenBlackList.jti == jti)).first()
         return token is not None  # True => revoked
-
-
-def configure_logging(app):
-    dictConfig({
-        'version': 1,
-        'formatters': {
-            'default': {
-                'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
-            }
-        },
-        'handlers': {
-            'console': {
-                'class': 'logging.StreamHandler',
-                'stream': 'ext://sys.stdout',
-                'formatter': 'default'
-            }
-        },
-        'root': {
-            'level': 'INFO',
-            'handlers': ['console']
-        }
-    })
-    app.logger.removeHandler(default_handler)

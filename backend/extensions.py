@@ -1,4 +1,5 @@
 from celery import Celery, Task
+import os
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from flask_limiter import Limiter
@@ -29,11 +30,19 @@ mg = Migrate()
 celery = Celery()
 
 # TODO: use redis for rate limit storage & change default rate limit
-limiter = Limiter(
-    get_remote_address,
-    default_limits=["10000 per day", "10000 per hour"],
-    storage_uri="memory://", #This URI is only meant for testing/development and 
-                            #should be replaced with an appropriate storage of your choice before moving to production.
+if os.getenv('FLASK_ENV') == 'development':
+    limiter = Limiter(
+        get_remote_address,
+        default_limits=["1000 per hour", "30 per minute"],
+        storage_uri="memory://"
+    )
+else:
+    # Production - use Redis
+    limiter = Limiter(
+        get_remote_address,
+        default_limits=["1000 per hour", "30 per minute"],
+        storage_uri=os.environ.get("REDIS"),
+        strategy="fixed-window"  
     )
 
 def celery_init_app(app: Flask) -> Celery:
