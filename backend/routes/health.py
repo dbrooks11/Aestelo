@@ -1,10 +1,10 @@
 import os
 
 import redis
-from extensions import db
+from .extensions import db
 from flask import Blueprint, current_app, jsonify
 from sqlalchemy import text
-from util import s3
+from utils import s3
 
 health_bp = Blueprint('health', __name__, url_prefix='/health')
 

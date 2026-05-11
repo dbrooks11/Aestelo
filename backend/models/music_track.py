@@ -1,4 +1,4 @@
-from extensions import db
+from backend.app.extensions import db
 from sqlalchemy import BigInteger, Column, Integer, String
 from sqlalchemy.orm import relationship
 

@@ -1,16 +1,15 @@
 
 import os
 import time
-from logging.config import dictConfig
 from datetime import datetime, timezone
 import uuid
 import models
-from config import config_dict
-from extensions import celery_init_app, db, jwt, limiter, ma, mg
+from backend.app.config import config_dict
+from backend.app.extensions import celery_init_app, db, jwt, limiter, ma, mg
 from flask import Flask, g, jsonify, request
 from flask_cors import CORS
 from flask_talisman import Talisman
-from util.loggin_config import configure_logging
+from utils.loggin_config import configure_logging
 from models.token_blacklist import TokenBlackList
 from sqlalchemy import select
 from routes import register_blueprints

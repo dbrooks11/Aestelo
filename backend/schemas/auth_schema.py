@@ -1,5 +1,5 @@
 # schemas/auth_schema.py
-from extensions import ma
+from backend.app.extensions import ma
 from marshmallow import ValidationError, fields, validate, validates, validates_schema
 from models.auth import AuthUser
 

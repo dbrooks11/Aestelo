@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 from celery import chord, group
 from celery.result import AsyncResult, GroupResult
-from extensions import celery, db
+from .extensions import celery, db
 from flask import Blueprint, current_app, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
@@ -12,7 +12,7 @@ from models import CollectionItem, Rating, Spot, UserProfile, Visit
 from schemas.spot_schema import spot_schema
 from sqlalchemy import Numeric, case, cast, func
 from sqlalchemy.orm import joinedload
-from util import (
+from utils import (
     average_location_batch,
     generate_presigned_url,
     process_photos_with_metadata,

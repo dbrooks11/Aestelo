@@ -1,4 +1,4 @@
-from extensions import ma
+from backend.app.extensions import ma
 from models.rating import Rating
 
 

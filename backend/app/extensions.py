@@ -29,7 +29,6 @@ jwt = JWTManager()
 mg = Migrate()
 celery = Celery()
 
-# TODO: use redis for rate limit storage & change default rate limit
 if os.getenv('FLASK_ENV') == 'development':
     limiter = Limiter(
         get_remote_address,
@@ -37,7 +36,6 @@ if os.getenv('FLASK_ENV') == 'development':
         storage_uri="memory://"
     )
 else:
-    # Production - use Redis
     limiter = Limiter(
         get_remote_address,
         default_limits=["1000 per hour", "30 per minute"],

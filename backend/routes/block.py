@@ -1,11 +1,11 @@
-from extensions import db
+from .extensions import db
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required
 from models import BlockProfile, Follow
 from models.user import UserProfile
 from schemas.user_schema import partial_schema
 from sqlalchemy import exists
-from util.decorators import (
+from utils.decorators import (
     profile_active_not_permitted,
     profile_check_current__banned_removed,
 )

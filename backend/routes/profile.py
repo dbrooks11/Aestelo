@@ -1,6 +1,6 @@
 from io import BytesIO
 
-from extensions import db
+from .extensions import db
 from flask import Blueprint, current_app, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from models import AuthUser, BlockProfile, Follow, UserProfile
@@ -13,8 +13,8 @@ from schemas.user_schema import (
 )
 from sqlalchemy import exists, select
 from sqlalchemy.orm import load_only
-from util import delete_file_s3, photo_processing_one_img, upload_to_s3
-from util.decorators import profile_check_current__banned_removed
+from utils import delete_file_s3, photo_processing_one_img, upload_to_s3
+from utils.decorators import profile_check_current__banned_removed
 
 profile_bp = Blueprint('profile',__name__, url_prefix='/profile')
 

@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from extensions import db
+from .extensions import db
 from sqlalchemy import (
     BigInteger,
     ForeignKey,

@@ -5,7 +5,7 @@ if TYPE_CHECKING:
     from models import Spot, UserProfile
 from datetime import datetime
 
-from extensions import db
+from .extensions import db
 from sqlalchemy import (
     BigInteger,
     CheckConstraint,

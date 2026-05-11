@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
-from extensions import db
+from .extensions import db
 
 if TYPE_CHECKING:
     from models import (

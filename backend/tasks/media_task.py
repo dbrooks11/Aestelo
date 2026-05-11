@@ -5,15 +5,15 @@ from typing import Literal
 from botocore.exceptions import BotoCoreError
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
-from config import Config
-from extensions import db
+from backend.app.config import Config
+from backend.app.extensions import db
 from models import SpotMedia, VisitMedia
 
-from util.photo_processing import (
+from utils.photo_processing import (
     get_decimal_coordinates,
     photo_processing_one_img_metadata,
 )
-from util.storage import download_file_from_s3, s3, upload_to_s3
+from utils.storage import download_file_from_s3, s3, upload_to_s3
 
 SSD_TEMP_DIR = os.environ.get('SSD_TMP_DIR', '/tmp')
 MAX_FILE_SIZE = Config.MAX_FILE_SIZE
