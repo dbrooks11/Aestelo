@@ -1,11 +1,12 @@
-import logging
-import traceback
-from functools import wraps
 
+import traceback
+import logging
+from functools import wraps
 from flask import jsonify
 from sqlalchemy.exc import DataError, IntegrityError, OperationalError, SQLAlchemyError
 from werkzeug.exceptions import BadRequest, Forbidden, Unauthorized
 
+root_logger = logging.getLogger("root")
 
 def handle_errors(func):
     @wraps(func)
@@ -22,10 +23,10 @@ def handle_errors(func):
 
         # Database errors (log only, hide message)
         except (IntegrityError, DataError, OperationalError, SQLAlchemyError) as e:
-            logging.error(f"Database Error: {e}\n{traceback.format_exc()}")
+            root_logger.error(error = f"Database Error: {e}\n{traceback.format_exc()}")
             return jsonify({'error': 'An unexpected error occurred. Please try again later.'}), 500
 
         # Catch-all for anything else
         except Exception as e:
-            logging.error(f"Error: {e}\n{traceback.format_exc()}")
+            root_logger.error(error = f"Error: {e}\n{traceback.format_exc()}")
     return wrapper

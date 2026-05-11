@@ -1,9 +1,9 @@
 
 import random
 from datetime import datetime, timezone
-
+import logging
 from app.extensions import db
-from flask import Blueprint, current_app, jsonify, request
+from flask import Blueprint, jsonify, request
 from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
@@ -29,12 +29,10 @@ from schemas.auth_schema import AuthUserSchema
 from sqlalchemy import exists, select
 from utils.schema_error_handling import schema_error_handling
 from utils.database import safe_transaction
-from utils.loggin_config import get_logger
 from werkzeug.security import check_password_hash, generate_password_hash
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
-logger = get_logger(__name__)
-
+root_logger = logging.getLogger("root")
 dummy_hash = generate_password_hash('secure_timing_attack_prevention_string')
 
 
@@ -53,7 +51,7 @@ def signup():
     if not all([email, password, confirm_password]):
         return jsonify({'error': 'Email, Password, and Confirmed Password are required'}), 401
 
-    logger.info("Signup attempt", email=email)
+    root_logger.info("Signup attempt", email=email)
 
     if db.session.execute(select(AuthUser.id).where(AuthUser.email == email)).first():
         return jsonify({'error': 'Account already exist'}), 409
@@ -95,12 +93,12 @@ def signup():
 
             db.session.add(auth_user)
 
-        logger.info("Signup successful", 
+        root_logger.info("Signup successful", 
                    email=email,
                    username=username)
         return jsonify({'message':'Account created successfully'}), 201
     except Exception as e:
-        logger.error("Signup failed", 
+        root_logger.error("Signup failed", 
                     email=email,
                     username=username,
                     error=str(e),
@@ -155,15 +153,16 @@ def login():
         set_access_cookies(response, access_token)
         set_refresh_cookies(response, refresh_token)
 
-        current_app.logger.info('Login-email endpoint successful')
+        root_logger.info('Login-email endpoint successful')
         return response, 200
     except Exception as e:
-        logger.error(
+        error_msg = "Failed to login"
+        root_logger.error(error_msg,
             login_method=login_method,
             error=str(e),
             exc_info=True
         )
-        return jsonify({'error': 'Failed to login'}), 500
+        return jsonify({'error':error_msg}), 500
 
 
 @auth_bp.route('/logout', methods = ['POST'])
@@ -178,10 +177,10 @@ def logout():
 
         response = jsonify({'message': 'Logout successful'})
         unset_jwt_cookies(response)
-        logger.info("Logout successful")
+        root_logger.info("Logout successful")
         return response, 200
     except Exception as e:
-        logger.error("Logout failed", error=str(e))
+        root_logger.error("Logout failed", error=str(e))
         return jsonify({'error': 'Failed to logout'}), 500
 
 
@@ -196,7 +195,7 @@ def refresh():
         set_access_cookies(response, access_token)
         return response, 200
     except Exception as e:
-        logger.error("Refresh failed",
+        root_logger.error("Refresh failed",
                      user_id=current_user,
                      error=str(e))
         return jsonify({"Refresh failed"}), 500

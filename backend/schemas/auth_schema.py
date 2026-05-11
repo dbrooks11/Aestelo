@@ -16,8 +16,7 @@ class AuthUserSchema(ma.SQLAlchemyAutoSchema):
     username = fields.Str(
         required=True,
         validate=[
-            validate.Length(min=min_username_length, max=max_username_length, error= f"Username must be between {min_username_length} and {max_username_length} characters"),
-            validate.Regexp(r'^(?!.*\.$)(?!^\.)[a-z0-9._]+$', error='Username can only contain letters, numbers, periods, and underscores')
+            validate.Length(min=min_username_length, max=max_username_length, error= f"Username must be between {min_username_length} and {max_username_length} characters")
     ])
     email = fields.Email(
         required=True, 
@@ -37,7 +36,6 @@ class AuthUserSchema(ma.SQLAlchemyAutoSchema):
                                   error = f"Confirmed Password must be between {min_password_length} and {max_password_length} characters")], 
                                   load_only=True
                     )
-
     
     @validates('password')
     def validate_password(self, value, **kwargs):

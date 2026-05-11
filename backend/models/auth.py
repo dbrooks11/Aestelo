@@ -18,7 +18,7 @@ class AuthUser(db.Model):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     username: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
     email: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
-    password_encrypted: Mapped[str] = mapped_column(String(255), nullable=False)
+    password_encrypted: Mapped[str] = mapped_column(String(255), nullable=False) #TODO: change column name to password_hash
 
     email_confirmed: Mapped[bool] = mapped_column(Boolean, default=False)
     email_confirmed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))

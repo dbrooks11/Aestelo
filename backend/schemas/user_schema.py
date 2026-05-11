@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+from flask import current_app
 
 from app.extensions import db, ma
 from marshmallow import ValidationError, fields, validate, validates
@@ -12,12 +13,14 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
         model = UserProfile
         include_fk = True
         exclude = ('is_banned', 'banned_at', 'banned_by', 'banned_reason','num_reports_made',
-                   'num_reports', 'is_deleted','deleted_at', 'profile_photo', 'profile_banner')
+                   'num_reports', 'is_deleted','deleted_at','is_verified_instagram','is_verified_twitter_x', 'is_verified_facebook',
+                   'is_verified_tiktok', 'is_business_account','is_prem_account','is_private',
+                   'music_track_id','show_online_status')
 
     id = fields.UUID(dump_only=True)
 
-    profile_photo_url = fields.Str(attribute='profile_photo_url', dump_only=True)
-    profile_banner_url = fields.Str(attribute='profile_banner_url', dump_only=True)
+    profile_photo = fields.Method('profile_photo_url', dump_only=True)
+    profile_banner = fields.Method('profile_banner_url', dump_only=True)
 
     profile_created_at = fields.DateTime(dump_only=True)
     post_count = fields.Int(dump_only=True)
@@ -52,6 +55,18 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
         if '\x00' in value:
             raise ValidationError('Bio contains invalid characters')
         return value
+    
+    def profile_photo_url(self, obj):
+        if not obj.profile_photo:
+            return None
+        public_url = f"{current_app.config['R2_PUBLIC_URL']}/{obj.profile_photo}"
+        return public_url
+
+    def profile_banner_url(self, obj):
+        if not obj.profile_banner:
+            return None
+        public_url = f"{current_app.config['R2_PUBLIC_URL']}/{obj.profile_banner}"
+        return public_url
         
 class UserProfileSimpleSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

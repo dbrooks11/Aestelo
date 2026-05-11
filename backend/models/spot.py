@@ -39,8 +39,8 @@ class Spot(db.Model):
     coordinates: Mapped[Optional[Geography]] = mapped_column(
         Geography(geometry_type='POINT', srid=4326, spatial_index=True)
     )
-    latitude = column_property(ST_Y(cast(coordinates, Geometry)))
-    longitude = column_property(ST_X(cast(coordinates, Geometry)))
+    latitude: Mapped[int] = column_property(ST_Y(cast(coordinates, Geometry)))
+    longitude: Mapped[int] = column_property(ST_X(cast(coordinates, Geometry)))
     date_posted: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), 
         index=True

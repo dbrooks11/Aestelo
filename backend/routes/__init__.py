@@ -8,7 +8,6 @@ from .collection import collection_bp
 from .visit import visit_bp
 from .user_info import user_info_bp
 from .user_settings import user_settings_bp
-from .health import health_bp
 
 routes = [
     auth_bp,
@@ -19,8 +18,7 @@ routes = [
     visit_bp,
     user_info_bp,
     user_settings_bp,
-    collection_bp,
-    health_bp
+    collection_bp
 ]
 
 def register_blueprints(app):

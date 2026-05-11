@@ -2,6 +2,7 @@
 import os
 
 import models
+from logging.config import dictConfig
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_talisman import Talisman
@@ -10,7 +11,6 @@ from middleware.request_time_middleware import configure_request_time
 from models.token_blacklist import TokenBlackList
 from routes import register_blueprints
 from sqlalchemy import select
-from utils.loggin_config import configure_logging
 
 from app.config import config_dict
 from app.extensions import celery_init_app, db, jwt, limiter, ma, mg
@@ -110,3 +110,34 @@ def register_jwt_handlers(app):
         jti = jwt_data['jti']
         token = db.session.execute(select(TokenBlackList).where(TokenBlackList.jti == jti)).first()
         return token is not None  # True => revoked
+    
+
+def configure_logging(app):
+    dictConfig(
+        {
+            "version": 1,
+            "formatters": {
+                "default": {
+                    "format": "[%(asctime)s] %(levelname)s in %(module)s | function(s) = %(funcName)s: %(message)s",
+                    "datefmt": "%B %d, %Y %H:%M:%S %Z"
+                }
+            },
+            "handlers": {
+                "console": {
+                    "class": "logging.StreamHandler",
+                    "stream": "ext://sys.stdout",
+                    "formatter": "default",
+                },
+                "time-rotate": {
+                    "class": "logging.handlers.TimedRotatingFileHandler",
+                    "filename": "flask.log",
+                    "when": "D",
+                    "interval": 7,
+                    "backupCount": 3,
+                    "formatter": "default"
+                }
+
+            },
+            "root": {"level": "DEBUG", "handlers": ["console", "time-rotate"]},
+        }
+    )

@@ -112,19 +112,6 @@ class UserProfile(db.Model):
     def active(cls):
         return cls.query.filter_by(is_banned = False, is_deleted = False)
     
-    @property
-    def profile_photo_url(self):
-        if not self.profile_photo:
-            return None
-        public_url = f"{current_app.config['R2_PUBLIC_URL']}/{self.profile_photo}"
-        return public_url
-
-    @property
-    def profile_banner_url(self):
-        if not self.profile_banner:
-            return None
-        public_url = f"{current_app.config['R2_PUBLIC_URL']}/{self.profile_banner}"
-        return public_url
         
     
 class UserInfo(db.Model):
