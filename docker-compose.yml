@@ -9,6 +9,7 @@ services:
       - ./backend:/app
       - temp_uploads:/app/uploads_tmp 
     command: flask run --host=0.0.0.0 --debug
+    restart: unless-stopped
     env_file:
       - ./backend/.env.development
     logging:
@@ -26,7 +27,7 @@ services:
     volumes:
       - ./backend:/app
       - temp_uploads:/app/uploads_tmp
-    command: celery -A make_celery.celery_app worker -Q media_processing --loglevel=info --concurrency=4
+    command: celery -A tasks.make_celery.celery_app worker -Q media_processing --loglevel=info --concurrency=4
     env_file:
       - ./backend/.env.development
     depends_on:
@@ -35,7 +36,7 @@ services:
       backend:
         condition: service_started
     healthcheck:
-      test: ["CMD-SHELL", "celery -A make_celery.celery_app inspect ping -d celery@aestelo_celery_heavy --timeout=10 2>&1 | grep -E 'celery@aestelo_celery_heavy.*OK|pong' || exit 1"]
+      test: ["CMD-SHELL", "celery -A tasks.make_celery.celery_app inspect ping -d celery@aestelo_celery_heavy --timeout=10 2>&1 | grep -E 'celery@aestelo_celery_heavy.*OK|pong' || exit 1"]
       interval: 30s
       timeout: 15s
       retries: 5
@@ -47,7 +48,7 @@ services:
     volumes:
       - ./backend:/app
       - temp_uploads:/app/uploads_tmp
-    command: celery -A make_celery.celery_app worker -Q default,high_priority --loglevel=info --concurrency=4
+    command: celery -A tasks.make_celery.celery_app worker -Q default,high_priority --loglevel=info --concurrency=4
     env_file:
       - ./backend/.env.development
     depends_on:
@@ -56,7 +57,7 @@ services:
       backend:
         condition: service_started
     healthcheck:
-      test: ["CMD-SHELL", "celery -A make_celery.celery_app inspect ping -d celery@aestelo_celery_light --timeout=10 2>&1 | grep -E 'celery@aestelo_celery_light.*OK|pong' || exit 1"]
+      test: ["CMD-SHELL", "celery -A tasks.make_celery.celery_app inspect ping -d celery@aestelo_celery_light --timeout=10 2>&1 | grep -E 'celery@aestelo_celery_light.*OK|pong' || exit 1"]
       interval: 30s
       timeout: 15s
       retries: 5
@@ -98,7 +99,7 @@ services:
   flower:
     build: ./backend
     container_name: aestelo_flower
-    command: celery -A make_celery.celery_app flower --port=5555
+    command: celery -A tasks.make_celery.celery_app flower --port=5555
     ports:
       - "5555:5555"
     env_file:

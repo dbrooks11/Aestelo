@@ -12,8 +12,8 @@ from routes import register_blueprints
 from sqlalchemy import select
 from utils.loggin_config import configure_logging
 
-from backend.app.config import config_dict
-from backend.app.extensions import celery_init_app, db, jwt, limiter, ma, mg
+from app.config import config_dict
+from app.extensions import celery_init_app, db, jwt, limiter, ma, mg
 
 
 def create_app(config_name=None):

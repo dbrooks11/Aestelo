@@ -4,8 +4,6 @@ from datetime import timedelta
 from dotenv import load_dotenv
 from kombu import Queue
 
-
-
 class Config:
     # Flask
     SECRET_KEY = os.environ.get('SECRET_KEY')
@@ -31,9 +29,6 @@ class Config:
     JWT_COOKIE_HTTPONLY = True
     JWT_COOKIE_SAMESITE = 'Lax'
     JWT_COOKIE_CSRF_PROTECT = True
-    
-    # Default Security (Override in Prod)
-    JWT_COOKIE_SECURE = False 
 
     # Cloudflare R2
     R2_ACCESS_KEY_ID = os.environ.get('R2_ACCESS_KEY_ID')
@@ -60,11 +55,6 @@ class Config:
         'location_batch': {'queue': 'media_processing'}
         # 'app.tasks.send_email': {'queue': 'default'}, can be added when emails and such are set up
     }
-
-    #SIGHTENGINE
-    SIGHTENGINE_WORKFLOW_ID = os.environ.get('SIGHTENGINE_WORKFLOW_ID')
-    SIGHTENGINE_API_USER = os.environ.get('SIGHTENGINE_API_USER')
-    SIGHTENGINE_API_SECRET =os.environ.get('SIGHTENGINE_API_SECRET')
 
 class DevelopmentConfig(Config):
     DEBUG = True

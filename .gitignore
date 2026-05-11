@@ -53,7 +53,7 @@ meexample1.jpg
 #gitginore
 .gitignore
 gitignore
-
+Makefile
 frontend/config.js
 .log
 app_logs.log
