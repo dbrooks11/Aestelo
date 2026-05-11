@@ -10,8 +10,8 @@ from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from marshmallow import ValidationError
 from models import CollectionItem, Rating, Spot, UserProfile, Visit
 from schemas.spot_schema import spot_schema
-from sqlalchemy import Numeric, case, cast, func
-from sqlalchemy.orm import joinedload
+from sqlalchemy import Numeric, case, cast, func, select, label
+from sqlalchemy.orm import joinedload, selectinload
 from utils import (
     average_location_batch,
     generate_presigned_url,
@@ -197,61 +197,65 @@ def get_user_spots():
         page = request.args.get('page', default=1, type=int)
         per_page = request.args.get('per_page', default=12, type=int)
 
-        username_and_collections = UserProfile.query.options(
-            joinedload(UserProfile.collection)
-        ).get(current_user)
-
-        is_saved = db.session.query(CollectionItem).filter(
+        is_saved = select(CollectionItem.id).exists().where(
             CollectionItem.spot_id == Spot.id,
             CollectionItem.saved_by == current_user
-        ).exists()
-
-        has_visited = db.session.query(Visit).filter(
-            Visit.spot_id == Spot.id,
-            Visit.user_id == current_user
-        ).exists()
-
-        spots = db.session.query(
-            Spot, Rating, is_saved.label('is_saved'), has_visited.label('has_visited')
-        ).outerjoin(
-            Rating, 
-            (Rating.user_id==current_user) & (Rating.spot_id==Spot.id)
-        ).filter(
-            Spot.user_id==current_user,
-            Spot.status == 'success'
-        ).options(
-            joinedload(Spot.media)
-        ).order_by(Spot.date_posted.desc())
-
-        paginated_spots = spots.paginate(
-            page=page,
-            per_page=per_page
         )
 
-        results =[]
+        has_visited = select(Visit.id).exists().where(
+            Visit.spot_id == Spot.id,
+            Visit.user_id == current_user
+        )
 
-        if username_and_collections.collection:
-            collections = [{'id': c.id, 'name': c.name, 'is_default': c.is_default} for c in username_and_collections.collection]
+        fetch_limit = per_page + 1
+        offset = (page - 1) * per_page
 
-        for spot, rating, is_saved, has_visited in paginated_spots.items:
-            spot_data = spot_schema.dump(spot)
+        spots = (
+            select(
+                Spot,
+                Rating.rating_choice,
+                label('is_saved', is_saved),
+                label('has_visited', has_visited)
+            ).outerjoin(
+                Rating,
+                (Rating.user_id == current_user) & (Rating.spot_id == Spot.id)
+            ).where(
+                Spot.user_id==current_user,
+                Spot.status == 'success'
+            ).options(
+                selectinload(Spot.media)
+            ).order_by(
+                Spot.date_posted.desc()
+            ).limit(
+                fetch_limit
+            ).offset(offset)
+        )
 
-            spot_data['rating_choice'] = rating.rating_choice if rating else None
-            spot_data['username'] = username_and_collections.username
-            spot_data['is_saved'] = is_saved
-            spot_data['has_visited'] = has_visited
+        rows = db.session.execute(spots).all()
+        has_next = len(rows) > per_page
 
-            results.append(spot_data)
+        if has_next:
+            rows = rows[:-1]
+        has_prev = page > 1
+
+        results = []
+        for spot in rows:
+            data = spot[0]
+            data.rating_choice = spot[1]
+            data.is_saved = spot[2]
+            data.has_visited = spot[3]
+
+            results.append(spot_schema.dump(data))
 
 
         return jsonify({
             'spots': results,
-            'collections': collections,
-            'total': paginated_spots.total,
-            'total_pages': paginated_spots.pages,
-            'current_page': paginated_spots.page
+            'has_next': has_next,
+            'has_prev': has_prev,
+            'current_page': page
         }), 200
     except Exception as e:
+        print(str(e))
         return jsonify({'error': str(e)}), 500
     
 

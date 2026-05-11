@@ -4,7 +4,8 @@ from typing import TYPE_CHECKING, Optional
 
 from app.extensions  import db
 from flask import current_app
-from geoalchemy2 import Geography
+from geoalchemy2 import Geography, Geometry
+from geoalchemy2.functions import ST_X, ST_Y
 from sqlalchemy import (
     BigInteger,
     Boolean,
@@ -14,6 +15,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    cast
 )
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, column_property, mapped_column, relationship
@@ -37,6 +39,8 @@ class Spot(db.Model):
     coordinates: Mapped[Optional[Geography]] = mapped_column(
         Geography(geometry_type='POINT', srid=4326, spatial_index=True)
     )
+    latitude = column_property(ST_Y(cast(coordinates, Geometry)))
+    longitude = column_property(ST_X(cast(coordinates, Geometry)))
     date_posted: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), 
         index=True

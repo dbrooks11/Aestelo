@@ -27,6 +27,7 @@ from models import (
 from schemas import ValidationError
 from schemas.auth_schema import AuthUserSchema
 from sqlalchemy import exists, select
+from utils.schema_error_handling import schema_error_handling
 from utils.database import safe_transaction
 from utils.loggin_config import get_logger
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -45,27 +46,27 @@ def signup():
     if(data.get("name")):
         return jsonify({'error': 'Invalid(b)'}), 401
 
-    email = data.get('email', None)
-    password = data.get('password', None)
-    confirm_password = data.get('confirm_password', None)
+    email: str = data.get('email', None)
+    password: str = data.get('password', None)
+    confirm_password: str = data.get('confirm_password', None)
 
     if not all([email, password, confirm_password]):
         return jsonify({'error': 'Email, Password, and Confirmed Password are required'}), 401
 
     logger.info("Signup attempt", email=email)
 
-    if db.session.execute(select(AuthUser).where(AuthUser.email == email)).first():
+    if db.session.execute(select(AuthUser.id).where(AuthUser.email == email)).first():
         return jsonify({'error': 'Account already exist'}), 409
     
     try:
-        AuthUserSchema().validate(data, partial=True)
+        AuthUserSchema().load(data, partial=True)
     except ValidationError as error:
-        return jsonify({'error': error}), 400
+        return jsonify({'error': schema_error_handling(error)}), 400
 
     try:
         with safe_transaction():
-            username = ''
-            attempts = 0
+            username: str = ''
+            attempts: int = 0
             while attempts < 3:
                 username = f'user{random.randint(1, 999999999999999999999999)}'
                 
@@ -115,29 +116,28 @@ def login():
     if(data.get("name")):
         return jsonify({'error': 'Invalid input'}), 401
     
-    login_method = data.get("email") or data.get("username")
+    login_method: str = data.get("email", None) or data.get("username", None)
     if not login_method:
         return jsonify({'error': 'Email or username required'}), 401
     
     try:
-        AuthUserSchema().validate(data, partial=True)
+        AuthUserSchema().load(data, partial=True)
     except ValidationError as error:
-        return jsonify({'error': error}), 400
+        return jsonify({'error': schema_error_handling(error)}), 400
     
     try:
-        
         authenticate_user = db.session.scalars(select(AuthUser).where(
                 (AuthUser.email == login_method) |
                 (AuthUser.username == login_method)
             )).first()
 
         if authenticate_user:
-            user_hash = authenticate_user.password_encrypted
+            user_hash: str = authenticate_user.password_encrypted
         else:
-            user_hash = dummy_hash
+            user_hash: str = dummy_hash
 
-        password = data.get("password", None)
-        password_check = check_password_hash(user_hash, password)
+        password: str = data.get("password", None)
+        password_check: bool = check_password_hash(user_hash, password)
 
         if not all([authenticate_user, password_check]):
             return jsonify({'error': 'Invalid email or password'}),401
@@ -145,8 +145,8 @@ def login():
         with safe_transaction():
             authenticate_user.last_sign_in_at = datetime.now(timezone.utc)
 
-        access_token = create_access_token(identity=authenticate_user.id)
-        refresh_token = create_refresh_token(identity=authenticate_user.id)
+        access_token: str = create_access_token(identity=authenticate_user.id)
+        refresh_token: str = create_refresh_token(identity=authenticate_user.id)
 
         response =  jsonify({
             'message': 'Login successful',
@@ -180,8 +180,8 @@ def logout():
         unset_jwt_cookies(response)
         logger.info("Logout successful")
         return response, 200
-    except Exception:
-        logger.error("Logout failed")
+    except Exception as e:
+        logger.error("Logout failed", error=str(e))
         return jsonify({'error': 'Failed to logout'}), 500
 
 
@@ -200,3 +200,9 @@ def refresh():
                      user_id=current_user,
                      error=str(e))
         return jsonify({"Refresh failed"}), 500
+    
+
+@auth_bp.route('/authenticate', methods = ["GET"])
+@jwt_required()
+def authenticate():
+    return jsonify({'auth': True}), 200

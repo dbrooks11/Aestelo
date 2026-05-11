@@ -5,16 +5,18 @@ from models.auth import AuthUser
 
 min_password_length = 8
 max_password_length = 64
+
+min_username_length = 1
+max_username_length = 30
     
 class AuthUserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = AuthUser
 
-    id = fields.UUID(dump_only=True)
     username = fields.Str(
         required=True,
         validate=[
-            validate.Length(min=1, max=30),
+            validate.Length(min=min_username_length, max=max_username_length, error= f"Username must be between {min_username_length} and {max_username_length} characters"),
             validate.Regexp(r'^(?!.*\.$)(?!^\.)[a-z0-9._]+$', error='Username can only contain letters, numbers, periods, and underscores')
     ])
     email = fields.Email(

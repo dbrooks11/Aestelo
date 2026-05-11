@@ -18,9 +18,11 @@ class SpotSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Spot
         include_fk = True
-        exclude = ('is_deleted','deleted_at','num_reports','is_removed','removed_at', 'trending_score', 'num_of_edits','status')
+        exclude = ('is_deleted','deleted_at','num_reports','is_removed','removed_at', 'trending_score', 'num_of_edits','status',
+                   'coordinates')
 
-    coordinates = fields.Method("get_coordinates")
+    latitide = fields.Float(dump_only=True)
+    longitude = fields.Float(dump_only=True)
 
     media = fields.Nested(SpotMediaSchema, many=True)
     username = fields.Pluck(UserProfileSimpleSchema, 'username', attribute='user_profile')
@@ -33,7 +35,9 @@ class SpotSchema(ma.SQLAlchemyAutoSchema):
         validate=validate.Length(max=15, error='Spot can not have more than 15 tags')
     )
     
-   
+    has_visited = fields.Bool(dump_only=True)
+    is_saved = fields.Bool(dump_only=True)
+    rating_choice = fields.Integer(dump_only=True)
 
     @validates('hashtags')
     def validate_hashtags(self, value, **kwargs):
@@ -78,17 +82,6 @@ class SpotSchema(ma.SQLAlchemyAutoSchema):
             raise ValidationError(f'Spot description must be {spot_description_length} characters or less')
 
         return value.strip()
-
-    def get_coordinates(self, obj):
-        if not obj.coordinates:
-            return None
-    
-        point = to_shape(obj.coordinates)
-        return {
-            "latitude": point.y,
-            "longitude": point.x
-        }
-    
 
 
 spot_schema = SpotSchema()

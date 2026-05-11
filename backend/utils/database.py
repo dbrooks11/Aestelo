@@ -4,7 +4,7 @@ from app.extensions import db
 
 @contextmanager
 def safe_transaction():
-    """Handle database transactions with automatic rollback on error"""
+    """Handle database transactions with automatic commit on completion & rollback on error"""
     try:
         yield
         db.session.commit()
