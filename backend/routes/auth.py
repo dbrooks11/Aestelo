@@ -2,7 +2,7 @@
 import random
 from datetime import datetime, timezone
 
-from .extensions import db
+from app.extensions import db
 from flask import Blueprint, current_app, jsonify, request
 from flask_jwt_extended import (
     create_access_token,
@@ -27,7 +27,6 @@ from models import (
 from schemas import ValidationError
 from schemas.auth_schema import AuthUserSchema
 from sqlalchemy import exists, select
-from sqlalchemy.orm import load_only
 from utils.database import safe_transaction
 from utils.loggin_config import get_logger
 from werkzeug.security import check_password_hash, generate_password_hash

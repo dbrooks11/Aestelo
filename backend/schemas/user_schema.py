@@ -1,7 +1,7 @@
 import re
 from datetime import datetime
 
-from backend.app.extensions import db, ma
+from app.extensions import db, ma
 from marshmallow import ValidationError, fields, validate, validates
 from models.user import UserInfo, UserProfile, UserRole, UserSettings, UserSubscription
 from sqlalchemy import exists

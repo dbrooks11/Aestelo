@@ -1,4 +1,4 @@
-from backend.app.extensions import ma
+from app.extensions import ma
 from marshmallow import fields
 from models import Collection, CollectionItem
 

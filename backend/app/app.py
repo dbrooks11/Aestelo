@@ -1,18 +1,19 @@
 
 import os
-import time
-from datetime import datetime, timezone
-import uuid
+
 import models
-from backend.app.config import config_dict
-from backend.app.extensions import celery_init_app, db, jwt, limiter, ma, mg
-from flask import Flask, g, jsonify, request
+from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_talisman import Talisman
-from utils.loggin_config import configure_logging
+from middleware.logging_middleware import configure_logging_middleware
+from middleware.request_time_middleware import configure_request_time
 from models.token_blacklist import TokenBlackList
-from sqlalchemy import select
 from routes import register_blueprints
+from sqlalchemy import select
+from utils.loggin_config import configure_logging
+
+from backend.app.config import config_dict
+from backend.app.extensions import celery_init_app, db, jwt, limiter, ma, mg
 
 
 def create_app(config_name=None):
@@ -29,35 +30,12 @@ def create_app(config_name=None):
 
     extensions(app)
     configure_logging(app)
+    configure_logging_middleware(app)
+    configure_request_time(app)
     register_blueprints(app)
     register_jwt_handlers(app)
     configure_security(app)
 
-    @app.before_request
-    def assign_request_id():
-        g.request_id = request.headers.get('X-Request-ID', str(uuid.uuid4()))
-        g.start_time = datetime.now(timezone.utc)
-
-    @app.after_request
-    def add_request_id_header(response):
-        response.headers['X-Request-ID'] = g.request_id
-        return response
-    
-    @app.before_request
-    def start_timer():
-        g.start = time.time()
-
-    @app.after_request
-    def log_request(response):
-        if request.path.startswith('/static'): 
-            return response
-        now = time.time()
-        duration = round(now - g.start, 2)
-        duration_ms = round((now - g.start) * 1000, 2)
-        print(f"⏱️ {request.method} {request.path} took {duration}s/{duration_ms}ms")
-        return response
-
- 
     with app.app_context():
         @app.route('/')
         def health_check():

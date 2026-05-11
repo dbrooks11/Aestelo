@@ -1,7 +1,7 @@
 import os
 
 import redis
-from .extensions import db
+from app.extensions  import db
 from flask import Blueprint, current_app, jsonify
 from sqlalchemy import text
 from utils import s3

@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from models import Spot, UserProfile, Visit
 from datetime import datetime
 
-from .extensions import db
+from app.extensions  import db
 from sqlalchemy import (
     ARRAY,
     BigInteger,

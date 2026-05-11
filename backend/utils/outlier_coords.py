@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 from celery import shared_task
-from backend.app.extensions import db
+from app.extensions import db
 from flask import current_app
 from geopy.distance import distance
 from models import Spot, Visit

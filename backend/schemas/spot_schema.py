@@ -1,4 +1,4 @@
-from backend.app.extensions import ma
+from app.extensions import ma
 from geoalchemy2.shape import to_shape
 from marshmallow import ValidationError, fields, validate, validates
 from models.spot import Spot, SpotMedia

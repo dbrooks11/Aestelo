@@ -1,6 +1,6 @@
 from functools import wraps
 
-from backend.app.extensions import db
+from app.extensions import db
 from flask import jsonify, request
 from flask_jwt_extended import get_jwt_identity
 from models import BlockProfile, Follow, Spot, UserProfile, Visit

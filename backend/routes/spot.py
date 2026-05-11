@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 from celery import chord, group
 from celery.result import AsyncResult, GroupResult
-from .extensions import celery, db
+from app.extensions  import celery, db
 from flask import Blueprint, current_app, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer

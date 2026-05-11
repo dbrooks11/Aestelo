@@ -1,6 +1,6 @@
 # util/database.py
 from contextlib import contextmanager
-from backend.app.extensions import db
+from app.extensions import db
 
 @contextmanager
 def safe_transaction():

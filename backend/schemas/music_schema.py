@@ -1,5 +1,5 @@
 # schemas/user.py
-from backend.app.extensions import ma
+from app.extensions import ma
 from marshmallow import fields
 from models.music_track import MusicTrack
 

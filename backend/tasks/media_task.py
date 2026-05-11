@@ -5,8 +5,8 @@ from typing import Literal
 from botocore.exceptions import BotoCoreError
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
-from backend.app.config import Config
-from backend.app.extensions import db
+from app.config import Config
+from app.extensions import db
 from models import SpotMedia, VisitMedia
 
 from utils.photo_processing import (

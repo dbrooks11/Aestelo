@@ -1,5 +1,6 @@
-from celery import Celery, Task
 import os
+
+from celery import Celery, Task
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from flask_limiter import Limiter
