@@ -12,12 +12,16 @@ max_username_length = 30
 class AuthUserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = AuthUser
+    
+    name = fields.Str()
 
     username = fields.Str(
         required=True,
         validate=[
             validate.Length(min=min_username_length, max=max_username_length, error= f"Username must be between {min_username_length} and {max_username_length} characters")
     ])
+
+
     email = fields.Email(
         required=True, 
         validate=[
@@ -41,8 +45,12 @@ class AuthUserSchema(ma.SQLAlchemyAutoSchema):
     def validate_password(self, value, **kwargs):
         if ' ' in value:
             raise ValidationError('Password cannot contain spaces')
-        
     
+    @validates("name")
+    def name_field(self, value, **kwargs):
+        if value:
+            raise ValidationError("Invalid Input(b)")
+        
     @validates_schema
     def validate_passwords(self,data,**kwargs):
         password = data.get('password')
