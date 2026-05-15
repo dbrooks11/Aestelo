@@ -1,6 +1,5 @@
 import os
 from datetime import timedelta
-
 from dotenv import load_dotenv
 from kombu import Queue
 
@@ -10,7 +9,20 @@ class Config:
     JSON_SORT_KEYS = False
     MAX_CONTENT_LENGTH = 200 * 1024 * 1024
     MAX_FILE_SIZE = 20 * 1024 * 1024
-   
+    ALLOWED_POST_FORMATS = {
+        'image/jpeg': 'jpg',
+        'image/jpg': 'jpg',
+        'image/heic': 'heic',
+        'image/heif': 'heif',
+    }
+    ALLOWED_MIME_TYPES = {
+        'image/jpeg': 'jpg',
+        'image/jpg': 'jpg',
+        'image/png': 'png',
+        'image/webp': 'webp',
+        'image/heic': 'heic',
+        'image/heif': 'heif',
+    }
     
     # Database
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
@@ -34,12 +46,14 @@ class Config:
     R2_ACCESS_KEY_ID = os.environ.get('R2_ACCESS_KEY_ID')
     R2_SECRET_ACCESS_KEY = os.environ.get('R2_SECRET_ACCESS_KEY')
     R2_BUCKET_NAME = os.environ.get('R2_BUCKET_NAME')
-    R2_PUBLIC_URL = os.environ.get('R2_PUBLIC_URL')
-
+    R2_ENDPOINT = os.environ.get('R2_S3_API')
+    R2_PUBLIC_URL = os.environ.get('R2_PUBLIC_DEV_URL')
+    
+    
     #CELERY
     CELERY = dict(
-        broker_url=os.getenv('CELERY_BROKER_URL', 'redis://redis:6379/0'),
-        result_backend=os.getenv('CELERY_RESULT_BACKEND', 'redis://redis:6379/0'),
+        broker_url=os.getenv('CELERY_BROKER_URL'),
+        result_backend=os.getenv('CELERY_RESULT_BACKEND'),
         task_ignore_result=False,
     )
 
@@ -49,7 +63,6 @@ class Config:
         Queue('media_processing')
     )
 
-    # Define Functions (Map tasks to queues)
     CELERY_TASK_ROUTES = {
         'process_photos_metadata': {'queue': 'media_processing'},
         'location_batch': {'queue': 'media_processing'}
@@ -57,13 +70,22 @@ class Config:
     }
 
 class DevelopmentConfig(Config):
+    #Flask
     DEBUG = True
     DEBUG_TB_ENABLED = True
     JWT_COOKIE_SECURE = False
 
+    #Celery
+    CELERY = dict(
+        broker_url='redis://redis:6379/0',
+        result_backend='redis://redis:6379/0',
+        task_ignore_result=False,
+    )
+
 class ProductionConfig(Config):
     DEBUG = False
     JWT_COOKIE_SECURE = True
+    R2_PUBLIC_URL = os.environ.get('R2_CUSTOM_DOMAIN')
 
 
 config_dict = {
