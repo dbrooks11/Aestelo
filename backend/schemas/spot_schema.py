@@ -1,8 +1,8 @@
 from app.extensions import ma
-from geoalchemy2.shape import to_shape
 from marshmallow import ValidationError, fields, validate, validates
 from models.spot import Spot, SpotMedia
-
+from app.config import Config
+from typing import Optional
 from schemas.user_schema import UserProfileSimpleSchema
 
 
@@ -10,10 +10,16 @@ class SpotMediaSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = SpotMedia
         include_fk = True
-        exclude = ('spot_id', 'uploaded_by', 'id', 'photo_type', 'photo_path')
+        exclude = ('spot_id', 'uploaded_by', 'id', 'photo_type')
 
-    photo_path_url = fields.Str(attribute='photo_path_url', dump_only=True)
+    photo_path = fields.Method('photo_path_url', dump_only=True)
 
+    def photo_path_url(self, obj) -> Optional[str]:
+        if not obj.photo_path:
+            return None
+        public_url =  f"{Config.R2_PUBLIC_URL}/{obj.photo_path}"
+        return public_url
+    
 class SpotSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Spot

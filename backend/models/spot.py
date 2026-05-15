@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
 from app.extensions  import db
-from flask import current_app
 from geoalchemy2 import Geography, Geometry
 from geoalchemy2.functions import ST_X, ST_Y
 from sqlalchemy import (
@@ -120,9 +119,3 @@ class SpotMedia(db.Model):
     def save(self):
         db.session.add(self)
         db.session.commit()
-
-    @property
-    def photo_path_url(self) -> Optional[str]:
-        if not self.photo_path:
-            return None
-        return f"{current_app.config['R2_PUBLIC_URL']}/{self.photo_path}"

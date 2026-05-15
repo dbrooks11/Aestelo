@@ -62,7 +62,7 @@ class ObjectStorage:
         return unique_filename
 
 
-    def generate_presigned_url(self, mimetype: str, user_id: str, expires_in: int, content_target: Literal['spot','visit','profile']):
+    def generate_presigned_url(self, mimetype: str, user_id: str, content_target: Literal['spot','visit','profile'], expires_in: int = 3600):
         """Generate presigned URL"""
         folders = {
             "spot": "quarantine/spot",
@@ -86,7 +86,7 @@ class ObjectStorage:
                     'Key':object_key,
                     'ContentType': mimetype
                 },
-                ExpiresIn = expires_in if expires_in else 3600
+                ExpiresIn = expires_in
             )
 
             return {'key': object_key, 'presigned_url': response } 

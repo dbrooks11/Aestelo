@@ -1,8 +1,8 @@
 import re
 from datetime import datetime
-from flask import current_app
 
 from app.extensions import db, ma
+from app.config import Config
 from marshmallow import ValidationError, fields, validate, validates
 from models.user import UserInfo, UserProfile, UserRole, UserSettings, UserSubscription
 from sqlalchemy import exists
@@ -59,13 +59,13 @@ class UserProfileSchema(ma.SQLAlchemyAutoSchema):
     def profile_photo_url(self, obj):
         if not obj.profile_photo:
             return None
-        public_url = f"{current_app.config['R2_PUBLIC_URL']}/{obj.profile_photo}"
+        public_url = f"{Config.R2_PUBLIC_URL}/{obj.profile_photo}"
         return public_url
 
     def profile_banner_url(self, obj):
         if not obj.profile_banner:
             return None
-        public_url = f"{current_app.config['R2_PUBLIC_URL']}/{obj.profile_banner}"
+        public_url = f"{Config.R2_PUBLIC_URL}/{obj.profile_banner}"
         return public_url
         
 class UserProfileSimpleSchema(ma.SQLAlchemyAutoSchema):
