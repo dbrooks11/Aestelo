@@ -16,14 +16,14 @@ export default function Photos({media, progress, onClickFunctionality}): JSX.Ele
         <div className="relative flex flex-1 justify-center items-center stroke-white object-cover aspect-4/5 text-accents-primary/80 select-none">
             {isLoading && <Loader2 className="animate-spin" size={34}/>}
             {onError && <ImageOff size={34}/>}
-            {mediaList.map((item: {photo_path_url: string}, index: number) => {
+            {mediaList.map((item: {photo_path: string}, index: number) => {
                 const shouldRender = Math.abs(index - (progress - 1)) <= 1
                 
                 if(!shouldRender) return null
 
                 return (<img
                     key={index}
-                    src={item.photo_path_url}
+                    src={item.photo_path}
                     onTouchStart={() => {
                         const date = new Date()
                         const time = date.getTime()

@@ -95,7 +95,7 @@ export default function EditProfileForm({
           const { key, presigned_url } = presignedUrls[i]
           const fileData: [string, FormDataEntryValue] = fileArray[i]
           const file: File | string = fileData[1]
-
+          
           if(file instanceof File){
             console.log("key:", key, "Presigned:", presigned_url)
             console.log("File", file, "File type", file.type)
@@ -106,14 +106,6 @@ export default function EditProfileForm({
                 "Content-Type": file.type,
               }
             })
-            // const responseS3: Response = await fetch(presigned_url, {
-            //   method: "PUT",
-            //   body: file,
-            //   headers: {
-            //     "Content-Type": file.type
-            //     }
-            // })
-
             console.log("Response S3:" , responseS3)
           }
         }  

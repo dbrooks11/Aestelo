@@ -9,7 +9,7 @@ export default function SpotThumbnail({spot}): JSX.Element{
     return(
         <div className="relative aspect-4/5 object-cover flex flex-1 select-none">
             <img
-                src={thumbnail?.photo_path_url}
+                src={thumbnail?.photo_path}
                 loading="lazy"
                 className="w-full h-full object-cover"
                 alt={`Spot ${spot.id} Thumbnail`}
