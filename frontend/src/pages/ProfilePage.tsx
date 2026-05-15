@@ -1,6 +1,6 @@
 
 import {useEffect, type JSX, useState} from 'react'
-import { AxiosErrorHelper, protectedInstance } from '../util/axios_api_helpers'
+import { protectedInstance } from '../util/axiosHelpers'
 import DefaultBannerDark from "../assets/default_banner_dark.svg"
 import DefaultBannerLight from "../assets/default_banner_light.svg"
 import DefaultPhoto from "../assets/default_photo.svg"
@@ -11,36 +11,25 @@ import ProfileTabs from '../components/Profile/ProfileTabs'
 import EditProfileForm from '../components/Forms/ProfileEditForm'
 import type { AxiosResponse } from 'axios'
 import ToasterCustom from '../components/Toast'
-import toast from 'react-hot-toast'
 import { useTheme } from '../context/ThemeContext'
 import ProfileLoadingSkeleton from '../components/Skeletons/ProfileSkeleton'
 
 export type ProfileDataType = {
   id: string,
-  profile_photo_url: string | undefined
-  profile_banner_url: string | undefined,
-  username: string,
-  banner_theme: string,
-  bio: string,
+  profile_photo: string | undefined
+  profile_banner: string | undefined,
+  username: string | undefined,
+  banner_theme: string | undefined,
+  bio: string | undefined,
   instagram: string | undefined,
   tiktok: string | undefined,
   twitter_x: string | undefined,
   facebook: string | undefined,
 
-  is_verified_instagram: boolean,
-  is_verified_tiktok: boolean,
-  is_verified_twitter_x: boolean,
-  is_verified_facebook: boolean,
-  
-  is_business_account: boolean,
-  is_prem_account: boolean,
-  show_online_status: boolean,
-  is_private: boolean,
-
-  follower_count: number,
-  following_count: number,
-  spot_count: number,
-  visit_count: number,
+  follower_count: number | undefined,
+  following_count: number | undefined,
+  spot_count: number | undefined,
+  visit_count: number | undefined,
 
   profile_created_at: Date
   
@@ -70,10 +59,7 @@ export default function ProfilePage(): JSX.Element {
         }
 
       }catch(error){
-        const newError = AxiosErrorHelper(error)
-        toast.error(newError, {
-          toasterId: 'profile'
-        })
+        console.error(error)
         
       }
     }
@@ -85,22 +71,22 @@ export default function ProfilePage(): JSX.Element {
     <>
       {!isLoading ? <main className='relative flex flex-col items-center h-full'>
         <ProfileHeader 
-          username = {profileData?.username ? profileData.username : ''} 
-          follower_count={profileData?.follower_count ? profileData.follower_count : 0}/>
+          username = {profileData?.username} 
+          follower_count={profileData?.follower_count}/>
           
-        <ProfileBanner profileBanner={profileData?.profile_banner_url ? profileData.profile_banner_url: banner}/> 
+        <ProfileBanner profileBanner={profileData?.profile_banner ?? banner}/> 
         <ProfileInfo 
-          profile_photo_url={profileData?.profile_photo_url ? profileData.profile_photo_url : DefaultPhoto} 
-          follower_count={profileData?.follower_count ? profileData.follower_count : 0}
-          following_count={profileData?.following_count ? profileData.following_count : 0}
-          username= {profileData?.username ? profileData.username : ''}
-          bio = {profileData?.bio ? profileData.bio : ""}
-          spot_count={profileData?.spot_count ? profileData.spot_count : 0}
-          visit_count={profileData?.visit_count ? profileData.visit_count : 0}
-          instagram = {profileData?.instagram ? profileData.instagram : undefined}
-          tiktok = {profileData?.tiktok ? profileData.tiktok : undefined}
-          twitter_x = {profileData?.twitter_x ? profileData.twitter_x : undefined}
-          facebook = {profileData?.facebook ? profileData.facebook : undefined}
+          profile_photo={profileData?.profile_photo ?? DefaultPhoto} 
+          follower_count={profileData?.follower_count}
+          following_count={profileData?.following_count}
+          username= {profileData?.username}
+          bio = {profileData?.bio}
+          spot_count={profileData?.spot_count}
+          visit_count={profileData?.visit_count}
+          instagram = {profileData?.instagram}
+          tiktok = {profileData?.tiktok}
+          twitter_x = {profileData?.twitter_x}
+          facebook = {profileData?.facebook}
           setProfileData = {setProfileData}
           profileData = {profileData}
           setShowModal = {setShowModal}
@@ -109,10 +95,10 @@ export default function ProfilePage(): JSX.Element {
         
         <ProfileTabs/>
         <EditProfileForm
-          profile_banner_url={profileData?.profile_banner_url ? profileData.profile_banner_url : banner}
-          profile_photo_url={profileData?.profile_photo_url ? profileData.profile_photo_url : DefaultPhoto}  
-          username = {profileData?.username ? profileData.username : ""} 
-          bio = {profileData?.bio ? profileData.bio : ""}
+          profileBannerUrl={profileData?.profile_banner ?? banner}
+          profilePhotoUrl={profileData?.profile_photo ?? DefaultPhoto}  
+          username = {profileData?.username} 
+          bio = {profileData?.bio}
           setProfileData={setProfileData}
           setShowModal={setShowModal}
           showModal={showModal}

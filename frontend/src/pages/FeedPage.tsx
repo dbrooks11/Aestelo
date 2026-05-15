@@ -1,6 +1,6 @@
 
 import {type JSX, useState, useEffect} from 'react'
-import { AxiosErrorHelper, protectedInstance } from '../util/axios_api_helpers'
+import { protectedInstance } from '../util/axiosHelpers'
 import toast, { Toaster } from 'react-hot-toast'
 import Post from '../components/ContentType/Spot/Spot'
 import Spot from '../components/ContentType/Spot/Spot'

@@ -1,7 +1,7 @@
 import { useState, type FormEvent, type JSX, type KeyboardEvent } from "react";
 import { ArrowLeft, ArrowRight, X, Accessibility } from "lucide-react";
 import type { PreviewPhotosState, UploadedPhotosState } from "../CreateSpotForm";
-import { AxiosErrorHelper, protectedInstance } from "../../../../util/axios_api_helpers";
+import {protectedInstance } from "../../../../util/axiosHelpers";
 import axios, { type AxiosResponse } from "axios";
 import { useTaskStore } from "../../../../store/taskStateStore";
 import toast from "react-hot-toast";
@@ -42,7 +42,7 @@ export default function CreateSpotFormStepThree({previewPhotos, uploadedPhotos, 
 
             // TODO: remove console logs and display actual errors via toast
             try{
-                const responseOne: AxiosResponse = await protectedInstance.post('/spot/presigned-url', fileInfo)
+                const responseOne: AxiosResponse = await protectedInstance.post('/s3/presigned-url/spot', fileInfo)
 
                 if(responseOne.status === 200){
                     const presignedList: Array<{key: string, presigned_url: string}> = responseOne.data.message
@@ -79,18 +79,11 @@ export default function CreateSpotFormStepThree({previewPhotos, uploadedPhotos, 
                             resetForm()
                         }
                     }catch(error){
-                        const errors: string = AxiosErrorHelper(error)
-                        toast.error(errors, {
-                            toasterId: 'spotForm'
-                        })
-                        
+                        console.error(error)
                     }
                 }
             }catch(error){
-                const errors: string = AxiosErrorHelper(error)
-                toast.error(errors, {
-                    toasterId: 'spotForm'
-                })
+                console.error(error)
             }finally{
                 setIsLoading(false)
             }

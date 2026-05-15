@@ -1,57 +1,50 @@
 import { useEffect, useState, type ReactNode, type JSX } from "react";
-import { protectedInstance } from "../util/axios_api_helpers";
-import { AuthContext, type ProfileDataMinimal, type AuthContextType } from "../context/AuthContext";
-import DefaultProfilePhoto from "../assets/default_photo.svg"
+import { AuthContext, type AuthContextType } from "../context/AuthContext";
+import { csrfRefreshToken } from "../util/cookieHandlers";
+import { protectedInstance } from "../util/axiosHelpers";
+import axios from "axios";
 
 
 export default function AuthProvider({ children }: {children: ReactNode}): JSX.Element {
 
-    const [user, setUser] = useState<ProfileDataMinimal | null>(null);
+    const [user, setUser] = useState<boolean | null>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     
-
-    //TODO: potential idea - use cookies with login value (true or false) to indicate if user is logged)
-    const checkAuth = async () =>{
-        try{
-            const response = await protectedInstance.get('/auth/authenticate')
- 
-            if (response.status === 200){
-                const data: ProfileDataMinimal = response.data.user
-
-                if(!data.profile_photo_url){
-                    data.profile_photo_url = DefaultProfilePhoto
-                }
-                setUser(data)
-            }
-        }catch{
-            setUser(null)
-        }
-        finally{
-            setIsLoading(false)
-        }
-    }
-
-    useEffect(() => {
-        checkAuth()
-    }, [])
 
 
     useEffect(() => {
         const authInterceptor = protectedInstance.interceptors.response.use(
             (response) => response,
-            (error) => {
+            async (error) => {
+                const originalRequest = error.config;
                 
-                if (error.response?.status === 401){
-                    console.warn("Session expired or invalid. Loggin out...")
-                    setUser(null)
+                if ([401].includes(error.response?.status) && !originalRequest._retry){
+                    originalRequest._retry = true;
+                    try{
+                        const refreshResponse = await protectedInstance.post('/auth/refresh', {}, {
+                            withCredentials: true,
+                            headers: {
+                                "X-CSRF-TOKEN": csrfRefreshToken()
+                            }
+                        })
 
+                        if (refreshResponse.status === 200){
+                            console.log("Refreshing session...")
+                            originalRequest.headers["X-CSRF-TOKEN"] = csrfRefreshToken()
+                            return axios(originalRequest)
+                        }
+                    }catch(error){
+                        console.warn("Session expired. Logging out...")
+                        setUser(false)
+                        window.location.href = '/login-email'
+                    }
                 }
                 return Promise.reject(error)
             }
         )
     
         return () => {
-            protectedInstance.interceptors.response.eject(authInterceptor)
+            axios.interceptors.response.eject(authInterceptor)
         }
     }, [setUser]);
 
@@ -60,7 +53,6 @@ export default function AuthProvider({ children }: {children: ReactNode}): JSX.E
         user,
         isLoading,
         isAuthenticated: user ? true : false,
-        checkAuth,
         setUser,
     }
 

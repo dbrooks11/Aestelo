@@ -5,7 +5,7 @@ import { ArrowLeft, Ellipsis, X, Settings, LogOut } from "lucide-react"
 import { motion, useTransform, useScroll, AnimatePresence } from "framer-motion";
 import { type ProfileDataType  } from "../../pages/ProfilePage";
 import type { AxiosResponse } from "axios";
-import { protectedInstance, AxisErrorHelperConsoleOnly } from "../../util/axios_api_helpers";
+import { protectedInstance } from "../../util/axiosHelpers";
 import toast from "react-hot-toast";
 
 
@@ -100,7 +100,7 @@ export default function ProfileHeader(props: ProfileHeaderProps): JSX.Element{
           }
     
         }catch(error: unknown){
-          AxisErrorHelperConsoleOnly(error, "Log Out")
+          console.error("Failed to logout")
         }
     
       }

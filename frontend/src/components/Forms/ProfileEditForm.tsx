@@ -1,18 +1,18 @@
 import { useState, useEffect,type Dispatch, type JSX, type SetStateAction, type ChangeEvent } from "react";
 import cn from "../../util/tailwind_merger";
 import { type ProfileDataType } from "../../pages/ProfilePage";
-import { LoaderCircle, PencilLine, X } from 'lucide-react'
-import toast from "react-hot-toast";
+import { LoaderCircle, PencilLine, X } from 'lucide-react';
 import { Monitor, Smartphone, Upload } from "lucide-react";
-import { protectedInstance } from "../../util/axios_api_helpers";
+import { protectedInstance} from "../../util/axiosHelpers";
 import { useFormStatus } from "react-dom";
-import { AxiosErrorHelper } from "../../util/axios_api_helpers";
 import Modal from "../Modal";
 import { useSpotMutation } from "../../hooks/SpotHooks/useSpotMutation";
+import type { AxiosResponse } from "axios";
+import axios from "axios";
 
 type EditProfileFormProps = {
-  profile_banner_url: ProfileDataType['profile_banner_url']
-  profile_photo_url: ProfileDataType['profile_photo_url']
+  profileBannerUrl: ProfileDataType['profile_banner']
+  profilePhotoUrl: ProfileDataType['profile_photo']
   username: ProfileDataType['username']
   bio: ProfileDataType['bio']
   setProfileData: Dispatch<SetStateAction<ProfileDataType | null>>
@@ -21,38 +21,38 @@ type EditProfileFormProps = {
 }
 
 // TODO: put the css back to respective elements
-const editProfileFormScreenGuideButtonStyle = 'flex gap-2 py-1 px-2 items-center rounded-md hover:dark:text-text-main-dark hover:text-text-main-light cursor-pointer'
-const editProfileFormScreenGuideButtonActiveStyle = 'dark:bg-bg-secondary-dark bg-bg-secondary-light dark:text-text-main-dark text-text-main-light shadow-sm'
-const editProfileFormContainerStyle = 'border dark:bg-charcoal dark:border-border-color-dark bg-black/10 border-border-color-light rounded-lg text-sm'
-const editProfileFormLabelStyle = 'font-bold dark:text-text-muted-dark text-text-main-light'
-const editProfileFormTinyText = 'text-[10px] text-text-muted-light dark:text-text-muted-dark'
+const editProfileFormScreenGuideButtonStyle = 'flex gap-2 py-1 px-2 items-center rounded-md hover:dark:text-text-main-dark hover:text-text-main-light cursor-pointer';
+const editProfileFormScreenGuideButtonActiveStyle = 'dark:bg-bg-secondary-dark bg-bg-secondary-light dark:text-text-main-dark text-text-main-light shadow-sm';
+const editProfileFormContainerStyle = 'border dark:bg-charcoal dark:border-border-color-dark bg-black/10 border-border-color-light rounded-lg text-sm';
+const editProfileFormLabelStyle = 'font-bold dark:text-text-muted-dark text-text-main-light';
+const editProfileFormTinyText = 'text-[10px] text-text-muted-light dark:text-text-muted-dark';
 
 export default function EditProfileForm({
-  username, bio, profile_photo_url, profile_banner_url,
+  username, bio, profilePhotoUrl, profileBannerUrl,
   setProfileData, setShowModal, showModal }: EditProfileFormProps): JSX.Element {
   
-  const { updateAllSpotsInCache} = useSpotMutation()
+  const { updateAllSpotsInCache} = useSpotMutation();
   
-  const [usernameIndicator, setUsernameIndictor] = useState<boolean>(false)
-  const [charCounterBio, setCharCounterBio] = useState<number>(bio.length) 
-  const [charCounterUsername, setCharCounterUsername] = useState<number>(username.length) 
-  const [screenGuideType, setScreenGuideType] = useState<'mobile' | 'desktop'>('desktop')
-  const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | undefined>(undefined)
-  const [profileBannerPreview, setProfileBannerPreview] = useState<string | undefined>(undefined)
+  const [usernameIndicator, setUsernameIndictor] = useState<boolean>(false);
+  const [charCounterBio, setCharCounterBio] = useState<number>(bio.length);
+  const [charCounterUsername, setCharCounterUsername] = useState<number>(username.length);
+  const [screenGuideType, setScreenGuideType] = useState<'mobile' | 'desktop'>('desktop');
+  const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | undefined>(undefined);
+  const [profileBannerPreview, setProfileBannerPreview] = useState<string | undefined>(undefined);
 
   const handleProfileFileChange = (e: ChangeEvent<HTMLInputElement>, isFor: ('banner' | 'photo')) => {
-    let tempUrl = ''
-    const file = e.target.files
+    let tempUrl = '';
+    const file = e.target.files;
     if(file && file.length === 1){
       if(isFor === 'photo'){
-        if(profilePhotoPreview !== undefined) URL.revokeObjectURL(profilePhotoPreview)
-        tempUrl = URL.createObjectURL(file[0])
-        setProfilePhotoPreview(tempUrl)
+        if(profilePhotoPreview !== undefined) URL.revokeObjectURL(profilePhotoPreview);
+        tempUrl = URL.createObjectURL(file[0]);
+        setProfilePhotoPreview(tempUrl);
       }
       else if(isFor === 'banner'){
-        if(profileBannerPreview !== undefined) URL.revokeObjectURL(profileBannerPreview)
-        tempUrl = URL.createObjectURL(file[0])
-        setProfileBannerPreview(tempUrl)
+        if(profileBannerPreview !== undefined) URL.revokeObjectURL(profileBannerPreview);
+        tempUrl = URL.createObjectURL(file[0]);
+        setProfileBannerPreview(tempUrl);
       }
     }
   }
@@ -61,60 +61,70 @@ export default function EditProfileForm({
   useEffect(() => {
     return () => {
       if (profilePhotoPreview) {
-        URL.revokeObjectURL(profilePhotoPreview)
-        setProfilePhotoPreview(undefined)
+        URL.revokeObjectURL(profilePhotoPreview);
+        setProfilePhotoPreview(undefined);
       }
       if (profileBannerPreview) {
-        URL.revokeObjectURL(profileBannerPreview)
-        setProfileBannerPreview(undefined)
+        URL.revokeObjectURL(profileBannerPreview);
+        setProfileBannerPreview(undefined);
       }
     }
   },[])
 
-  //TODO: Add field for links and badges(maybe) in the future
-  const handleEditProfileFormClick = async (formData: FormData): Promise<void> => {
+  async function handleEditProfileFormClick(formData: FormData) {
+    const files = new FormData();
+    const info = new FormData();
+  
     try {
-      const response = await protectedInstance.patch('/profile/me', formData, {
-        headers:{
-          'Content-Type': 'multipart/form-data'
+      for (const [key, value] of formData.entries()){
+        if (value instanceof File){
+          if (value.size > 0){
+            files.append(key, value);
+          }
+        }else{
+          info.append(key, value);
         }
-      })
-
-      if (response.status === 200) {
-        const data = response.data
-
-        setProfileData((prev) => {
-          if (!prev) return null;
-          return (
-            {
-              ...prev,
-              profile_banner_url: data.updated_fields.profile_banner_url,
-              profile_photo_url: data.updated_fields.profile_photo_url,
-              username: data.updated_fields.username,
-              bio: data.updated_fields.bio
-            }
-          )
-        })
-        setShowModal(false)
-        updateAllSpotsInCache({'username': data.updated_fields.username})
-        toast.success(data.message, {
-          toasterId: 'profile'
-        })
       }
+        const response: AxiosResponse = await protectedInstance.post(`/s3/presigned-url/profile`, files);
+
+        const presignedUrls = response.data.data;
+        const fileArray: Array<[string, FormDataEntryValue]> = Array.from(files)
+        console.log(fileArray)
+
+        for (let i = 0; i < presignedUrls.length; i++){
+          const { key, presigned_url } = presignedUrls[i]
+          const fileData: [string, FormDataEntryValue] = fileArray[i]
+          const file: File | string = fileData[1]
+
+          if(file instanceof File){
+            console.log("key:", key, "Presigned:", presigned_url)
+            console.log("File", file, "File type", file.type)
+            const responseS3 = await fetch(presigned_url, {
+              method: "PUT",
+              body: file,
+              headers: {
+                "Content-Type": file.type,
+              }
+            })
+            // const responseS3: Response = await fetch(presigned_url, {
+            //   method: "PUT",
+            //   body: file,
+            //   headers: {
+            //     "Content-Type": file.type
+            //     }
+            // })
+
+            console.log("Response S3:" , responseS3)
+          }
+        }  
     } catch(error) {
-      const newError = AxiosErrorHelper(error)
-      toast.error(newError, {
-        toasterId: 'modal'
-      })
-      setProfileBannerPreview(profile_banner_url)
-      setProfilePhotoPreview(profile_photo_url)
+      console.log(error);
     }
   }
 
   //TODO: export submit button from signup or login an customize css
   function SubmitButton():JSX.Element{
-    const {pending} = useFormStatus()
-
+    const {pending} = useFormStatus();
     return(
       <>
         <button
@@ -129,26 +139,26 @@ export default function EditProfileForm({
 
   const charCounterDisplayHandler = (e:ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, isFor: ('username' | 'bio')) => {
     if(isFor === 'username'){
-      const length = e.target.value.length
-      setCharCounterUsername(length)
+      const length = e.target.value.length;
+      setCharCounterUsername(length);
     }
     else if(isFor === 'bio'){
-      const length = e.target.value.length
-      setCharCounterBio(length)
+      const length = e.target.value.length;
+      setCharCounterBio(length);
     }
   }
 
   const usernameIndicatorHander = (e: ChangeEvent<HTMLInputElement>) => {
-    const usernameChars = e.target.value
-    const re = /^[0-9A-Za-z_.]+$/
+    const usernameChars = e.target.value;
+    const re = /^[0-9A-Za-z_.]+$/;
 
     if(e.target.value === '' || !re.test(usernameChars)){
-      setUsernameIndictor(true)
+      setUsernameIndictor(true);
     }else{
-      setUsernameIndictor(false)
+      setUsernameIndictor(false);
     }
 
-    charCounterDisplayHandler(e, 'username')
+    charCounterDisplayHandler(e, 'username');
   }
 
 
@@ -192,7 +202,7 @@ export default function EditProfileForm({
             <div className={cn(`${editProfileFormContainerStyle} relative`, 'rounded-full')}>
               <div className="w-30 h-30 md:w-35 md:h-35">
                 <img
-                  src={profilePhotoPreview ? profilePhotoPreview : profile_photo_url}
+                  src={profilePhotoPreview ? profilePhotoPreview : profilePhotoUrl}
                   className='rounded-full w-full h-full object-cover pointer-events-none'
                   alt="Profile Picture Preview"
                 ></img>
@@ -211,7 +221,7 @@ export default function EditProfileForm({
               name='profile_photo'
               id='profile_photo'
               className='hidden'
-              accept='image/png, image/jpeg, image/heic, image/heif'
+              accept='image/*'
               onChange={(e) => handleProfileFileChange(e, 'photo')}
               multiple={true} 
             ></input>
@@ -265,7 +275,7 @@ export default function EditProfileForm({
                 className={`${screenGuideType === 'desktop' ? 'w-full aspect-3/1' : 'w-100 aspect-15/16'} border-4 border-black bg-black rounded-lg overflow-hidden transition-all relative shadow-lg`}
               >
                 <img 
-                  src={profileBannerPreview ? profileBannerPreview : profile_banner_url}
+                  src={profileBannerPreview ? profileBannerPreview : profileBannerUrl}
                   className={`${screenGuideType === 'desktop' && 'object-[10%_52%]'} h-full w-full object-cover pointer-events-none`}
                   alt="Profile Banner Preview"
                 >
@@ -290,7 +300,7 @@ export default function EditProfileForm({
               type='file'
               name='profile_banner'
               id='profile_banner'
-              accept="image/png, image/jpeg, image/heic, image/heif"
+              accept="image/*"
               className="hidden"
               onChange={(e) => handleProfileFileChange(e, 'banner')}
             ></input>

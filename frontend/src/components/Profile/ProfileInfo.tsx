@@ -6,7 +6,7 @@ import ProfileBadges from './ProfileBadges'
 import { UserPen } from 'lucide-react'
 
 
-type BaseProfileInfoParams = Pick<ProfileDataType , 'username' | 'profile_photo_url' | 'bio' 
+type BaseProfileInfoParams = Pick<ProfileDataType , 'username' | 'profile_photo' | 'bio' 
                                             | 'following_count' | 'follower_count'
                                             | 'spot_count' | 'visit_count' | 'instagram'
                                             | 'tiktok' | 'twitter_x' | 'facebook'>
@@ -36,7 +36,7 @@ export default function ProfileInfo(props: ProfileInfoParams):JSX.Element {
                 <figure className='w-35 h-35 flex relative'>
                     <img 
                         className="rounded-full w-full h-full object-cover pointer-events-none" 
-                        src={props.profile_photo_url} 
+                        src={props.profile_photo} 
                         alt={`${props.username}'s profile picture`}
                     />
                     <button

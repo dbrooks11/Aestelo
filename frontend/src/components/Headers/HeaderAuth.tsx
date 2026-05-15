@@ -3,7 +3,7 @@ import { type JSX } from "react";
 import { ThemeButton } from "../../hooks/ThemeProvider";
 import { Search} from "lucide-react";
 import { Link, useNavigate, type NavigateFunction, useLocation} from "react-router-dom";
-import {AxisErrorHelperConsoleOnly, protectedInstance } from "../../util/axios_api_helpers";
+import {AxisErrorHelperConsoleOnly, protectedInstance } from "../../util/axiosHelpers";
 import type { AxiosResponse } from "axios";
 
 

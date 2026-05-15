@@ -1,6 +1,6 @@
 import { useCallback, useRef, type JSX } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { protectedInstance } from "../../../util/axios_api_helpers";
+import { protectedInstance } from "../../../util/axiosHelpers";
 import SpotCard from "../Cards/SpotCard/SpotCard";
 
 

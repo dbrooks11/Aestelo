@@ -1,36 +1,20 @@
 // Universal Header
-import { type JSX, useState} from "react";
-import { useAuth } from "../../context/AuthContext";
+import { type JSX} from "react";
 import { ThemeButton } from "../../hooks/ThemeProvider";
 import { Link, useNavigate, type NavigateFunction} from "react-router-dom";
-import { Menu } from "lucide-react";
 
 
 const headerLinksStyle = "transition hover:scale-110 dark:hover:text-bg-light hover:text-black cursor-pointer"
 
 export default function PublicHeader(): JSX.Element {
-
-  const {isAuthenticated} = useAuth()
-  const [isDropwdown, setIsDropwdown] = useState<boolean>(false)
   const navigate: NavigateFunction = useNavigate()
 
   function loginRouting(): void{
-    if(isAuthenticated){
-      navigate('/profile/me')
-    }else{
-      navigate('/login-email')
-    }
+      navigate('/login-email') 
   }
 
   function signupRouting(): void{
     navigate('/signup')
-  }
-
-
-  function toggleDropdown(){
-    setIsDropwdown((bool)=>{
-      return bool ? false : true
-    })
   }
 
   
@@ -48,28 +32,6 @@ export default function PublicHeader(): JSX.Element {
         <div>
           <span className="text-3xl text-black dark:text-white">Aeste<span className="text-accents-primary">lo</span></span>
         </div>
-
-          {/* Dropdown Menu for smaller screens */}
-        {!isAuthenticated ? 
-        <div className="flex gap-6 md:hidden">
-          <ThemeButton className="flex justify-center items-center hover:bg-accents-primary/20 rounded-full w-10 h-10 text-black dark:text-white transition-colors duration-300 hover:cursor-pointer"/>
-          <button onClick={toggleDropdown} type="button" className="text-accents-primary cursor-pointer w-8 hover:text-accents-deep ">
-              <Menu className="w-full h-full"/>
-        </button>
-        {isDropwdown ? <nav id="nav-dropdown-menu" className="">
-          <ul>
-            <li>
-              <Link className={headerLinksStyle} to="/">Home</Link>
-            </li>
-            <li>
-              <Link className={headerLinksStyle} to="/about">About</Link>
-            </li>
-            <li>
-              <Link className={headerLinksStyle} to="/explore">Explore</Link>
-            </li>
-          </ul>
-        </nav>: null}
-        </div>: null}
 
         {/* Regular Header for Public pages */}
         <div className="hidden md:flex gap-4 text-white justify-end min-w-1/3 xs:max-md:hidden">

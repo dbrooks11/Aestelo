@@ -2,7 +2,7 @@ import { useCallback, useRef, useState, type JSX} from "react";
 import { Bookmark} from "lucide-react";
 import ButtonBase from "../../ButtonBase";
 import { useSpotMutation } from "../../../../hooks/SpotHooks/useSpotMutation";
-import { AxiosErrorHelper, protectedInstance } from "../../../../util/axios_api_helpers";
+import { protectedInstance } from "../../../../util/axiosHelpers";
 import axios from "axios";
 
 type SaveButton =  {
@@ -60,11 +60,10 @@ export default function SaveButton(props: SaveButton): JSX.Element{
                 })
             }
         }catch(error){
-            const newError = AxiosErrorHelper(error)
-            if(axios.isCancel(newError)) return
+            if(axios.isCancel(error)) return
             setSaveCountState(prevSaveCount)
             setIsSavedState(prevSaved)
-            console.error(newError)
+            console.error(error)
         }
             
     }, [props, updateSpotInCache, isSavedState, saveCountState])

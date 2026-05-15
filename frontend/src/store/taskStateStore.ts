@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { protectedInstance } from '../util/axios_api_helpers';
+import { protectedInstance } from '../util/axiosHelpers';
 
 
 export type Task = {

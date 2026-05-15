@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type Dispatch, type JSX, type SetStateAction } from "react";
 import { type UploadedPhotosState, type PreviewPhotosState} from "../CreateSpotForm";
 import { Scan, LoaderCircle, Trash2, Plus } from "lucide-react";
-import { fileCompressionForPreview } from "../../../../util/client_image_compression";
+import { fileCompressionForPreview } from "../../../../util/clientImageCompression";
 import ScrollContainer from "react-indiana-drag-scroll";
 
 

@@ -2,7 +2,7 @@ import { Fragment, useCallback, useRef, useState, type CSSProperties, type Dispa
 import ButtonBase from "../../ButtonBase";
 import { Star } from "lucide-react";
 import { type rateSelectorState, type averageRatingState } from "../Spot";
-import { AxiosErrorHelper, protectedInstance } from "../../../../util/axios_api_helpers";
+import {protectedInstance } from "../../../../util/axiosHelpers";
 import { useSpotMutation } from "../../../../hooks/SpotHooks/useSpotMutation";
 import axios from "axios";
 
@@ -94,12 +94,11 @@ export default function RateButton(props: RateButtonProps): JSX.Element{
                 }  
             } 
         }catch(error){
-            const newError = AxiosErrorHelper(error)
-            if(axios.isCancel(newError)) return
+            if(axios.isCancel(error)) return
             props.setHoldAverageRating(prevAverageRating)
             setIsRated(prevRated)
             setRatingCountHolder(prevRateCount)
-            console.error(newError)
+            console.error(error)
         } 
     }, [props, updateSpotInCache, isRated, ratingCountHolder, rating])
 

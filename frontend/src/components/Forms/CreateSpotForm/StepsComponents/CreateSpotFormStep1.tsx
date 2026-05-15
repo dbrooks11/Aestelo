@@ -1,7 +1,7 @@
 import { AlertTriangle, Camera } from "lucide-react";
 import { type JSX } from "react";
 import { type StepState, type UploadedPhotosState, type PreviewPhotosState } from "../CreateSpotForm";
-import { fileCompressionForPreview } from "../../../../util/client_image_compression";
+import { fileCompressionForPreview } from "../../../../util/clientImageCompression";
 
 export type Step1 = {
     setStep: (num: StepState) => void

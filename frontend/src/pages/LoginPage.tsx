@@ -1,57 +1,38 @@
 import { useState, type JSX} from "react";
 import { LoaderCircle, Eye, EyeClosed } from "lucide-react";
 import { useFormStatus } from "react-dom";
-import { useAuth } from "../context/AuthContext";
-import { useNavigate, type NavigateFunction, Link } from "react-router-dom";
-import { AxiosErrorHelper, loginInstance } from "../util/axios_api_helpers";
+import { Link, type NavigateFunction } from "react-router-dom";
 import ToasterCustom from "../components/Toast";
-import toast from "react-hot-toast";
+import { publicInstance } from "../util/axiosHelpers";
+import { useNavigate } from "react-router-dom";
 
 
 export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
     const navigate: NavigateFunction = useNavigate()
-
-    const {checkAuth} = useAuth()
-    
-    const [showPassword, setShowPassword] = useState("password")
+    const [showPassword, setShowPassword] = useState<boolean>(false)
     const[emailState, setEmailState] = useState<string | undefined>("")
     const [usernameState, setUsernameState] = useState<string | undefined>("")
 
+    const loginMethod = isEmail ? "email" : "username"
+    const alternateLoginMethod = isEmail ? "username" : "email"
+
 
     async function login(formData: FormData): Promise<void>{
-        const name: FormDataEntryValue | null = formData.get("name") //for honey pot check
-        const email: FormDataEntryValue | null = formData.get('email') ? formData.get('email') : null
-        const username: FormDataEntryValue | null = formData.get('username') ? formData.get('username') : null
-        const password: FormDataEntryValue | null = formData.get('password')
-
-        if(name?.toString().trim()) return
-        if(email) setEmailState(email.toString())
-        else setUsernameState(username?.toString())
-
-        const body = {
-            ...(email ? {email} : {username}),
-            password,
-            ...(name ? {name} : {undefined}),
-        }
-
+        
+        setEmailState(formData.get("email")?.toString())
+        setUsernameState(formData.get("username")?.toString())
         try{ 
-            const response = await loginInstance.post(`/auth/login-${email ? 'email' : 'username'}`, body)
+            const response = await publicInstance.post("/auth/login", formData)
 
             if(response.status === 200){
-                await checkAuth()
                 navigate('/profile/me')
             }
-        }
-        catch(error: unknown){
-            const newError = AxiosErrorHelper(error)
-            toast.error(newError, {
-                toasterId: 'login',
-                
-            })
+        }catch(error){
+            console.error("Login failed", error)
         }
     }
 
-    //TODO: turn this into reusale component
+    //TODO: turn this into reusable component
     function SubmitButton(): JSX.Element{
         const {pending}:{pending:boolean} = useFormStatus()
         return(
@@ -61,8 +42,8 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
     }
 
     function showPasswords(){
-        setShowPassword((type)=>{
-            return type === 'text' ? 'password' : 'text'
+        setShowPassword((show)=>{
+            return !show
         })
     }
 
@@ -91,17 +72,17 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
 
                 {/*  Email/Username Field  */}
                 <div className="flex flex-col gap-2 mb-7">
-                    <label htmlFor={isEmail ? "email" : "username"}>
-                        {isEmail ? "Email" : "Username"}
+                    <label htmlFor={loginMethod}>
+                        {loginMethod.charAt(0).toUpperCase() + loginMethod.slice(1)}
                     </label>
                     <input 
                         className="border-neutral-500/30 focus:border-accents-primary border-b-2 focus:outline-none"
                         type={isEmail ? 'email' : 'text'}
-                        name={isEmail ? "email" : "username"} 
-                        id={isEmail ? "email" : "username"} 
-                        autoComplete={isEmail ? "email" : "username"} 
-                        defaultValue={isEmail ? emailState : usernameState} 
-                        placeholder={isEmail ? "Enter email" : "Enter username"}
+                        name={loginMethod} 
+                        id={loginMethod} 
+                        autoComplete={loginMethod} 
+                        defaultValue={isEmail ? emailState : usernameState}
+                        placeholder={`Enter ${loginMethod}`}
                         required
                         aria-required="true"
                     />
@@ -112,7 +93,7 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
                     <label htmlFor="password">Password</label>
                     <input 
                         className="pr-8 border-neutral-500/30 focus:border-accents-primary border-b-2 focus:outline-none"
-                        type={showPassword} 
+                        type={showPassword ? "text" : "password"} 
                         name="password" 
                         id="password" 
                         autoComplete="current-password" 
@@ -125,9 +106,9 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
                         tabIndex={-1} 
                         onClick={showPasswords} 
                         className="right-0 bottom-1 absolute flex justify-center items-center hover:bg-bg-light-tertiary hover:dark:bg-slate/60 dark:bg-charcoal hover:shadow-sm p-0.5 rounded-md w-6 text-black dark:text-stone-400 cursor-pointer" 
-                        aria-label={showPassword === 'text' ? "Hide password" : "Show password"}
+                        aria-label={showPassword ? "Show password" : "Hide password"}
                     >
-                        {showPassword === 'text' ? <EyeClosed className="w-full h-full" aria-hidden="true"/> : <Eye className="w-full h-full" aria-hidden="true"/>}
+                        {showPassword ? <Eye className="w-full h-full" aria-hidden="true"/> : <EyeClosed className="w-full h-full" aria-hidden="true"/>}
                     </button>
                 </div>
 
@@ -138,10 +119,10 @@ export default function LoginPage({isEmail}:{isEmail: boolean}): JSX.Element {
             {/* Alternative Login Link */}
             <Link 
                 className="flex w-fit text-sm" 
-                to={`/login-${isEmail ? 'username': 'email'}`}
-                aria-label={`Switch to login with ${isEmail ? 'username' : 'email'}`}
+                to={`/login-${alternateLoginMethod}`}
+                aria-label={`Switch to login with ${alternateLoginMethod}`}
             >
-                Log in with {isEmail ? 'username' : 'email'}
+                Log in with {alternateLoginMethod}
             </Link>
         </section>
         <ToasterCustom toasterId='login'/>

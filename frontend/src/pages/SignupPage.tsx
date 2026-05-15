@@ -1,60 +1,41 @@
 import { useState, type JSX } from "react";
 import { LoaderCircle, Eye, EyeClosed } from "lucide-react";
-import { AxiosErrorHelper, signupInstance } from "../util/axios_api_helpers";
 import { useFormStatus } from "react-dom";
-import { useNavigate, type NavigateFunction } from "react-router-dom";
 import type { AxiosResponse} from "axios";
 import ToasterCustom from "../components/Toast";
-import toast from "react-hot-toast";
+import { publicInstance } from "../util/axiosHelpers";
+import { useNavigate, type NavigateFunction } from "react-router-dom";
 
 
 const inputFieldsStyle = "border-neutral-500/30 focus:border-accents-primary border-b-2 focus:outline-none"
 const showPassStyle = "absolute right-0 bottom-1 w-6 p-0.5 rounded-md text-black hover:bg-bg-light-tertiary dark:bg-charcoal hover:dark:bg-slate/60 cursor-pointer dark:text-stone-400 flex items-center justify-center hover:shadow-sm"
 
+export function HideFieldEyeIcon(show: boolean) {
+    return show ? <Eye className="w-full h-full" aria-hidden="true"/> : <EyeClosed className="w-full h-full" aria-hidden="true"/>
+}
 
 export default function SignupPage(): JSX.Element {
-
     const navigate: NavigateFunction = useNavigate()
+
     const [email, setEmail] = useState<string | undefined>("")
-    const [showPasswordOne, setShowPasswordOne] = useState("password")
-    const [showPasswordTwo, setShowPasswordTwo] = useState("password")
+    const [showPasswordOne, setShowPasswordOne] = useState<boolean>(true)
+    const [showPasswordTwo, setShowPasswordTwo] = useState<boolean>(false)
+
+    const passOneType = showPasswordOne ? "text" : "password"
+    const passTwoType = showPasswordTwo ? "text" : "password"
     
 
-    async function signUp(formData: FormData): Promise<void>{
-        const name: FormDataEntryValue | null = formData.get("name")
-        const email: FormDataEntryValue | null = formData.get("email")
-        const password: FormDataEntryValue | null  = formData.get("password")
-        const confirm_password: FormDataEntryValue | null  = formData.get("confirm_password")
-
-        if(name?.toString().trim()) {
-            return
-        }
-            
-
-        const stringEmail: string | undefined = email?.toString()
-        setEmail(stringEmail)
+    async function signUp(formData: FormData): Promise<void>{ 
+        setEmail(formData.get("email")?.toString())
 
         try{
-            const response: AxiosResponse = await signupInstance.post('/auth/signup', {
-                email,
-                password,
-                confirm_password,
-                ...(name ? {name} : {undefined}),
-            })
-
-            const data = response.data
+            const response: AxiosResponse = await publicInstance.post('/auth/signup', formData)
 
             if (response.status === 201){
                 navigate('/login-email')
-                toast.success(data.message, {
-                    toasterId: 'login'
-                })
             }
         } catch (error: unknown){
-            const newError = AxiosErrorHelper(error)
-            toast.error(newError, {
-                toasterId: 'signup'
-            })
+            console.error("Signup failed", error)
 
       }
     }
@@ -68,14 +49,14 @@ export default function SignupPage(): JSX.Element {
     }
 
     function showPasswordsOne(){
-        setShowPasswordOne((type)=>{
-            return type === 'text' ? 'password' : 'text'
+        setShowPasswordOne((show)=>{
+            return !show
         })
     }
 
     function showPasswordsTwo(){
-        setShowPasswordTwo((type)=>{
-            return type === 'text' ? 'password' : 'text'
+        setShowPasswordTwo((show)=>{
+            return !show
         })
     }
 
@@ -118,13 +99,13 @@ export default function SignupPage(): JSX.Element {
                         aria-required="true" 
                     />
                 </div>
-
+                {/* TODO: turn password field into reusable component */}
                 {/* --- Password Field --- */}
                 <div className="relative flex flex-col gap-2 mb-7">
                     <label htmlFor="password">Password</label>
                     <input 
                         className={inputFieldsStyle} 
-                        type={showPasswordOne} 
+                        type={passOneType} 
                         name="password" 
                         id="password" 
                         placeholder="Enter password"
@@ -136,9 +117,9 @@ export default function SignupPage(): JSX.Element {
                         tabIndex={-1} 
                         onClick={showPasswordsOne} 
                         className={showPassStyle} 
-                        aria-label={showPasswordOne === 'text' ? "Hide password" : "Show password"}
+                        aria-label={showPasswordOne ? "Hide password" : "Show password"}
                     >
-                        {showPasswordOne === 'text' ? <EyeClosed className="w-full h-full" aria-hidden="true"/> : <Eye className="w-full h-full" aria-hidden="true"/>}
+                        {HideFieldEyeIcon(showPasswordOne)}
                     </button>
                 </div>
 
@@ -147,7 +128,7 @@ export default function SignupPage(): JSX.Element {
                     <label htmlFor="confirm_password">Confirm Password</label>
                     <input 
                         className={inputFieldsStyle} 
-                        type={showPasswordTwo} 
+                        type={passTwoType} 
                         name="confirm_password" 
                         id="confirm_password" 
                         placeholder="Re-enter password" 
@@ -159,9 +140,9 @@ export default function SignupPage(): JSX.Element {
                         tabIndex={-1} 
                         onClick={showPasswordsTwo} 
                         className={showPassStyle} 
-                        aria-label={showPasswordTwo === 'text' ? "Hide confirm password" : "Show confirm password"}
+                        aria-label={showPasswordTwo ? "Hide confirm password" : "Show confirm password"}
                     >
-                        {showPasswordTwo === 'text' ? <EyeClosed className="w-full h-full" aria-hidden="true"/> : <Eye className="w-full h-full" aria-hidden="true"/>}
+                        {HideFieldEyeIcon(showPasswordTwo)}
                     </button>
                 </div>
 

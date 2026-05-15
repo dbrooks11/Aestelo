@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState, type JSX } from "react";
-import { protectedInstance } from "../../../util/axios_api_helpers";
+import { protectedInstance } from "../../../util/axiosHelpers";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import CollectionCard from "../Cards/CollectionCard/CollectionCard";
 import AddCollectionCard from "../Cards/CollectionCard/AddCollectionCard";
