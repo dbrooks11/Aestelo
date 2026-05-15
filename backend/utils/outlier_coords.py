@@ -7,10 +7,11 @@ from geopy.distance import distance
 from models import Spot, Visit
 from sqlalchemy.orm import joinedload
 
-from utils.storage import delete_file_s3
+from utils.storage import ObjectStorage
 
 long = 'longitude'
 lat = 'latitude'
+storage = ObjectStorage()
 
 def average_location(coords, post_type_id: int, post_type: str):
     if not coords:
@@ -112,13 +113,13 @@ def reject_post_type(post_type_id: int, post_type: str, results: list = None):
         
         media_list = item.media or [] 
         for media in media_list:
-            delete_file_s3(file_path=media.photo_path)
+            storage.delete_file_s3(file_path=media.photo_path)
             
         if results:
             for r in results:
                 path = r.get('path')
                 if path:
-                    delete_file_s3(file_path=path)
+                    storage.delete_file_s3(file_path=path)
                     
 
         db.session.delete(item)

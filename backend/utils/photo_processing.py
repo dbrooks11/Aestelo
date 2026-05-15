@@ -2,12 +2,12 @@ import io
 from tempfile import NamedTemporaryFile
 
 from flask import current_app
-from PIL import ExifTags, Image, ImageFile, ImageOps
+from app.config import Config
+from PIL import ExifTags, Image, ImageOps, ImageFile
 from PIL.Image import DecompressionBombError
 from pillow_heif import register_heif_opener
 
 register_heif_opener()
-ALLOWED_FORMATS = ('JPEG', 'PNG', 'HEIF', 'HEIC')
 Image.MAX_IMAGE_PIXELS = 100_000_000
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
@@ -82,7 +82,7 @@ def photo_processing_one_img_metadata(file_path: str, current_user_id: str):
             
         with Image.open(file_path) as img:
 
-            if img.format not in ALLOWED_FORMATS:
+            if img.format not in Config.ALLOWED_POST_FORMATS:
                 raise Exception(f"Unsupported format: {img.format}")
         
             img = ImageOps.exif_transpose(img)
@@ -134,7 +134,7 @@ def photo_processing_one_img(img_file, is_banner: bool, current_user_id: str):
     try:
         img = Image.open(img_file)
 
-        if img.format not in ALLOWED_FORMATS:
+        if img.format not in Config.ALLOWED_POST_FORMATS:
             error.append(f"Invalid format: {img.format}. Must be JPEG, PNG, HEIC, or HEIF")
             return error
     

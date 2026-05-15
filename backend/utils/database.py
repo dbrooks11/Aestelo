@@ -1,4 +1,3 @@
-# util/database.py
 from contextlib import contextmanager
 from app.extensions import db
 
