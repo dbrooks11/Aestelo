@@ -1,6 +1,5 @@
 import logging
 
-from app.config import Config
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from utils.storage import ObjectStorage
@@ -14,16 +13,15 @@ logger = logging.getLogger("root")
 @jwt_required()
 def get_presigned_url(content):
     current_user = get_jwt_identity()
-    storage = ObjectStorage()
     try:
+        storage = ObjectStorage()
         data = request.files.lists()
-        presigned_urls = []
+        presigned_urls: list[dict[str, str]] = []
 
         for key, file_list in data:
             for file in file_list:
                 mimetype: str | None = file.content_type
-                if mimetype:
-                    presigned_urls.append(storage.generate_presigned_url(mimetype=mimetype, user_id=current_user, expires_in=1800, content_target=content))
+                presigned_urls.append(storage.generate_presigned_url(mimetype=mimetype, user_id=current_user, expires_in=1800, content_target=content))
         return jsonify({'data': presigned_urls}), 200
     except InvalidFileTypeError as ifte:
         logger.error(str(ifte))
