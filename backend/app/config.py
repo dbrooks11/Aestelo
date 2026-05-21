@@ -1,98 +1,249 @@
-import os
-from datetime import timedelta
-from dotenv import load_dotenv
-from kombu import Queue
+import logging
+
+import structlog
+from app.settings import settings
+from litestar.config.allowed_hosts import AllowedHostsConfig
+from litestar.config.cors import CORSConfig
+from litestar.config.csrf import CSRFConfig
+from litestar.exceptions import NotAuthorizedException, PermissionDeniedException
+from litestar.logging.config import (
+    LoggingConfig,
+    StructLoggingConfig,
+    default_logger_factory,
+)
+from litestar.middleware.logging import LoggingMiddlewareConfig
+from litestar.openapi.config import OpenAPIConfig
+from advanced_alchemy.extensions.litestar import (
+    AsyncSessionConfig,
+    SQLAlchemyAsyncConfig,
+    async_autocommit_before_send_handler,
+    EngineConfig,
+    AlembicAsyncConfig
+)
+from litestar.plugins.structlog import StructlogConfig
+from litestar_email import EmailConfig, ResendConfig, SMTPConfig
+from litestar_saq import SAQConfig, QueueConfig
+
 
 class Config:
-    # Flask
-    SECRET_KEY = os.environ.get('SECRET_KEY')
-    JSON_SORT_KEYS = False
-    MAX_CONTENT_LENGTH = 200 * 1024 * 1024
-    MAX_FILE_SIZE = 20 * 1024 * 1024
-    ALLOWED_POST_FORMATS = {
-        'image/jpeg': 'jpg',
-        'image/jpg': 'jpg',
-        'image/heic': 'heic',
-        'image/heif': 'heif',
-    }
-    ALLOWED_MIME_TYPES = {
-        'image/jpeg': 'jpg',
-        'image/jpg': 'jpg',
-        'image/png': 'png',
-        'image/webp': 'webp',
-        'image/heic': 'heic',
-        'image/heif': 'heif',
-    }
+    @property
+    def openapi_config(self) -> OpenAPIConfig:
+        return OpenAPIConfig(
+            title=settings.app.NAME,
+            version=settings.app.VERSION
+        )
+
+    @property
+    def cors_config(self) -> CORSConfig:
+        """Get CORS configuration.
+
+        Returns:
+            The CORS configuration.
+        """
+        return CORSConfig(
+            allow_credentials=True,
+            allow_methods=["GET", "POST", "PATCH", "DELETE"],
+            allow_headers=["Content-Type", "x-csrf-token"],
+            allow_origins=settings.app.ALLOWED_CORS_ORIGINS,
+            allow_origin_regex=r"http://localhost(:\d+)?$"
+        )
+
+    @property
+    def allowed_host_config(self) -> AllowedHostsConfig:
+        """Get allowed host configuration.
+
+        Returns:
+            The allowed host configuration.
+        """
+        return AllowedHostsConfig(
+            allowed_hosts=["localhost"]
+        )
+
+    @property
+    def sqlalchemy_config(self) -> SQLAlchemyAsyncConfig:
+        """Get SQLAlchemy configuration. This desciption also contains the convention 
+        for manually settings certain arguments.
+
+        Returns:
+            The SQLAlchemy configuration.
+        
+        db_convention = {
+            "ix": "ix_%(column_0_label)s",
+            "uq": "uq_%(table_name)s_%(column_0_name)s",
+            "ck": "ck_%(table_name)s_%(constraint_name)s",
+            "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+            "pk": "pk_%(table_name)s",
+        }
+        """
+        return SQLAlchemyAsyncConfig(
+            connection_string=settings.db.DATABASE_URL,
+            session_config=AsyncSessionConfig(expire_on_commit=False),
+            before_send_handler=async_autocommit_before_send_handler,
+            engine_config=EngineConfig(
+                pool_size=settings.db.POOL_SIZE,
+                max_overflow=settings.db.POOL_MAX_OVERFLOW,
+                pool_timeout=settings.db.POOL_TIMEOUT,
+                pool_recycle=settings.db.POOL_RECYCLE,
+                pool_pre_ping=settings.db.POOL_PRE_PING,
+                echo=settings.db.ECHO,
+                echo_pool=settings.db.ECHO_POOL
+            ),
+            create_all=True,
+            alembic_config=AlembicAsyncConfig(
+                script_location=settings.db.MIGRATION_PATH,
+                version_table_name=settings.db.MIGRATION_DDL_VERSION_TABLE,
+                script_config=settings.db.MIGRATION_CONFIG
+            )
+        )
+
+    @property
+    def csrf_config(self) -> CSRFConfig:
+        """Get CSRF configuration.
+
+        Returns:
+            The CSRF configuration.
+        """
+        return CSRFConfig(
+            secret=settings.app.SECRET_KEY,
+            cookie_secure=settings.app.JWT_COOKIE_SECURE,
+            cookie_samesite=settings.app.JWT_COOKIE_SAMESITE,
+            exclude_from_csrf_key='csrf_none'
+        )
     
-    # Database
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        'pool_size': 20,
-        'pool_recycle': 3600,
-        'pool_pre_ping': True,
-    }
+    @property
+    def saq_config(self) -> SAQConfig:
+        """Get SAQ configuration.
 
-    # JWT Core
-    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
-    JWT_TOKEN_LOCATION = ['cookies']
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=120)
-    JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=7)
-    JWT_COOKIE_HTTPONLY = True
-    JWT_COOKIE_SAMESITE = 'Lax'
-    JWT_COOKIE_CSRF_PROTECT = True
+        Returns:
+            The SAQ configuration.
+        """
+        return SAQConfig(
+            web_enabled=settings.saq.WEB_ENABLED,
+            worker_processes=settings.saq.PROCESSES,
+            use_server_lifespan=settings.saq.USE_SERVER_LIFESPAN,
+            queue_configs=[
+                QueueConfig(
+                    name="background-tasks",
+                    dsn=settings.saq.REDIS_URL,
+                    tasks=[],
+                    concurrency=settings.saq.CONCURRENCY,
+                    # startup=on_startup,
+                    # shutdown=on_shutdown,
+                    # before_process=before_process,
+                    # after_process=after_process,
+                )
+            ],
+        )
 
-    # Cloudflare R2
-    R2_ACCESS_KEY_ID = os.environ.get('R2_ACCESS_KEY_ID')
-    R2_SECRET_ACCESS_KEY = os.environ.get('R2_SECRET_ACCESS_KEY')
-    R2_BUCKET_NAME = os.environ.get('R2_BUCKET_NAME')
-    R2_ENDPOINT = os.environ.get('R2_S3_API')
-    R2_PUBLIC_URL = os.environ.get('R2_PUBLIC_DEV_URL')
-    
-    
-    #CELERY
-    CELERY = dict(
-        broker_url=os.getenv('CELERY_BROKER_URL'),
-        result_backend=os.getenv('CELERY_RESULT_BACKEND'),
-        task_ignore_result=False,
-    )
+    @property
+    def email_config(self) -> EmailConfig: 
+        """Return EmailConfig for the litestar-email plugin.
 
-    CELERY_WORKER_PREFETCH_MULTIPLIER = 1 
-    CELERY_TASK_QUEUES = (
-        Queue('default', routing_key='default'),
-        Queue('media_processing')
-    )
+        As of litestar-email v0.3.0, the backend parameter accepts either
+        string ("smtp", "resend").
 
-    CELERY_TASK_ROUTES = {
-        'process_photos_metadata': {'queue': 'media_processing'},
-        'location_batch': {'queue': 'media_processing'}
-        # 'app.tasks.send_email': {'queue': 'default'}, can be added when emails and such are set up
-    }
+        Returns:
+            The email configuration.
+        """
+        backend: str | SMTPConfig | ResendConfig = settings.email.BACKEND
+        if settings.email.BACKEND == "smtp":
+            backend = SMTPConfig(
+                host=settings.email.SMTP_HOST,
+                port=settings.email.SMTP_PORT,
+                username=settings.email.SMTP_USER,
+                password=settings.email.SMTP_PASSWORD,
+                use_tls=settings.email.USE_TLS,
+                use_ssl=settings.email.USE_SSL,
+                timeout=settings.email.TIMEOUT,
+            )
+        elif settings.email.BACKEND == "resend":
+            backend = ResendConfig(api_key=settings.email.RESEND_API_KEY)
+        return EmailConfig(
+            backend=backend,
+            from_email=settings.email.FROM_EMAIL,
+            from_name=settings.email.FROM_NAME,
+        )
 
-class DevelopmentConfig(Config):
-    #Flask
-    DEBUG = True
-    DEBUG_TB_ENABLED = True
-    JWT_COOKIE_SECURE = False
+    @property
+    def structlog_config(self) -> StructlogConfig:
+        """Get log configuration
 
-    #Celery
-    CELERY = dict(
-        broker_url='redis://redis:6379/0',
-        result_backend='redis://redis:6379/0',
-        task_ignore_result=False,
-    )
+        Returns:
+            The log configuration
+        """
+        from app.lib import log as log_conf
 
-class ProductionConfig(Config):
-    DEBUG = False
-    JWT_COOKIE_SECURE = True
-    R2_PUBLIC_URL = os.environ.get('R2_CUSTOM_DOMAIN')
+        return StructlogConfig(
+            enable_middleware_logging=False,
+            structlog_logging_config=StructLoggingConfig(
+                log_exceptions="always",
+                processors=log_conf.structlog_processors(as_json=not log_conf.is_tty()),
+                logger_factory=default_logger_factory(as_json=not log_conf.is_tty()),
+                disable_stack_trace={404, 401, 403, NotAuthorizedException, PermissionDeniedException},
+                standard_lib_logging_config=LoggingConfig(
+                    log_exceptions="always",
+                    disable_stack_trace={404, 401, 403, NotAuthorizedException, PermissionDeniedException},
+                    root={"level": logging.getLevelName(settings.log.LEVEL), "handlers": ["queue_listener"]},
+                    formatters={
+                        "standard": {
+                            "()": structlog.stdlib.ProcessorFormatter,
+                            "processors": log_conf.stdlib_logger_processors(as_json=not log_conf.is_tty()),
+                        },
+                    },
+                    loggers={
+                        "saq": {
+                            "propagate": False,
+                            "level": settings.log.SAQ_LEVEL,
+                            "handlers": ["queue_listener"],
+                        },
+                        "sqlalchemy.engine": {
+                            "propagate": False,
+                            "level": settings.log.SQLALCHEMY_LEVEL,
+                            "handlers": ["queue_listener"],
+                        },
+                        "sqlalchemy.pool": {
+                            "propagate": False,
+                            "level": settings.log.SQLALCHEMY_LEVEL,
+                            "handlers": ["queue_listener"],
+                        },
+                        "opentelemetry.sdk.metrics._internal": {
+                            "propagate": False,
+                            "level": 40,
+                            "handlers": ["queue_listener"],
+                        },
+                        "httpx": {
+                            "propagate": False,
+                            "level": max(settings.log.LEVEL, logging.WARNING),
+                            "handlers": ["queue_listener"],
+                        },
+                        "httpcore": {
+                            "propagate": False,
+                            "level": max(settings.log.LEVEL, logging.WARNING),
+                            "handlers": ["queue_listener"],
+                        },
+                        "_granian": {
+                            "propagate": False,
+                            "level": settings.log.ASGI_ERROR_LEVEL,
+                            "handlers": ["queue_listener"],
+                        },
+                        "granian.server": {
+                            "propagate": False,
+                            "level": settings.log.ASGI_ERROR_LEVEL,
+                            "handlers": ["queue_listener"],
+                        },
+                        "granian.access": {
+                            "propagate": False,
+                            "level": settings.log.ASGI_ACCESS_LEVEL,
+                            "handlers": ["queue_listener"],
+                        },
+                    },
+                ),
+            ),
+            middleware_logging_config=LoggingMiddlewareConfig(
+                request_log_fields=settings.log.REQUEST_FIELDS,
+                response_log_fields=settings.log.RESPONSE_FIELDS,
+            ),
+        )
 
 
-config_dict = {
-    'development': DevelopmentConfig,
-    'production': ProductionConfig,
-}
-
-    
- 
-
+config = Config()

@@ -1,40 +1,44 @@
-FROM python:3.12-slim
+ARG PYTHON_VERSION=3.13
 
-# Security: Prevent writing .pyc files and buffer stdout
+# --- Stage 1: Build --- #
+FROM python:${PYTHON_VERSION}-slim-bookworm AS builder
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# 1. Install System Dependencies (as root)
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+
+COPY pyproject.toml uv.lock ./
+
+# Use uv's own Python so the venv path is self-contained
+RUN uv sync --frozen --no-dev --no-install-project
+
+# --- Stage 2: Runtime ---
+FROM python:${PYTHON_VERSION}-slim-bookworm
+
+WORKDIR /app
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
     build-essential \
     libjpeg-dev \
     zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Security: Create a Non-Root User
-RUN addgroup --system --gid 10001 appgroup && \
-    adduser --system --uid 10001 --ingroup appgroup appuser
+RUN groupadd -r appuser && useradd -r -g appuser appuser
 
-# 3. Create Temp Directory & Set Permissions
-RUN mkdir -p /app/uploads_tmp && \
-    chown -R appuser:appgroup /app/uploads_tmp
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+COPY --from=builder /app/.venv /app/.venv
 
-# 4. Install Python Dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt && \
-    pip install gunicorn
+COPY . .
 
-# 5. Copy Application Code
-COPY --chown=appuser:appgroup . .
+ENV PATH="/app/.venv/bin:$PATH"
 
-# 6. Security: Switch to Non-Root User
+RUN chown -R appuser:appuser /app
 USER appuser
 
-# Expose the port (Flask default)
-EXPOSE 5000
+EXPOSE 8000
 
-# Run the application
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:create_app()"]
+CMD ["litestar", "run", "--app", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]

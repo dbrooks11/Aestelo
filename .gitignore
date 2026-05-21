@@ -29,6 +29,10 @@ __pycache__/
 .pytest_cache
 .log
 *.log
+/backend_fk
+
+#Litestar
+*ls/
 
 # IDEs
 .vscode/
@@ -67,4 +71,6 @@ test
 render.yaml
 .yaml
 saving_frontend
-secrets.py
+secret.py
+
+notes.txt

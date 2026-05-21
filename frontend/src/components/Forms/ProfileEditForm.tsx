@@ -19,6 +19,8 @@ type EditProfileFormProps = {
   setShowModal: (value: boolean) => void
   showModal: boolean
 }
+type PresignResponse = {key: string, presigned_url: string}
+type FormDataEntry = [string, FormDataEntryValue]
 
 // TODO: put the css back to respective elements
 const editProfileFormScreenGuideButtonStyle = 'flex gap-2 py-1 px-2 items-center rounded-md hover:dark:text-text-main-dark hover:text-text-main-light cursor-pointer';
@@ -73,7 +75,7 @@ export default function EditProfileForm({
 
   async function handleEditProfileFormClick(formData: FormData) {
     const files = new FormData();
-    const info = new FormData();
+    const info: object = {};
   
     try {
       for (const [key, value] of formData.entries()){
@@ -82,33 +84,46 @@ export default function EditProfileForm({
             files.append(key, value);
           }
         }else{
-          info.append(key, value);
+          info[key] = value
         }
       }
-        const response: AxiosResponse = await protectedInstance.post(`/s3/presigned-url/profile`, files);
 
-        const presignedUrls = response.data.data;
-        const fileArray: Array<[string, FormDataEntryValue]> = Array.from(files)
-        console.log(fileArray)
+      const response: AxiosResponse = await protectedInstance.post(`/s3/presigned-url/profile`, files);
+      const presignedUrls = response.data.data;
+      const fileArray: Array<FormDataEntry> = Array.from(files);
 
-        for (let i = 0; i < presignedUrls.length; i++){
-          const { key, presigned_url } = presignedUrls[i]
-          const fileData: [string, FormDataEntryValue] = fileArray[i]
-          const file: File | string = fileData[1]
+      
+      const keys: Array<string> = [];
+      const presignPromises: Array<Promise<Response>> = presignedUrls.map((obj: PresignResponse, index: number) => {
+        const { key, presigned_url } = obj;
+        keys.push(key);
+        const fileData: FormDataEntry = fileArray[index];
+        const file: File | string = fileData[1];
+        if(file instanceof File){
+          return fetch(presigned_url, {
+            method: "PUT",
+            body: file,
+            headers: {
+              "Content-Type": file.type,
+            }
+          })
+        }
+      });
+      
+      await Promise.all(presignPromises);
+      const editProfileResponse = await protectedInstance.patch('profile/edit', {
+        ...info,
+        "obj_keys": keys
+      })
+
+      const updatedProfileData = editProfileResponse.data.data
+      console.log(updatedProfileData)
+
+      // setProfileData((profile) => {
+      //   return {
           
-          if(file instanceof File){
-            console.log("key:", key, "Presigned:", presigned_url)
-            console.log("File", file, "File type", file.type)
-            const responseS3 = await fetch(presigned_url, {
-              method: "PUT",
-              body: file,
-              headers: {
-                "Content-Type": file.type,
-              }
-            })
-            console.log("Response S3:" , responseS3)
-          }
-        }  
+      //   }
+      // })
     } catch(error) {
       console.log(error);
     }
@@ -310,7 +325,6 @@ export default function EditProfileForm({
               type='text'
               name='username'
               id='username'
-              defaultValue={username}
               maxLength={30}
               minLength={1}
               onChange={usernameIndicatorHander}
@@ -333,7 +347,6 @@ export default function EditProfileForm({
               className={`${editProfileFormContainerStyle} h-40 wrap-break-word p-3 dark:text-white text-black lowercase`}
               name='bio'
               id='bio'
-              defaultValue={bio}
               maxLength={150}
               onChange={(e) => charCounterDisplayHandler(e, 'bio')}
               aria-describedby="bio-counter"

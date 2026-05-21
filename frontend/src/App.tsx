@@ -7,7 +7,6 @@ import HomePage from './pages/HomePage'
 import SignupPage from './pages/SignupPage'
 import LoginPage from './pages/LoginPage'
 import ProfilePage from './pages/ProfilePage'
-import FeedPage from './pages/FeedPage'
 
 
 

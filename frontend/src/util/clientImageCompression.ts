@@ -1,15 +1,17 @@
 import heic2any from "heic2any";
 import imageCompression from "browser-image-compression";
 
-export const processImageForPreview = async (file) => {
+
+export const processImageForPreview = async (file: File) => {
   let imageToCompress = file;
 
   if (file.type === "image/heic" || file.name.toLowerCase().endsWith(".heic")) {
-    const convertedBlob = await heic2any({
+    const convertedBlob: Blob | Array<Blob> = await heic2any({
       blob: file,
       toType: "image/jpeg",
       quality: 0.7, 
     });
+    // @ts-expect-error: Blob converion, param is file
     imageToCompress = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
   }
 
@@ -49,7 +51,8 @@ export const fileCompressionForPreview = (filesList: FileList | null, setIsLoadi
                 );
 
                 if (isActive) {
-                    createdUrls = urls;
+                  createdUrls = urls;
+                  // @ts-expect-error: type is already infered by value
                     setPreviewPhotos((prev) => {
                       return [...prev, ...urls]
                         
