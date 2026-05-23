@@ -13,10 +13,13 @@ __pycache__/
 /__pycache__
 *.py[cod]
 *$py.class
+backend_fk  #TODO: remove this after migrating
 
 
 # React
 node_modules
+/node_modules
+node_modules/
 dist
 .env
 .git
