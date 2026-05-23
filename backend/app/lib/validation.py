@@ -442,16 +442,8 @@ def validate_username(v: str) -> str:
         msg = "Username can only contain letters, numbers, hyphens, and underscores"
         raise ValidationError(msg)
 
-    if not USERNAME_START_PATTERN.match(username):
-        msg = "Username must start with a letter or number"
-        raise ValidationError(msg)
-
     if username in RESERVED_USERNAMES:
         msg = "Username is reserved and cannot be used"
-        raise ValidationError(msg)
-
-    if USERNAME_REPEATED_PATTERN.search(username):
-        msg = "Username contains too many repeated characters"
         raise ValidationError(msg)
 
     return username
