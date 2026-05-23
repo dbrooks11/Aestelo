@@ -98,8 +98,6 @@ class SaqSettings(BaseSettings):
         extra='ignore'
     )
 
-    REDIS_URL: str = "redis://localhost:6379/0"
-    """Redis URL for SAQ broker."""
     PROCESSES: int = 1
     """The number of worker processes to start.
 
@@ -214,10 +212,22 @@ class AppSettings(BaseSettings):
     """Google Client ID"""
     GOOGLE_OAUTH2_CLIENT_SECRET: str = ""
     """Google Client Secret"""
+    
 
+class BrokerSettings(BaseSettings):
+    """Broker configuration"""
+    model_config = SettingsConfigDict(
+        env_prefix='BROKER_',
+        env_file=ENV_FILE,
+        env_file_encoding=ENV_ENCODING,
+        extra='ignore'
+    )
 
-class ObjectStorageSettings(BaseSettings):
-    """Object Storage configuration"""
+    REDIS: str = "redis://localhost:6379/0"
+    """Redis URL for broker."""
+
+class CFObjectStorageSettings(BaseSettings):
+    """Object Storage configuration for cloudflare"""
     model_config = SettingsConfigDict(
         env_prefix='CF_',
         env_file=ENV_FILE,
@@ -225,6 +235,7 @@ class ObjectStorageSettings(BaseSettings):
         extra='ignore'
     )
 
+    #CLOUDFLARE
     TURNSTILE_SITE_KEY: str = ""
     """Cloudflare's turnstile key for bot protection"""
     R2_ACCOUNT_ID: str = ""
@@ -244,6 +255,25 @@ class ObjectStorageSettings(BaseSettings):
     R2_CUSTOM_DOMAIN: str = ""
     """Custom domain the bucket has set"""
 
+
+class BBObjectStorageSettings(BaseSettings):
+    """Object Storage configuration for BackBlaze b2"""
+    model_config = SettingsConfigDict(
+        env_prefix='BB_',
+        env_file=ENV_FILE,
+        env_file_encoding=ENV_ENCODING,
+        extra='ignore'
+    )
+    BUCKET_NAME: str = ''
+    """Name of bucket"""
+    BUCKET_ENDPOINT: str = ''
+    """S3 Endpoint for the bucket"""
+    APP_KEY_ID: str = ''
+    """Application Access Key ID for Backblaze"""
+    APP_KEY_NAME: str = ''
+    """Application Access Key name for Backblaze"""
+    APP_KEY: str = ''
+    """Application Access key for Backblaze"""
 
 
 class LogSettings(BaseSettings):
@@ -291,7 +321,9 @@ class Settings(BaseSettings):
     saq: SaqSettings = SaqSettings()
     log: LogSettings = LogSettings()
     email: EmailSettings = EmailSettings()
-    storage: ObjectStorageSettings = ObjectStorageSettings()
+    storage_cf: CFObjectStorageSettings = CFObjectStorageSettings()
+    storage_bb: BBObjectStorageSettings = BBObjectStorageSettings()
+    broker: BrokerSettings = BrokerSettings()
     logger: ClassVar = structlog.get_logger()
 
     

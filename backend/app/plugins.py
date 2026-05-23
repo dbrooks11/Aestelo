@@ -12,7 +12,7 @@ class Plugins:
     structlog = StructlogPlugin(config=config.structlog_config)
     problem_details = ProblemDetailsPlugin()
     email = EmailPlugin(config=config.email_config)
-    saq = SAQPlugin(config=config.saq_config)
+    saq = SAQPlugin(config=config.saq_config())
     
     
 plugins = Plugins()
