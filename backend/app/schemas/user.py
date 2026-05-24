@@ -1,14 +1,14 @@
 from app.schemas.base import CamelizedBaseSchema
-from litestar.datastructures.upload_file import UploadFile
-from pydantic import Field, field_validator
-import re
+from pydantic import Field, field_validator, FileUrl
 from typing import Optional, Annotated
-from app.lib.validation import (USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH, USERNAME_VALID_PATTERN, RESERVED_USERNAMES)
 from app.schemas.auth import username_invalidation
 
 class UserProfileEdit(CamelizedBaseSchema):
-    avatar: Optional[UploadFile] = Field(default=None)
-    banner: Optional[UploadFile] = Field(default=None)
+    """Schema to validate edits to a user's profile.
+    This is also used within the UserService
+    """
+    avatar: Optional[str] = Field(default=None)
+    banner: Optional[str] = Field(default=None)
     username: Annotated[Optional[str], Field(default=None)]
     bio: Optional[str] = Field(default=None)
 
