@@ -9,7 +9,7 @@ from app.settings import settings
 
 
 @monitored_job()
-async def process_profile_media(ctx: Context, *, user_id: str, field: str, obj_key: str):
+async def process_profile_media(ctx: Context, *, user_id: str, field: str, obj_key: str, prev_key: str):
     storage_bb = ObjectStorage(
         bucket=settings.storage_bb.BUCKET_NAME,
         endpoint=settings.storage_bb.BUCKET_ENDPOINT,
@@ -38,6 +38,8 @@ async def process_profile_media(ctx: Context, *, user_id: str, field: str, obj_k
             async with get_db_session() as session:
                 profile_service = UserProfileService(session=session)
                 await profile_service.update_profile(data=UserProfileEdit.model_validate({field: new_obj_key}), user_id=user_id)
+                if prev_key:
+                    await storage_bb.delete_file_s3(key=prev_key)
         
         return {'field': field, 'obj_key': new_obj_key}
     

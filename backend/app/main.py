@@ -8,7 +8,7 @@ from app.middleware import middlewares
 from pydantic import BaseModel
 from litestar import Litestar
 
-MAX_CONTENT_LENGTH = 200 * 1024 * 1024  #200MB
+MAX_CONTENT_LENGTH = 100 * 1024 * 1024  #100MB
 
 app = Litestar(
     cors_config=config.cors_config,
@@ -23,7 +23,7 @@ app = Litestar(
         plugins.sqlalchemy,
         plugins.email,
         plugins.problem_details,
-        plugins.structlog,
+        # plugins.structlog,
         plugins.saq
     ],
     type_encoders={BaseModel: lambda m: m.model_dump(by_alias=True, exclude_none=True)},

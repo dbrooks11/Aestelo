@@ -28,13 +28,14 @@ class ProfileController(Controller):
             'avatar': data_dict.pop('avatar', None),
             'banner': data_dict.pop('banner', None)
         }
-        
+
+        profile = await profile_service.get_profile_me(user_id=user_id)
         queue = plugins.saq.get_queue('profile_processing')
 
         items = []
         for field, obj_key in profile_media.items():
             if obj_key:
-                items.append({'field': field, 'obj_key': obj_key, 'user_id': user_id})
+                items.append({'field': field, 'obj_key': obj_key, 'prev_key': getattr(profile, field, None), 'user_id': user_id})
         if items:
             results = await queue.map(
                         "process_profile_media",
@@ -45,11 +46,12 @@ class ProfileController(Controller):
                         retry_backoff=True
                     )
         updated_profile = await profile_service.update_profile(user_id=user_id, data=UserProfileEdit.model_validate(data_dict))
-
-        for result in results:
-            for field, item in result.items():
-                if field in updated_profile:
-                    setattr(updated_profile, field, item)
+        
+        if results:
+            for result in results:
+                for field, item in result.items():
+                    if field in updated_profile:
+                        setattr(updated_profile, field, item)
         
         return updated_profile
 
