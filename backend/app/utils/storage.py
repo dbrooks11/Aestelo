@@ -1,0 +1,222 @@
+
+import secrets
+from datetime import datetime, timezone
+from typing import Literal, Optional, Any
+from litestar.datastructures import UploadFile
+from litestar.exceptions import ValidationException
+from aioboto3 import Session
+from aiobotocore.config import AioConfig
+
+ALLOWED_POST_MIME_TYPES = {
+        'image/jpeg': 'jpg',
+        'image/jpg': 'jpg',
+        'image/heic': 'heic',
+        'image/heif': 'heif',
+    }
+
+ALLOWED_MIME_TYPES = {
+    'image/jpeg': 'jpg',
+    'image/jpg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+    'image/heic': 'heic',
+    'image/heif': 'heif',
+}
+
+async def verify_file_type(mimetype: str, is_post: bool):
+    """Verifies the file type that is allowed"""
+    if not mimetype:
+        raise ValidationException("Invalid file type: None")
+    extension: str | None = ALLOWED_MIME_TYPES.get(mimetype, None) if not is_post else ALLOWED_POST_MIME_TYPES.get(mimetype, None)
+    if not extension:
+        raise ValidationException(f"Invalid file type {mimetype}")
+    return extension
+
+
+class ObjectStorage:
+    """
+    Client wrapper for S3 object storage operations.
+    
+    Handles presigned URL generation, file uploads/downloads, and file deletions.
+    
+    Uses aioboto3 client configured for S3.
+    """
+    allowed_folders: list[str] = ['spot', 'visit', 'avatar', 'banner','quarantine']
+    
+    def __init__(self,
+                 bucket: str, 
+                 endpoint: str,
+                 access_key_id: str,
+                 secret_access_key: str,
+                 region: str = 'auto',
+                 service_name: str = 's3'
+                 ):
+            self.service_name =service_name
+            self.endpoint_url = endpoint
+            self.access_key_id = access_key_id
+            self.secret_access_key = secret_access_key
+            self.bucket = bucket
+            self.region = region
+            self.session = Session()
+
+    async def generate_file_name(self, folder: str, mimetype: str, id: str | int, is_post: bool) -> str:
+        """Generate unique file path for the object.
+        
+        Folder structure for profile items:
+            {foldername}/{user_id}
+
+        Folder structure for posts:
+            {foldername}/{post_id}
+        """
+
+        if folder not in self.allowed_folders:
+            raise Exception('Invalid destination') 
+        
+        extension = await verify_file_type(mimetype, is_post=is_post)
+        timestamp = datetime.now(timezone.utc).strftime('%d%m%Y_%H%M%S')
+        short_id = secrets.token_urlsafe(32) 
+        filename = f"{folder}/{id}/{timestamp}_{short_id}.{extension}"
+
+        return filename
+
+    async def generate_presigned_put_url(self, mimetype: str, user_id: str, expires_in: int = 600) -> dict[str, str]:
+        """Generate presigned URL
+
+        The default folder is always "quarantine/{user_id}".
+        """
+
+        object_key = await self.generate_file_name(id=user_id, folder='quarantine', mimetype=mimetype, is_post=False)
+
+        async with self.session.client(
+            service_name=self.service_name,
+            endpoint_url=self.endpoint_url,
+            aws_access_key_id=self.access_key_id,
+            aws_secret_access_key=self.secret_access_key,
+            region_name=self.region,
+            config=AioConfig(signature_version='s3v4')
+        ) as s3: # type: ignore[attr-defined]
+            response = await s3.generate_presigned_url(
+                'put_object',
+                Params = {
+                    'Bucket': self.bucket,
+                    'Key':object_key,
+                    'ContentType': mimetype
+                },
+                ExpiresIn = expires_in
+            )
+
+        return {'key': object_key, 'presigned_url': response } 
+    
+    async def generate_presigned_get_url(self, key: str, expires_in: int = 300) -> str:
+        async with self.session.client(
+            service_name=self.service_name,
+            endpoint_url=self.endpoint_url,
+            aws_access_key_id=self.access_key_id,
+            aws_secret_access_key=self.secret_access_key,
+            region_name=self.region,
+            config=AioConfig(signature_version='s3v4')
+        ) as s3: # type: ignore[attr-defined] 
+            return await s3.generate_presigned_url(
+                "get_object",
+                Params={"Bucket": self.bucket, "Key": key},
+                ExpiresIn=expires_in,
+            )
+         
+
+    async def download_file_from_s3(self, key: str, local_path: str):   
+        """Download file from S3"""
+        async with self.session.client(
+            service_name=self.service_name,
+            endpoint_url=self.endpoint_url,
+            aws_access_key_id=self.access_key_id,
+            aws_secret_access_key=self.secret_access_key,
+            region_name=self.region,
+            config=AioConfig(signature_version='s3v4')
+        ) as s3: # type: ignore[attr-defined]
+            await s3.download_file(
+                Bucket=self.bucket, 
+                Key=key, 
+                Filename=local_path
+            )
+
+    async def upload_file_s3(self, object_key: str, file: bytes, mimetype: str) -> bool:
+        """Upload a file to an S3 bucket"""
+        async with self.session.client(
+            service_name=self.service_name,
+            endpoint_url=self.endpoint_url,
+            aws_access_key_id=self.access_key_id,
+            aws_secret_access_key=self.secret_access_key,
+            region_name=self.region,
+            config=AioConfig(signature_version='s3v4')
+        ) as s3: # type: ignore[attr-defined]
+            await s3.put_object(Bucket=self.bucket, Key=object_key, Body=file, ContentType=mimetype)
+            return True
+        
+        return False
+
+    async def head_object_from_s3(self, key: str) -> Any:
+        """Returns the meta data associated with the object"""
+        async with self.session.client(
+            service_name=self.service_name,
+            endpoint_url=self.endpoint_url,
+            aws_access_key_id=self.access_key_id,
+            aws_secret_access_key=self.secret_access_key,
+            region_name=self.region,
+            config=AioConfig(signature_version='s3v4')
+        ) as s3: # type: ignore[attr-defined]
+            return await s3.head_object(Bucket=self.bucket, Key=key)
+        
+    
+    async def get_object_s3(self, key: str):
+        """Gets the object stream via PUT"""
+        async with self.session.client(
+            service_name=self.service_name,
+            endpoint_url=self.endpoint_url,
+            aws_access_key_id=self.access_key_id,
+            aws_secret_access_key=self.secret_access_key,
+            region_name=self.region,
+            config=AioConfig(signature_version='s3v4')
+        ) as s3: # type: ignore[attr-defined]
+            response = await s3.get_object(Bucket=self.bucket, Key=key)
+            return await response['Body'].read()
+    
+
+
+    async def delete_file_s3(self, key: str) -> bool:
+        """Delete file from S3"""
+        try:
+            async with self.session.client(
+            service_name=self.service_name,
+            endpoint_url=self.endpoint_url,
+            aws_access_key_id=self.access_key_id,
+            aws_secret_access_key=self.secret_access_key,
+            region_name=self.region,
+            config=AioConfig(signature_version='s3v4')
+        ) as s3: # type: ignore[attr-defined]
+                await s3.delete_object(Bucket=self.bucket, Key=key)
+                return True
+        except Exception:
+            return False
+        
+    async def copy_file_s3(self, key: str, new_key: str, mimetype: str) -> Any:
+        """Delete file from S3"""
+        async with self.session.client(
+            service_name=self.service_name,
+            endpoint_url=self.endpoint_url,
+            aws_access_key_id=self.access_key_id,
+            aws_secret_access_key=self.secret_access_key,
+            region_name=self.region,
+            config=AioConfig(signature_version='s3v4')
+        ) as s3: # type: ignore[attr-defined]
+            response = s3.copy_object(
+                Bucket=self.bucket,
+                ContentType=mimetype,
+                Key=new_key,
+                CopySource={
+                    'Bucket': self.bucket,
+                    'Key': key
+                }
+            )
+        
+        return response
+    
