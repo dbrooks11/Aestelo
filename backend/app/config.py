@@ -1,5 +1,6 @@
 import logging
 
+import uuid
 import structlog
 from app.settings import settings
 from litestar.config.allowed_hosts import AllowedHostsConfig
@@ -23,7 +24,8 @@ from advanced_alchemy.extensions.litestar import (
 from litestar.plugins.structlog import StructlogConfig
 from litestar_email import EmailConfig, ResendConfig, SMTPConfig
 from litestar_saq import SAQConfig, QueueConfig
-
+from app.tasks.worker_config_processes import startup, shutdown, before_process, after_process
+from app.tasks.profile_tasks import process_profile_media
 
 class Config:
     @property
@@ -110,7 +112,7 @@ class Config:
             exclude_from_csrf_key='csrf_none'
         )
     
-    @property
+    
     def saq_config(self) -> SAQConfig:
         """Get SAQ configuration.
 
@@ -123,14 +125,37 @@ class Config:
             use_server_lifespan=settings.saq.USE_SERVER_LIFESPAN,
             queue_configs=[
                 QueueConfig(
-                    name="background-tasks",
-                    dsn=settings.saq.REDIS_URL,
+                    name="default",
+                    id=f'default_worker_{uuid.uuid4()}',
+                    dsn=settings.broker.REDIS,
                     tasks=[],
                     concurrency=settings.saq.CONCURRENCY,
-                    # startup=on_startup,
-                    # shutdown=on_shutdown,
-                    # before_process=before_process,
-                    # after_process=after_process,
+                    startup=startup,
+                    shutdown=shutdown,
+                    before_process=before_process,
+                    after_process=after_process
+                ),
+                QueueConfig(
+                    name="profile_processing",
+                    id=f'profile_worker_{uuid.uuid4()}',
+                    dsn=settings.broker.REDIS,
+                    tasks=[process_profile_media],
+                    concurrency=settings.saq.CONCURRENCY,
+                    startup=startup,
+                    shutdown=shutdown,
+                    before_process=before_process,
+                    after_process=after_process
+                ),
+                QueueConfig(
+                    name="media_processing",
+                    id=f'media_worker_{uuid.uuid4()}',
+                    dsn=settings.broker.REDIS,
+                    tasks=[],
+                    concurrency=settings.saq.CONCURRENCY,
+                    startup=startup,
+                    shutdown=shutdown,
+                    before_process=before_process,
+                    after_process=after_process
                 )
             ],
         )
