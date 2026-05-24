@@ -4,8 +4,8 @@ import jwt
 from argon2 import PasswordHasher
 from app.db.models import (AuthUser, TokenBlackList, UserProfile, UserInfo, UserSettings, 
                            UserRole, UserSubscription, Collection)
-from app.lib.jwt import jwt_cookie_access, jwt_cookie_refresh
-from litestar import Response, post, Request, get
+from app.middleware.jwt import jwt_cookie_access, jwt_cookie_refresh
+from litestar import Response, post, Request
 from litestar.exceptions import (
     HTTPException,
     NotAuthorizedException,
@@ -13,8 +13,7 @@ from litestar.exceptions import (
 from sqlalchemy.sql.functions import now
 from litestar.controller import Controller
 from app.settings import settings
-from litestar.status_codes import HTTP_201_CREATED
-from app.schemas.auth import LoginRequest, SignupRequest, AuthBase
+from app.schemas.auth import LoginRequest, SignupRequest
 from sqlalchemy import func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from litestar.params import Body
@@ -26,7 +25,7 @@ ph = PasswordHasher()
 class AuthController(Controller):
     path = "/auth"
 
-    @post('/signup', status_code=HTTP_201_CREATED, opt={'csrf_none': True, 'access_none': True, 'refresh_none': True})
+    @post('/signup', opt={'csrf_none': True, 'access_none': True, 'refresh_none': True})
     async def signup(self, 
                      data: Annotated[SignupRequest, Body(media_type=RequestEncodingType.MULTI_PART)], 
                      db_session: AsyncSession) -> Response:
