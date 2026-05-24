@@ -31,8 +31,6 @@ __pycache__/
 *.log
 /backend_fk
 
-#Litestar
-*ls/
 
 # IDEs
 .vscode/
