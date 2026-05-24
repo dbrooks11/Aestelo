@@ -186,6 +186,8 @@ class AppSettings(BaseSettings):
     """Application contact email"""
     CLIENT_URL: str = "http://localhost:8000"
     """The frontend base URL"""
+    CPU_COUNT: int = 0
+    """Number of CPUs"""
     SSD_TIMP_DIR: str = ""
     """Directory specifying where background task should process media"""
     RUN_DEBUG: bool = True
@@ -254,6 +256,8 @@ class CFObjectStorageSettings(BaseSettings):
     """Public url that exposes the bucket to the internet."""
     R2_CUSTOM_DOMAIN: str = ""
     """Custom domain the bucket has set"""
+    CDN_DOMAIN_BASE: str =''
+    """CDN url from cloudflare that sits on top of object bucket"""
 
 
 class BBObjectStorageSettings(BaseSettings):
