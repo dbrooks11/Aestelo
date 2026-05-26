@@ -14,7 +14,7 @@ if TYPE_CHECKING:
         Spot,
         Visit,
     )
-from app.db.schemas import (
+from app.db.enum_schemas import (
     LanguagePreferenceEnum,
     UserGenderEnum,
     UserRoleEnum,
@@ -65,19 +65,19 @@ class UserProfile(base.DefaultBase):
     is_deleted: Mapped[bool] = mapped_column(default=False)
     deleted_at: Mapped[Optional[DateTime]] = mapped_column(DateTime(timezone=True))
 
-    auth: Mapped['AuthUser'] = relationship(back_populates='profile', lazy='selectin')
-    info: Mapped["UserInfo"] = relationship(back_populates="profile")
-    settings: Mapped["UserSettings"] = relationship(back_populates="profile")
-    role: Mapped["UserRole"] = relationship(back_populates="profile")
-    subscription: Mapped["UserSubscription"] = relationship(back_populates="profile")
-    spot: Mapped[list["Spot"]] = relationship(back_populates="profile")
-    visit: Mapped[list["Visit"]] = relationship(back_populates="profile")
-    rating: Mapped[list["Rating"]] = relationship(back_populates="profile")
+    auth: Mapped['AuthUser'] = relationship(back_populates='profile', lazy='joined')
+    info: Mapped["UserInfo"] = relationship(back_populates="profile", lazy='joined')
+    settings: Mapped["UserSettings"] = relationship(back_populates="profile", lazy='joined')
+    role: Mapped["UserRole"] = relationship(back_populates="profile", lazy='joined')
+    subscription: Mapped["UserSubscription"] = relationship(back_populates="profile", lazy='joined')
+    spot: Mapped[list["Spot"]] = relationship(back_populates="profile", lazy='selectin')
+    visit: Mapped[list["Visit"]] = relationship(back_populates="profile", lazy='selectin')
+    rating: Mapped[list["Rating"]] = relationship(back_populates="profile", lazy='selectin')
     report: Mapped[list["Report"]] = relationship(back_populates="profile")
-    collection: Mapped[list["Collection"]] = relationship(back_populates="profile")
-    follower: Mapped[list["Follow"]] = relationship(foreign_keys="Follow.follower_id", back_populates="follower")
-    following: Mapped[list["Follow"]] = relationship(foreign_keys="Follow.following_id", back_populates="following")
-    likes: Mapped[list["Likes"]] = relationship(back_populates='profile')
+    collection: Mapped[list["Collection"]] = relationship(back_populates="profile", lazy='selectin')
+    follower: Mapped[list["Follow"]] = relationship(foreign_keys="Follow.follower_id", back_populates="follower", lazy='selectin')
+    following: Mapped[list["Follow"]] = relationship(foreign_keys="Follow.following_id", back_populates="following", lazy='selectin')
+    likes: Mapped[list["Likes"]] = relationship(back_populates='profile', lazy='selectin')
     
     @hybrid_property
     def avatar_url(self) -> str | None:
@@ -108,7 +108,7 @@ class UserInfo(base.DefaultBase):
     state: Mapped[Optional[str]] = mapped_column(Text)
     city: Mapped[Optional[str]] = mapped_column(Text)
 
-    profile: Mapped["UserProfile"] = relationship(back_populates="info")
+    profile: Mapped["UserProfile"] = relationship(back_populates="info", lazy='joined')
 
 class UserRole(base.DefaultBase):
     __tablename__ = 'user_role'
@@ -118,7 +118,7 @@ class UserRole(base.DefaultBase):
     granted_at: Mapped[Optional[DateTime]] = mapped_column(DateTime(timezone=True))
     granted_by: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True))
 
-    profile: Mapped["UserProfile"] = relationship(back_populates="role")
+    profile: Mapped["UserProfile"] = relationship(back_populates="role", lazy='joined')
 
 class UserSettings(base.DefaultBase):
     __tablename__ = 'user_settings'
@@ -131,7 +131,7 @@ class UserSettings(base.DefaultBase):
     data_usage_consent: Mapped[bool] = mapped_column(default=False)
     marketing_consent: Mapped[bool] = mapped_column(default=False)
 
-    profile: Mapped["UserProfile"] = relationship(back_populates="settings")
+    profile: Mapped["UserProfile"] = relationship(back_populates="settings", lazy='joined')
     
 class UserSubscription(base.DefaultBase):
     __tablename__ = 'user_subscription'
@@ -146,4 +146,4 @@ class UserSubscription(base.DefaultBase):
     billing_cycle: Mapped[UserSubscriptionBillCycleEnum] = mapped_column(Enum(UserSubscriptionBillCycleEnum), default=UserSubscriptionBillCycleEnum.MONTHLY)
     trial_used: Mapped[bool] = mapped_column(default=False)
 
-    profile: Mapped["UserProfile"] = relationship(back_populates="subscription")
+    profile: Mapped["UserProfile"] = relationship(back_populates="subscription", lazy='joined')

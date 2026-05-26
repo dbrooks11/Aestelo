@@ -1,7 +1,7 @@
 
 from typing import TYPE_CHECKING, Optional
 import uuid
-from app.db.schemas import MediaTypeEnum, UploadStatusEnum
+from app.db.enum_schemas import UploadStatusEnum
 from geoalchemy2 import Geography
 from advanced_alchemy.extensions.litestar import base
 from sqlalchemy import (
@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 
 class Visit(base.BigIntAuditBase):
     __tablename__ = "visit"
+    __table_args__ = (Index('ix_visit_hashtags', 'hashtags', postgresql_using='gin'))
     
     spot_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("spot.id", ondelete='CASCADE'), nullable=False)
     user_id: Mapped[uuid.UUID] = mapped_column(
@@ -41,7 +42,7 @@ class Visit(base.BigIntAuditBase):
     )
 
     caption: Mapped[Optional[str]] = mapped_column(String(2500))
-    hashtags: Mapped[Optional[list[str]]] = mapped_column(ARRAY(String))
+    hashtags: Mapped[Optional[list[str]]] = mapped_column(ARRAY(Text))
     
     like_count: Mapped[int] = mapped_column(BigInteger, default=0)
     save_count: Mapped[int] = mapped_column(BigInteger, default=0)
@@ -66,10 +67,10 @@ class Visit(base.BigIntAuditBase):
         back_populates="visit", 
         cascade="all, delete-orphan"
     )
-    profile: Mapped["UserProfile"] = relationship(back_populates="visit")
-    spot: Mapped["Spot"] = relationship(back_populates="visit")
-    likes: Mapped["Likes"] = relationship(back_populates='visit')
-    media: Mapped[list["VisitMedia"]] = relationship(back_populates='visit')
+    profile: Mapped["UserProfile"] = relationship(back_populates="visit", lazy='joined')
+    spot: Mapped["Spot"] = relationship(back_populates="visit", lazy="joined")
+    likes: Mapped["Likes"] = relationship(back_populates='visit', lazy='selectin')
+    media: Mapped[list["VisitMedia"]] = relationship(back_populates='visit' , lazy='selectin')
     
 
 class VisitMedia(base.BigIntBase):
@@ -84,9 +85,6 @@ class VisitMedia(base.BigIntBase):
 
     sort_order: Mapped[Optional[int]] = mapped_column(Integer)
     media_key: Mapped[Optional[str]] = mapped_column(Text)
-    media_type: Mapped[str] = mapped_column(Text, default=MediaTypeEnum.PHOTO) 
-    width: Mapped[Optional[int]] = mapped_column(Integer)
-    height: Mapped[Optional[int]] = mapped_column(Integer)
 
-    visit: Mapped["Visit"] = relationship(back_populates="media")
+    visit: Mapped["Visit"] = relationship(back_populates="media", lazy='joined')
 

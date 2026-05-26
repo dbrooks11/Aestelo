@@ -6,6 +6,8 @@ from litestar.datastructures import UploadFile
 from litestar.exceptions import ValidationException
 from aioboto3 import Session
 from aiobotocore.config import AioConfig
+from app.settings import settings
+
 
 ALLOWED_POST_MIME_TYPES = {
         'image/jpeg': 'jpg',
@@ -59,14 +61,15 @@ class ObjectStorage:
             self.region = region
             self.session = Session()
 
-    async def generate_file_name(self, folder: str, mimetype: str, id: str | int, is_post: bool) -> str:
+    async def generate_file_name(self, mimetype: str, id: str | int, is_post: bool, folder: str = 'quarantine') -> str:
         """Generate unique file path for the object.
         
-        Folder structure for profile items:
-            {foldername}/{user_id}
+        Folder structure:
+            {foldername}/{id}/{timestamp}_{short_id}.{extension}
 
-        Folder structure for posts:
-            {foldername}/{post_id}
+        set is_post=True to validate a specific set of mimetypes for Post like content.
+
+        Allowed Folders: spot, visit, avatar, banner, quarantine
         """
 
         if folder not in self.allowed_folders:
@@ -79,13 +82,8 @@ class ObjectStorage:
 
         return filename
 
-    async def generate_presigned_put_url(self, mimetype: str, user_id: str, expires_in: int = 600) -> dict[str, str]:
-        """Generate presigned URL
-
-        The default folder is always "quarantine/{user_id}".
-        """
-
-        object_key = await self.generate_file_name(id=user_id, folder='quarantine', mimetype=mimetype, is_post=False)
+    async def generate_presigned_put_url(self, mimetype: str, obj_key: str, expires_in: int = 600) -> dict[str, str]:
+        """Generate presigned URL"""
 
         async with self.session.client(
             service_name=self.service_name,
@@ -99,13 +97,13 @@ class ObjectStorage:
                 'put_object',
                 Params = {
                     'Bucket': self.bucket,
-                    'Key':object_key,
+                    'Key':obj_key,
                     'ContentType': mimetype
                 },
                 ExpiresIn = expires_in
             )
 
-        return {'key': object_key, 'presigned_url': response } 
+        return {'key': obj_key, 'presigned_url': response } 
     
     async def generate_presigned_get_url(self, key: str, expires_in: int = 300) -> str:
         async with self.session.client(
@@ -220,3 +218,20 @@ class ObjectStorage:
         
         return response
     
+
+
+storage_bb = ObjectStorage(
+    bucket=settings.storage_bb.BUCKET_NAME,
+    endpoint=settings.storage_bb.BUCKET_ENDPOINT,
+    access_key_id=settings.storage_bb.APP_KEY_ID,
+    secret_access_key=settings.storage_bb.APP_KEY
+)
+"""Backblaze storage intialization"""
+
+storage_cf = ObjectStorage(
+    bucket=settings.storage_cf.R2_BUCKET_NAME,
+    endpoint=settings.storage_cf.R2_S3_API,
+    access_key_id=settings.storage_cf.R2_ACCESS_KEY_ID,
+    secret_access_key=settings.storage_cf.R2_SECRET_ACCESS_KEY
+)
+"""Cloudflare storage intialization"""

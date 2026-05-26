@@ -9,124 +9,143 @@ from urllib.parse import urlparse
 import msgspec
 from app.lib.exceptions import ApplicationClientError
 
-EMAIL_BASIC_PATTERN = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]\.[a-zA-Z]{2,}$")
-EMAIL_DOUBLE_DOT_PATTERN = re.compile(r"\.\.+")
-EMAIL_BLOCKED_PATTERNS = [
-    re.compile(r".*\+.*test.*@.*"),
-    re.compile(r".*\+.*spam.*@.*"),
-    re.compile(r"^test.*@.*"),
-    re.compile(r"^noreply@.*"),
-    re.compile(r"^no-reply@.*"),
-]
 
-PASSWORD_UPPERCASE_PATTERN = re.compile(r"[A-Z]")
-PASSWORD_LOWERCASE_PATTERN = re.compile(r"[a-z]")
-PASSWORD_DIGIT_PATTERN = re.compile(r"\d")
-PASSWORD_SPECIAL_PATTERN = re.compile(r'[!@#$%^&*(),.?":{}|<>_+=\-\[\]\\\/~`]')
-PASSWORD_COMMON_PATTERN = re.compile(r"(password|123456|qwerty|admin)", re.IGNORECASE)
-PASSWORD_REPEATED_PATTERN = re.compile(r"(.)\1{4,}")
-PASSWORD_SIMPLE_REPEATED_PATTERN = re.compile(r"^(.)\1{11,}$")
-PASSWORD_SEQUENTIAL_PATTERN = re.compile(r"^(012|123|234|345|456|567|678|789|890|abc|bcd|cde)", re.IGNORECASE)
-PASSWORD_KEYBOARD_PATTERN = re.compile(r"^(qwe|asd|zxc)", re.IGNORECASE)
+class ValidationConfiguration:
+    MAX_HEIGHT=2560
+    MAX_WIDTH=1440
+    QUALITY = 85
+    COMPRESSION_IMAGE_TYPE='webp'
+    MAX_FILE_SIZE = 10 * 1024 * 1024 
+    MAX_NUM_FILES_POST=10
+    MAX_NUM_FILES_PROFILE=2
 
-NAME_WHITESPACE_PATTERN = re.compile(r"\s+")
-NAME_VALID_PATTERN = re.compile(r"^[a-zA-ZÀ-ÿĀ-žА-я\u4e00-\u9fff\u0600-\u06ff\u3040-\u309f\u30a0-\u30ff\s'\-\.]+$")
-NAME_REPEATED_PATTERN = re.compile(r"(.)\1{4,}")
+    MAX_POST_MEDIA_COUNT=10
+    MIN_POST_MEDIA_COUNT=1
+    MAX_POST_HASHTAG_COUNT=20
+    MIN_POST_HASHTAG_COUNT=0
+    MAX_POST_DESCRIPTION_LENGTH= 250
+    MIN_POST_DESCRIPTION_LENGTH=0
 
-USERNAME_VALID_PATTERN = re.compile(r'^(?!.*\.$)(?!^\.)[a-z0-9._]+$')
+    EMAIL_BASIC_PATTERN = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]\.[a-zA-Z]{2,}$")
+    EMAIL_DOUBLE_DOT_PATTERN = re.compile(r"\.\.+")
+    EMAIL_BLOCKED_PATTERNS = [
+        re.compile(r".*\+.*test.*@.*"),
+        re.compile(r".*\+.*spam.*@.*"),
+        re.compile(r"^test.*@.*"),
+        re.compile(r"^noreply@.*"),
+        re.compile(r"^no-reply@.*"),
+    ]
 
-SLUG_VALID_PATTERN = re.compile(r"^[a-z0-9-]+$")
+    PASSWORD_UPPERCASE_PATTERN = re.compile(r"[A-Z]")
+    PASSWORD_LOWERCASE_PATTERN = re.compile(r"[a-z]")
+    PASSWORD_DIGIT_PATTERN = re.compile(r"\d")
+    PASSWORD_SPECIAL_PATTERN = re.compile(r'[!@#$%^&*(),.?":{}|<>_+=\-\[\]\\\/~`]')
+    PASSWORD_COMMON_PATTERN = re.compile(r"(password|123456|qwerty|admin)", re.IGNORECASE)
+    PASSWORD_REPEATED_PATTERN = re.compile(r"(.)\1{4,}")
+    PASSWORD_SIMPLE_REPEATED_PATTERN = re.compile(r"^(.)\1{11,}$")
+    PASSWORD_SEQUENTIAL_PATTERN = re.compile(r"^(012|123|234|345|456|567|678|789|890|abc|bcd|cde)", re.IGNORECASE)
+    PASSWORD_KEYBOARD_PATTERN = re.compile(r"^(qwe|asd|zxc)", re.IGNORECASE)
 
-PHONE_BASIC_PATTERN = re.compile(r"^[\+]?[0-9\s\-\(\)\.]+$")
-PHONE_DIGITS_PATTERN = re.compile(r"[^\d]")
+    NAME_WHITESPACE_PATTERN = re.compile(r"\s+")
+    NAME_VALID_PATTERN = re.compile(r"^[a-zA-ZÀ-ÿĀ-žА-я\u4e00-\u9fff\u0600-\u06ff\u3040-\u309f\u30a0-\u30ff\s'\-\.]+$")
+    NAME_REPEATED_PATTERN = re.compile(r"(.)\1{4,}")
 
-EMAIL_BLOCKED_DOMAINS = [
-    "10minutemail.com",
-    "tempmail.org",
-    "guerrillamail.com",
-    "mailinator.com",
-    "throwaway.email",
-    "temp-mail.org",
-    "yopmail.com",
-    "maildrop.cc",
-    "dispostable.com",
-    "trashmail.com",
-    "fake-mail.cf",
-    "tempmail.net",
-]
+    USERNAME_VALID_PATTERN = re.compile(r'^(?!.*\.$)(?!^\.)[a-z0-9._]+$')
 
-COMMON_PASSWORDS = {
-    "password",
-    "password123",
-    "123456789",
-    "qwertyuiop",
-    "administrator",
-    "welcome123",
-    "password1234",
-    "letmein123",
-    "admin123456",
-    "password12345",
-}
+    SLUG_VALID_PATTERN = re.compile(r"^[a-z0-9-]+$")
 
-PASSWORD_MIN_LENGTH = 8
-PASSWORD_MAX_LENGTH = 128
-PASSWORD_STRONG_LENGTH = 12
-PASSWORD_VERY_STRONG_LENGTH = 20
+    PHONE_BASIC_PATTERN = re.compile(r"^[\+]?[0-9\s\-\(\)\.]+$")
+    PHONE_DIGITS_PATTERN = re.compile(r"[^\d]")
 
-PASSWORD_SCORE_STRONG = 7
-PASSWORD_SCORE_MEDIUM = 5
+    EMAIL_BLOCKED_DOMAINS = [
+        "10minutemail.com",
+        "tempmail.org",
+        "guerrillamail.com",
+        "mailinator.com",
+        "throwaway.email",
+        "temp-mail.org",
+        "yopmail.com",
+        "maildrop.cc",
+        "dispostable.com",
+        "trashmail.com",
+        "fake-mail.cf",
+        "tempmail.net",
+    ]
 
-PHONE_MIN_DIGITS = 7
-PHONE_MAX_DIGITS = 15
+    COMMON_PASSWORDS = {
+        "password",
+        "password123",
+        "123456789",
+        "qwertyuiop",
+        "administrator",
+        "welcome123",
+        "password1234",
+        "letmein123",
+        "admin123456",
+        "password12345",
+    }
 
-EMAIL_MAX_LENGTH = 254
-EMAIL_MIN_LENGTH = 5
-EMAIL_LOCAL_PART_MAX_LENGTH = 64
+    PASSWORD_MIN_LENGTH = 8
+    PASSWORD_MAX_LENGTH = 128
+    PASSWORD_STRONG_LENGTH = 12
+    PASSWORD_VERY_STRONG_LENGTH = 20
 
-NAME_MAX_LENGTH = 100
-USERNAME_MIN_LENGTH = 2
-USERNAME_MAX_LENGTH = 30
+    PASSWORD_SCORE_STRONG = 7
+    PASSWORD_SCORE_MEDIUM = 5
 
-URL_MAX_LENGTH = 2048
-SLUG_MAX_LENGTH = 100
+    PHONE_MIN_DIGITS = 7
+    PHONE_MAX_DIGITS = 15
 
-RESERVED_USERNAMES = {
-    "admin",
-    "root",
-    "api",
-    "www",
-    "mail",
-    "ftp",
-    "support",
-    "help",
-    "security",
-    "privacy",
-    "terms",
-    "about",
-    "contact",
-    "blog",
-    "news",
-    "app",
-    "application",
-    "system",
-    "test",
-    "user",
-    "guest",
-    "demo",
-    "null",
-    "undefined",
-    "none",
-}
+    EMAIL_MAX_LENGTH = 254
+    EMAIL_MIN_LENGTH = 5
+    EMAIL_LOCAL_PART_MAX_LENGTH = 64
 
-ALLOWED_URL_SCHEMES = {"http", "https"}
-BLOCKED_URL_DOMAINS = {
-    "localhost",
-    "127.0.0.1",
-    "0.0.0.0",  # noqa: S104
-    "::1",
-    "[::1]",
-}
-SUSPICIOUS_URL_PATTERNS = ["javascript:", "data:", "vbscript:", "file:"]
+    NAME_MAX_LENGTH = 100
+    USERNAME_MIN_LENGTH = 2
+    USERNAME_MAX_LENGTH = 30
+
+    URL_MAX_LENGTH = 2048
+    SLUG_MAX_LENGTH = 100
+
+    RESERVED_USERNAMES = {
+        "admin",
+        "root",
+        "api",
+        "www",
+        "mail",
+        "ftp",
+        "support",
+        "help",
+        "security",
+        "privacy",
+        "terms",
+        "about",
+        "contact",
+        "blog",
+        "news",
+        "app",
+        "application",
+        "system",
+        "test",
+        "user",
+        "guest",
+        "demo",
+        "null",
+        "undefined",
+        "none",
+    }
+
+    ALLOWED_URL_SCHEMES = {"http", "https"}
+    BLOCKED_URL_DOMAINS = {
+        "localhost",
+        "127.0.0.1",
+        "0.0.0.0",  # noqa: S104
+        "::1",
+        "[::1]",
+    }
+    SUSPICIOUS_URL_PATTERNS = ["javascript:", "data:", "vbscript:", "file:"]
+
+validate = ValidationConfiguration()
 
 
 class ValidationError(ApplicationClientError):
@@ -205,27 +224,27 @@ def validate_password_strength(password: str) -> None:
     """
     _ensure_str(password, "Password", PasswordValidationError)
 
-    if len(password) < PASSWORD_MIN_LENGTH:
-        msg = f"Password must be at least {PASSWORD_MIN_LENGTH} characters long"
+    if len(password) < validate.PASSWORD_MIN_LENGTH:
+        msg = f"Password must be at least {validate.PASSWORD_MIN_LENGTH} characters long"
         raise PasswordValidationError(msg)
 
-    if len(password) > PASSWORD_MAX_LENGTH:
-        msg = f"Password must not exceed {PASSWORD_MAX_LENGTH} characters"
+    if len(password) > validate.PASSWORD_MAX_LENGTH:
+        msg = f"Password must not exceed {validate.PASSWORD_MAX_LENGTH} characters"
         raise PasswordValidationError(msg)
 
-    if not PASSWORD_UPPERCASE_PATTERN.search(password):
+    if not validate.PASSWORD_UPPERCASE_PATTERN.search(password):
         msg = "Password must contain at least one uppercase letter"
         raise PasswordValidationError(msg)
 
-    if not PASSWORD_LOWERCASE_PATTERN.search(password):
+    if not validate.PASSWORD_LOWERCASE_PATTERN.search(password):
         msg = "Password must contain at least one lowercase letter"
         raise PasswordValidationError(msg)
 
-    if not PASSWORD_DIGIT_PATTERN.search(password):
+    if not validate.PASSWORD_DIGIT_PATTERN.search(password):
         msg = "Password must contain at least one digit"
         raise PasswordValidationError(msg)
 
-    if not PASSWORD_SPECIAL_PATTERN.search(password):
+    if not validate.PASSWORD_SPECIAL_PATTERN.search(password):
         msg = "Password must contain at least one special character"
         raise PasswordValidationError(msg)
 
@@ -245,16 +264,16 @@ def _is_common_password(password: str) -> bool:
     """
     password_lower = password.lower()
 
-    if password_lower in COMMON_PASSWORDS:
+    if password_lower in validate.COMMON_PASSWORDS:
         return True
 
-    if PASSWORD_SIMPLE_REPEATED_PATTERN.match(password):
+    if validate.PASSWORD_SIMPLE_REPEATED_PATTERN.match(password):
         return True
 
-    if PASSWORD_SEQUENTIAL_PATTERN.match(password_lower):
+    if validate.PASSWORD_SEQUENTIAL_PATTERN.match(password_lower):
         return True
 
-    return bool(PASSWORD_KEYBOARD_PATTERN.match(password_lower))
+    return bool(validate.PASSWORD_KEYBOARD_PATTERN.match(password_lower))
 
 
 def get_password_strength(password: str) -> dict[str, Any]:
@@ -270,11 +289,11 @@ def get_password_strength(password: str) -> dict[str, Any]:
         "score": 0,
         "strength": "weak",
         "requirements": {
-            "length": len(password) >= PASSWORD_MIN_LENGTH,
-            "uppercase": bool(PASSWORD_UPPERCASE_PATTERN.search(password)),
-            "lowercase": bool(PASSWORD_LOWERCASE_PATTERN.search(password)),
-            "digits": bool(PASSWORD_DIGIT_PATTERN.search(password)),
-            "special_chars": bool(PASSWORD_SPECIAL_PATTERN.search(password)),
+            "length": len(password) >= validate.PASSWORD_MIN_LENGTH,
+            "uppercase": bool(validate.PASSWORD_UPPERCASE_PATTERN.search(password)),
+            "lowercase": bool(validate.PASSWORD_LOWERCASE_PATTERN.search(password)),
+            "digits": bool(validate.PASSWORD_DIGIT_PATTERN.search(password)),
+            "special_chars": bool(validate.PASSWORD_SPECIAL_PATTERN.search(password)),
             "not_common": not _is_common_password(password),
         },
         "feedback": [],
@@ -310,14 +329,14 @@ def get_password_strength(password: str) -> dict[str, Any]:
     else:
         analysis["feedback"].append("Avoid common passwords")
 
-    if len(password) >= PASSWORD_STRONG_LENGTH:
+    if len(password) >= validate.PASSWORD_STRONG_LENGTH:
         analysis["score"] += 1
-    if len(password) >= PASSWORD_VERY_STRONG_LENGTH:
+    if len(password) >= validate.PASSWORD_VERY_STRONG_LENGTH:
         analysis["score"] += 1
 
-    if analysis["score"] >= PASSWORD_SCORE_STRONG:
+    if analysis["score"] >= validate.PASSWORD_SCORE_STRONG:
         analysis["strength"] = "strong"
-    elif analysis["score"] >= PASSWORD_SCORE_MEDIUM:
+    elif analysis["score"] >= validate.PASSWORD_SCORE_MEDIUM:
         analysis["strength"] = "medium"
     else:
         analysis["strength"] = "weak"
@@ -341,33 +360,33 @@ def validate_email(v: str) -> str:
 
     email = v.strip().lower()
 
-    if len(email) > EMAIL_MAX_LENGTH:
+    if len(email) > validate.EMAIL_MAX_LENGTH:
         msg = "Email address too long"
         raise ValidationError(msg)
 
-    if len(email) < EMAIL_MIN_LENGTH:
+    if len(email) < validate.EMAIL_MIN_LENGTH:
         msg = "Email address too short"
         raise ValidationError(msg)
 
-    if not EMAIL_BASIC_PATTERN.match(email):
+    if not validate.EMAIL_BASIC_PATTERN.match(email):
         msg = "Invalid email format"
         raise ValidationError(msg)
 
-    if EMAIL_DOUBLE_DOT_PATTERN.search(email):
+    if validate.EMAIL_DOUBLE_DOT_PATTERN.search(email):
         msg = "Invalid email format"
         raise ValidationError(msg)
 
     local_part, _, domain = email.rpartition("@")
-    if domain in EMAIL_BLOCKED_DOMAINS:
+    if domain in validate.EMAIL_BLOCKED_DOMAINS:
         msg = "Email domain not allowed"
         raise ValidationError(msg)
 
-    for pattern in EMAIL_BLOCKED_PATTERNS:
+    for pattern in validate.EMAIL_BLOCKED_PATTERNS:
         if pattern.match(email):
             msg = "Email format not allowed"
             raise ValidationError(msg)
 
-    if len(local_part) > EMAIL_LOCAL_PART_MAX_LENGTH:
+    if len(local_part) > validate.EMAIL_LOCAL_PART_MAX_LENGTH:
         msg = "Email local part too long"
         raise ValidationError(msg)
 
@@ -395,20 +414,20 @@ def validate_name(v: str) -> str:
     v = _ensure_str(v, "Name")
 
     name = v.strip()
-    name = NAME_WHITESPACE_PATTERN.sub(" ", name)
+    name = validate.NAME_WHITESPACE_PATTERN.sub(" ", name)
 
     if len(name) < 1:
         msg = "Name cannot be empty"
         raise ValidationError(msg)
-    if len(name) > NAME_MAX_LENGTH:
-        msg = f"Name must not exceed {NAME_MAX_LENGTH} characters"
+    if len(name) > validate.NAME_MAX_LENGTH:
+        msg = f"Name must not exceed {validate.NAME_MAX_LENGTH} characters"
         raise ValidationError(msg)
 
-    if not NAME_VALID_PATTERN.match(name):
+    if not validate.NAME_VALID_PATTERN.match(name):
         msg = "Name contains invalid characters"
         raise ValidationError(msg)
 
-    if NAME_REPEATED_PATTERN.search(name):
+    if validate.NAME_REPEATED_PATTERN.search(name):
         msg = "Name contains suspicious patterns"
         raise ValidationError(msg)
 
@@ -431,18 +450,18 @@ def validate_username(v: str) -> str:
 
     username = v.strip().lower()
 
-    if len(username) < USERNAME_MIN_LENGTH:
-        msg = f"Username must be at least {USERNAME_MIN_LENGTH} characters"
+    if len(username) < validate.USERNAME_MIN_LENGTH:
+        msg = f"Username must be at least {validate.USERNAME_MIN_LENGTH} characters"
         raise ValidationError(msg)
-    if len(username) > USERNAME_MAX_LENGTH:
-        msg = f"Username must not exceed {USERNAME_MAX_LENGTH} characters"
+    if len(username) > validate.USERNAME_MAX_LENGTH:
+        msg = f"Username must not exceed {validate.USERNAME_MAX_LENGTH} characters"
         raise ValidationError(msg)
 
-    if not USERNAME_VALID_PATTERN.match(username):
+    if not validate.USERNAME_VALID_PATTERN.match(username):
         msg = "Username can only contain letters, numbers, hyphens, and underscores"
         raise ValidationError(msg)
 
-    if username in RESERVED_USERNAMES:
+    if username in validate.RESERVED_USERNAMES:
         msg = "Username is reserved and cannot be used"
         raise ValidationError(msg)
 
@@ -469,7 +488,7 @@ def validate_url(v: str) -> str:
 
     url = v.strip()
 
-    if len(url) > URL_MAX_LENGTH:
+    if len(url) > validate.URL_MAX_LENGTH:
         msg = "URL too long"
         raise ValidationError(msg)
 
@@ -483,20 +502,20 @@ def validate_url(v: str) -> str:
         msg = "URL must include a scheme (http:// or https://)"
         raise ValidationError(msg)
 
-    if parsed.scheme not in ALLOWED_URL_SCHEMES:
-        msg = f"URL scheme must be one of: {', '.join(ALLOWED_URL_SCHEMES)}"
+    if parsed.scheme not in validate.ALLOWED_URL_SCHEMES:
+        msg = f"URL scheme must be one of: {', '.join(validate.ALLOWED_URL_SCHEMES)}"
         raise ValidationError(msg)
 
     if not parsed.hostname:
         msg = "URL must include a hostname"
         raise ValidationError(msg)
 
-    if parsed.hostname in BLOCKED_URL_DOMAINS:
+    if parsed.hostname in validate.BLOCKED_URL_DOMAINS:
         msg = "URL domain not allowed"
         raise ValidationError(msg)
 
     url_lower = url.lower()
-    if any(suspicious in url_lower for suspicious in SUSPICIOUS_URL_PATTERNS):
+    if any(suspicious in url_lower for suspicious in validate.SUSPICIOUS_URL_PATTERNS):
         msg = "URL contains suspicious content"
         raise ValidationError(msg)
 
@@ -522,11 +541,11 @@ def validate_slug(v: str) -> str:
     if len(slug) < 1:
         msg = "Slug cannot be empty"
         raise ValidationError(msg)
-    if len(slug) > SLUG_MAX_LENGTH:
-        msg = f"Slug must not exceed {SLUG_MAX_LENGTH} characters"
+    if len(slug) > validate.SLUG_MAX_LENGTH:
+        msg = f"Slug must not exceed {validate.SLUG_MAX_LENGTH} characters"
         raise ValidationError(msg)
 
-    if not SLUG_VALID_PATTERN.match(slug):
+    if not validate.SLUG_VALID_PATTERN.match(slug):
         msg = "Slug can only contain lowercase letters, numbers, and hyphens"
         raise ValidationError(msg)
 
@@ -565,13 +584,13 @@ def validate_phone(v: str) -> str:
         msg = "Phone number cannot be empty"
         raise ValidationError(msg)
 
-    if not PHONE_BASIC_PATTERN.match(phone):
+    if not validate.PHONE_BASIC_PATTERN.match(phone):
         msg = "Invalid phone number format"
         raise ValidationError(msg)
 
-    digits_only = PHONE_DIGITS_PATTERN.sub("", phone)
-    if len(digits_only) < PHONE_MIN_DIGITS or len(digits_only) > PHONE_MAX_DIGITS:
-        msg = f"Phone number must be between {PHONE_MIN_DIGITS} and {PHONE_MAX_DIGITS} digits"
+    digits_only = validate.PHONE_DIGITS_PATTERN.sub("", phone)
+    if len(digits_only) < validate.PHONE_MIN_DIGITS or len(digits_only) > validate.PHONE_MAX_DIGITS:
+        msg = f"Phone number must be between {validate.PHONE_MIN_DIGITS} and {validate.PHONE_MAX_DIGITS} digits"
         raise ValidationError(msg)
 
     return phone

@@ -1,7 +1,7 @@
 
 from typing import TYPE_CHECKING, Optional
 import uuid
-from app.db.schemas import MediaTypeEnum, UploadStatusEnum
+from app.db.enum_schemas import UploadStatusEnum
 from geoalchemy2 import Geography, Geometry
 from geoalchemy2.functions import ST_X, ST_Y
 from advanced_alchemy.extensions.litestar import base
@@ -14,11 +14,13 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     Integer,
-    String,
+    Enum,
     Text,
     cast,
+    Index
 )
 from sqlalchemy.orm import Mapped, column_property, mapped_column, relationship
+from app.lib.validation import validate
 
 if TYPE_CHECKING:
     from models import CollectionItem, Rating, UserProfile, Visit
@@ -26,6 +28,8 @@ if TYPE_CHECKING:
 
 class Spot(base.BigIntAuditBase):
     __tablename__ = "spot"
+    __table_args__= (Index('ix_spot_color_palette', 'color_palette', postgresql_using='gin'),
+                     Index('ix_spot_hashtags', 'hashtags', postgresql_using='gin'),)
 
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), 
@@ -38,10 +42,11 @@ class Spot(base.BigIntAuditBase):
     coordinates: Mapped[Optional[Geography]] = mapped_column(
         Geography(geometry_type='POINT', srid=4326, spatial_index=True)
     )
-    latitude: Mapped[int] = column_property(ST_Y(cast(coordinates, Geometry)))
-    longitude: Mapped[int] = column_property(ST_X(cast(coordinates, Geometry)))
+    color_palette: Mapped[Optional[ARRAY]] = mapped_column(ARRAY(Text))
+    latitude: Mapped[float] = column_property(ST_Y(cast(coordinates, Geometry)))
+    longitude: Mapped[float] = column_property(ST_X(cast(coordinates, Geometry)))
 
-    description: Mapped[Optional[str]] = mapped_column(Text)
+    description: Mapped[Optional[str]] = mapped_column(Text(validate.MAX_POST_DESCRIPTION_LENGTH))
     total_num_of_photos: Mapped[Optional[int]] = mapped_column(Integer)
 
     visit_count: Mapped[int] = mapped_column(Integer, default=0) 
@@ -51,7 +56,7 @@ class Spot(base.BigIntAuditBase):
     save_count: Mapped[int] = mapped_column(Integer, default=0)
     share_count: Mapped[int] = mapped_column(Integer, default=0)
     
-    hashtags: Mapped[Optional[list[str]]] = mapped_column(ARRAY(String)) 
+    hashtags: Mapped[Optional[list[str]]] = mapped_column(ARRAY(Text)) 
     accessibility: Mapped[bool] = mapped_column(Boolean, default=False) 
     num_of_edits: Mapped[int] = mapped_column(Integer, default=0)
     
@@ -60,21 +65,24 @@ class Spot(base.BigIntAuditBase):
     num_reports: Mapped[int] = mapped_column(Integer, default=0)
     is_removed: Mapped[bool] = mapped_column(Boolean, default=False)
     removed_at: Mapped[Optional[DateTime]] = mapped_column(DateTime(timezone=True))
-    status: Mapped[str] = mapped_column(Text, default=UploadStatusEnum.PROCESSING)
+    status: Mapped[Enum] = mapped_column(Enum(UploadStatusEnum), default=UploadStatusEnum.PROCESSING)
 
-    profile: Mapped["UserProfile"] = relationship(back_populates="spot")
-    collection_item: Mapped["CollectionItem"] = relationship(back_populates="spot")
+    profile: Mapped["UserProfile"] = relationship(back_populates="spot", lazy='joined')
+    collection_item: Mapped["CollectionItem"] = relationship(back_populates="spot", lazy='selectin')
     media: Mapped[list["SpotMedia"]] = relationship(
         back_populates="spot", 
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
+        lazy='selectin',
     )
     visit: Mapped[list["Visit"]] = relationship(
         back_populates="spot", 
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
+        lazy='selectin'
     )
     rating: Mapped[list["Rating"]] = relationship(
         back_populates="spot", 
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
+        lazy='selectin'
     )
 
 class SpotMedia(base.BigIntBase):
@@ -89,8 +97,5 @@ class SpotMedia(base.BigIntBase):
 
     sort_order: Mapped[int] = mapped_column(BigInteger)
     media_key: Mapped[Optional[str]] = mapped_column(Text)
-    media_type: Mapped[str] = mapped_column(Text, default=MediaTypeEnum.PHOTO) 
-    width: Mapped[Optional[int]] = mapped_column(Integer)
-    height: Mapped[Optional[int]] = mapped_column(Integer)
 
-    spot: Mapped["Spot"] = relationship(back_populates="media")
+    spot: Mapped["Spot"] = relationship(back_populates="media", lazy='joined')

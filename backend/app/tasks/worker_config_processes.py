@@ -1,3 +1,5 @@
+from app.utils.storage import ObjectStorage
+from app.settings import settings
 
 async def startup(ctx):
     print('Worker is alive. Waiting for job')

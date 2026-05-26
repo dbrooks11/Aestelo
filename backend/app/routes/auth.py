@@ -13,7 +13,7 @@ from litestar.exceptions import (
 from sqlalchemy.sql.functions import now
 from litestar.controller import Controller
 from app.settings import settings
-from app.schemas.auth import LoginRequest, SignupRequest
+from app.schemas.auth import LoginRequestSchema, SignupRequestSchema
 from sqlalchemy import func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from litestar.params import Body
@@ -27,7 +27,7 @@ class AuthController(Controller):
 
     @post('/signup', opt={'csrf_none': True, 'access_none': True, 'refresh_none': True})
     async def signup(self, 
-                     data: Annotated[SignupRequest, Body(media_type=RequestEncodingType.MULTI_PART)], 
+                     data: Annotated[SignupRequestSchema, Body(media_type=RequestEncodingType.MULTI_PART)], 
                      db_session: AsyncSession) -> Response:
 
         exist_stmt = (select(1).where( 
@@ -58,7 +58,7 @@ class AuthController(Controller):
     
 
     @post('/login', opt={'csrf_none': True, 'access_none': True, 'refresh_none': True})
-    async def login(self, data: Annotated[LoginRequest, Body(media_type=RequestEncodingType.MULTI_PART)], db_session: AsyncSession) -> Response:
+    async def login(self, data: Annotated[LoginRequestSchema, Body(media_type=RequestEncodingType.MULTI_PART)], db_session: AsyncSession) -> Response:
         account = await db_session.execute(select(AuthUser.id, AuthUser.password_hash).where(
             (AuthUser.email == data.email) | 
             (AuthUser.username == data.username))

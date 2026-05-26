@@ -8,7 +8,6 @@ from app.utils.storage import ObjectStorage
 from app.settings import settings
 
 MAX_NUM_OF_FILES=10
-MAX_FILE_SIZE = 10 * 1024 * 1024  #20MB
 
 class ObjectStorageController(Controller):
     path='/s3'
@@ -28,8 +27,9 @@ class ObjectStorageController(Controller):
         )
 
         presigned_urls: list = []
-        for file in data:  
-            print(file.headers)
-            presigned_urls.append(await storage.generate_presigned_put_url(mimetype=file.content_type, user_id=user_id))
+        for file in data:
+            mimetype = file.content_type
+            obj_key = await storage.generate_file_name(mimetype=mimetype, id=user_id, is_post=False)  
+            presigned_urls.append(await storage.generate_presigned_put_url(mimetype=mimetype, obj_key=obj_key))
 
         return presigned_urls

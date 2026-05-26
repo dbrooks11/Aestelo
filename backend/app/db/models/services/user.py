@@ -1,21 +1,19 @@
-from sqlalchemy import UUID
-from typing import Union
 from advanced_alchemy.repository import SQLAlchemyAsyncRepository, ErrorMessages
 from advanced_alchemy.service import SQLAlchemyAsyncRepositoryService
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models.user import UserProfile
-from app.schemas.user import UserProfileEdit
+from app.schemas.user import UserProfileEditSchema
 from collections.abc import AsyncGenerator
 from sqlalchemy.orm import selectinload, joinedload
 
 class UserProfileService(SQLAlchemyAsyncRepositoryService[UserProfile]):
     """Handles database operations for users"""
 
-    class UserProfileRepository(SQLAlchemyAsyncRepository[UserProfile]):
+    class UserProfileRepo(SQLAlchemyAsyncRepository[UserProfile]):
         """Repository for managing User profile information"""
         model_type=UserProfile
 
-    repository_type = UserProfileRepository
+    repository_type = UserProfileRepo
     
     async def get_profile_me(self, user_id: str) -> UserProfile:
         return await self.get(item_id=user_id, 
@@ -25,7 +23,7 @@ class UserProfileService(SQLAlchemyAsyncRepositoryService[UserProfile]):
                             load=[joinedload(UserProfile.auth)]
                         )
 
-    async def update_profile(self, user_id: str, data: UserProfileEdit) -> UserProfile:
+    async def update_profile(self, user_id: str, data: UserProfileEditSchema) -> UserProfile:
         profile = await self.get(user_id, load=[selectinload(UserProfile.auth)])
 
         username = data.username

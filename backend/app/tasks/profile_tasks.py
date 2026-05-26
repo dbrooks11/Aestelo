@@ -1,26 +1,19 @@
 from saq.types import Context
-from app.utils.storage import ObjectStorage
 from app.utils.media_processing import process_media_image
 from app.db.models.services.user import UserProfileService
-from app.schemas.user import UserProfileEdit
+from app.schemas.user import UserProfileEditSchema
 from app.db.session import get_db_session
 from litestar_saq import monitored_job
-from app.settings import settings
+from app.utils.storage import storage_bb
+
 
 
 @monitored_job()
 async def process_profile_media(ctx: Context, *, user_id: str, field: str, obj_key: str, prev_key: str):
-    storage_bb = ObjectStorage(
-        bucket=settings.storage_bb.BUCKET_NAME,
-        endpoint=settings.storage_bb.BUCKET_ENDPOINT,
-        access_key_id=settings.storage_bb.APP_KEY_ID,
-        secret_access_key=settings.storage_bb.APP_KEY
-    )
-
     uploaded: bool = False
 
     try:
-        processed_file_data = await process_media_image(storage=storage_bb, obj_key=obj_key, need_exif=True) #TODO: set exif to false
+        processed_file_data = await process_media_image(storage=storage_bb, obj_key=obj_key, need_exif=False, need_colors=False)
 
         processed_file = processed_file_data.get('compressed_file') # type: ignore
         if not processed_file:
@@ -37,7 +30,7 @@ async def process_profile_media(ctx: Context, *, user_id: str, field: str, obj_k
         if uploaded:
             async with get_db_session() as session:
                 profile_service = UserProfileService(session=session)
-                await profile_service.update_profile(data=UserProfileEdit.model_validate({field: new_obj_key}), user_id=user_id)
+                await profile_service.update_profile(data=UserProfileEditSchema.model_validate({field: new_obj_key}), user_id=user_id)
                 if prev_key:
                     await storage_bb.delete_file_s3(key=prev_key)
         

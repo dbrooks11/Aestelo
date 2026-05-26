@@ -26,6 +26,7 @@ from litestar_email import EmailConfig, ResendConfig, SMTPConfig
 from litestar_saq import SAQConfig, QueueConfig
 from app.tasks.worker_config_processes import startup, shutdown, before_process, after_process
 from app.tasks.profile_tasks import process_profile_media
+from app.tasks.post_media_task import process_post_media
 
 class Config:
     @property
@@ -150,7 +151,7 @@ class Config:
                     name="media_processing",
                     id=f'media_worker_{uuid.uuid4()}',
                     dsn=settings.broker.REDIS,
-                    tasks=[],
+                    tasks=[process_post_media],
                     concurrency=settings.saq.CONCURRENCY,
                     startup=startup,
                     shutdown=shutdown,

@@ -1,6 +1,5 @@
 from litestar.plugins.sqlalchemy import SQLAlchemyDTO, SQLAlchemyDTOConfig
 from app.db.models.user import UserProfile
-from app.settings import settings
 
 
 class UserProfileDTO(SQLAlchemyDTO[UserProfile]):

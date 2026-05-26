@@ -1,14 +1,15 @@
 from litestar.controller import Controller
 from litestar.di import Provide
-from typing import Annotated
+from typing import Annotated, Any
 from litestar import get, post, patch, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models.services.user import provide_user_service, UserProfileService
 from app.db.models.dto.user import UserProfileDTO, UserProfileEditDTO
 from app.db.models.user import UserProfile
-from app.schemas.user import UserProfileEdit
+from app.schemas.user import UserProfileEditSchema
 from app.plugins import plugins
-
+from app.settings import settings
+from app.utils.storage import ObjectStorage
 
 
 class ProfileController(Controller):
@@ -21,8 +22,14 @@ class ProfileController(Controller):
         return await profile_service.get_profile_me(user_id=user_id)
 
     @patch('/edit', return_dto=UserProfileEditDTO)
-    async def edit_profile(self, data: UserProfileEdit, request: Request, profile_service: UserProfileService) -> UserProfile:
+    async def edit_profile(self, data: UserProfileEditSchema, request: Request, profile_service: UserProfileService) -> UserProfile:
         user_id = request.user.id
+        storage = ObjectStorage(
+            bucket=settings.storage_bb.BUCKET_NAME,
+            endpoint=settings.storage_bb.BUCKET_ENDPOINT,
+            access_key_id=settings.storage_bb.APP_KEY_ID,
+            secret_access_key=settings.storage_bb.APP_KEY
+        )
         data_dict = data.model_dump(exclude_none=True, exclude_unset=True)
         profile_media = {
             'avatar': data_dict.pop('avatar', None),
@@ -35,7 +42,8 @@ class ProfileController(Controller):
         items = []
         for field, obj_key in profile_media.items():
             if obj_key:
-                items.append({'field': field, 'obj_key': obj_key, 'prev_key': getattr(profile, field, None), 'user_id': user_id})
+                items.append({'field': field, 'obj_key': obj_key, 'prev_key': getattr(profile, field, None), 'user_id': user_id, 'storage': storage})
+        results: list[Any] = []
         if items:
             results = await queue.map(
                         "process_profile_media",
@@ -45,7 +53,7 @@ class ProfileController(Controller):
                         retry_delay=1,
                         retry_backoff=True
                     )
-        updated_profile = await profile_service.update_profile(user_id=user_id, data=UserProfileEdit.model_validate(data_dict))
+        updated_profile = await profile_service.update_profile(user_id=user_id, data=UserProfileEditSchema.model_validate(data_dict))
         
         if results:
             for result in results:

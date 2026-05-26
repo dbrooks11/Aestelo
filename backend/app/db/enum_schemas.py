@@ -11,6 +11,10 @@ class UploadStatusEnum(Enum):
     FAILED = 'Failed'
     SUCCESS = 'Success'
 
+class PostTypes(Enum):
+    SPOT = 'spot'
+    VISIT = 'visit'
+
 class MediaTypeEnum(Enum):
     PHOTO = 'Photo'
     VIDEO = 'Video'

@@ -3,7 +3,7 @@ from pydantic import Field, field_validator, FileUrl
 from typing import Optional, Annotated
 from app.schemas.auth import username_invalidation
 
-class UserProfileEdit(CamelizedBaseSchema):
+class UserProfileEditSchema(CamelizedBaseSchema):
     """Schema to validate edits to a user's profile.
     This is also used within the UserService
     """

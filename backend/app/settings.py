@@ -320,15 +320,25 @@ class LogSettings(BaseSettings):
 
 class Settings(BaseSettings):
     app: AppSettings = AppSettings()
+    """App settings"""
     db: DatabaseSettings = DatabaseSettings()
+    """Database settings"""
     server: ServerSettings = ServerSettings()
+    """Server settings"""
     saq: SaqSettings = SaqSettings()
+    """SAQ Background workers"""
     log: LogSettings = LogSettings()
+    """Logging"""
     email: EmailSettings = EmailSettings()
+    """Email configuration"""
     storage_cf: CFObjectStorageSettings = CFObjectStorageSettings()
+    """Cloudflare storage"""
     storage_bb: BBObjectStorageSettings = BBObjectStorageSettings()
+    """Backblaze storage"""
     broker: BrokerSettings = BrokerSettings()
+    """Broker settings (e.g. Redis)"""
     logger: ClassVar = structlog.get_logger()
+    """Struct logger"""
 
     
 

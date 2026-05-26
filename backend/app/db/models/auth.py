@@ -17,6 +17,6 @@ class AuthUser(base.UUIDAuditBase):
     last_signed_in: Mapped[Optional[DateTime]] = mapped_column(DateTime(timezone=True))
     locked_until: Mapped[Optional[DateTime]] = mapped_column(DateTime(timezone=True))
 
-    profile: Mapped["UserProfile"] = relationship(back_populates='auth')
+    profile: Mapped["UserProfile"] = relationship(back_populates='auth', lazy='joined')
 
 
