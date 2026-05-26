@@ -2,8 +2,9 @@ import time
 import structlog
 from litestar.middleware.base import AbstractMiddleware
 from litestar.types import Receive, Scope, Send
+from app.settings import settings
 
-logger = structlog.get_logger()
+logger = settings.logger
 
 class RequestTimingMiddleware(AbstractMiddleware):
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:

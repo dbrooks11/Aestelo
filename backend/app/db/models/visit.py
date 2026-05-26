@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
 class Visit(base.BigIntAuditBase):
     __tablename__ = "visit"
-    __table_args__ = (Index('ix_visit_hashtags', 'hashtags', postgresql_using='gin'))
+    __table_args__ = (Index('ix_visit_hashtags', 'hashtags', postgresql_using='gin'),)
     
     spot_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("spot.id", ondelete='CASCADE'), nullable=False)
     user_id: Mapped[uuid.UUID] = mapped_column(

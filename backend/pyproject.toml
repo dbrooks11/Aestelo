@@ -1,5 +1,5 @@
 [project]
-name = "aestelo"
+name = "aestelo-backend"
 version = "0.1.0"
 description = "Backend dependencies for litestar applciation"
 readme = "README.md"

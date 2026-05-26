@@ -29,11 +29,13 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     Text,
+    String,
     Enum,
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
+from app.lib.validation import validate
 
 
 class UserProfile(base.DefaultBase):
@@ -42,7 +44,7 @@ class UserProfile(base.DefaultBase):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('auth_user.id', ondelete='CASCADE'), primary_key=True)
     avatar: Mapped[Optional[str]] = mapped_column(Text)
     banner: Mapped[Optional[str]] = mapped_column(Text)
-    bio: Mapped[Optional[str]] = mapped_column(Text)
+    bio: Mapped[Optional[str]] = mapped_column(String(validate.MAX_PROFILE_BIO_LENGTH))
 
     spot_count: Mapped[int] = mapped_column(Integer, default=0)
     visit_count: Mapped[int] = mapped_column(Integer, default=0)

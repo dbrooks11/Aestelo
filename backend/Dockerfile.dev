@@ -1,0 +1,42 @@
+ARG PYTHON_VERSION=3.13
+
+# Development image (includes dev dependencies and hot reload)
+FROM python:${PYTHON_VERSION}-slim-bookworm AS dev
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+
+# Install system dependencies (including build tools for dev)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    build-essential \
+    libjpeg-dev \
+    zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy dependency files
+COPY pyproject.toml uv.lock ./
+
+# Install ALL dependencies (including dev) for development
+RUN uv sync --frozen --all-extras
+
+# Create non-root user
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+RUN chown -R appuser:appuser /app
+USER appuser
+
+# Copy source code (will be overridden by volume mount in compose)
+COPY --chown=appuser:appuser . .
+
+# Set path
+ENV PATH="/app/.venv/bin:$PATH"
+
+EXPOSE 8000
+
+# Use litestar with --reload flag for hot reload
+CMD ["litestar", "run", "--reload", "--host", "0.0.0.0", "--port", "8000"]

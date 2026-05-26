@@ -2,7 +2,6 @@ from typing import cast
 from geopy.distance import geodesic
 
 
-
 class GPSHandling:
     LOCATION_KEY_LAT = 'lat'
     LOCATION_KEY_LON = 'long'
@@ -53,8 +52,6 @@ class GPSHandling:
         return {self.LOCATION_KEY_LAT: await dms_to_decimal(ref=lat_ref, decimal=lat_d, minute=lat_m, second=lat_s),
                 self.LOCATION_KEY_LON: await dms_to_decimal(ref=long_ref, decimal=long_d, minute=long_m, second=long_s)}  # type: ignore
     
-    from geopy.distance import geodesic
-
 
 
     async def average_location(self, coords: list[dict[str, float]]) -> dict | None:

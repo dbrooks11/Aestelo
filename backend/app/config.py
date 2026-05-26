@@ -197,79 +197,8 @@ class Config:
         Returns:
             The log configuration
         """
-        from app.lib import log as log_conf
 
-        return StructlogConfig(
-            enable_middleware_logging=False,
-            structlog_logging_config=StructLoggingConfig(
-                log_exceptions="always",
-                processors=log_conf.structlog_processors(as_json=not log_conf.is_tty()),
-                logger_factory=default_logger_factory(as_json=not log_conf.is_tty()),
-                disable_stack_trace={404, 401, 403, NotAuthorizedException, PermissionDeniedException},
-                standard_lib_logging_config=LoggingConfig(
-                    log_exceptions="always",
-                    disable_stack_trace={404, 401, 403, NotAuthorizedException, PermissionDeniedException},
-                    root={"level": logging.getLevelName(settings.log.LEVEL), "handlers": ["queue_listener"]},
-                    formatters={
-                        "standard": {
-                            "()": structlog.stdlib.ProcessorFormatter,
-                            "processors": log_conf.stdlib_logger_processors(as_json=not log_conf.is_tty()),
-                        },
-                    },
-                    loggers={
-                        "saq": {
-                            "propagate": False,
-                            "level": settings.log.SAQ_LEVEL,
-                            "handlers": ["queue_listener"],
-                        },
-                        "sqlalchemy.engine": {
-                            "propagate": False,
-                            "level": settings.log.SQLALCHEMY_LEVEL,
-                            "handlers": ["queue_listener"],
-                        },
-                        "sqlalchemy.pool": {
-                            "propagate": False,
-                            "level": settings.log.SQLALCHEMY_LEVEL,
-                            "handlers": ["queue_listener"],
-                        },
-                        "opentelemetry.sdk.metrics._internal": {
-                            "propagate": False,
-                            "level": 40,
-                            "handlers": ["queue_listener"],
-                        },
-                        "httpx": {
-                            "propagate": False,
-                            "level": max(settings.log.LEVEL, logging.WARNING),
-                            "handlers": ["queue_listener"],
-                        },
-                        "httpcore": {
-                            "propagate": False,
-                            "level": max(settings.log.LEVEL, logging.WARNING),
-                            "handlers": ["queue_listener"],
-                        },
-                        "_granian": {
-                            "propagate": False,
-                            "level": settings.log.ASGI_ERROR_LEVEL,
-                            "handlers": ["queue_listener"],
-                        },
-                        "granian.server": {
-                            "propagate": False,
-                            "level": settings.log.ASGI_ERROR_LEVEL,
-                            "handlers": ["queue_listener"],
-                        },
-                        "granian.access": {
-                            "propagate": False,
-                            "level": settings.log.ASGI_ACCESS_LEVEL,
-                            "handlers": ["queue_listener"],
-                        },
-                    },
-                ),
-            ),
-            middleware_logging_config=LoggingMiddlewareConfig(
-                request_log_fields=settings.log.REQUEST_FIELDS,
-                response_log_fields=settings.log.RESPONSE_FIELDS,
-            ),
-        )
+        return StructlogConfig()
 
 
 config = Config()

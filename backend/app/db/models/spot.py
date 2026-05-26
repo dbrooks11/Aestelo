@@ -17,6 +17,7 @@ from sqlalchemy import (
     Enum,
     Text,
     cast,
+    String,
     Index
 )
 from sqlalchemy.orm import Mapped, column_property, mapped_column, relationship
@@ -46,7 +47,7 @@ class Spot(base.BigIntAuditBase):
     latitude: Mapped[float] = column_property(ST_Y(cast(coordinates, Geometry)))
     longitude: Mapped[float] = column_property(ST_X(cast(coordinates, Geometry)))
 
-    description: Mapped[Optional[str]] = mapped_column(Text(validate.MAX_POST_DESCRIPTION_LENGTH))
+    description: Mapped[Optional[str]] = mapped_column(String(validate.MAX_POST_DESCRIPTION_LENGTH))
     total_num_of_photos: Mapped[Optional[int]] = mapped_column(Integer)
 
     visit_count: Mapped[int] = mapped_column(Integer, default=0) 
