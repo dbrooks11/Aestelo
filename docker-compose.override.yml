@@ -22,8 +22,9 @@ services:
           ignore:
             - __pycache__/
             - .pytest_cache/
-        - action: rebuild
+        - action: sync+restart
           path: .env
+          target: /app/.env
         - action: rebuild
           path: ./backend/pyproject.toml
         - action: rebuild
@@ -101,8 +102,9 @@ services:
           path: ./frontend/package.json
         - action: rebuild
           path: ./frontend/pnpm-lock.yaml
-        - action: rebuild
+        - action: sync+restart
           path: .env
+          target: /app/.env
     environment:
       VITE_API_URL: ${VITE_API_URL}
     volumes:
@@ -146,6 +148,8 @@ services:
       - redis-insight:/data
     depends_on:
       - redis
+    networks:
+      - aestelo_network
 
 volumes:
   redis_data:

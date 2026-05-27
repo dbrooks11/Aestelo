@@ -23,7 +23,7 @@ app = Litestar(
         plugins.sqlalchemy,
         plugins.email,
         plugins.problem_details,
-        # plugins.structlog,
+        plugins.structlog,
         plugins.saq
     ],
     type_encoders={BaseModel: lambda m: m.model_dump(by_alias=True, exclude_none=True)},

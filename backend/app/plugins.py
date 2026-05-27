@@ -9,7 +9,7 @@ from litestar_saq import SAQPlugin
 
 class Plugins:
     sqlalchemy = SQLAlchemyInitPlugin(config=config.sqlalchemy_config)
-    structlog = StructlogPlugin(config=config.structlog_config)
+    structlog = StructlogPlugin()
     problem_details = ProblemDetailsPlugin()
     email = EmailPlugin(config=config.email_config)
     saq = SAQPlugin(config=config.saq_config())

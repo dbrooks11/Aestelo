@@ -59,7 +59,7 @@ class Config:
             The allowed host configuration.
         """
         return AllowedHostsConfig(
-            allowed_hosts=["localhost"]
+            allowed_hosts=["localhost:8000"]
         )
 
     @property
