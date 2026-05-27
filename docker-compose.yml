@@ -15,8 +15,6 @@ services:
       timeout: 10s
       retries: 3
     restart: unless-stopped
-    networks:
-      - aestelo_network
 
   # BACKEND (Production Build) 
   backend:
@@ -39,8 +37,7 @@ services:
     #   timeout: 10s
     #   retries: 3
     restart: unless-stopped
-    networks:
-      - aestelo_network
+
 
   # POSTGRES DATABASE 
   db:
@@ -57,8 +54,7 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-    networks:
-      - aestelo_network
+
 
   # REDIS (for SAQ Queues)
   redis:
@@ -72,13 +68,8 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-    networks:
-      - aestelo_network
+
 
 volumes:
   postgres_data:
   redis_data:
-
-networks:
-  aestelo_network:
-    driver: bridge

@@ -2,10 +2,8 @@
 FROM node:22-alpine AS deps
 WORKDIR /app
 
-RUN corepack enable
-
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+COPY package.json package-lock.json ./
+RUN npm ci
 
 # STAGE 2: Build 
 FROM deps AS build
@@ -13,7 +11,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN pnpm run build
+RUN npm run build
 
 # STAGE 3: Production Server (Non-Root Nginx)
 FROM nginxinc/nginx-unprivileged:alpine AS prod

@@ -7,12 +7,9 @@ FROM node:${NODE_VERSION} AS dev
 # Set the working directory inside the container
 WORKDIR /app
 ENV CI=true
-# Enable Corepack to use the exact pnpm version from package.json
-RUN corepack enable
 
-# Copy dependency files and install (uses lockfile)
-COPY package.json pnpm-lock.yaml .npmrc* ./
-RUN pnpm install --frozen-lockfile
+COPY package.json package-lock.json ./
+RUN npm ci
 
 # Copy the rest of the application source code into the container
 COPY . .
@@ -21,4 +18,4 @@ COPY . .
 EXPOSE 5173
 
 # Use a default command, can be overridden in Docker compose.yml file
-CMD ["pnpm", "run", "dev"]
+CMD ["npm", "run", "dev", "--", "--host"]
