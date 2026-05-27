@@ -1,18 +1,33 @@
 services:
-  # --- LITESTAR BACKEND --- #
+  # LITESTAR BACKEND 
   backend:
     container_name: aestelo_backend
     build: 
       context: ./backend
+      dockerfile: Dockerfile.dev
+      target: dev
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/app
-      - /app/.venv
-    command: litestar --app app.main:app run --reload --host 0.0.0.0 --port 8000
+      - backend_venv:/app/.venv
     restart: unless-stopped
     env_file:
       - .env
+    develop:
+      watch:
+        - action: sync
+          path: ./backend/app
+          target: /app/app
+          ignore:
+            - __pycache__/
+            - .pytest_cache/
+        - action: rebuild
+          path: .env
+        - action: rebuild
+          path: ./backend/pyproject.toml
+        - action: rebuild
+          path: ./backend/uv.lock
     logging:
       driver: "json-file"
       options:
@@ -24,11 +39,14 @@ services:
       redis:
         condition: service_healthy
 
+# BG Workers
   workers:
     container_name: aestelo_workers
     build:
       context: ./backend
-    command: litestar --app app.main:app workers run
+      dockerfile: Dockerfile.dev
+      target: dev
+    command: litestar workers run
     env_file:
       - .env
     depends_on:
@@ -38,10 +56,12 @@ services:
         condition: service_healthy
     volumes:
       - ./backend:/app
-      - /app/.venv
+      - backend_venv:/app/.venv
+    networks:
+      - aestelo_network
       
 
-  # --- POSTGRES DATABASE ---#  
+  # POSTGRES DATABASE (with postgis)
   db:
     image: postgis/postgis:18-3.6
     container_name: aestelo_db
@@ -60,27 +80,40 @@ services:
       timeout: 5s
       retries: 5
 
-  # --- REACT FRONTEND ---
+  # REACT FRONTEND 
   frontend:
     container_name: aestelo_frontend
     build: 
       context: ./frontend
-      target: development
+      dockerfile: Dockerfile.dev
+      target: dev
     ports:
       - "5173:5173"
-    command: npm run dev -- --host
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
+          ignore:
+            - node_modules
+            - dist/
+        - action: rebuild
+          path: ./frontend/package.json
+        - action: rebuild
+          path: ./frontend/pnpm-lock.yaml
+        - action: rebuild
+          path: .env
     environment:
-      NODE_ENV: ${VITE_ENV}
       VITE_API_URL: ${VITE_API_URL}
     volumes:
       - ./frontend:/app
-      - /app/node_modules 
+      - frontend_node_modules:/app/node_modules 
     depends_on:
       - backend
     env_file:
       - .env
   
-  #--- REDIS ---#
+  #  REDIS
   redis:
     image: redis:7-alpine
     container_name: aestelo_redis
@@ -89,6 +122,7 @@ services:
       - "6379:6379"
     command: redis-server --save 20 1 --loglevel warning --requirepass ${BROKER_REDIS_PASSWORD}
     environment:
+      REDIS_URL: ${BROKER_REDIS}
       REDIS_PASSWORD: ${BROKER_REDIS_PASSWORD}
     env_file:
       - .env
@@ -99,6 +133,8 @@ services:
       retries: 5
     volumes:
       - redis_data:/data 
+    networks:
+      - aestelo_network
   
   redisinsight:
     image: redis/redisinsight:latest
@@ -118,3 +154,9 @@ volumes:
     name: aestelo_db
   redis-insight:
     name: aestelo_redis-insight
+  backend_venv:
+    name: aestelo_backend_venv
+  frontend_node_modules:
+    name: aestelo_frontend_node_modules
+  aestelo_network:
+    driver: bridge

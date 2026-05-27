@@ -9,7 +9,11 @@ lerna-debug.log*
 
 # Env
 .env.development
-
+frontend/.pnpm-store/
+.pnpm-store/
+.pnpm-store
+/.pnpm-store
+node_modules/
 node_modules
 dist
 dist-ssr

@@ -1,21 +1,22 @@
-# STAGE 1: Build
-FROM node:22-alpine AS base
+# STAGE 1: Dependencies
+FROM node:22-alpine AS deps
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci 
+
+RUN corepack enable
+
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+
+# STAGE 2: Build 
+FROM deps AS build
+WORKDIR /app
+
 COPY . .
 
-# STAGE 2: Development
-FROM base AS development
-EXPOSE 5173
-CMD ["npm", "run", "dev", "--", "--host"]
+RUN pnpm run build
 
-# STAGE 3: Build Production Artifacts
-FROM base AS build
-RUN npm run build
-
-# STAGE 4: Production Server (Non-Root Nginx)
-FROM nginxinc/nginx-unprivileged:alpine AS production
+# STAGE 3: Production Server (Non-Root Nginx)
+FROM nginxinc/nginx-unprivileged:alpine AS prod
 
 COPY --from=build /app/dist /usr/share/nginx/html
 

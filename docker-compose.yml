@@ -1,0 +1,84 @@
+services:
+  # FRONTEND (Production Build)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile       
+      target: prod        
+    ports:
+      - "8080:8080"               
+    environment:
+      VITE_API_URL: ${VITE_API_URL}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - aestelo_network
+
+  # BACKEND (Production Build) 
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile       
+      target: prod           
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    restart: unless-stopped
+    networks:
+      - aestelo_network
+
+  # POSTGRES DATABASE 
+  db:
+    image: postgis/postgis:18-3.6
+    environment:
+      POSTGRES_USER: ${DB_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${DB_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${DB_POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_POSTGRES_USER} -d ${DB_POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - aestelo_network
+
+  # REDIS (for SAQ Queues)
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - aestelo_network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  aestelo_network:
+    driver: bridge
