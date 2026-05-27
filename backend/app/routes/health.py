@@ -18,4 +18,4 @@ class HealthCheckController(Controller):
         db_health = await db_session.execute(select(1))
 
         if not db_health:
-            raise InternalServerException()
+            raise InternalServerException("Database is unhealthy")

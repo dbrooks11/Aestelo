@@ -1,12 +1,10 @@
 import logging
 
 import uuid
-import structlog
 from app.settings import settings
 from litestar.config.allowed_hosts import AllowedHostsConfig
 from litestar.config.cors import CORSConfig
 from litestar.config.csrf import CSRFConfig
-from litestar.exceptions import NotAuthorizedException, PermissionDeniedException
 from litestar.logging.config import (
     LoggingConfig,
     StructLoggingConfig,
@@ -27,6 +25,7 @@ from litestar_saq import SAQConfig, QueueConfig
 from app.tasks.worker_config_processes import startup, shutdown, before_process, after_process
 from app.tasks.profile_tasks import process_profile_media
 from app.tasks.post_media_task import process_post_media
+
 
 class Config:
     @property
@@ -198,7 +197,21 @@ class Config:
             The log configuration
         """
 
-        return StructlogConfig()
+        return StructlogConfig(
+            middleware_logging_config=LoggingMiddlewareConfig(
+                response_cookies_to_obfuscate={'csrftoken', 'access_token', 'refresh_token'},
+                response_headers_to_obfuscate={'cookie', 'x-csrftoken'},
+                request_cookies_to_obfuscate={'csrftoken', 'access_token', 'refresh_token'},
+                request_headers_to_obfuscate={'cookie', 'x-csrftoken'},
+                request_log_fields=('path', 'method', 'content_type', 'headers', 'query', 'path_params', 'body'),
+                response_log_fields=("status_code", "headers", "body"),
+                exclude=['/saq']
+            ),
+            structlog_logging_config=StructLoggingConfig(
+                log_exceptions='always',
+                disable_stack_trace={404, ValueError}
+            )
+        )
 
 
 config = Config()
