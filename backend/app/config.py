@@ -1,14 +1,11 @@
-import logging
-
 import uuid
 from app.settings import settings
+
 from litestar.config.allowed_hosts import AllowedHostsConfig
 from litestar.config.cors import CORSConfig
 from litestar.config.csrf import CSRFConfig
 from litestar.logging.config import (
-    LoggingConfig,
-    StructLoggingConfig,
-    default_logger_factory,
+    StructLoggingConfig
 )
 from litestar.middleware.logging import LoggingMiddlewareConfig
 from litestar.openapi.config import OpenAPIConfig
@@ -17,23 +14,32 @@ from advanced_alchemy.extensions.litestar import (
     SQLAlchemyAsyncConfig,
     async_autocommit_before_send_handler,
     EngineConfig,
-    AlembicAsyncConfig
+    AlembicAsyncConfig,
 )
 from litestar.plugins.structlog import StructlogConfig
 from litestar_email import EmailConfig, ResendConfig, SMTPConfig
 from litestar_saq import SAQConfig, QueueConfig
 from app.tasks.worker_config_processes import startup, shutdown, before_process, after_process
 from app.tasks.profile_tasks import process_profile_media
-from app.tasks.post_media_task import process_post_media
+from app.tasks.post_media_task import process_post_pipeline
+from litestar.openapi.plugins import ScalarRenderPlugin
 
 
 class Config:
     @property
     def openapi_config(self) -> OpenAPIConfig:
         return OpenAPIConfig(
-            title=settings.app.NAME,
-            version=settings.app.VERSION
-        )
+        title=settings.app.NAME,
+        version=settings.app.VERSION,
+        render_plugins=[
+            ScalarRenderPlugin(
+                options={
+                    "persistAuth": True,
+                    'withCredentials': True,
+                }
+            )
+        ],
+    )
 
     @property
     def cors_config(self) -> CORSConfig:
@@ -58,7 +64,7 @@ class Config:
             The allowed host configuration.
         """
         return AllowedHostsConfig(
-            allowed_hosts=["localhost:8000"]
+            allowed_hosts=["localhost:8000", "localhost:5173"]
         )
 
     @property
@@ -91,11 +97,7 @@ class Config:
                 echo_pool=settings.db.ECHO_POOL
             ),
             create_all=True,
-            alembic_config=AlembicAsyncConfig(
-                script_location=settings.db.MIGRATION_PATH,
-                version_table_name=settings.db.MIGRATION_DDL_VERSION_TABLE,
-                script_config=settings.db.MIGRATION_CONFIG
-            )
+            alembic_config=AlembicAsyncConfig(compare_type=True)
         )
 
     @property
@@ -107,6 +109,7 @@ class Config:
         """
         return CSRFConfig(
             secret=settings.app.SECRET_KEY,
+            header_name='x-csrf-token',
             cookie_secure=settings.app.JWT_COOKIE_SECURE,
             cookie_samesite=settings.app.JWT_COOKIE_SAMESITE,
             exclude_from_csrf_key='csrf_none'
@@ -150,7 +153,7 @@ class Config:
                     name="media_processing",
                     id=f'media_worker_{uuid.uuid4()}',
                     dsn=settings.broker.REDIS,
-                    tasks=[process_post_media],
+                    tasks=[process_post_pipeline],
                     concurrency=settings.saq.CONCURRENCY,
                     startup=startup,
                     shutdown=shutdown,

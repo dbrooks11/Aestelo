@@ -17,7 +17,6 @@ DEFAULT_MODULE_NAME = "app"
 BASE_DIR: Final[Path] = module_to_os_path(DEFAULT_MODULE_NAME)
 
 
-
 class DatabaseSettings(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix='DB_',
@@ -42,12 +41,6 @@ class DatabaseSettings(BaseSettings):
     """Amount of time to wait before recycling connections."""
     POOL_PRE_PING: bool = True
     """Optionally ping database before fetching a session from the connection pool."""
-    MIGRATION_CONFIG: str = f"{BASE_DIR}/db/migrations/alembic.ini"
-    """The path to the `alembic.ini` configuration file."""
-    MIGRATION_PATH: str = f"{BASE_DIR}/db/migrations"
-    """The path to the `alembic` database migrations."""
-    MIGRATION_DDL_VERSION_TABLE: str = "ddl_version"
-    """The name to use for the `alembic` versions table name."""
     POSTGRES_USER: str = ""
     """User/username for the postgres"""
     POSTGRES_DB: str = ""
@@ -228,7 +221,39 @@ class BrokerSettings(BaseSettings):
     REDIS: str = "redis://localhost:6379/0"
     """Redis URL for broker."""
 
-class CFObjectStorageSettings(BaseSettings):
+
+class ObjectStorageSettings(BaseSettings):
+    """Object Storage configuration for cloudflare"""
+    model_config = SettingsConfigDict(
+        env_prefix='OBJS_',
+        env_file=ENV_FILE,
+        env_file_encoding=ENV_ENCODING,
+        extra='ignore'
+    )
+
+    ACCESS_KEY_ID: str = ""
+    """Access key"""
+    SECRET_ACCESS_KEY: str = ""
+    """Secret access key"""
+    ENDPOINT: str = ""
+    """S3 Endpoint"""
+    ENDPOINT_EU: str = ""
+    """S3 Endpoint (EU)"""
+
+    #Public bucket
+    BUCKET_NAME: str = ""
+    """Name of object bucket serving files"""
+    PUBLIC_URL: str = ""
+    """Public url that exposes the bucket to the internet."""
+    SUB_DOMAIN: str = ""
+    """Sub domain the bucket has set"""
+
+    #Private bucket
+    PRIVATE_BUCKET_NAME: str = ""
+    """Name of private object bucket """
+
+
+class CloudFlareSettings(BaseSettings):
     """Object Storage configuration for cloudflare"""
     model_config = SettingsConfigDict(
         env_prefix='CF_',
@@ -242,43 +267,6 @@ class CFObjectStorageSettings(BaseSettings):
     """Cloudflare's turnstile key for bot protection"""
     R2_ACCOUNT_ID: str = ""
     """Account ID for Cloudflare R2"""
-    R2_BUCKET_NAME: str = ""
-    """Name of object bucket in Cloudflare R2"""
-    R2_ACCESS_KEY_ID: str = ""
-    """Access key for Cloudflare R2"""
-    R2_SECRET_ACCESS_KEY: str = ""
-    """Secret access key for Cloudflare R2"""
-    R2_S3_API: str = ""
-    """S3 Api"""
-    R2_S3_API_EU: str = ""
-    """S3 Api (EU)"""
-    R2_PUBLIC_URL: str = ""
-    """Public url that exposes the bucket to the internet."""
-    R2_CUSTOM_DOMAIN: str = ""
-    """Custom domain the bucket has set"""
-    CDN_DOMAIN_BASE: str =''
-    """CDN url from cloudflare that sits on top of object bucket"""
-
-
-class BBObjectStorageSettings(BaseSettings):
-    """Object Storage configuration for BackBlaze b2"""
-    model_config = SettingsConfigDict(
-        env_prefix='BB_',
-        env_file=ENV_FILE,
-        env_file_encoding=ENV_ENCODING,
-        extra='ignore'
-    )
-    BUCKET_NAME: str = ''
-    """Name of bucket"""
-    BUCKET_ENDPOINT: str = ''
-    """S3 Endpoint for the bucket"""
-    APP_KEY_ID: str = ''
-    """Application Access Key ID for Backblaze"""
-    APP_KEY_NAME: str = ''
-    """Application Access Key name for Backblaze"""
-    APP_KEY: str = ''
-    """Application Access key for Backblaze"""
-
 
 class LogSettings(BaseSettings):
     """Logger configuration"""
@@ -318,6 +306,18 @@ class LogSettings(BaseSettings):
     """Level to log uvicorn error logs."""
 
 
+class MiscSettings(BaseSettings):
+    """Miscellanous configuration"""
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILE,
+        env_file_encoding=ENV_ENCODING,
+        extra='ignore'
+    )
+
+    MAX_CONCURRENT_IMAGES: int = 4
+    """Max amount asyncio semaphorge allows at a time"""
+
+
 class Settings(BaseSettings):
     app: AppSettings = AppSettings()
     """App settings"""
@@ -331,12 +331,12 @@ class Settings(BaseSettings):
     """Logging"""
     email: EmailSettings = EmailSettings()
     """Email configuration"""
-    storage_cf: CFObjectStorageSettings = CFObjectStorageSettings()
-    """Cloudflare storage"""
-    storage_bb: BBObjectStorageSettings = BBObjectStorageSettings()
-    """Backblaze storage"""
+    storage: ObjectStorageSettings = ObjectStorageSettings()
+    """General object configuration"""
     broker: BrokerSettings = BrokerSettings()
     """Broker settings (e.g. Redis)"""
+    misc: MiscSettings = MiscSettings()
+    """Misc settings"""
     logger: ClassVar = structlog.get_logger()
     """Struct logger"""
 
