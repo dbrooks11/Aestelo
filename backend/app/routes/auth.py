@@ -2,62 +2,65 @@ import random
 import uuid
 import jwt
 from argon2 import PasswordHasher
-from app.db.models import (AuthUser, TokenBlackList, UserProfile, UserInfo, UserSettings, 
-                           UserRole, UserSubscription, Collection)
+from app.db.models import (AuthUser, TokenBlackList)
 from app.middleware.jwt import jwt_cookie_access, jwt_cookie_refresh
-from litestar import Response, post, Request
+from litestar import Response, post, Request, status_codes
 from litestar.exceptions import (
     HTTPException,
     NotAuthorizedException,
+    InternalServerException
 )
 from sqlalchemy.sql.functions import now
 from litestar.controller import Controller
 from app.settings import settings
-from app.schemas.auth import LoginRequestSchema, SignupRequestSchema
+from app.schemas.auth import LoginRequestSchema, SignupRequestSchema, AuthServiceSignupSchema
 from sqlalchemy import func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from litestar.params import Body
 from litestar.enums import RequestEncodingType
 from typing import Annotated
+from app.db.models.services.auth import provide_auth_service, AuthService
+from litestar.di import Provide
 
 ph = PasswordHasher()
 
 class AuthController(Controller):
     path = "/auth"
+    dependencies = {'auth_service': Provide(provide_auth_service)}
 
     @post('/signup', opt={'csrf_none': True, 'access_none': True, 'refresh_none': True})
     async def signup(self, 
                      data: Annotated[SignupRequestSchema, Body(media_type=RequestEncodingType.MULTI_PART)], 
-                     db_session: AsyncSession) -> Response:
+                     auth_service: AuthService) -> Response:
 
-        exist_stmt = (select(1).where( 
-            (AuthUser.email == data.email)
-            ).exists())
-        exist = await db_session.scalar(select(1).where(exist_stmt))
+        exist = await auth_service.exists(email = data.email)
 
         if exist:
             raise HTTPException(detail='Email already exists', status_code=409)
         
-        username: str = f'user{random.randint(1, 999999999999999999999999)}'
+        count: int = 0
+        exist_username: bool = False
+        username: str = ''
+        while count < 3:
+            username = f'user{random.randint(1, 999999999999999999999999)}'
+            exist_username = await auth_service.exists(username=username)
+
+            if exist_username:
+                count += 1
+            else:
+                break
         
-        auth_user = AuthUser(
-            username=username,
-            email=data.email,
-            password_hash=ph.hash(data.password),
-        )
-        auth_user.profile = UserProfile(
-            auth=auth_user,
-            info=UserInfo(),
-            settings=UserSettings(),
-            role=UserRole(),
-            subscription=UserSubscription()
-        )
-        auth_user.profile.collection.append(Collection(name="Default", is_default=True))
-        db_session.add(auth_user)
+        if exist_username:
+            raise InternalServerException(detail='Failed to create an account. Please try again.')
+            
+        data_dict = data.model_dump()
+        data_dict['username'] = username
+        
+        await auth_service.create_account(data=AuthServiceSignupSchema.model_validate(data_dict))
         return Response(content='Account created successfully')
     
 
-    @post('/login', opt={'csrf_none': True, 'access_none': True, 'refresh_none': True})
+    @post('/login', status_code=status_codes.HTTP_200_OK, opt={'csrf_none': True, 'access_none': True, 'refresh_none': True})
     async def login(self, data: Annotated[LoginRequestSchema, Body(media_type=RequestEncodingType.MULTI_PART)], db_session: AsyncSession) -> Response:
         account = await db_session.execute(select(AuthUser.id, AuthUser.password_hash).where(
             (AuthUser.email == data.email) | 
