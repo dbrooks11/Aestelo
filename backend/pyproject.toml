@@ -1,5 +1,5 @@
 [project]
-name = "aestelo-backend"
+name = "aestelo"
 version = "0.1.0"
 description = "Backend dependencies for litestar applciation"
 readme = "README.md"
@@ -14,7 +14,6 @@ dependencies = [
     "litestar-email>=0.4.0",
     "litestar-saq[otel]>=0.7.1",
     "litestar[sqlalchemy,standard]>=2.21.1",
-    "modern-colorthief>=0.2.1",
     "pydantic-settings>=2.14.1",
     "pydantic[email]>=2.13.4",
     "pyjwt>=2.12.1",
