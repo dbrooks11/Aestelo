@@ -3,10 +3,14 @@ from app.config import config
 from app.middleware.jwt import jwt_cookie_access
 from app.plugins import plugins
 from app.routes import all_controllers
-from app.settings import settings
 from app.middleware import middlewares
 from pydantic import BaseModel
 from litestar import Litestar
+from geoalchemy2.elements import WKBElement
+from geoalchemy2.shape import to_shape
+
+def serialize_wkb(value: WKBElement) -> str:
+    return to_shape(value).wkt
 
 MAX_CONTENT_LENGTH = 100 * 1024 * 1024  #100MB
 
@@ -26,8 +30,8 @@ app = Litestar(
         plugins.structlog,
         plugins.saq
     ],
-    type_encoders={BaseModel: lambda m: m.model_dump(by_alias=True, exclude_none=True)},
-    debug=settings.app.DEBUG,
+    type_encoders={BaseModel: lambda m: m.model_dump(by_alias=True, exclude_none=True), WKBElement: serialize_wkb},
+    debug=False
 )
 
 
