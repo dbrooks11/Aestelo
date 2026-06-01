@@ -8,21 +8,29 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
-# Install system dependencies (including build tools for dev)
+#Added cmake and git to your existing build tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     build-essential \
+    cmake \
+    git \
     libjpeg-dev \
     zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy dependency files
+#Clone and compile mimalloc v3.3.2 right into the dev image
+RUN git clone -b v3.3.2 https://github.com/microsoft/mimalloc.git /mimalloc \
+    && cd /mimalloc \
+    && mkdir build \
+    && cd build \
+    && cmake .. \
+    && make \
+    && make install
+
 COPY pyproject.toml uv.lock ./
 
-# Install ALL dependencies (including dev) for development
 RUN uv sync --frozen --all-extras
 
 # Create non-root user
@@ -30,13 +38,12 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 RUN chown -R appuser:appuser /app
 USER appuser
 
-# Copy source code (will be overridden by volume mount in compose)
 COPY --chown=appuser:appuser . .
 
-# Set path
 ENV PATH="/app/.venv/bin:$PATH"
+
+ENV LD_PRELOAD="/usr/local/lib/libmimalloc.so.3"
 
 EXPOSE 8000
 
-# Use litestar with --reload flag for hot reload
 CMD ["litestar", "run", "--reload", "--host", "0.0.0.0", "--port", "8000"]
