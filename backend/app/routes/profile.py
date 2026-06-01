@@ -1,15 +1,16 @@
 from litestar.controller import Controller
+from litestar.exceptions import ValidationException
 from litestar.di import Provide
-from typing import Annotated, Any
-from litestar import get, post, patch, Request, Response
+from litestar import get, patch, Request
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from app.db.models.services.user import provide_user_service, UserProfileService
-from app.db.models.dto.user import UserProfileDTO, UserProfileEditDTO
-from app.db.models.user import UserProfile
-from app.schemas.user import UserProfileEditSchema
+from app.db.models.dto.user import UserProfileDTO, UserProfileEditInfoDTO, UserProfileEditMediaDTO
+from app.db.models import UserProfile, AuthUser
+from app.schemas.user import UserProfileEditSchema, UserProfileEditMediaSchema
 from app.plugins import plugins
-from app.settings import settings
-from app.utils.storage import ObjectStorage
+from app.lib.validation import validate
+
 
 
 class ProfileController(Controller):
@@ -21,45 +22,37 @@ class ProfileController(Controller):
         user_id = request.user.id
         return await profile_service.get_profile_me(user_id=user_id)
 
-    @patch('/edit', return_dto=UserProfileEditDTO)
-    async def edit_profile(self, data: UserProfileEditSchema, request: Request, profile_service: UserProfileService) -> UserProfile:
+    @patch('/edit', return_dto=UserProfileEditInfoDTO)
+    async def edit_profile(self, db_session: AsyncSession, data: UserProfileEditSchema, request: Request, profile_service: UserProfileService) -> UserProfile:
         user_id = request.user.id
-        storage = ObjectStorage(
-            bucket=settings.storage_bb.BUCKET_NAME,
-            endpoint=settings.storage_bb.BUCKET_ENDPOINT,
-            access_key_id=settings.storage_bb.APP_KEY_ID,
-            secret_access_key=settings.storage_bb.APP_KEY
-        )
-        data_dict = data.model_dump(exclude_none=True, exclude_unset=True)
-        profile_media = {
-            'avatar': data_dict.pop('avatar', None),
-            'banner': data_dict.pop('banner', None)
-        }
-
-        profile = await profile_service.get_profile_me(user_id=user_id)
-        queue = plugins.saq.get_queue('profile_processing')
-
-        items = []
-        for field, obj_key in profile_media.items():
-            if obj_key:
-                items.append({'field': field, 'obj_key': obj_key, 'prev_key': getattr(profile, field, None), 'user_id': user_id, 'storage': storage})
-        results: list[Any] = []
-        if items:
-            results = await queue.map(
-                        "process_profile_media",
-                        items,
-                        retries=3,
-                        timeout=30,
-                        retry_delay=1,
-                        retry_backoff=True
-                    )
-        updated_profile = await profile_service.update_profile(user_id=user_id, data=UserProfileEditSchema.model_validate(data_dict))
-        
-        if results:
-            for result in results:
-                for field, item in result.items():
-                    if field in updated_profile:
-                        setattr(updated_profile, field, item)
-        
+        stmt = select(1).where(AuthUser.username == data.username, AuthUser.id != user_id)
+        username_exists = await db_session.scalar(stmt) 
+        if username_exists:
+            raise ValidationException(f"Username '{data.username}' is already taken", status_code=409)
+        updated_profile = await profile_service.update_profile(user_id=user_id, data=data) 
         return updated_profile
-
+    
+    @patch('/edit-media', return_dto=UserProfileEditMediaDTO)
+    async def edit_profile_media(self, data: UserProfileEditMediaSchema, request: Request, profile_service: UserProfileService) -> UserProfile| None:
+        user_id = request.user.id
+        if data.model_dump(exclude_none=True):
+            profile = await profile_service.get_profile_me(user_id=user_id)
+            queue = plugins.saq.get_queue('profile_processing')
+            items: list = []
+            for field, obj_key in data:
+                if obj_key:
+                    items.append({'field': field, 'obj_key': obj_key, 'prev_key': getattr(profile, field, None), 'user_id': user_id})
+            if len(items) > validate.MAX_NUM_FILES_PROFILE:
+                raise ValidationException('Too many files')
+            result: list[dict[str, str]] = []
+            if items:
+                result = await queue.map(
+                    "process_profile_media",
+                    items,
+                    retries=3,
+                    timeout=30,
+                    retry_delay=1,
+                    retry_backoff=True
+                )
+            flatted_data: dict | None = {key: value for dic in result for key,value in dic.items()} if result else None
+            return UserProfile(**flatted_data) if flatted_data else None
