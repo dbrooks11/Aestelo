@@ -110,8 +110,8 @@ class Config:
         return CSRFConfig(
             secret=settings.app.SECRET_KEY,
             header_name='x-csrf-token',
-            cookie_secure=settings.app.JWT_COOKIE_SECURE,
-            cookie_samesite=settings.app.JWT_COOKIE_SAMESITE,
+            cookie_secure=settings.app.CSRF_COOKIE_SECURE,
+            cookie_samesite=settings.app.CSRF_COOKIE_SAMESITE,
             exclude_from_csrf_key='csrf_none'
         )
     

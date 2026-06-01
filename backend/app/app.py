@@ -1,11 +1,13 @@
 import app.db.models
 from app.config import config
-from app.middleware.jwt import jwt_cookie_access
 from app.plugins import plugins
 from app.routes import all_controllers
 from app.middleware import middlewares
+from app.settings import settings
 from pydantic import BaseModel
 from litestar import Litestar
+from app.middleware.sessions import session_auth
+from litestar.stores.redis import RedisStore
 from geoalchemy2.elements import WKBElement
 from geoalchemy2.shape import to_shape
 
@@ -15,6 +17,9 @@ def serialize_wkb(value: WKBElement) -> str:
 MAX_CONTENT_LENGTH = 100 * 1024 * 1024  #100MB
 
 app = Litestar(
+    stores={
+        'sessions': RedisStore.with_client(url=settings.broker.REDIS, namespace='LITESTAR_SESSION')
+    },
     cors_config=config.cors_config,
     csrf_config=config.csrf_config,
     openapi_config=config.openapi_config,
@@ -22,7 +27,7 @@ app = Litestar(
     route_handlers=all_controllers,
     middleware=middlewares,
     request_max_body_size=MAX_CONTENT_LENGTH,
-    on_app_init=[jwt_cookie_access.on_app_init],
+    on_app_init=[session_auth.on_app_init],
     plugins=[
         plugins.sqlalchemy,
         plugins.email,

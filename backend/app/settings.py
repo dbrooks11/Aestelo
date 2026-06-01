@@ -187,20 +187,18 @@ class AppSettings(BaseSettings):
     """Run `Litestar` with `debug=True`."""
     SECRET_KEY: str = ""
     """Application secret key."""
-    JWT_SECRET_KEY: str = "random-string"
-    """Jwt secret key"""
-    JWT_ENCRYPTION_ALGORITHM: str = "HS256"
-    """JWT Algorithm to use"""
-    JWT_ACCESS_TOKEN_EXPIRES: int = int(timedelta(hours=2).total_seconds())
-    """Access Token expiration time"""
-    JWT_REFRESH_TOKEN_EXPIRES:int = int(timedelta(days=7).total_seconds())
-    """Refresh token expiraiton time"""
-    JWT_COOKIE_SAMESITE: Literal['lax', 'strict', 'none'] = 'none'
-    """Sets samesite attribute for jwt cookies"""
+    CSRF_COOKIE_SECURE: bool = False
+    """Use secure csrf cookie (set to True in production with HTTPS)"""
+    CSRF_COOKIE_SAMESITE: Literal['lax', 'strict', 'none'] = 'none'
+    """Sets samesite attribute for the csrf cookie"""
+    SESSION_SECRET_KEY: str = "random-string"
+    """session secret key"""
+    SESSION_SAMESITE: Literal['lax', 'strict', 'none'] = 'none'
+    """Sets samesite attribute for session cookies"""
+    SESSION_SECURE: bool = False
+    """Use secure cookies (set to True in production with HTTPS)"""
     ALLOWED_CORS_ORIGINS: list[str] = ["*"]
     """Allowed CORS Origins"""
-    JWT_COOKIE_SECURE: bool = False
-    """Use secure cookies (set to True in production with HTTPS)"""
     ENABLE_INSTRUMENTATION: bool = False
     """Enable OpenTelemetry instrumentation"""
     GOOGLE_OAUTH2_CLIENT_ID: str = ""

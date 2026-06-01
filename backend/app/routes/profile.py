@@ -19,12 +19,13 @@ class ProfileController(Controller):
 
     @get(return_dto=UserProfileDTO)
     async def profile_me(self, request: Request, profile_service: UserProfileService) -> UserProfile:
-        user_id = request.user.id
+        user_id: str = request.user.id
+
         return await profile_service.get_profile_me(user_id=user_id)
 
     @patch('/edit', return_dto=UserProfileEditInfoDTO)
     async def edit_profile(self, db_session: AsyncSession, data: UserProfileEditSchema, request: Request, profile_service: UserProfileService) -> UserProfile:
-        user_id = request.user.id
+        user_id: str = request.user.id
         stmt = select(1).where(AuthUser.username == data.username, AuthUser.id != user_id)
         username_exists = await db_session.scalar(stmt) 
         if username_exists:
@@ -34,7 +35,7 @@ class ProfileController(Controller):
     
     @patch('/edit-media', return_dto=UserProfileEditMediaDTO)
     async def edit_profile_media(self, data: UserProfileEditMediaSchema, request: Request, profile_service: UserProfileService) -> UserProfile| None:
-        user_id = request.user.id
+        user_id: str = request.user.id
         if data.model_dump(exclude_none=True):
             profile = await profile_service.get_profile_me(user_id=user_id)
             queue = plugins.saq.get_queue('profile_processing')

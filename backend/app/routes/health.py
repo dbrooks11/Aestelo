@@ -7,7 +7,7 @@ from litestar.exceptions import InternalServerException
 
 
 class HealthCheckController(Controller):
-    path='/health'
+    path='/healthz'
 
     @get(opt={'access_none':True})
     async def health_check(self, db_session: AsyncSession) -> None:

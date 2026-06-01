@@ -20,12 +20,12 @@ class SpotController(Controller):
 
     @get(return_dto=SpotDTO)
     async def spot_me(self, request: Request, spot_service: SpotService) -> ClassicPagination[Spot]:
-        user_id = request.user.id
+        user_id: str = request.user.id
         return await spot_service.get_spots_me_pagination(user_id=user_id, page_size=12, page=1)
 
     @post(return_dto=SpotDTO)
     async def create_spot(self, data: SpotInputWithMediaSchema, request: Request, spot_service: SpotService) -> Spot:
-        user_id=request.user.id
+        user_id: str = request.user.id
         post_type = 'spot'
         model_dump = data.model_dump()
 
@@ -54,7 +54,7 @@ class SpotController(Controller):
         
     @post('{spot_id:int}/rate')
     async def rate_spot(self, spot_id: FromPath[int], data: SpotRatingSchema, rate_service: RatingService, request: Request) -> int | None:
-        user_id = request.user.id
+        user_id: str = request.user.id
 
         prev_rating = await rate_service.get_rating(user_id=user_id, spot_id=spot_id)
 
