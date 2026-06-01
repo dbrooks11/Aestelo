@@ -1,6 +1,6 @@
 from app.schemas.base import CamelizedBaseSchema
-from pydantic import Field, field_validator
-from typing import Optional, Annotated
+from pydantic import Field
+from typing import Optional
 from app.lib.validation import validate
 
 class SpotSchemaBase(CamelizedBaseSchema):
@@ -19,5 +19,12 @@ class SpotMediaInsert(CamelizedBaseSchema):
     uploaded_by: str
     sort_order: int
     media_key: str
+
+class SpotRatingSchema(CamelizedBaseSchema):
+    rating: int = Field(ge=1, le=5)
+
+class SpotRatingGetData(CamelizedBaseSchema):
+    user_id: str
+    spot_id: int
 
 
