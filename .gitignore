@@ -66,7 +66,6 @@ meexample1.jpg
 #Docker stuff
 
 #gitginore
-.gitignore
 gitignore
 Makefile
 frontend/config.js
@@ -83,3 +82,42 @@ saving_frontend
 secret.py
 stuff/
 notes.txt
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+example
+
+# generated native folders
+/ios
+/android

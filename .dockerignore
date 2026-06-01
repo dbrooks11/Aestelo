@@ -36,7 +36,9 @@ node_modules
 dist
 dist-ssr
 *.local
-
+mobile/
+/mobile
+mobile
 
 # Virtual Environment (Don't copy local venv)
 venv/
@@ -86,6 +88,11 @@ init
 .git
 .gitignore
 .git/
+
+# mobile
+/mobile
+mobile/
+mobile
 
 
 # Docker (Don't copy Docker files into container)

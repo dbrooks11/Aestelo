@@ -7,7 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Env
+# frontend
 .env.development
 frontend/.pnpm-store/
 .pnpm-store/
