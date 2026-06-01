@@ -1,10 +1,14 @@
 from advanced_alchemy.repository import SQLAlchemyAsyncRepository, ErrorMessages
 from advanced_alchemy.service import SQLAlchemyAsyncRepositoryService
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.models.user import UserProfile
+from app.db.models import UserProfile, AuthUser
 from app.schemas.user import UserProfileEditSchema
+from sqlalchemy.ext.asyncio import AsyncSession
 from collections.abc import AsyncGenerator
-from sqlalchemy.orm import selectinload, joinedload
+from sqlalchemy.orm import joinedload
+from app.db.models.services.auth import AuthService
+from advanced_alchemy.filters import ExistsFilter
+from litestar.exceptions import ValidationException
 
 class UserProfileService(SQLAlchemyAsyncRepositoryService[UserProfile]):
     """Handles database operations for users"""
@@ -14,6 +18,7 @@ class UserProfileService(SQLAlchemyAsyncRepositoryService[UserProfile]):
         model_type=UserProfile
 
     repository_type = UserProfileRepo
+    auth_service = AuthService
     
     async def get_profile_me(self, user_id: str) -> UserProfile:
         return await self.get(item_id=user_id, 
@@ -24,19 +29,22 @@ class UserProfileService(SQLAlchemyAsyncRepositoryService[UserProfile]):
                         )
 
     async def update_profile(self, user_id: str, data: UserProfileEditSchema) -> UserProfile:
-        profile = await self.get(user_id, load=[selectinload(UserProfile.auth)])
+        profile = await self.get(user_id)
 
+        temp_data: dict = {}
         username = data.username
-        if username and username != profile.auth.username:
+        if username and username != profile.auth.username:       
             profile.auth.username = username
-
-        for key, value in data:
-            if getattr(profile, key, None) != value:
-                setattr(profile, key, value)
-
-        return await self.update(data=profile, error_messages=ErrorMessages(
-            {'other': 'Failed to update profile'}
-        ))
+        
+        data_dump: dict = data.model_dump(exclude={'username'}, exclude_none=True)
+        for key, value in data_dump.items():
+            prev_value = getattr(profile, key, None)
+            if prev_value != value:
+                temp_data[key] = value
+        
+        return await self.update(data=temp_data, item_id=user_id, error_messages=ErrorMessages(
+                {'other': 'Failed to update profile'}
+            ))
 
     async def delete_profile(self, user_id: str) -> UserProfile:
         return await self.delete(user_id)
