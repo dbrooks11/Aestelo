@@ -18,10 +18,18 @@ from sqlalchemy import (
     Text,
     cast,
     String,
-    Index
+    Index,
 )
-from sqlalchemy.orm import Mapped, column_property, mapped_column, relationship
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import Mapped, column_property, mapped_column, relationship, query_expression
 from app.lib.validation import validate
+from geoalchemy2.shape import to_shape
+from geoalchemy2.elements import WKBElement
+from typing import cast
+from shapely.geometry import Point
+from advanced_alchemy.types import DateTimeUTC
+from sqlalchemy.ext.hybrid import hybrid_property
+from app.settings import settings
 
 if TYPE_CHECKING:
     from models import CollectionItem, Rating, UserProfile, Visit
@@ -32,6 +40,10 @@ class Spot(base.BigIntAuditBase):
     __table_args__= (Index('ix_spot_color_palette', 'color_palette', postgresql_using='gin'),
                      Index('ix_spot_hashtags', 'hashtags', postgresql_using='gin'),)
 
+    visited: Mapped[Optional[bool]] = query_expression()
+    rated: Mapped[Optional[bool]] = query_expression()
+    saved: Mapped[Optional[bool]] = query_expression()
+
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), 
         ForeignKey("user_profile.id"), 
@@ -40,12 +52,10 @@ class Spot(base.BigIntAuditBase):
     )
 
     name: Mapped[str] = mapped_column(Text)
-    coordinates: Mapped[Optional[Geography]] = mapped_column(
+    coordinates: Mapped[Optional[WKBElement]] = mapped_column(
         Geography(geometry_type='POINT', srid=4326, spatial_index=True)
     )
     color_palette: Mapped[Optional[ARRAY]] = mapped_column(ARRAY(Text))
-    latitude: Mapped[float] = column_property(ST_Y(cast(coordinates, Geometry)))
-    longitude: Mapped[float] = column_property(ST_X(cast(coordinates, Geometry)))
 
     description: Mapped[Optional[str]] = mapped_column(String(validate.MAX_POST_DESCRIPTION_LENGTH))
     total_num_of_photos: Mapped[Optional[int]] = mapped_column(Integer)
@@ -62,16 +72,15 @@ class Spot(base.BigIntAuditBase):
     num_of_edits: Mapped[int] = mapped_column(Integer, default=0)
     
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False)
-    deleted_at: Mapped[Optional[DateTime]] = mapped_column(DateTime(timezone=True))
+    deleted_at: Mapped[Optional[DateTime]] = mapped_column(DateTimeUTC)
     num_reports: Mapped[int] = mapped_column(Integer, default=0)
     is_removed: Mapped[bool] = mapped_column(Boolean, default=False)
-    removed_at: Mapped[Optional[DateTime]] = mapped_column(DateTime(timezone=True))
+    removed_at: Mapped[Optional[DateTime]] = mapped_column(DateTimeUTC)
     status: Mapped[Enum] = mapped_column(Enum(UploadStatusEnum), default=UploadStatusEnum.PROCESSING)
 
     profile: Mapped["UserProfile"] = relationship(back_populates="spot", lazy='joined')
     collection_item: Mapped["CollectionItem"] = relationship(back_populates="spot", lazy='selectin')
     media: Mapped[list["SpotMedia"]] = relationship(
-        back_populates="spot", 
         cascade="all, delete-orphan",
         lazy='selectin',
     )
@@ -86,6 +95,22 @@ class Spot(base.BigIntAuditBase):
         lazy='selectin'
     )
 
+    @hybrid_property
+    def longitude(self) -> float:
+        """Extracts X coordinate via Shapely in Python."""
+        if self.coordinates is not None:
+            point = cast(Point, to_shape(self.coordinates))
+            return point.x
+        return 0.0
+
+    @hybrid_property
+    def latitude(self) -> float:
+        """Extracts Y coordinate via Shapely in Python."""
+        if self.coordinates is not None:
+            point = cast(Point, to_shape(self.coordinates))
+            return point.y
+        return 0.0
+
 class SpotMedia(base.BigIntBase):
     __tablename__ = "spot_media"
 
@@ -99,4 +124,9 @@ class SpotMedia(base.BigIntBase):
     sort_order: Mapped[int] = mapped_column(BigInteger)
     media_key: Mapped[Optional[str]] = mapped_column(Text)
 
-    spot: Mapped["Spot"] = relationship(back_populates="media", lazy='joined')
+
+    @hybrid_property
+    def media_url(self) -> str | None:
+        if self.media_key:
+            return f"https://{settings.storage.SUB_DOMAIN}/{self.media_key}"
+        return None
