@@ -1,35 +1,23 @@
 from litestar.controller import Controller
-from litestar.datastructures import UploadFile, URL
-from litestar import get, Request, post
-from typing import Annotated
-from litestar.enums import RequestEncodingType
-from litestar.params import Body
-from app.utils.storage import ObjectStorage
-from app.settings import settings
-
-MAX_NUM_OF_FILES=10
+from litestar import Request, post
+from app.lib.validation import validate
+from app.schemas.s3 import FileUploadSchema
+from app.utils.storage import storage_private
 
 class ObjectStorageController(Controller):
     path='/s3'
 
     @post('/presign-urls')
-    async def presign_urls(self, data: Annotated[list[UploadFile], Body(media_type=RequestEncodingType.MULTI_PART)], request:Request) -> list[dict[str,str]]:
-        if len(data) > MAX_NUM_OF_FILES:
+    async def presign_urls(self, data:list[FileUploadSchema], request:Request) -> list[dict[str,str]]:
+        if len(data) > validate.MAX_NUM_FILES_POST:
             raise Exception('Too many files')
         
         user_id: str = request.user.id
- 
-        storage = ObjectStorage(
-            bucket=settings.storage_bb.BUCKET_NAME,
-            endpoint=settings.storage_bb.BUCKET_ENDPOINT,
-            access_key_id=settings.storage_bb.APP_KEY_ID,
-            secret_access_key=settings.storage_bb.APP_KEY
-        )
 
         presigned_urls: list = []
         for file in data:
-            mimetype = file.content_type
-            obj_key = await storage.generate_file_name(mimetype=mimetype, id=user_id, is_post=False)  
-            presigned_urls.append(await storage.generate_presigned_put_url(mimetype=mimetype, obj_key=obj_key))
+            extension = await storage_private.verify_file_type(mimetype=file.content_type, is_post=False)
+            obj_key = await storage_private.generate_file_name(extension=extension, id=user_id)  
+            presigned_urls.append(await storage_private.generate_presigned_put_url(mimetype=file.content_type, obj_key=obj_key))
 
         return presigned_urls
