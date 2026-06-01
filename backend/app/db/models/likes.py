@@ -3,6 +3,7 @@ import uuid
 from advanced_alchemy.extensions.litestar import base
 from sqlalchemy import UUID, BigInteger, DateTime, ForeignKey, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from advanced_alchemy.types import DateTimeUTC
 
 if TYPE_CHECKING:
     from models import UserProfile, Visit
@@ -15,7 +16,7 @@ class Likes(base.BigIntBase):
 
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('user_profile.id'), nullable=False)
     visit_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('visit.id'), nullable=False)
-    created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[DateTime] = mapped_column(DateTimeUTC, server_default=func.now())
 
     profile: Mapped["UserProfile"] = relationship(back_populates='likes')
     visit: Mapped["Visit"] = relationship(back_populates='likes')

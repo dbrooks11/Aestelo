@@ -16,6 +16,7 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from advanced_alchemy.types import DateTimeUTC
 
 
 class Collection(base.BigIntAuditBase):
@@ -54,7 +55,7 @@ class CollectionItem(base.BigIntBase):
     spot_id: Mapped[Optional[int]] = mapped_column(BigInteger, ForeignKey('spot.id', ondelete='CASCADE'), nullable=True)
     visit_id: Mapped[Optional[int]] = mapped_column(BigInteger, ForeignKey('visit.id', ondelete='CASCADE'), nullable=True)
     saved_by: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
-    saved_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    saved_at: Mapped[DateTime] = mapped_column(DateTimeUTC, server_default=func.now())
     
     collection: Mapped["Collection"] = relationship(back_populates='collection_item')
     spot: Mapped["Spot"] = relationship(back_populates='collection_item')

@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Optional
 
 from advanced_alchemy.extensions.litestar import base
+from advanced_alchemy.types import DateTimeUTC
 from sqlalchemy import DateTime, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.lib.validation import validate
@@ -15,8 +16,8 @@ class AuthUser(base.UUIDAuditBase):
     email: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
 
-    last_signed_in: Mapped[Optional[DateTime]] = mapped_column(DateTime(timezone=True))
-    locked_until: Mapped[Optional[DateTime]] = mapped_column(DateTime(timezone=True))
+    last_signed_in: Mapped[Optional[DateTime]] = mapped_column(DateTimeUTC)
+    locked_until: Mapped[Optional[DateTime]] = mapped_column(DateTimeUTC)
 
     profile: Mapped["UserProfile"] = relationship(back_populates='auth', lazy='joined')
 

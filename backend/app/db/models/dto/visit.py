@@ -1,5 +1,5 @@
 from litestar.plugins.sqlalchemy import SQLAlchemyDTO, SQLAlchemyDTOConfig
-from app.db.models import Visit, VisitMedia
+from app.db.models import Visit
 
 
 class VisitDTO(SQLAlchemyDTO[Visit]):

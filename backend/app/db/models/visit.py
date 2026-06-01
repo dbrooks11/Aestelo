@@ -19,6 +19,7 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from advanced_alchemy.types import DateTimeUTC
 
 if TYPE_CHECKING:
     from models import CollectionItem, Likes, Spot, UserProfile
@@ -52,25 +53,24 @@ class Visit(base.BigIntAuditBase):
 
     num_of_edits: Mapped[int] = mapped_column(Integer, default=0)
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False)
-    deleted_at: Mapped[Optional[DateTime]] = mapped_column(DateTime(timezone=True))
+    deleted_at: Mapped[Optional[DateTime]] = mapped_column(DateTimeUTC)
     deleted_by: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True))
     
     num_reports: Mapped[int] = mapped_column(Integer, default=0)
     is_removed: Mapped[bool] = mapped_column(Boolean, default=False)
-    removed_at: Mapped[Optional[DateTime]] = mapped_column(DateTime(timezone=True))
+    removed_at: Mapped[Optional[DateTime]] = mapped_column(DateTimeUTC)
     removed_by: Mapped[Optional[uuid.UUID]] = mapped_column(UUID)
 
     status: Mapped[UploadStatusEnum] = mapped_column(Enum(UploadStatusEnum), default=UploadStatusEnum.PROCESSING)
 
     collection_item: Mapped['CollectionItem'] = relationship(back_populates='visit')
     media: Mapped[list["VisitMedia"]] = relationship( 
-        back_populates="visit", 
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
+        lazy='selectin'
     )
     profile: Mapped["UserProfile"] = relationship(back_populates="visit", lazy='joined')
     spot: Mapped["Spot"] = relationship(back_populates="visit", lazy="joined")
     likes: Mapped["Likes"] = relationship(back_populates='visit', lazy='selectin')
-    media: Mapped[list["VisitMedia"]] = relationship(back_populates='visit' , lazy='selectin')
     
 
 class VisitMedia(base.BigIntBase):
@@ -86,5 +86,4 @@ class VisitMedia(base.BigIntBase):
     sort_order: Mapped[Optional[int]] = mapped_column(Integer)
     media_key: Mapped[Optional[str]] = mapped_column(Text)
 
-    visit: Mapped["Visit"] = relationship(back_populates="media", lazy='joined')
 

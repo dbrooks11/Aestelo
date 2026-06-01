@@ -35,10 +35,11 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
+from advanced_alchemy.types import DateTimeUTC
 from app.lib.validation import validate
 
 
-class UserProfile(base.DefaultBase):
+class UserProfile(base.UUIDAuditBase):
     __tablename__ = 'user_profile'
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('auth_user.id', ondelete='CASCADE'), primary_key=True)
@@ -59,13 +60,13 @@ class UserProfile(base.DefaultBase):
 
     # Banning & Moderation
     is_banned: Mapped[bool] = mapped_column(default=False)
-    banned_at: Mapped[Optional[DateTime]] = mapped_column(DateTime)
+    banned_at: Mapped[Optional[DateTime]] = mapped_column(DateTimeUTC)
     banned_reason: Mapped[Optional[str]] = mapped_column(Text)
     banned_by: Mapped[Optional[uuid.UUID]] = mapped_column(default=None)
 
     # Soft Deletion & Reports
     is_deleted: Mapped[bool] = mapped_column(default=False)
-    deleted_at: Mapped[Optional[DateTime]] = mapped_column(DateTime(timezone=True))
+    deleted_at: Mapped[Optional[DateTime]] = mapped_column(DateTimeUTC)
 
     auth: Mapped['AuthUser'] = relationship(back_populates='profile', lazy='joined')
     info: Mapped["UserInfo"] = relationship(back_populates="profile", lazy='joined')
@@ -84,13 +85,13 @@ class UserProfile(base.DefaultBase):
     @hybrid_property
     def avatar_url(self) -> str | None:
         if self.avatar:
-            return f"https://{settings.storage_cf.CDN_DOMAIN_BASE}/{self.avatar}"
+            return f"https://{settings.storage.SUB_DOMAIN}/{self.avatar}"
         return None
 
     @hybrid_property
     def banner_url(self) -> str | None:
         if self.banner:
-            return f"https://{settings.storage_cf.CDN_DOMAIN_BASE}/{self.banner}"
+            return f"https://{settings.storage.SUB_DOMAIN}/{self.banner}"
         return None
     
 class UserInfo(base.DefaultBase):
@@ -100,7 +101,7 @@ class UserInfo(base.DefaultBase):
     first_name: Mapped[Optional[str]] = mapped_column(Text)
     last_name: Mapped[Optional[str]] = mapped_column(Text)
 
-    date_of_birth: Mapped[Optional[DateTime]] = mapped_column(DateTime())
+    date_of_birth: Mapped[Optional[DateTime]] = mapped_column(DateTimeUTC)
     age: Mapped[int] = mapped_column(Integer, default=0)
     gender: Mapped[UserGenderEnum] = mapped_column(Enum(UserGenderEnum), default=UserGenderEnum.NOT_SPECIFIED)
     
@@ -117,7 +118,7 @@ class UserRole(base.DefaultBase):
     
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('user_profile.id', ondelete='CASCADE'), primary_key=True)
     role: Mapped[UserRoleEnum] = mapped_column(Enum(UserRoleEnum), default=UserRoleEnum.USER)
-    granted_at: Mapped[Optional[DateTime]] = mapped_column(DateTime(timezone=True))
+    granted_at: Mapped[Optional[DateTime]] = mapped_column(DateTimeUTC)
     granted_by: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True))
 
     profile: Mapped["UserProfile"] = relationship(back_populates="role", lazy='joined')
@@ -141,8 +142,8 @@ class UserSubscription(base.DefaultBase):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('user_profile.id', ondelete='CASCADE'), primary_key=True)
     tier: Mapped[UserSubscriptionTierEnum] = mapped_column(Enum(UserSubscriptionTierEnum), default=UserSubscriptionTierEnum.FREE)
     price: Mapped[float] = mapped_column(Float, default=0.00)
-    started_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    expires_at: Mapped[Optional[DateTime]] = mapped_column(DateTime(timezone=True))
+    started_at: Mapped[DateTime] = mapped_column(DateTimeUTC, server_default=func.now())
+    expires_at: Mapped[Optional[DateTime]] = mapped_column(DateTimeUTC)
     auto_renew: Mapped[bool] = mapped_column(default=False)
     payment_method_id: Mapped[Optional[uuid.UUID]] = mapped_column() 
     billing_cycle: Mapped[UserSubscriptionBillCycleEnum] = mapped_column(Enum(UserSubscriptionBillCycleEnum), default=UserSubscriptionBillCycleEnum.MONTHLY)

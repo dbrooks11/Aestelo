@@ -3,6 +3,7 @@ import uuid
 from advanced_alchemy.extensions.litestar import base
 from sqlalchemy import UUID, DateTime, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from advanced_alchemy.types import DateTimeUTC
 
 if TYPE_CHECKING:
     from models import UserProfile
@@ -23,6 +24,6 @@ class Report(base.BigIntAuditBase):
     description: Mapped[Optional[str]] = mapped_column(Text)
     
     reviewed_by: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True))
-    reviewed_at: Mapped[Optional[DateTime]] = mapped_column(DateTime(timezone=True))
+    reviewed_at: Mapped[Optional[DateTime]] = mapped_column(DateTimeUTC)
 
     profile: Mapped["UserProfile"] = relationship(back_populates="report")

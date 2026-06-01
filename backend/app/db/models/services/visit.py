@@ -3,7 +3,7 @@ from app.schemas.visit import VisitSchemaBase
 from advanced_alchemy.repository import SQLAlchemyAsyncRepository, ErrorMessages
 from advanced_alchemy.filters import LimitOffset, OrderBy, SearchFilter, CollectionFilter
 from advanced_alchemy.service import SQLAlchemyAsyncRepositoryService
-from typing import Sequence, Literal, Any, Optional
+from typing import Literal, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from collections.abc import AsyncGenerator
 from litestar.pagination import OffsetPagination
