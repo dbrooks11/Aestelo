@@ -1,0 +1,33 @@
+{
+  "name": "Aestelo",
+  "version": "1.0.0",
+  "devDependencies": {
+    "@tanstack/eslint-plugin-query": "^5.100.14",
+    "@types/node": "^24.13.2",
+    "typescript": "~6.0.3",
+    "eslint": "^10.2.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-oxlint": "~1.60.0",
+    "eslint-plugin-playwright": "^2.10.1",
+    "eslint-plugin-vue": "~10.8.0",
+    "@vitest/eslint-plugin": "^1.6.16",
+    "oxfmt": "^0.45.0",
+    "oxlint": "~1.60.0"
+  },
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.7.0",
+      "onFail": "download"
+    }
+  },
+  "type": "module"
+}

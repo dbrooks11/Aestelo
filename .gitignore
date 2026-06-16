@@ -31,7 +31,8 @@ __pycache__/
 *.log
 /backend_fk
 
-#React
+#Frontend
+frontend-vue/
 .env.development
 frontend/.pnpm-store/
 .pnpm-store/
