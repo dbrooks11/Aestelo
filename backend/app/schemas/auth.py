@@ -30,6 +30,7 @@ class AuthBase(CamelizedBaseSchema):
         return value
 
 class LoginRequestSchema(AuthBase):
+    email: Annotated[Optional[EmailStr], Field(default=None, min_length=validate.EMAIL_MIN_LENGTH, max_length=validate.EMAIL_MAX_LENGTH)]
 
     @model_validator(mode='after')
     def check_email_and_username(self) -> Self:
@@ -54,3 +55,6 @@ class SignupRequestSchema(AuthBase):
         if self.password != self.confirm_password:
             raise ValueError('Passwords do not match')
         return self
+    
+class AuthServiceSignupSchema(AuthBase):
+    username: Annotated[str, Field(min_length=validate.USERNAME_MIN_LENGTH, max_length=validate.USERNAME_MAX_LENGTH)]

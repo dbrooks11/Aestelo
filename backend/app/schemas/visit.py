@@ -1,6 +1,6 @@
 from app.schemas.base import CamelizedBaseSchema
-from pydantic import Field, field_validator
-from typing import Optional, Annotated
+from pydantic import Field
+from typing import Optional
 from app.lib.validation import validate
 
 class VisitSchemaBase(CamelizedBaseSchema):
