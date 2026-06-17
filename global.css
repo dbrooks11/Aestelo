@@ -2,7 +2,7 @@
 @import 'uniwind';
 
 @source './apps/mobile';
-
+@source './apps/frontend-vue';
 
 @layer theme {
   :root {
@@ -50,10 +50,6 @@
       --color-danger: #ef4444;
       --color-success: #10b981;
       --color-warning: #f59e0b;
-    }
-
-    @variant tropical {
-      --color-primary-hover: #2563eb;
     }
   }
 }

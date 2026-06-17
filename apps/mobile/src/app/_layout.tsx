@@ -9,8 +9,7 @@ import * as SecureStore from 'expo-secure-store';
 import { ThemeProvider } from "@/context/theme-ctx";
 import { useTheme } from "@/hooks/use-theme";
 
-import '../../../global.css';
-
+import '../../../../global.css';
 
 const queryClient = new QueryClient();
 

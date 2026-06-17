@@ -1,6 +1,5 @@
 packages:
-  - "mobile"
-  - "frontend-vue"
+  - "apps/*"
   - "packages/*"
 catalog:
   axios: "^1.18.0"
@@ -42,7 +41,6 @@ overrides:
   '@vue/server-renderer': 'beta'
   '@vue/shared': 'beta'
   '@vue/compat': 'beta'
-  "@babel/types": "^7.29.7"
 
 peerDependencyRules:
   allowAny:
