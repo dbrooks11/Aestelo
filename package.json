@@ -33,14 +33,5 @@
   "dependencies": {
     "@tailwindcss/postcss": "catalog:",
     "postcss": "catalog:"
-  },
-  "pnpm": {
-    "packageExtensions": {
-      "react-native-worklets@*": {
-        "dependencies": {
-          "@babel/types": "7.29.7"
-        }
-      }
-    }
   }
 }
