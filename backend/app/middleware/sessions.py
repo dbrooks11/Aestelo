@@ -35,7 +35,8 @@ server_session = ServerSideSessionConfig(
     max_age= 14515200, #6 months (in seconds)
     secure=settings.app.SESSION_SECURE, #TODO: set to true for prod
     samesite=settings.app.SESSION_SAMESITE,
-    exclude_opt_key='set_session_none'
+    exclude_opt_key='set_session_none',
+    exclude=[auth_paths['signup']]
 )
 
 
