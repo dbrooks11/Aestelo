@@ -30,7 +30,7 @@ export default function LoginScreen() {
 
 
     return (
-        <View>
+        <View className="">
             <Text>Email</Text>
             <Controller
                 control={control}

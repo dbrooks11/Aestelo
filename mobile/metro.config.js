@@ -6,9 +6,9 @@ const { withUniwindConfig } = require('uniwind/metro');
 const config = getDefaultConfig(__dirname);
 
 module.exports = withUniwindConfig(config, {  
-  // relative path to your global.css file (from previous step)
-  cssEntryFile: '@aestelo/shared/global.css',
+  // relative path to your global.css file
+  cssEntryFile: '../global.css',
   // (optional) path where we gonna auto-generate typings
   // defaults to project's root
-  dtsFile: './src/uniwind-types.d.ts'
+  dtsFile: './uniwind-types.d.ts'
 });

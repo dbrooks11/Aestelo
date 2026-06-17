@@ -1,9 +1,8 @@
 @import 'tailwindcss';
 @import 'uniwind';
 
-@theme {
-    --color-primary: #C85A5E;
-}
+@source './apps/mobile';
+
 
 @layer theme {
   :root {
@@ -51,6 +50,10 @@
       --color-danger: #ef4444;
       --color-success: #10b981;
       --color-warning: #f59e0b;
+    }
+
+    @variant tropical {
+      --color-primary-hover: #2563eb;
     }
   }
 }

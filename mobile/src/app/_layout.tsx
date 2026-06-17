@@ -1,7 +1,7 @@
 import { Stack } from "expo-router";
 import { SessionProvider, useSession } from "@/context/auth-ctx";
 import { SplashScreenController } from "@/splash";
-import { Platform, View } from "react-native";
+import { Platform} from "react-native";
 import { publicInstance } from "@/config/axios";
 import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -9,7 +9,7 @@ import * as SecureStore from 'expo-secure-store';
 import { ThemeProvider } from "@/context/theme-ctx";
 import { useTheme } from "@/hooks/use-theme";
 
-import '@aestelo/shared/global.css';
+import '../../../global.css';
 
 
 const queryClient = new QueryClient();
@@ -54,17 +54,14 @@ function RootNavigator() {
   const { colors } = useTheme();
 
   return (
-    <View className="">
-      <Stack>
-        <Stack.Protected guard={!!session}>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack.Protected>
-        
-        <Stack.Protected guard={!session}>
-          <Stack.Screen name="login" />
-        </Stack.Protected>
-      </Stack>
-    </View>
-    
+    <Stack>
+      <Stack.Protected guard={!!session}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack.Protected>
+      
+      <Stack.Protected guard={!session}>
+        <Stack.Screen name="login" />
+      </Stack.Protected>
+    </Stack>
   );
 }

@@ -2,17 +2,17 @@
   "name": "Aestelo",
   "version": "1.0.0",
   "devDependencies": {
-    "@tanstack/eslint-plugin-query": "^5.100.14",
+    "@tanstack/eslint-plugin-query": "^5.101.0",
     "@types/node": "^24.13.2",
-    "typescript": "~6.0.3",
-    "eslint": "^10.2.1",
+    "@vitest/eslint-plugin": "^1.6.20",
+    "eslint": "^10.5.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-oxlint": "~1.60.0",
-    "eslint-plugin-playwright": "^2.10.1",
+    "eslint-plugin-playwright": "^2.10.4",
     "eslint-plugin-vue": "~10.8.0",
-    "@vitest/eslint-plugin": "^1.6.16",
     "oxfmt": "^0.45.0",
-    "oxlint": "~1.60.0"
+    "oxlint": "~1.60.0",
+    "typescript": "~6.0.3"
   },
   "description": "",
   "main": "index.js",
@@ -29,5 +29,18 @@
       "onFail": "download"
     }
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@tailwindcss/postcss": "catalog:",
+    "postcss": "catalog:"
+  },
+  "pnpm": {
+    "packageExtensions": {
+      "react-native-worklets@*": {
+        "dependencies": {
+          "@babel/types": "7.29.7"
+        }
+      }
+    }
+  }
 }

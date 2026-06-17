@@ -41,6 +41,7 @@ protectedInstance.interceptors.response.use(
             if (error.response?.status === 401) {
                 try {
                     await SecureStore.deleteItemAsync('session');
+                    console.log("rerouting to login")
                     router.replace('/login');
                 } catch (error) {
                     console.log('Failed to remove session from store')
@@ -56,7 +57,7 @@ protectedInstance.interceptors.response.use(
                         await SecureStore.setItemAsync('csrfToken', token);
                     }
                 } catch (error) {
-                    console.error('Failed to set CSRF token')
+                    console.error('Failed to set CSRF token', error)
                 }   
             }
         }   

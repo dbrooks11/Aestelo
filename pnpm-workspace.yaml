@@ -1,11 +1,14 @@
 packages:
-  - "apps/*"
+  - "mobile"
+  - "frontend-vue"
   - "packages/*"
 catalog:
   axios: "^1.18.0"
   "@tanstack/react-query": "^5.101.0"
   tailwindcss: "^4.3.1"
-  
+  '@tailwindcss/postcss': ^4.3.1
+  postcss: ^8.5.15
+
 allowBuilds:
   '@shopify/react-native-skia': true
 minimumReleaseAgeExclude:
@@ -39,8 +42,8 @@ overrides:
   '@vue/server-renderer': 'beta'
   '@vue/shared': 'beta'
   '@vue/compat': 'beta'
+  "@babel/types": "^7.29.7"
 
 peerDependencyRules:
   allowAny:
     - 'vue'
-
