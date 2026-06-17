@@ -1,9 +1,7 @@
 import random
-import uuid
-import jwt
 from argon2 import PasswordHasher
-from app.db.models import (AuthUser, TokenBlackList)
-from litestar import Response, post, Request, status_codes
+from app.db.models import (AuthUser)
+from litestar import Response, post, Request, status_codes,get
 from litestar.exceptions import (
     HTTPException,
     NotAuthorizedException,
@@ -15,11 +13,9 @@ from app.settings import settings
 from app.schemas.auth import LoginRequestSchema, SignupRequestSchema, AuthServiceSignupSchema
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from litestar.params import Body
-from litestar.enums import RequestEncodingType
-from typing import Annotated
 from app.db.models.services.auth import provide_auth_service, AuthService
 from litestar.di import Provide
+from litestar.middleware.csrf import generate_csrf_token
 
 ph = PasswordHasher()
 
@@ -27,9 +23,9 @@ class AuthController(Controller):
     path = "/auth"
     dependencies = {'auth_service': Provide(provide_auth_service)}
 
-    @post('/signup', opt={'csrf_none': True, 'set_session_none': True})
+    @post('/signup', opt={'csrf_none': True})
     async def signup(self, 
-                     data: Annotated[SignupRequestSchema, Body(media_type=RequestEncodingType.MULTI_PART)], 
+                     data: SignupRequestSchema, 
                      auth_service: AuthService
                      ) -> Response:
 
@@ -60,9 +56,9 @@ class AuthController(Controller):
         return Response(content='Account created successfully')
     
 
-    @post('/login', status_code=status_codes.HTTP_200_OK, opt={'csrf_none': True})
+    @post('/login', opt={'csrf_none': True})
     async def login(self, 
-                    data: Annotated[LoginRequestSchema, Body(media_type=RequestEncodingType.MULTI_PART)], 
+                    data: LoginRequestSchema, 
                     db_session: AsyncSession, 
                     request: Request
                     ) -> dict[str, str | None]:
@@ -98,7 +94,12 @@ class AuthController(Controller):
         session_id = request.get_session_id()
         return {'session': session_id}
 
-    @post('/logout')
-    async def logout(self, request: Request) -> Response:
+    @post('/sign-out')
+    async def signout(self, request: Request) -> Response:
         request.clear_session()
-        return Response('Logout successful')
+        return Response('Sign out successful')
+
+    @get('/csrf', opt={'set_session_none': True, 'session_auth_none': True})
+    async def get_csrf(self) -> str:
+        token: str = generate_csrf_token(secret=settings.app.SECRET_KEY)
+        return token
