@@ -1,0 +1,13 @@
+{
+  "name": "@aestelo/backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "lint": "uv run ruff check .",
+    "lint:fix": "uv run ruff check --fix .",
+    "format": "uv run ruff format .",
+    "format:check": "uv run ruff format --check .",
+    "test": "uv run pytest",
+    "audit": "uv run pip-audit"
+  }
+}
