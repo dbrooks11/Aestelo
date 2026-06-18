@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect, type PropsWithChildren } from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useColorScheme } from "react-native";
+import { Uniwind, useUniwind } from "uniwind";
 
 
 const lightThemeKey = 'light';
@@ -20,8 +20,7 @@ export const ThemeContext = createContext<ThemeContextType>({
 
 
 export function ThemeProvider({ children }: PropsWithChildren) {
-    const systemColorScheme = useColorScheme();
-    const [theme, setTheme] = useState<ThemeType>(lightThemeKey);
+   const {theme} = useUniwind();
 
     useEffect(() => {
         loadSavedTheme();
@@ -32,12 +31,9 @@ export function ThemeProvider({ children }: PropsWithChildren) {
             const savedTheme = await AsyncStorage.getItem(themeKey);
 
             if (savedTheme === lightThemeKey || savedTheme === darkThemeKey) {
-                setTheme(savedTheme);
+                Uniwind.setTheme(savedTheme);
             } else {
-                const systemTheme = (systemColorScheme === lightThemeKey || systemColorScheme === darkThemeKey) 
-                    ? systemColorScheme 
-                    : lightThemeKey;
-                setTheme(systemTheme)
+                Uniwind.setTheme(theme)
             }
         } catch (error) {
             console.error('Failed to load theme:', error);
@@ -46,7 +42,7 @@ export function ThemeProvider({ children }: PropsWithChildren) {
 
     const toggleTheme = async () => {
         const newTheme = theme === lightThemeKey ? darkThemeKey : lightThemeKey;
-        setTheme(newTheme);
+        Uniwind.setTheme(newTheme);
 
         try {
             await AsyncStorage.setItem(themeKey, newTheme);
