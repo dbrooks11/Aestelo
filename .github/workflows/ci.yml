@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  js-checks:
+    name: Lint & Format (JS/TS)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint & Format
+        run: pnpm turbo run quality --filter=!@aestelo/backend
+
+      - name: Lint & Format Fix
+        run: pnpm turbo run quality:fix --filter=!@aestelo/backend
+
+  backend-checks:
+    name: Lint & Format (Python)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Format check
+        run: uv run ruff format --check .
+
+  audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+ 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+ 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+ 
+      - name: JS audit (fails on critical)
+        run: pnpm audit --audit-level critical
+ 
+      - name: Install uv
+        if: always()
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+ 
+      - name: Python audit
+        if: always()
+        working-directory: backend
+        run: |
+          uv sync
+          uv run pip-audit
