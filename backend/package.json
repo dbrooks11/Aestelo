@@ -1,6 +1,7 @@
 {
-  "name": "@aestelo/backend",
+  "name": "@aestelo/backend-litestar",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "lint": "uv run ruff check .",

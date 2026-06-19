@@ -19,9 +19,9 @@ from advanced_alchemy.extensions.litestar import (
 from litestar.plugins.structlog import StructlogConfig
 from litestar_email import EmailConfig, ResendConfig, SMTPConfig
 from litestar_saq import SAQConfig, QueueConfig
-from app.tasks.worker_config_processes import startup, shutdown, before_process, after_process
-from app.tasks.profile_tasks import process_profile_media
-from app.tasks.post_media_task import process_post_pipeline
+from app.tasks.worker import startup, shutdown, before_process, after_process
+from app.tasks.profile import process_profile_media
+from app.tasks.media import process_post_pipeline
 from litestar.openapi.plugins import ScalarRenderPlugin
 
 

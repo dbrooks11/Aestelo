@@ -1,7 +1,7 @@
-import app.db.models
+import app.models
 from app.config import config
 from app.plugins import plugins
-from app.routes import all_controllers
+from app.controllers import all_controllers
 from app.middleware import middlewares
 from app.settings import settings
 from pydantic import BaseModel

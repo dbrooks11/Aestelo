@@ -1,8 +1,7 @@
 
 import secrets
 from datetime import datetime, timezone
-from typing import Literal, Optional, Any
-from litestar.datastructures import UploadFile
+from typing import Any
 from litestar.exceptions import ValidationException
 from aioboto3 import Session
 from aiobotocore.config import AioConfig
@@ -25,14 +24,7 @@ ALLOWED_MIME_TYPES = {
     'image/heif': 'heif',
 }
 
-async def verify_file_type(mimetype: str, is_post: bool):
-    """Verifies the file type that is allowed"""
-    if not mimetype:
-        raise ValidationException("Invalid file type: None")
-    extension: str | None = ALLOWED_MIME_TYPES.get(mimetype, None) if not is_post else ALLOWED_POST_MIME_TYPES.get(mimetype, None)
-    if not extension:
-        raise ValidationException(f"Invalid file type {mimetype}")
-    return extension
+
 
 
 class ObjectStorage:
@@ -61,10 +53,19 @@ class ObjectStorage:
             self.region = region
             self.session = Session()
 
-    async def generate_file_name(self, mimetype: str, id: str | int, is_post: bool, folder: str = 'quarantine') -> str:
+    async def verify_file_type(self, mimetype: str | None, is_post: bool):
+        """Verifies the file type that is allowed"""
+        if not mimetype:
+            raise ValidationException("Invalid file type: None")
+        extension: str | None = ALLOWED_MIME_TYPES.get(mimetype, None) if not is_post else ALLOWED_POST_MIME_TYPES.get(mimetype, None)
+        if not extension:
+            raise ValidationException(f"Invalid file type {mimetype}")
+        return extension
+
+    async def generate_file_name(self, id: str | int, extension: str, folder: str = 'quarantine') -> str:
         """Generate unique file path for the object.
         
-        Folder structure:
+        Non-quarantine folder structure:
             {foldername}/{id}/{timestamp}_{short_id}.{extension}
 
         set is_post=True to validate a specific set of mimetypes for Post like content.
@@ -75,7 +76,6 @@ class ObjectStorage:
         if folder not in self.allowed_folders:
             raise Exception('Invalid destination') 
         
-        extension = await verify_file_type(mimetype, is_post=is_post)
         timestamp = datetime.now(timezone.utc).strftime('%d%m%Y_%H%M%S')
         short_id = secrets.token_urlsafe(32) 
         filename = f"{folder}/{id}/{timestamp}_{short_id}.{extension}"
@@ -166,7 +166,7 @@ class ObjectStorage:
         
     
     async def get_object_s3(self, key: str):
-        """Gets the object stream via PUT"""
+        """Gets the object via PUT"""
         async with self.session.client(
             service_name=self.service_name,
             endpoint_url=self.endpoint_url,
@@ -176,7 +176,28 @@ class ObjectStorage:
             config=AioConfig(signature_version='s3v4')
         ) as s3: # type: ignore[attr-defined]
             response = await s3.get_object(Bucket=self.bucket, Key=key)
-            return await response['Body'].read()
+            return response
+        
+    async def get_object_s3_stream(self, key: str):
+        """Gets the object stream via PUT
+        
+        Returns:
+            Stream bytes
+
+            File size (content-length)
+        """
+        async with self.session.client(
+            service_name=self.service_name,
+            endpoint_url=self.endpoint_url,
+            aws_access_key_id=self.access_key_id,
+            aws_secret_access_key=self.secret_access_key,
+            region_name=self.region,
+            config=AioConfig(signature_version='s3v4')
+        ) as s3: # type: ignore[attr-defined]
+            response = await s3.get_object(Bucket=self.bucket, Key=key)
+            file_size = response.get('ContentLength', 0)
+            body = await response['Body'].read()
+            return body, file_size
     
 
 
@@ -218,20 +239,18 @@ class ObjectStorage:
         
         return response
     
-
-
-storage_bb = ObjectStorage(
-    bucket=settings.storage_bb.BUCKET_NAME,
-    endpoint=settings.storage_bb.BUCKET_ENDPOINT,
-    access_key_id=settings.storage_bb.APP_KEY_ID,
-    secret_access_key=settings.storage_bb.APP_KEY
+storage = ObjectStorage(
+    bucket=settings.storage.BUCKET_NAME,
+    endpoint=settings.storage.ENDPOINT,
+    access_key_id=settings.storage.ACCESS_KEY_ID,
+    secret_access_key=settings.storage.SECRET_ACCESS_KEY
 )
-"""Backblaze storage intialization"""
+"""Storage intialization with public bucket"""
 
-storage_cf = ObjectStorage(
-    bucket=settings.storage_cf.R2_BUCKET_NAME,
-    endpoint=settings.storage_cf.R2_S3_API,
-    access_key_id=settings.storage_cf.R2_ACCESS_KEY_ID,
-    secret_access_key=settings.storage_cf.R2_SECRET_ACCESS_KEY
+storage_private = ObjectStorage(
+    bucket=settings.storage.PRIVATE_BUCKET_NAME,
+    endpoint=settings.storage.ENDPOINT,
+    access_key_id=settings.storage.ACCESS_KEY_ID,
+    secret_access_key=settings.storage.SECRET_ACCESS_KEY
 )
-"""Cloudflare storage intialization"""
+"""Storage intialization with private bucket"""
