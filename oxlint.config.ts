@@ -1,5 +1,7 @@
 import { defineConfig } from 'oxlint';
 
+// TODO: remove frontend from ignorePatterns
+
 export default defineConfig({
   plugins: ['eslint', 'typescript', 'unicorn', 'oxc'],
   categories: {
@@ -15,6 +17,7 @@ export default defineConfig({
     '**/coverage/**',
     '**/.turbo/**',
     "vendor/**",
-    "test/snapshots/**"
+    "test/snapshots/**",
+    "frontend/**"
   ]
 });

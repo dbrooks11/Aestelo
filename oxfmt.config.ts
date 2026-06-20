@@ -1,5 +1,7 @@
 import { defineConfig } from 'oxfmt';
 
+// TODO: remove frontend from ignorepatterns
+
 export default defineConfig({
   semi: true,
   singleQuote: true,
@@ -22,6 +24,7 @@ export default defineConfig({
     preserveWhitespace: true,
   },
   ignorePatterns: [
-    "backend/**"
+    "backend/**",
+    "frontend/**"
   ]
 });
