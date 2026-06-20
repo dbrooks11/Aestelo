@@ -11,10 +11,12 @@ from litestar.middleware.logging import LoggingMiddlewareConfig
 from litestar.openapi.config import OpenAPIConfig
 from advanced_alchemy.extensions.litestar import (
     AsyncSessionConfig,
-    SQLAlchemyAsyncConfig,
-    async_autocommit_before_send_handler,
-    EngineConfig,
     AlembicAsyncConfig,
+    async_autocommit_before_send_handler
+)
+from advanced_alchemy.extensions.litestar.plugins import (
+    SQLAlchemyAsyncConfig,
+    EngineConfig
 )
 from litestar.plugins.structlog import StructlogConfig
 from litestar_email import EmailConfig, ResendConfig, SMTPConfig
@@ -64,7 +66,7 @@ class Config:
             The allowed host configuration.
         """
         return AllowedHostsConfig(
-            allowed_hosts=["localhost:8000", "10.150.176.90:8000"]
+            allowed_hosts=["localhost:8000", "10.150.176.90:8000", "testserver.local"]
         )
 
     @property
