@@ -2,6 +2,8 @@
   "name": "@aestelo/mobile",
   "main": "expo-router/entry",
   "version": "1.0.0",
+  "private": true,
+  "type": "module",
   "dependencies": {
     "@aestelo/shared": "workspace:*",
     "@expo/ui": "~56.0.18",
@@ -56,6 +58,5 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint"
-  },
-  "private": true
+  }
 }
