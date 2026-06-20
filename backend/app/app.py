@@ -11,14 +11,18 @@ from litestar.stores.redis import RedisStore
 from geoalchemy2.elements import WKBElement
 from geoalchemy2.shape import to_shape
 
+
 def serialize_wkb(value: WKBElement) -> str:
     return to_shape(value).wkt
 
-MAX_CONTENT_LENGTH = 100 * 1024 * 1024  #100MB
+
+MAX_CONTENT_LENGTH = 100 * 1024 * 1024  # 100MB
 
 app = Litestar(
     stores={
-        'sessions': RedisStore.with_client(url=settings.broker.REDIS, namespace='LITESTAR_SESSION')
+        "sessions": RedisStore.with_client(
+            url=settings.broker.REDIS, namespace="LITESTAR_SESSION"
+        )
     },
     cors_config=config.cors_config,
     csrf_config=config.csrf_config,
@@ -33,11 +37,11 @@ app = Litestar(
         plugins.email,
         plugins.problem_details,
         plugins.structlog,
-        plugins.saq
+        plugins.saq,
     ],
-    type_encoders={BaseModel: lambda m: m.model_dump(by_alias=True, exclude_none=True), WKBElement: serialize_wkb},
-    debug=False
+    type_encoders={
+        BaseModel: lambda m: m.model_dump(by_alias=True, exclude_none=True),
+        WKBElement: serialize_wkb,
+    },
+    debug=False,
 )
-
-
-

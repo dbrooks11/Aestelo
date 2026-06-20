@@ -10,18 +10,18 @@ from pydantic import computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from app.__metadata__ import __version__ as current_version
 
-ENV_FILE = 'backend/.env'
-ENV_ENCODING = 'utf-8'
+ENV_FILE = "backend/.env"
+ENV_ENCODING = "utf-8"
 DEFAULT_MODULE_NAME = "app"
 BASE_DIR: Final[Path] = module_to_os_path(DEFAULT_MODULE_NAME)
 
 
 class DatabaseSettings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_prefix='DB_',
+        env_prefix="DB_",
         env_file=ENV_FILE,
         env_file_encoding=ENV_ENCODING,
-        extra='ignore'
+        extra="ignore",
     )
 
     ECHO: bool = False
@@ -56,15 +56,14 @@ class DatabaseSettings(BaseSettings):
         """SQLAlchemy Database URL."""
         url = f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
         return url
-    
 
 
 class ServerSettings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_prefix='SERVER_',
+        env_prefix="SERVER_",
         env_file=ENV_FILE,
         env_file_encoding=ENV_ENCODING,
-        extra='ignore'
+        extra="ignore",
     )
 
     """Server configurations."""
@@ -80,14 +79,14 @@ class ServerSettings(BaseSettings):
     """Turn on hot reloading."""
 
 
-
 class SaqSettings(BaseSettings):
     """SAQ (Simple Async Queue) configuration using Redis as broker."""
+
     model_config = SettingsConfigDict(
-        env_prefix='SAQ_',
+        env_prefix="SAQ_",
         env_file=ENV_FILE,
         env_file_encoding=ENV_ENCODING,
-        extra='ignore'
+        extra="ignore",
     )
 
     PROCESSES: int = 1
@@ -105,9 +104,6 @@ class SaqSettings(BaseSettings):
     USE_SERVER_LIFESPAN: bool = True
     """Auto start and stop `saq` processes when starting the Litestar application."""
 
-    
-
-
 
 class EmailSettings(BaseSettings):
     """Email configuration.
@@ -118,13 +114,13 @@ class EmailSettings(BaseSettings):
     - "smtp" - sends via SMTP server
     - "resend" - sends via Resend API (production)
     """
+
     model_config = SettingsConfigDict(
-        env_prefix='EMAIL_',
+        env_prefix="EMAIL_",
         env_file=ENV_FILE,
         env_file_encoding=ENV_ENCODING,
-        extra='ignore'
+        extra="ignore",
     )
-    
 
     BACKEND: str = "console"
     """Email backend: console, memory, smtp, resend."""
@@ -133,7 +129,6 @@ class EmailSettings(BaseSettings):
     FROM_NAME: str = "Litestar App"
     """Default from name."""
 
-    
     # SMTP settings (only used when BACKEND="smtp")
     SMTP_HOST: str = "localhost"
     """SMTP server hostname."""
@@ -153,15 +148,14 @@ class EmailSettings(BaseSettings):
     """Resend API key for production email sending."""
 
 
-
-
 class AppSettings(BaseSettings):
     """Application configuration"""
+
     model_config = SettingsConfigDict(
-        env_prefix='APP_',
+        env_prefix="APP_",
         env_file=ENV_FILE,
         env_file_encoding=ENV_ENCODING,
-        extra='ignore'
+        extra="ignore",
     )
 
     ENV: str = "development"
@@ -188,11 +182,11 @@ class AppSettings(BaseSettings):
     """Application secret key."""
     CSRF_COOKIE_SECURE: bool = False
     """Use secure csrf cookie (set to True in production with HTTPS)"""
-    CSRF_COOKIE_SAMESITE: Literal['lax', 'strict', 'none'] = 'none'
+    CSRF_COOKIE_SAMESITE: Literal["lax", "strict", "none"] = "none"
     """Sets samesite attribute for the csrf cookie"""
     SESSION_SECRET_KEY: str = "random-string"
     """session secret key"""
-    SESSION_SAMESITE: Literal['lax', 'strict', 'none'] = 'none'
+    SESSION_SAMESITE: Literal["lax", "strict", "none"] = "none"
     """Sets samesite attribute for session cookies"""
     SESSION_SECURE: bool = False
     """Use secure cookies (set to True in production with HTTPS)"""
@@ -204,15 +198,16 @@ class AppSettings(BaseSettings):
     """Google Client ID"""
     GOOGLE_OAUTH2_CLIENT_SECRET: str = ""
     """Google Client Secret"""
-    
+
 
 class BrokerSettings(BaseSettings):
     """Broker configuration"""
+
     model_config = SettingsConfigDict(
-        env_prefix='BROKER_',
+        env_prefix="BROKER_",
         env_file=ENV_FILE,
         env_file_encoding=ENV_ENCODING,
-        extra='ignore'
+        extra="ignore",
     )
 
     REDIS: str = "redis://localhost:6379/0"
@@ -221,11 +216,12 @@ class BrokerSettings(BaseSettings):
 
 class ObjectStorageSettings(BaseSettings):
     """Object Storage configuration for cloudflare"""
+
     model_config = SettingsConfigDict(
-        env_prefix='OBJS_',
+        env_prefix="OBJS_",
         env_file=ENV_FILE,
         env_file_encoding=ENV_ENCODING,
-        extra='ignore'
+        extra="ignore",
     )
 
     ACCESS_KEY_ID: str = ""
@@ -237,7 +233,7 @@ class ObjectStorageSettings(BaseSettings):
     ENDPOINT_EU: str = ""
     """S3 Endpoint (EU)"""
 
-    #Public bucket
+    # Public bucket
     BUCKET_NAME: str = ""
     """Name of object bucket serving files"""
     PUBLIC_URL: str = ""
@@ -245,33 +241,36 @@ class ObjectStorageSettings(BaseSettings):
     SUB_DOMAIN: str = ""
     """Sub domain the bucket has set"""
 
-    #Private bucket
+    # Private bucket
     PRIVATE_BUCKET_NAME: str = ""
     """Name of private object bucket """
 
 
 class CloudFlareSettings(BaseSettings):
     """Object Storage configuration for cloudflare"""
+
     model_config = SettingsConfigDict(
-        env_prefix='CF_',
+        env_prefix="CF_",
         env_file=ENV_FILE,
         env_file_encoding=ENV_ENCODING,
-        extra='ignore'
+        extra="ignore",
     )
 
-    #CLOUDFLARE
+    # CLOUDFLARE
     TURNSTILE_SITE_KEY: str = ""
     """Cloudflare's turnstile key for bot protection"""
     R2_ACCOUNT_ID: str = ""
     """Account ID for Cloudflare R2"""
 
+
 class LogSettings(BaseSettings):
     """Logger configuration"""
+
     model_config = SettingsConfigDict(
-        env_prefix='LOG_',
+        env_prefix="LOG_",
         env_file=ENV_FILE,
         env_file_encoding=ENV_ENCODING,
-        extra='ignore'
+        extra="ignore",
     )
 
     EXCLUDE_PATHS: str = r"\A(?!x)x"
@@ -287,13 +286,18 @@ class LogSettings(BaseSettings):
     """Request cookie keys to obfuscate."""
     OBFUSCATE_HEADERS: set[str] = {"Authorization", "X-API-KEY", "X-XSRF-TOKEN"}
     """Request header keys to obfuscate."""
-    REQUEST_FIELDS: list[RequestExtractorField] = ["path","method","query","path_params"]
+    REQUEST_FIELDS: list[RequestExtractorField] = [
+        "path",
+        "method",
+        "query",
+        "path_params",
+    ]
     """Attributes of the [Request][litestar.connection.request.Request] to be
     logged."""
     RESPONSE_FIELDS: list[ResponseExtractorField] = ["status_code"]
     """Attributes of the [Response][litestar.response.Response] to be
     logged."""
-    SAQ_LEVEL: int =  50
+    SAQ_LEVEL: int = 50
     """Level to log SAQ logs."""
     SQLALCHEMY_LEVEL: int = 30
     """Level to log SQLAlchemy logs."""
@@ -305,10 +309,9 @@ class LogSettings(BaseSettings):
 
 class MiscSettings(BaseSettings):
     """Miscellanous configuration"""
+
     model_config = SettingsConfigDict(
-        env_file=ENV_FILE,
-        env_file_encoding=ENV_ENCODING,
-        extra='ignore'
+        env_file=ENV_FILE, env_file_encoding=ENV_ENCODING, extra="ignore"
     )
 
     MAX_CONCURRENT_IMAGES: int = 4
@@ -337,6 +340,5 @@ class Settings(BaseSettings):
     logger: ClassVar = structlog.get_logger()
     """Struct logger"""
 
-    
 
 settings = Settings()

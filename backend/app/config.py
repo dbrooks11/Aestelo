@@ -4,19 +4,17 @@ from app.settings import settings
 from litestar.config.allowed_hosts import AllowedHostsConfig
 from litestar.config.cors import CORSConfig
 from litestar.config.csrf import CSRFConfig
-from litestar.logging.config import (
-    StructLoggingConfig
-)
+from litestar.logging.config import StructLoggingConfig
 from litestar.middleware.logging import LoggingMiddlewareConfig
 from litestar.openapi.config import OpenAPIConfig
 from advanced_alchemy.extensions.litestar import (
     AsyncSessionConfig,
     AlembicAsyncConfig,
-    async_autocommit_before_send_handler
+    async_autocommit_before_send_handler,
 )
 from advanced_alchemy.extensions.litestar.plugins import (
     SQLAlchemyAsyncConfig,
-    EngineConfig
+    EngineConfig,
 )
 from litestar.plugins.structlog import StructlogConfig
 from litestar_email import EmailConfig, ResendConfig, SMTPConfig
@@ -31,17 +29,17 @@ class Config:
     @property
     def openapi_config(self) -> OpenAPIConfig:
         return OpenAPIConfig(
-        title=settings.app.NAME,
-        version=settings.app.VERSION,
-        render_plugins=[
-            ScalarRenderPlugin(
-                options={
-                    "persistAuth": True,
-                    'withCredentials': True,
-                }
-            )
-        ],
-    )
+            title=settings.app.NAME,
+            version=settings.app.VERSION,
+            render_plugins=[
+                ScalarRenderPlugin(
+                    options={
+                        "persistAuth": True,
+                        "withCredentials": True,
+                    }
+                )
+            ],
+        )
 
     @property
     def cors_config(self) -> CORSConfig:
@@ -55,7 +53,7 @@ class Config:
             allow_methods=["GET", "POST", "PATCH", "DELETE"],
             allow_headers=["Content-Type", "x-csrf-token"],
             allow_origins=settings.app.ALLOWED_CORS_ORIGINS,
-            allow_origin_regex=r"http://localhost(:\d+)?$"
+            allow_origin_regex=r"http://localhost(:\d+)?$",
         )
 
     @property
@@ -71,12 +69,12 @@ class Config:
 
     @property
     def sqlalchemy_config(self) -> SQLAlchemyAsyncConfig:
-        """Get SQLAlchemy configuration. This desciption also contains the convention 
+        """Get SQLAlchemy configuration. This desciption also contains the convention
         for manually settings certain arguments.
 
         Returns:
             The SQLAlchemy configuration.
-        
+
         db_convention = {
             "ix": "ix_%(column_0_label)s",
             "uq": "uq_%(table_name)s_%(column_0_name)s",
@@ -96,10 +94,10 @@ class Config:
                 pool_recycle=settings.db.POOL_RECYCLE,
                 pool_pre_ping=settings.db.POOL_PRE_PING,
                 echo=settings.db.ECHO,
-                echo_pool=settings.db.ECHO_POOL
+                echo_pool=settings.db.ECHO_POOL,
             ),
             create_all=True,
-            alembic_config=AlembicAsyncConfig(compare_type=True)
+            alembic_config=AlembicAsyncConfig(compare_type=True),
         )
 
     @property
@@ -111,13 +109,12 @@ class Config:
         """
         return CSRFConfig(
             secret=settings.app.SECRET_KEY,
-            header_name='x-csrf-token',
+            header_name="x-csrf-token",
             cookie_secure=settings.app.CSRF_COOKIE_SECURE,
             cookie_samesite=settings.app.CSRF_COOKIE_SAMESITE,
-            exclude_from_csrf_key='csrf_none'
+            exclude_from_csrf_key="csrf_none",
         )
-    
-    
+
     def saq_config(self) -> SAQConfig:
         """Get SAQ configuration.
 
@@ -131,42 +128,42 @@ class Config:
             queue_configs=[
                 QueueConfig(
                     name="default",
-                    id=f'default_worker_{uuid.uuid4()}',
+                    id=f"default_worker_{uuid.uuid4()}",
                     dsn=settings.broker.REDIS,
                     tasks=[],
                     concurrency=settings.saq.CONCURRENCY,
                     startup=startup,
                     shutdown=shutdown,
                     before_process=before_process,
-                    after_process=after_process
+                    after_process=after_process,
                 ),
                 QueueConfig(
                     name="profile_processing",
-                    id=f'profile_worker_{uuid.uuid4()}',
+                    id=f"profile_worker_{uuid.uuid4()}",
                     dsn=settings.broker.REDIS,
                     tasks=[process_profile_media],
                     concurrency=settings.saq.CONCURRENCY,
                     startup=startup,
                     shutdown=shutdown,
                     before_process=before_process,
-                    after_process=after_process
+                    after_process=after_process,
                 ),
                 QueueConfig(
                     name="media_processing",
-                    id=f'media_worker_{uuid.uuid4()}',
+                    id=f"media_worker_{uuid.uuid4()}",
                     dsn=settings.broker.REDIS,
                     tasks=[process_post_pipeline],
                     concurrency=settings.saq.CONCURRENCY,
                     startup=startup,
                     shutdown=shutdown,
                     before_process=before_process,
-                    after_process=after_process
-                )
+                    after_process=after_process,
+                ),
             ],
         )
 
     @property
-    def email_config(self) -> EmailConfig: 
+    def email_config(self) -> EmailConfig:
         """Return EmailConfig for the litestar-email plugin.
 
         As of litestar-email v0.3.0, the backend parameter accepts either
@@ -204,18 +201,33 @@ class Config:
 
         return StructlogConfig(
             middleware_logging_config=LoggingMiddlewareConfig(
-                response_cookies_to_obfuscate={'csrftoken', 'access_token', 'refresh_token'},
-                response_headers_to_obfuscate={'cookie', 'x-csrftoken'},
-                request_cookies_to_obfuscate={'csrftoken', 'access_token', 'refresh_token'},
-                request_headers_to_obfuscate={'cookie', 'x-csrftoken'},
-                request_log_fields=('path', 'method', 'content_type', 'headers', 'query', 'path_params', 'body'),
+                response_cookies_to_obfuscate={
+                    "csrftoken",
+                    "access_token",
+                    "refresh_token",
+                },
+                response_headers_to_obfuscate={"cookie", "x-csrftoken"},
+                request_cookies_to_obfuscate={
+                    "csrftoken",
+                    "access_token",
+                    "refresh_token",
+                },
+                request_headers_to_obfuscate={"cookie", "x-csrftoken"},
+                request_log_fields=(
+                    "path",
+                    "method",
+                    "content_type",
+                    "headers",
+                    "query",
+                    "path_params",
+                    "body",
+                ),
                 response_log_fields=("status_code", "headers", "body"),
-                exclude=['/saq']
+                exclude=["/saq"],
             ),
             structlog_logging_config=StructLoggingConfig(
-                log_exceptions='always',
-                disable_stack_trace={404, ValueError}
-            )
+                log_exceptions="always", disable_stack_trace={404, ValueError}
+            ),
         )
 
 

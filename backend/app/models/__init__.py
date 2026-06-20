@@ -7,9 +7,32 @@ from app.models.rating import Rating
 from app.models.report import Report
 from app.models.spot import Spot, SpotMedia
 from app.models.token_blacklist import TokenBlackList
-from app.models.user import UserInfo, UserProfile, UserRole, UserSettings, UserSubscription
+from app.models.user import (
+    UserInfo,
+    UserProfile,
+    UserRole,
+    UserSettings,
+    UserSubscription,
+)
 from app.models.visit import Visit, VisitMedia
 
-__all__ = ["AuthUser", "UserProfile", "UserInfo", "UserRole", "UserSettings", "UserSubscription",
-           "Spot", "SpotMedia","Visit", "VisitMedia", "Rating", "Report", "Follow", "BlockProfile", 
-           "Collection", "CollectionItem", "TokenBlackList", "Likes"]
+__all__ = [
+    "AuthUser",
+    "UserProfile",
+    "UserInfo",
+    "UserRole",
+    "UserSettings",
+    "UserSubscription",
+    "Spot",
+    "SpotMedia",
+    "Visit",
+    "VisitMedia",
+    "Rating",
+    "Report",
+    "Follow",
+    "BlockProfile",
+    "Collection",
+    "CollectionItem",
+    "TokenBlackList",
+    "Likes",
+]

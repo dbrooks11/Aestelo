@@ -4,9 +4,9 @@ from litestar.controller import Controller
 
 
 class IndexController(Controller):
-    path='/'
+    path = "/"
 
-    @get(opt={'access_none': True})
+    @get(opt={"access_none": True})
     async def app_health_check(self) -> dict[str, str]:
         return {
             "status": "healthy",

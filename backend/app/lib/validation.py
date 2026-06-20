@@ -1,25 +1,26 @@
-
 import re
 
 
 class ValidationConfiguration:
-    MAX_HEIGHT=2560
-    MAX_WIDTH=1440
+    MAX_HEIGHT = 2560
+    MAX_WIDTH = 1440
     QUALITY = 85
-    COMPRESSION_IMAGE_TYPE='webp'
-    MAX_FILE_SIZE = 10 * 1024 * 1024 
-    MAX_NUM_FILES_POST=10
-    MAX_NUM_FILES_PROFILE=2
+    COMPRESSION_IMAGE_TYPE = "webp"
+    MAX_FILE_SIZE = 10 * 1024 * 1024
+    MAX_NUM_FILES_POST = 10
+    MAX_NUM_FILES_PROFILE = 2
 
-    MAX_POST_MEDIA_COUNT=10
-    MIN_POST_MEDIA_COUNT=1
-    MAX_POST_HASHTAG_COUNT=20
-    MIN_POST_HASHTAG_COUNT=0
-    MAX_POST_DESCRIPTION_LENGTH= 250
-    MIN_POST_DESCRIPTION_LENGTH=0
-    MAX_PROFILE_BIO_LENGTH=150
+    MAX_POST_MEDIA_COUNT = 10
+    MIN_POST_MEDIA_COUNT = 1
+    MAX_POST_HASHTAG_COUNT = 20
+    MIN_POST_HASHTAG_COUNT = 0
+    MAX_POST_DESCRIPTION_LENGTH = 250
+    MIN_POST_DESCRIPTION_LENGTH = 0
+    MAX_PROFILE_BIO_LENGTH = 150
 
-    EMAIL_BASIC_PATTERN = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]\.[a-zA-Z]{2,}$")
+    EMAIL_BASIC_PATTERN = re.compile(
+        r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]\.[a-zA-Z]{2,}$"
+    )
     EMAIL_DOUBLE_DOT_PATTERN = re.compile(r"\.\.+")
     EMAIL_BLOCKED_PATTERNS = [
         re.compile(r".*\+.*test.*@.*"),
@@ -33,17 +34,23 @@ class ValidationConfiguration:
     PASSWORD_LOWERCASE_PATTERN = re.compile(r"[a-z]")
     PASSWORD_DIGIT_PATTERN = re.compile(r"\d")
     PASSWORD_SPECIAL_PATTERN = re.compile(r'[!@#$%^&*(),.?":{}|<>_+=\-\[\]\\\/~`]')
-    PASSWORD_COMMON_PATTERN = re.compile(r"(password|123456|qwerty|admin)", re.IGNORECASE)
+    PASSWORD_COMMON_PATTERN = re.compile(
+        r"(password|123456|qwerty|admin)", re.IGNORECASE
+    )
     PASSWORD_REPEATED_PATTERN = re.compile(r"(.)\1{4,}")
     PASSWORD_SIMPLE_REPEATED_PATTERN = re.compile(r"^(.)\1{11,}$")
-    PASSWORD_SEQUENTIAL_PATTERN = re.compile(r"^(012|123|234|345|456|567|678|789|890|abc|bcd|cde)", re.IGNORECASE)
+    PASSWORD_SEQUENTIAL_PATTERN = re.compile(
+        r"^(012|123|234|345|456|567|678|789|890|abc|bcd|cde)", re.IGNORECASE
+    )
     PASSWORD_KEYBOARD_PATTERN = re.compile(r"^(qwe|asd|zxc)", re.IGNORECASE)
 
     NAME_WHITESPACE_PATTERN = re.compile(r"\s+")
-    NAME_VALID_PATTERN = re.compile(r"^[a-zA-ZÀ-ÿĀ-žА-я\u4e00-\u9fff\u0600-\u06ff\u3040-\u309f\u30a0-\u30ff\s'\-\.]+$")
+    NAME_VALID_PATTERN = re.compile(
+        r"^[a-zA-ZÀ-ÿĀ-žА-я\u4e00-\u9fff\u0600-\u06ff\u3040-\u309f\u30a0-\u30ff\s'\-\.]+$"
+    )
     NAME_REPEATED_PATTERN = re.compile(r"(.)\1{4,}")
 
-    USERNAME_VALID_PATTERN = re.compile(r'^(?!.*\.$)(?!^\.)[a-z0-9._]+$')
+    USERNAME_VALID_PATTERN = re.compile(r"^(?!.*\.$)(?!^\.)[a-z0-9._]+$")
 
     SLUG_VALID_PATTERN = re.compile(r"^[a-z0-9-]+$")
 
@@ -137,5 +144,6 @@ class ValidationConfiguration:
         "[::1]",
     }
     SUSPICIOUS_URL_PATTERNS = ["javascript:", "data:", "vbscript:", "file:"]
+
 
 validate = ValidationConfiguration()

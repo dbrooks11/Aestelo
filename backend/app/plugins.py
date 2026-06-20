@@ -1,4 +1,3 @@
-
 from app.config import config
 from litestar.plugins.problem_details import ProblemDetailsPlugin
 from advanced_alchemy.extensions.litestar.plugins import SQLAlchemyInitPlugin
@@ -13,6 +12,6 @@ class Plugins:
     problem_details = ProblemDetailsPlugin()
     email = EmailPlugin(config=config.email_config)
     saq = SAQPlugin(config=config.saq_config())
-    
-    
+
+
 plugins = Plugins()

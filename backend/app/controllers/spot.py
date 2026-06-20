@@ -13,35 +13,48 @@ from litestar.di import NamedDependency
 from litestar.params import JSONBody
 
 
-
 class SpotController(Controller):
-    path='/spot'
-    dependencies={'spot_service': Provide(provide_spot_service), 'rate_service': Provide(provide_rate_service)}
-
+    path = "/spot"
+    dependencies = {
+        "spot_service": Provide(provide_spot_service),
+        "rate_service": Provide(provide_rate_service),
+    }
 
     @get(return_dto=SpotDTO)
-    async def spot_me(self, request: Request, spot_service: NamedDependency[SpotService]) -> ClassicPagination[Spot]:
+    async def spot_me(
+        self, request: Request, spot_service: NamedDependency[SpotService]
+    ) -> ClassicPagination[Spot]:
         user_id: str = request.user.id
-        return await spot_service.get_spots_me_pagination(user_id=user_id, page_size=12, page=1)
+        return await spot_service.get_spots_me_pagination(
+            user_id=user_id, page_size=12, page=1
+        )
 
     @post(return_dto=SpotDTO)
-    async def create_spot(self, data: JSONBody[SpotInputWithMediaSchema], request: Request, spot_service: NamedDependency[SpotService]) -> Spot:
+    async def create_spot(
+        self,
+        data: JSONBody[SpotInputWithMediaSchema],
+        request: Request,
+        spot_service: NamedDependency[SpotService],
+    ) -> Spot:
         user_id: str = request.user.id
-        post_type = 'spot'
+        post_type = "spot"
         model_dump = data.model_dump()
 
-        media: list[str] = model_dump.pop('media')
+        media: list[str] = model_dump.pop("media")
 
-        spot = await spot_service.create_spot(user_id=user_id, data=SpotSchemaBase.model_validate(model_dump, extra='ignore'))
+        spot = await spot_service.create_spot(
+            user_id=user_id,
+            data=SpotSchemaBase.model_validate(model_dump, extra="ignore"),
+        )
 
         tasks = []
         for order, key in enumerate(media, 1):
-            tasks.append({'sort_order': order, 'obj_key': key})
+            tasks.append({"sort_order": order, "obj_key": key})
         if tasks:
-            queue = plugins.saq.get_queue('media_processing')
+            queue = plugins.saq.get_queue("media_processing")
 
             await queue.enqueue(
-                'process_post_pipeline',
+                "process_post_pipeline",
                 tasks=tasks,
                 post_id=spot.id,
                 post_type=post_type,
@@ -49,18 +62,23 @@ class SpotController(Controller):
                 timeout=60,
                 retries=2,
                 retry_delay=3,
-                retry_backoff=True
+                retry_backoff=True,
             )
         return spot
-        
-    @post('{spot_id:int}/rate')
-    async def rate_spot(self, spot_id: FromPath[int], data: JSONBody[SpotRatingSchema], rate_service: NamedDependency[RatingService], request: Request) -> int | None:
+
+    @post("{spot_id:int}/rate")
+    async def rate_spot(
+        self,
+        spot_id: FromPath[int],
+        data: JSONBody[SpotRatingSchema],
+        rate_service: NamedDependency[RatingService],
+        request: Request,
+    ) -> int | None:
         user_id: str = request.user.id
 
         prev_rating = await rate_service.get_rating(user_id=user_id, spot_id=spot_id)
 
         if prev_rating and data.rating == prev_rating.rating_choice:
             return data.rating
-
 
         return prev_rating.rating_choice if prev_rating else None

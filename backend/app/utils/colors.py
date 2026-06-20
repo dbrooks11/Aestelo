@@ -5,9 +5,9 @@
 # def get_vips_palette(vips_image, color_count: int = 8) -> list[tuple[int, int, int]]:
 #     h_scale = 3 / vips_image.width
 #     v_scale = 3 / vips_image.height
-    
+
 #     tiny_img = vips_image.resize(h_scale, vscale=v_scale)
-    
+
 #     palette = []
 #     for y in range(tiny_img.height):
 #         for x in range(tiny_img.width):
@@ -15,13 +15,13 @@
 #             if len(pixel) >= 3:
 #                 r, g, b = int(pixel[0]), int(pixel[1]), int(pixel[2])
 #                 palette.append((r, g, b))
-                
+
 #             if len(palette) == color_count:
 #                 return palette
 #     return palette
 
 # class ColorCalculation:
-    
+
 #     async def rgb_to_hex(self, rgb: tuple[int, int, int]) -> str:
 #         return '#{:02x}{:02x}{:02x}'.format(*rgb)
 
@@ -34,24 +34,24 @@
 #             tuple(round(sum(c[i] for c in slot) / len(slot)) for i in range(3))
 #             for slot in zip(*palettes)
 #         ]  # type: ignore[return-value]
-    
+
 #     async def palette_to_color_tags(self, palette: list[tuple[int, int, int]]) -> list[str]:
-#         tags = list({await self.rgb_to_color_tag(color) for color in palette}) 
+#         tags = list({await self.rgb_to_color_tag(color) for color in palette})
 #         return tags             # type: ignore[attr-defined]
-    
+
 #     async def rgb_to_color_tag(self, rgb: tuple[int, int, int]) -> str:
 #         r, g, b = [x / 255 for x in rgb]
 #         h, l, s = colorsys.rgb_to_hls(r, g, b)
 #         h = h * 360
-    
+
 #         if l < 0.10: return 'black'
 #         if l > 0.93: return 'white'
-    
+
 #         if s < 0.06:
 #             if l > 0.80: return 'light gray'
 #             if l < 0.30: return 'dark gray'
 #             return 'gray'
-    
+
 #         # low saturation
 #         if s < 0.15:
 #             if l > 0.88: return 'white'
@@ -72,7 +72,7 @@
 #                 if 0 <= h < 60 or 300 <= h <= 360: return 'dark taupe'
 #                 return 'dark gray'
 #             return 'dark gray'
-    
+
 #         # medium saturation (0.15-0.30)
 #         if s < 0.30:
 #             if 0 <= h < 20 or 340 <= h <= 360:
@@ -110,7 +110,7 @@
 #                 if l > 0.60: return 'dusty rose'
 #                 if l > 0.40: return 'dusty rose'
 #                 return 'wine'
-    
+
 #         # medium-high sat (0.30-0.55)
 #         if s < 0.55:
 #             if 0 <= h < 15 or 345 <= h <= 360:
@@ -156,7 +156,7 @@
 #                 if l < 0.25: return 'dark pink'
 #                 if l < 0.55: return 'pink'
 #                 return 'light pink'
-    
+
 #         # high sat (0.55+)
 #         if 0 <= h < 15 or 345 <= h <= 360:
 #             if l < 0.25: return 'dark red'
@@ -193,9 +193,8 @@
 #             if l < 0.30: return 'dark pink'
 #             if l < 0.55: return 'hot pink'
 #             return 'pink'
-    
-#         return 'neutral'
 
+#         return 'neutral'
 
 
 # color = ColorCalculation()

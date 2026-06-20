@@ -6,7 +6,6 @@ from sqlalchemy import pool
 from geoalchemy2 import alembic_helpers
 
 from sqlalchemy.ext.asyncio import AsyncEngine, async_engine_from_config
-import geoalchemy2
 from advanced_alchemy.base import metadata_registry
 from alembic import context
 
@@ -21,6 +20,7 @@ __all__ = ("do_run_migrations", "run_migrations_offline", "run_migrations_online
 # access to the values within the .ini file in use.
 config: "AlembicCommandConfig" = context.config  # type: ignore
 writer = rewriter.Rewriter()
+
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.

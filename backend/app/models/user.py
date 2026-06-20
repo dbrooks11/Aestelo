@@ -40,9 +40,13 @@ from app.lib.validation import validate
 
 
 class UserProfile(base.UUIDAuditBase):
-    __tablename__ = 'user_profile'
+    __tablename__ = "user_profile"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('auth_user.id', ondelete='CASCADE'), primary_key=True)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("auth_user.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
     avatar: Mapped[str | None] = mapped_column(Text)
     banner: Mapped[str | None] = mapped_column(Text)
     bio: Mapped[str | None] = mapped_column(String(validate.MAX_PROFILE_BIO_LENGTH))
@@ -68,20 +72,36 @@ class UserProfile(base.UUIDAuditBase):
     is_deleted: Mapped[bool] = mapped_column(default=False)
     deleted_at: Mapped[DateTime | None] = mapped_column(DateTimeUTC)
 
-    auth: Mapped['AuthUser'] = relationship(back_populates='profile', lazy='joined')
-    info: Mapped["UserInfo"] = relationship(back_populates="profile", lazy='joined')
-    settings: Mapped["UserSettings"] = relationship(back_populates="profile", lazy='joined')
-    role: Mapped["UserRole"] = relationship(back_populates="profile", lazy='joined')
-    subscription: Mapped["UserSubscription"] = relationship(back_populates="profile", lazy='joined')
-    spot: Mapped[list["Spot"]] = relationship(back_populates="profile", lazy='selectin')
-    visit: Mapped[list["Visit"]] = relationship(back_populates="profile", lazy='selectin')
-    rating: Mapped[list["Rating"]] = relationship(back_populates="profile", lazy='selectin')
+    auth: Mapped["AuthUser"] = relationship(back_populates="profile", lazy="joined")
+    info: Mapped["UserInfo"] = relationship(back_populates="profile", lazy="joined")
+    settings: Mapped["UserSettings"] = relationship(
+        back_populates="profile", lazy="joined"
+    )
+    role: Mapped["UserRole"] = relationship(back_populates="profile", lazy="joined")
+    subscription: Mapped["UserSubscription"] = relationship(
+        back_populates="profile", lazy="joined"
+    )
+    spot: Mapped[list["Spot"]] = relationship(back_populates="profile", lazy="selectin")
+    visit: Mapped[list["Visit"]] = relationship(
+        back_populates="profile", lazy="selectin"
+    )
+    rating: Mapped[list["Rating"]] = relationship(
+        back_populates="profile", lazy="selectin"
+    )
     report: Mapped[list["Report"]] = relationship(back_populates="profile")
-    collection: Mapped[list["Collection"]] = relationship(back_populates="profile", lazy='selectin')
-    follower: Mapped[list["Follow"]] = relationship(foreign_keys="Follow.follower_id", back_populates="follower", lazy='selectin')
-    following: Mapped[list["Follow"]] = relationship(foreign_keys="Follow.following_id", back_populates="following", lazy='selectin')
-    likes: Mapped[list["Likes"]] = relationship(back_populates='profile', lazy='selectin')
-    
+    collection: Mapped[list["Collection"]] = relationship(
+        back_populates="profile", lazy="selectin"
+    )
+    follower: Mapped[list["Follow"]] = relationship(
+        foreign_keys="Follow.follower_id", back_populates="follower", lazy="selectin"
+    )
+    following: Mapped[list["Follow"]] = relationship(
+        foreign_keys="Follow.following_id", back_populates="following", lazy="selectin"
+    )
+    likes: Mapped[list["Likes"]] = relationship(
+        back_populates="profile", lazy="selectin"
+    )
+
     @hybrid_property
     def avatar_url(self) -> str | None:
         if self.avatar:
@@ -93,60 +113,95 @@ class UserProfile(base.UUIDAuditBase):
         if self.banner:
             return f"https://{settings.storage.SUB_DOMAIN}/{self.banner}"
         return None
-    
+
+
 class UserInfo(base.DefaultBase):
-    __tablename__ = 'user_info'
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('user_profile.id', ondelete='CASCADE'), primary_key=True)
+    __tablename__ = "user_info"
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("user_profile.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
 
     first_name: Mapped[str | None] = mapped_column(Text)
     last_name: Mapped[str | None] = mapped_column(Text)
 
     date_of_birth: Mapped[DateTime | None] = mapped_column(DateTimeUTC)
     age: Mapped[int] = mapped_column(Integer, default=0)
-    gender: Mapped[UserGenderEnum] = mapped_column(Enum(UserGenderEnum), default=UserGenderEnum.NOT_SPECIFIED)
-    
+    gender: Mapped[UserGenderEnum] = mapped_column(
+        Enum(UserGenderEnum), default=UserGenderEnum.NOT_SPECIFIED
+    )
+
     height_ft: Mapped[int] = mapped_column(Integer, default=0)
     height_in: Mapped[int] = mapped_column(Integer, default=0)
 
     state: Mapped[str | None] = mapped_column(Text)
     city: Mapped[str | None] = mapped_column(Text)
 
-    profile: Mapped["UserProfile"] = relationship(back_populates="info", lazy='joined')
+    profile: Mapped["UserProfile"] = relationship(back_populates="info", lazy="joined")
+
 
 class UserRole(base.DefaultBase):
-    __tablename__ = 'user_role'
-    
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('user_profile.id', ondelete='CASCADE'), primary_key=True)
-    role: Mapped[UserRoleEnum] = mapped_column(Enum(UserRoleEnum), default=UserRoleEnum.USER)
+    __tablename__ = "user_role"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("user_profile.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    role: Mapped[UserRoleEnum] = mapped_column(
+        Enum(UserRoleEnum), default=UserRoleEnum.USER
+    )
     granted_at: Mapped[DateTime | None] = mapped_column(DateTimeUTC)
     granted_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
 
-    profile: Mapped["UserProfile"] = relationship(back_populates="role", lazy='joined')
+    profile: Mapped["UserProfile"] = relationship(back_populates="role", lazy="joined")
+
 
 class UserSettings(base.DefaultBase):
-    __tablename__ = 'user_settings'
+    __tablename__ = "user_settings"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('user_profile.id', ondelete='CASCADE'), primary_key=True)
-    language_preference: Mapped[LanguagePreferenceEnum | None] = mapped_column(Enum(LanguagePreferenceEnum), default=LanguagePreferenceEnum.ENGLISH)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("user_profile.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    language_preference: Mapped[LanguagePreferenceEnum | None] = mapped_column(
+        Enum(LanguagePreferenceEnum), default=LanguagePreferenceEnum.ENGLISH
+    )
     email_notifications: Mapped[bool] = mapped_column(default=False)
     push_notifications: Mapped[bool] = mapped_column(default=False)
     location_sharing: Mapped[bool] = mapped_column(default=False)
     data_usage_consent: Mapped[bool] = mapped_column(default=False)
     marketing_consent: Mapped[bool] = mapped_column(default=False)
 
-    profile: Mapped["UserProfile"] = relationship(back_populates="settings", lazy='joined')
-    
-class UserSubscription(base.DefaultBase):
-    __tablename__ = 'user_subscription'
+    profile: Mapped["UserProfile"] = relationship(
+        back_populates="settings", lazy="joined"
+    )
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('user_profile.id', ondelete='CASCADE'), primary_key=True)
-    tier: Mapped[UserSubscriptionTierEnum] = mapped_column(Enum(UserSubscriptionTierEnum), default=UserSubscriptionTierEnum.FREE)
+
+class UserSubscription(base.DefaultBase):
+    __tablename__ = "user_subscription"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("user_profile.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    tier: Mapped[UserSubscriptionTierEnum] = mapped_column(
+        Enum(UserSubscriptionTierEnum), default=UserSubscriptionTierEnum.FREE
+    )
     price: Mapped[float] = mapped_column(Float, default=0.00)
     started_at: Mapped[DateTime] = mapped_column(DateTimeUTC, server_default=func.now())
     expires_at: Mapped[DateTime | None] = mapped_column(DateTimeUTC)
     auto_renew: Mapped[bool] = mapped_column(default=False)
-    payment_method_id: Mapped[uuid.UUID | None] = mapped_column() 
-    billing_cycle: Mapped[UserSubscriptionBillCycleEnum] = mapped_column(Enum(UserSubscriptionBillCycleEnum), default=UserSubscriptionBillCycleEnum.MONTHLY)
+    payment_method_id: Mapped[uuid.UUID | None] = mapped_column()
+    billing_cycle: Mapped[UserSubscriptionBillCycleEnum] = mapped_column(
+        Enum(UserSubscriptionBillCycleEnum),
+        default=UserSubscriptionBillCycleEnum.MONTHLY,
+    )
     trial_used: Mapped[bool] = mapped_column(default=False)
 
-    profile: Mapped["UserProfile"] = relationship(back_populates="subscription", lazy='joined')
+    profile: Mapped["UserProfile"] = relationship(
+        back_populates="subscription", lazy="joined"
+    )
