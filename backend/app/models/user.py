@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 import uuid
 from advanced_alchemy.extensions.litestar import base
 from app.settings import settings
@@ -43,9 +43,9 @@ class UserProfile(base.UUIDAuditBase):
     __tablename__ = 'user_profile'
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('auth_user.id', ondelete='CASCADE'), primary_key=True)
-    avatar: Mapped[Optional[str]] = mapped_column(Text)
-    banner: Mapped[Optional[str]] = mapped_column(Text)
-    bio: Mapped[Optional[str]] = mapped_column(String(validate.MAX_PROFILE_BIO_LENGTH))
+    avatar: Mapped[str | None] = mapped_column(Text)
+    banner: Mapped[str | None] = mapped_column(Text)
+    bio: Mapped[str | None] = mapped_column(String(validate.MAX_PROFILE_BIO_LENGTH))
 
     spot_count: Mapped[int] = mapped_column(Integer, default=0)
     visit_count: Mapped[int] = mapped_column(Integer, default=0)
@@ -60,13 +60,13 @@ class UserProfile(base.UUIDAuditBase):
 
     # Banning & Moderation
     is_banned: Mapped[bool] = mapped_column(default=False)
-    banned_at: Mapped[Optional[DateTime]] = mapped_column(DateTimeUTC)
-    banned_reason: Mapped[Optional[str]] = mapped_column(Text)
-    banned_by: Mapped[Optional[uuid.UUID]] = mapped_column(default=None)
+    banned_at: Mapped[DateTime | None] = mapped_column(DateTimeUTC)
+    banned_reason: Mapped[str | None] = mapped_column(Text)
+    banned_by: Mapped[uuid.UUID | None] = mapped_column(default=None)
 
     # Soft Deletion & Reports
     is_deleted: Mapped[bool] = mapped_column(default=False)
-    deleted_at: Mapped[Optional[DateTime]] = mapped_column(DateTimeUTC)
+    deleted_at: Mapped[DateTime | None] = mapped_column(DateTimeUTC)
 
     auth: Mapped['AuthUser'] = relationship(back_populates='profile', lazy='joined')
     info: Mapped["UserInfo"] = relationship(back_populates="profile", lazy='joined')
@@ -98,18 +98,18 @@ class UserInfo(base.DefaultBase):
     __tablename__ = 'user_info'
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('user_profile.id', ondelete='CASCADE'), primary_key=True)
 
-    first_name: Mapped[Optional[str]] = mapped_column(Text)
-    last_name: Mapped[Optional[str]] = mapped_column(Text)
+    first_name: Mapped[str | None] = mapped_column(Text)
+    last_name: Mapped[str | None] = mapped_column(Text)
 
-    date_of_birth: Mapped[Optional[DateTime]] = mapped_column(DateTimeUTC)
+    date_of_birth: Mapped[DateTime | None] = mapped_column(DateTimeUTC)
     age: Mapped[int] = mapped_column(Integer, default=0)
     gender: Mapped[UserGenderEnum] = mapped_column(Enum(UserGenderEnum), default=UserGenderEnum.NOT_SPECIFIED)
     
     height_ft: Mapped[int] = mapped_column(Integer, default=0)
     height_in: Mapped[int] = mapped_column(Integer, default=0)
 
-    state: Mapped[Optional[str]] = mapped_column(Text)
-    city: Mapped[Optional[str]] = mapped_column(Text)
+    state: Mapped[str | None] = mapped_column(Text)
+    city: Mapped[str | None] = mapped_column(Text)
 
     profile: Mapped["UserProfile"] = relationship(back_populates="info", lazy='joined')
 
@@ -118,8 +118,8 @@ class UserRole(base.DefaultBase):
     
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('user_profile.id', ondelete='CASCADE'), primary_key=True)
     role: Mapped[UserRoleEnum] = mapped_column(Enum(UserRoleEnum), default=UserRoleEnum.USER)
-    granted_at: Mapped[Optional[DateTime]] = mapped_column(DateTimeUTC)
-    granted_by: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True))
+    granted_at: Mapped[DateTime | None] = mapped_column(DateTimeUTC)
+    granted_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
 
     profile: Mapped["UserProfile"] = relationship(back_populates="role", lazy='joined')
 
@@ -127,7 +127,7 @@ class UserSettings(base.DefaultBase):
     __tablename__ = 'user_settings'
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('user_profile.id', ondelete='CASCADE'), primary_key=True)
-    language_preference: Mapped[Optional[LanguagePreferenceEnum]] = mapped_column(Enum(LanguagePreferenceEnum), default=LanguagePreferenceEnum.ENGLISH)
+    language_preference: Mapped[LanguagePreferenceEnum | None] = mapped_column(Enum(LanguagePreferenceEnum), default=LanguagePreferenceEnum.ENGLISH)
     email_notifications: Mapped[bool] = mapped_column(default=False)
     push_notifications: Mapped[bool] = mapped_column(default=False)
     location_sharing: Mapped[bool] = mapped_column(default=False)
@@ -143,9 +143,9 @@ class UserSubscription(base.DefaultBase):
     tier: Mapped[UserSubscriptionTierEnum] = mapped_column(Enum(UserSubscriptionTierEnum), default=UserSubscriptionTierEnum.FREE)
     price: Mapped[float] = mapped_column(Float, default=0.00)
     started_at: Mapped[DateTime] = mapped_column(DateTimeUTC, server_default=func.now())
-    expires_at: Mapped[Optional[DateTime]] = mapped_column(DateTimeUTC)
+    expires_at: Mapped[DateTime | None] = mapped_column(DateTimeUTC)
     auto_renew: Mapped[bool] = mapped_column(default=False)
-    payment_method_id: Mapped[Optional[uuid.UUID]] = mapped_column() 
+    payment_method_id: Mapped[uuid.UUID | None] = mapped_column() 
     billing_cycle: Mapped[UserSubscriptionBillCycleEnum] = mapped_column(Enum(UserSubscriptionBillCycleEnum), default=UserSubscriptionBillCycleEnum.MONTHLY)
     trial_used: Mapped[bool] = mapped_column(default=False)
 

@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 import uuid
 if TYPE_CHECKING:
     from app.models import Spot, UserProfile, Visit
@@ -23,10 +23,10 @@ class Collection(base.BigIntAuditBase):
     __tablename__ = 'collection'
     __table_args__ = (UniqueConstraint('user_id', 'name'),)
     
-    preview_thumbnails: Mapped[Optional[list[str]]] = mapped_column(ARRAY(Text))
+    preview_thumbnails: Mapped[list[str] | None] = mapped_column(ARRAY(Text))
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('user_profile.id', ondelete='CASCADE'), index=True)
     name: Mapped[str] = mapped_column(Text)
-    description: Mapped[Optional[str]] = mapped_column(Text)
+    description: Mapped[str | None] = mapped_column(Text)
     is_public: Mapped[bool] = mapped_column(Boolean, default=False)
     is_default: Mapped[bool] = mapped_column(Boolean, default=False)
 
@@ -52,8 +52,8 @@ class CollectionItem(base.BigIntBase):
                       UniqueConstraint('collection_id', 'visit_id', name='uq_collection_item_collection_visit'),)
 
     collection_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('collection.id', ondelete='CASCADE'), nullable=False)
-    spot_id: Mapped[Optional[int]] = mapped_column(BigInteger, ForeignKey('spot.id', ondelete='CASCADE'), nullable=True)
-    visit_id: Mapped[Optional[int]] = mapped_column(BigInteger, ForeignKey('visit.id', ondelete='CASCADE'), nullable=True)
+    spot_id: Mapped[int | None] = mapped_column(BigInteger, ForeignKey('spot.id', ondelete='CASCADE'), nullable=True)
+    visit_id: Mapped[int | None] = mapped_column(BigInteger, ForeignKey('visit.id', ondelete='CASCADE'), nullable=True)
     saved_by: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     saved_at: Mapped[DateTime] = mapped_column(DateTimeUTC, server_default=func.now())
     

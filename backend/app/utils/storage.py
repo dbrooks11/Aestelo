@@ -1,6 +1,6 @@
 
 import secrets
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from typing import Any
 from litestar.exceptions import ValidationException
 from aioboto3 import Session
@@ -76,7 +76,7 @@ class ObjectStorage:
         if folder not in self.allowed_folders:
             raise Exception('Invalid destination') 
         
-        timestamp = datetime.now(timezone.utc).strftime('%d%m%Y_%H%M%S')
+        timestamp = datetime.now(UTC).strftime('%d%m%Y_%H%M%S')
         short_id = secrets.token_urlsafe(32) 
         filename = f"{folder}/{id}/{timestamp}_{short_id}.{extension}"
 

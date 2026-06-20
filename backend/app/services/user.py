@@ -1,14 +1,11 @@
 from advanced_alchemy.repository import SQLAlchemyAsyncRepository, ErrorMessages
 from advanced_alchemy.service import SQLAlchemyAsyncRepositoryService
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models import UserProfile, AuthUser
+from app.models import UserProfile
 from app.schemas.user import UserProfileEditSchema
-from sqlalchemy.ext.asyncio import AsyncSession
 from collections.abc import AsyncGenerator
 from sqlalchemy.orm import joinedload
 from app.services.auth import AuthService
-from advanced_alchemy.filters import ExistsFilter
-from litestar.exceptions import ValidationException
 from litestar.di import NamedDependency
 
 class UserProfileService(SQLAlchemyAsyncRepositoryService[UserProfile]):
@@ -52,6 +49,6 @@ class UserProfileService(SQLAlchemyAsyncRepositoryService[UserProfile]):
 
 
 
-async def provide_user_service(db_session: NamedDependency[AsyncSession]) -> AsyncGenerator[UserProfileService, None]:
+async def provide_user_service(db_session: NamedDependency[AsyncSession]) -> AsyncGenerator[UserProfileService]:
     async with UserProfileService.new(session=db_session) as service:
         yield service

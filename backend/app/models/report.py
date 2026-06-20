@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 import uuid
 from advanced_alchemy.extensions.litestar import base
 from sqlalchemy import UUID, DateTime, ForeignKey, Text
@@ -21,9 +21,9 @@ class Report(base.BigIntAuditBase):
     reported_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     
     reason: Mapped[str] = mapped_column(Text, nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(Text)
+    description: Mapped[str | None] = mapped_column(Text)
     
-    reviewed_by: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True))
-    reviewed_at: Mapped[Optional[DateTime]] = mapped_column(DateTimeUTC)
+    reviewed_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    reviewed_at: Mapped[DateTime | None] = mapped_column(DateTimeUTC)
 
     profile: Mapped["UserProfile"] = relationship(back_populates="report")

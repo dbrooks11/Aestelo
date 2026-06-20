@@ -2,7 +2,7 @@ from app.models import Spot, SpotMedia, Rating, Visit, CollectionItem
 from advanced_alchemy.repository import SQLAlchemyAsyncRepository
 from advanced_alchemy.filters import LimitOffset, OrderBy, SearchFilter
 from advanced_alchemy.service import SQLAlchemyAsyncRepositoryService
-from typing import Sequence, Literal, Any, Optional
+from typing import Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from collections.abc import AsyncGenerator
 from app.schemas.spot import SpotSchemaBase
@@ -22,7 +22,7 @@ class SpotService(SQLAlchemyAsyncRepositoryService[Spot]):
     
     repository_type=SpotRepo
 
-    async def get_spots_me_pagination(self, user_id: str, page: int, page_size: int, search_filter: Optional[SearchFilter] = None) -> ClassicPagination[Spot]:  
+    async def get_spots_me_pagination(self, user_id: str, page: int, page_size: int, search_filter: SearchFilter | None = None) -> ClassicPagination[Spot]:  
         visit_subqeury = (select(1).where(Visit.spot_id == Spot.id, Visit.user_id == user_id).exists())
         rated_subquery = (select(1).where(Rating.spot_id == Spot.id, Rating.user_id == user_id).exists())
         saved_subquery = (select(1).where(CollectionItem.spot_id == Spot.id, CollectionItem.saved_by == user_id).exists())
@@ -60,7 +60,7 @@ class SpotService(SQLAlchemyAsyncRepositoryService[Spot]):
         return await self.update(data=data, item_id=spot_id)
     
 
-async def provide_spot_service(db_session: NamedDependency[AsyncSession]) -> AsyncGenerator[SpotService, None]:
+async def provide_spot_service(db_session: NamedDependency[AsyncSession]) -> AsyncGenerator[SpotService]:
     async with SpotService.new(session=db_session) as service:
         yield service
 
@@ -74,6 +74,6 @@ class SpotMediaService(SQLAlchemyAsyncRepositoryService[SpotMedia]):
     repository_type=SpotMediaRepo
 
 
-async def provide_spot_media_service(db_session: NamedDependency[AsyncSession]) -> AsyncGenerator[SpotMediaService, None]:
+async def provide_spot_media_service(db_session: NamedDependency[AsyncSession]) -> AsyncGenerator[SpotMediaService]:
     async with SpotMediaService.new(session=db_session) as service:
         yield service

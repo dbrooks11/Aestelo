@@ -36,19 +36,19 @@ async def process_post_media(post_type: Literal['spot','visit'], post_id: int, s
             exif: dict[str,str] | None = processed_media.get('exif', None)
     
             if not all([compressed_file, original_mimetype, new_mimetype, exif]):
-                raise ValidationException(detail=f'Failed to process media. Invalid data')
+                raise ValidationException(detail='Failed to process media. Invalid data')
             
             coordinates = await gps.get_lat_long(exif=exif)
 
             if not coordinates:
-                raise ValidationException(detail=f'No GPS data found')
+                raise ValidationException(detail='No GPS data found')
             
             valid_extension = await storage.verify_file_type(mimetype=original_mimetype, is_post=True)
             new_obj_key = await storage.generate_file_name(id=post_id, folder=post_type, extension=valid_extension)
             is_uploaded = await storage.upload_file_s3(object_key=new_obj_key, file=compressed_file, mimetype=new_mimetype) # type: ignore
 
             if not is_uploaded:
-                raise InternalServerException(detail=f'Failed to upload media')
+                raise InternalServerException(detail='Failed to upload media')
             
             post_id_field = f'{post_type}_id'
             return {

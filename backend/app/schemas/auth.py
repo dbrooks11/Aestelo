@@ -1,7 +1,7 @@
 from app.schemas.base import CamelizedBaseSchema
 import re
-from typing import Annotated, Optional
-from typing_extensions import Self
+from typing import Annotated
+from typing import Self
 from pydantic import EmailStr,model_validator, Field, field_validator
 from app.lib.validation import validate
 
@@ -14,7 +14,7 @@ def username_invalidation(value):
 
 
 class AuthBase(CamelizedBaseSchema):
-    username: Annotated[Optional[str], Field(default=None, min_length=validate.USERNAME_MIN_LENGTH, max_length=validate.USERNAME_MAX_LENGTH)]
+    username: Annotated[str | None, Field(default=None, min_length=validate.USERNAME_MIN_LENGTH, max_length=validate.USERNAME_MAX_LENGTH)]
     email: Annotated[EmailStr, Field(min_length=validate.EMAIL_MIN_LENGTH, max_length=validate.EMAIL_MAX_LENGTH)]
     password: Annotated[str, Field(min_length=validate.PASSWORD_MIN_LENGTH, max_length=validate.PASSWORD_MAX_LENGTH)]
     
@@ -30,7 +30,7 @@ class AuthBase(CamelizedBaseSchema):
         return value
 
 class LoginRequestSchema(AuthBase):
-    email: Annotated[Optional[EmailStr], Field(default=None, min_length=validate.EMAIL_MIN_LENGTH, max_length=validate.EMAIL_MAX_LENGTH)]
+    email: Annotated[EmailStr | None, Field(default=None, min_length=validate.EMAIL_MIN_LENGTH, max_length=validate.EMAIL_MAX_LENGTH)]
 
     @model_validator(mode='after')
     def check_email_and_username(self) -> Self:

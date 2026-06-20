@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from advanced_alchemy.extensions.litestar import base
 from advanced_alchemy.types import DateTimeUTC
@@ -16,8 +16,8 @@ class AuthUser(base.UUIDAuditBase):
     email: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
 
-    last_signed_in: Mapped[Optional[DateTime]] = mapped_column(DateTimeUTC)
-    locked_until: Mapped[Optional[DateTime]] = mapped_column(DateTimeUTC)
+    last_signed_in: Mapped[DateTime | None] = mapped_column(DateTimeUTC)
+    locked_until: Mapped[DateTime | None] = mapped_column(DateTimeUTC)
 
     profile: Mapped["UserProfile"] = relationship(back_populates='auth', lazy='joined')
 

@@ -27,9 +27,9 @@ class AuthController(Controller):
 
     @post('/signup', opt={'csrf_none': True})
     async def signup(self, 
-                     data: JSONBody[SignupRequestSchema], 
-                     auth_service: NamedDependency[AuthService]
-                     ) -> Response:
+                    data: JSONBody[SignupRequestSchema], 
+                    auth_service: NamedDependency[AuthService]
+                    ) -> Response:
 
         exist = await auth_service.exists(email = data.email)
 
