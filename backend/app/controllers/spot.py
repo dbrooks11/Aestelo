@@ -1,17 +1,18 @@
 from litestar.controller import Controller
 from litestar import get, post, Request
-from typing import Any
 from litestar.di import Provide
 from app.dto.spot import SpotDTO
 from app.services.spot import provide_spot_service, SpotService
 from app.services.rating import RatingService, provide_rate_service
-from app.models import Spot, Rating
+from app.models import Spot
 from app.schemas.spot import SpotSchemaBase, SpotInputWithMediaSchema, SpotRatingSchema
 from litestar.pagination import ClassicPagination
 from litestar.params import FromPath
 from app.plugins import plugins
-from sqlalchemy import select
-from advanced_alchemy.filters import ComparisonFilter
+from litestar.di import NamedDependency
+from litestar.params import JSONBody
+
+
 
 class SpotController(Controller):
     path='/spot'
@@ -19,12 +20,12 @@ class SpotController(Controller):
 
 
     @get(return_dto=SpotDTO)
-    async def spot_me(self, request: Request, spot_service: SpotService) -> ClassicPagination[Spot]:
+    async def spot_me(self, request: Request, spot_service: NamedDependency[SpotService]) -> ClassicPagination[Spot]:
         user_id: str = request.user.id
         return await spot_service.get_spots_me_pagination(user_id=user_id, page_size=12, page=1)
 
     @post(return_dto=SpotDTO)
-    async def create_spot(self, data: SpotInputWithMediaSchema, request: Request, spot_service: SpotService) -> Spot:
+    async def create_spot(self, data: JSONBody[SpotInputWithMediaSchema], request: Request, spot_service: NamedDependency[SpotService]) -> Spot:
         user_id: str = request.user.id
         post_type = 'spot'
         model_dump = data.model_dump()
@@ -53,7 +54,7 @@ class SpotController(Controller):
         return spot
         
     @post('{spot_id:int}/rate')
-    async def rate_spot(self, spot_id: FromPath[int], data: SpotRatingSchema, rate_service: RatingService, request: Request) -> int | None:
+    async def rate_spot(self, spot_id: FromPath[int], data: JSONBody[SpotRatingSchema], rate_service: NamedDependency[RatingService], request: Request) -> int | None:
         user_id: str = request.user.id
 
         prev_rating = await rate_service.get_rating(user_id=user_id, spot_id=spot_id)

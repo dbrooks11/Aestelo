@@ -1,28 +1,21 @@
 ARG PYTHON_VERSION=3.13
 
-#Stage 1: Build 
-FROM python:${PYTHON_VERSION}-slim-bookworm AS builder
+# Stage 1: build mimalloc
+FROM python:${PYTHON_VERSION}-slim-bookworm AS mimalloc-builder
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
-
-WORKDIR /app
-
-# Install C/C++ build tools required to compile mimalloc
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    cmake \
-    git \
+    build-essential cmake git \
     && rm -rf /var/lib/apt/lists/*
 
-# Clone the absolute latest mimalloc (v3.3.2) and build it from source
 RUN git clone -b v3.3.2 https://github.com/microsoft/mimalloc.git /mimalloc \
-    && cd /mimalloc \
-    && mkdir build \
-    && cd build \
-    && cmake .. \
-    && make \
-    && make install
+    && cd /mimalloc && mkdir build && cd build \
+    && cmake .. && make && make install \
+    && rm -rf /mimalloc
+
+# Stage 2: install Python dependencies
+FROM python:${PYTHON_VERSION}-slim-bookworm AS deps-builder
+
+WORKDIR /app
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
@@ -30,28 +23,31 @@ COPY pyproject.toml uv.lock ./
 
 RUN uv sync --frozen --no-dev --no-install-project
 
-#Stage 2: Runtime
+# Stage 3: runtime
 FROM python:${PYTHON_VERSION}-slim-bookworm AS prod
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/app/.venv/bin:$PATH" \
+    LD_PRELOAD="/usr/local/lib/libmimalloc.so.3"
 
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    libjpeg-dev \
-    zlib1g-dev \
+    libjpeg62-turbo \
+    zlib1g \
+    libvips \
     && rm -rf /var/lib/apt/lists/*
 
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+# Copy mimalloc shared library from builder
+COPY --from=mimalloc-builder /usr/local/lib/libmimalloc* /usr/local/lib/
+RUN ldconfig
 
-COPY --from=builder /app/.venv /app/.venv
+RUN groupadd appuser && useradd -g appuser -m appuser
 
-COPY . .
+COPY --from=deps-builder /app/.venv /app/.venv
+COPY --chown=appuser:appuser . .
 
-ENV PATH="/app/.venv/bin:$PATH"
-
-ENV LD_PRELOAD="/usr/local/lib/libmimalloc.so.3"
-
-RUN chown -R appuser:appuser /app
 USER appuser
 
 EXPOSE 8000

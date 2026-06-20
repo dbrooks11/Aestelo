@@ -1,7 +1,7 @@
 import random
 from argon2 import PasswordHasher
 from app.models import (AuthUser)
-from litestar import Response, post, Request, status_codes,get
+from litestar import Response, post, Request,get
 from litestar.exceptions import (
     HTTPException,
     NotAuthorizedException,
@@ -16,6 +16,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.auth import provide_auth_service, AuthService
 from litestar.di import Provide
 from litestar.middleware.csrf import generate_csrf_token
+from litestar.di import NamedDependency
+from litestar.params import JSONBody
 
 ph = PasswordHasher()
 
@@ -25,8 +27,8 @@ class AuthController(Controller):
 
     @post('/signup', opt={'csrf_none': True})
     async def signup(self, 
-                     data: SignupRequestSchema, 
-                     auth_service: AuthService
+                     data: JSONBody[SignupRequestSchema], 
+                     auth_service: NamedDependency[AuthService]
                      ) -> Response:
 
         exist = await auth_service.exists(email = data.email)
@@ -58,8 +60,8 @@ class AuthController(Controller):
 
     @post('/login', opt={'csrf_none': True})
     async def login(self, 
-                    data: LoginRequestSchema, 
-                    db_session: AsyncSession, 
+                    data: JSONBody[LoginRequestSchema], 
+                    db_session: NamedDependency[AsyncSession], 
                     request: Request
                     ) -> dict[str, str | None]:
         account = await db_session.execute(select(AuthUser.id, AuthUser.password_hash).where(

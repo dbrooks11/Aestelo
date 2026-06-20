@@ -3,12 +3,13 @@ from litestar import Request, post
 from app.lib.validation import validate
 from app.schemas.s3 import FileUploadSchema
 from app.utils.storage import storage_private
+from litestar.params import JSONBody
 
 class ObjectStorageController(Controller):
     path='/s3'
 
     @post('/presign-urls')
-    async def presign_urls(self, data:list[FileUploadSchema], request:Request) -> list[dict[str,str]]:
+    async def presign_urls(self, data: JSONBody[list[FileUploadSchema]], request: Request) -> list[dict[str,str]]:
         if len(data) > validate.MAX_NUM_FILES_POST:
             raise Exception('Too many files')
         

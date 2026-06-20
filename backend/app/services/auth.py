@@ -5,6 +5,7 @@ from app.models import (AuthUser)
 from collections.abc import AsyncGenerator
 from app.schemas.auth import AuthServiceSignupSchema
 from argon2 import PasswordHasher 
+from litestar.di import NamedDependency
 
 ph = PasswordHasher()
 class AuthService(SQLAlchemyAsyncRepositoryService[AuthUser]):
@@ -30,7 +31,7 @@ class AuthService(SQLAlchemyAsyncRepositoryService[AuthUser]):
         }
         await self.create(data=account_structure)
 
-async def provide_auth_service(db_session: AsyncSession) -> AsyncGenerator[AuthService, None]:
+async def provide_auth_service(db_session: NamedDependency[AsyncSession]) -> AsyncGenerator[AuthService, None]:
     async with AuthService.new(session=db_session) as service:
         yield service
 

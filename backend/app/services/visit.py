@@ -1,13 +1,13 @@
 from app.models import Visit, VisitMedia
 from app.schemas.visit import VisitSchemaBase
-from advanced_alchemy.repository import SQLAlchemyAsyncRepository, ErrorMessages
+from advanced_alchemy.repository import SQLAlchemyAsyncRepository
 from advanced_alchemy.filters import LimitOffset, OrderBy, SearchFilter, CollectionFilter
 from advanced_alchemy.service import SQLAlchemyAsyncRepositoryService
 from typing import Literal, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from collections.abc import AsyncGenerator
 from litestar.pagination import OffsetPagination
-
+from litestar.di import NamedDependency
 
 class VisitService(SQLAlchemyAsyncRepositoryService[Visit]):
     """Handles database operations for visits"""
@@ -39,7 +39,7 @@ class VisitService(SQLAlchemyAsyncRepositoryService[Visit]):
         return await self.update(data=data, item_id=visit_id)
     
 
-async def provide_visit_service(db_session: AsyncSession) -> AsyncGenerator[VisitService, None]:
+async def provide_visit_service(db_session: NamedDependency[AsyncSession]) -> AsyncGenerator[VisitService, None]:
     async with VisitService.new(session=db_session) as service:
         yield service
 
@@ -53,6 +53,6 @@ class VisitMediaService(SQLAlchemyAsyncRepositoryService[VisitMedia]):
     repository_type=VisitMediaRepo
 
 
-async def provide_visit_media_service(db_session: AsyncSession) -> AsyncGenerator[VisitMediaService, None]:
+async def provide_visit_media_service(db_session: NamedDependency[AsyncSession]) -> AsyncGenerator[VisitMediaService, None]:
     async with VisitMediaService.new(session=db_session) as service:
         yield service

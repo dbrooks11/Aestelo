@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from collections.abc import AsyncGenerator
 from app.schemas.spot import SpotRatingGetData
 from sqlalchemy import select
-
+from litestar.di import NamedDependency
 
 class RatingService(SQLAlchemyAsyncRepositoryService[Rating]):
 
@@ -21,6 +21,6 @@ class RatingService(SQLAlchemyAsyncRepositoryService[Rating]):
                                                                          Rating.spot_id == spot_id))
 
 
-async def provide_rate_service(db_session: AsyncSession) -> AsyncGenerator[RatingService, None]:
+async def provide_rate_service(db_session: NamedDependency[AsyncSession]) -> AsyncGenerator[RatingService, None]:
     async with RatingService.new(session=db_session) as service:
         yield service

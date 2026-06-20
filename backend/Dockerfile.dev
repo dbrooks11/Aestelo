@@ -1,16 +1,15 @@
 ARG PYTHON_VERSION=3.13
 
-# Development image (includes dev dependencies and hot reload)
 FROM python:${PYTHON_VERSION}-slim-bookworm AS dev
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    UV_PYTHON_DOWNLOADS=0
 
 WORKDIR /app
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
-#Added cmake and git to your existing build tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     build-essential \
@@ -18,31 +17,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     libjpeg-dev \
     zlib1g-dev \
+    libvips-dev \
     && rm -rf /var/lib/apt/lists/*
 
-#Clone and compile mimalloc v3.3.2 right into the dev image
 RUN git clone -b v3.3.2 https://github.com/microsoft/mimalloc.git /mimalloc \
-    && cd /mimalloc \
-    && mkdir build \
-    && cd build \
-    && cmake .. \
-    && make \
-    && make install
+    && cd /mimalloc && mkdir build && cd build \
+    && cmake .. && make && make install \
+    && ldconfig \
+    && rm -rf /mimalloc
 
 COPY pyproject.toml uv.lock ./
 
-RUN uv sync --frozen --all-extras
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --all-extras
 
-# Create non-root user
-RUN groupadd -r appuser && useradd -r -g appuser appuser
-RUN chown -R appuser:appuser /app
-USER appuser
+COPY . .
 
-COPY --chown=appuser:appuser . .
-
-ENV PATH="/app/.venv/bin:$PATH"
-
-ENV LD_PRELOAD="/usr/local/lib/libmimalloc.so.3"
+ENV PATH="/app/.venv/bin:$PATH" \
+    LD_PRELOAD="/usr/local/lib/libmimalloc.so.3" \
+    VIRTUAL_ENV="/app/.venv" \
+    UV_PROJECT_ENVIRONMENT="/app/.venv"
 
 EXPOSE 8000
 

@@ -2,20 +2,32 @@ from litestar.controller import Controller
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from litestar import get
-from litestar.exceptions import InternalServerException
-
-
+from litestar.exceptions import ServiceUnavailableException
+from litestar import Response
+from litestar.di import NamedDependency
 
 class HealthCheckController(Controller):
     path='/healthz'
-
-    @get(opt={'access_none':True})
-    async def health_check(self, db_session: AsyncSession) -> None:
+    include_in_schema=False
+    
+    @get()
+    async def health(self) -> Response[str]:
         """
-        Verifies the app can reach the Database and Redis Cloud.
+        Verifies the app is healthy
         """
+        return Response('Litestar backend application is healthy')
 
-        db_health = await db_session.execute(select(1))
+    @get('/db')
+    async def health_db(self, db_session: NamedDependency[AsyncSession]) -> Response[str]:
+        """
+        Verifies the app can reach the Database
+        """
+        try:
+            await db_session.execute(select(1))
+            return Response('Database is healthy')
+        except Exception as e:
+            raise ServiceUnavailableException('Database is unhealthy') from e        
 
-        if not db_health:
-            raise InternalServerException("Database is unhealthy")
+    
+
+        

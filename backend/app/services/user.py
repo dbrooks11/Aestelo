@@ -9,6 +9,7 @@ from sqlalchemy.orm import joinedload
 from app.services.auth import AuthService
 from advanced_alchemy.filters import ExistsFilter
 from litestar.exceptions import ValidationException
+from litestar.di import NamedDependency
 
 class UserProfileService(SQLAlchemyAsyncRepositoryService[UserProfile]):
     """Handles database operations for users"""
@@ -51,6 +52,6 @@ class UserProfileService(SQLAlchemyAsyncRepositoryService[UserProfile]):
 
 
 
-async def provide_user_service(db_session: AsyncSession) -> AsyncGenerator[UserProfileService, None]:
+async def provide_user_service(db_session: NamedDependency[AsyncSession]) -> AsyncGenerator[UserProfileService, None]:
     async with UserProfileService.new(session=db_session) as service:
         yield service

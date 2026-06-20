@@ -1,6 +1,6 @@
 [project]
 name = "aestelo"
-version = "0.1.0"
+version = "1.0.0"
 description = "Backend dependencies for litestar applciation"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -24,9 +24,17 @@ dependencies = [
     "types-aiobotocore[s3]>=3.7.0",
 ]
 
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+anyio_mode = "auto"
+anyio_backend = "asyncio"
+addopts = ["--import-mode=importlib"]
+
 [dependency-groups]
 dev = [
     "pip-audit>=2.10.0",
     "pytest>=9.0.3",
+    "pytest-asyncio>=1.4.0",
     "ruff>=0.15.13",
 ]

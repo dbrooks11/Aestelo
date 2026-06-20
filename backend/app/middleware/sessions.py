@@ -29,7 +29,7 @@ async def retrieve_user_handler(session: dict, connection: ASGIConnection) -> Us
 
 
 
-server_session = ServerSideSessionConfig(
+server_session_config = ServerSideSessionConfig(
     session_id_bytes=64,
     renew_on_access=False,
     max_age= 14515200, #6 months (in seconds)
@@ -41,7 +41,7 @@ server_session = ServerSideSessionConfig(
 
 
 session_auth = SessionAuth[User, ServerSideSessionBackend](
-    session_backend_config=server_session,
+    session_backend_config=server_session_config,
     retrieve_user_handler=retrieve_user_handler,
     exclude_opt_key='session_auth_none',
     exclude=[auth_paths['login'], auth_paths['signup']],

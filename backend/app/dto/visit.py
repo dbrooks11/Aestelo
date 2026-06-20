@@ -1,4 +1,4 @@
-from litestar.plugins.sqlalchemy import SQLAlchemyDTO, SQLAlchemyDTOConfig
+from advanced_alchemy.extensions.litestar import SQLAlchemyDTO, SQLAlchemyDTOConfig
 from app.models import Visit
 
 

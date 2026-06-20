@@ -11,7 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import with_expression
 from math import ceil
 from app.db.enums import UploadStatusEnum
-
+from litestar.di import NamedDependency
 
 class SpotService(SQLAlchemyAsyncRepositoryService[Spot]):
     """Handles database operations for spots"""
@@ -60,7 +60,7 @@ class SpotService(SQLAlchemyAsyncRepositoryService[Spot]):
         return await self.update(data=data, item_id=spot_id)
     
 
-async def provide_spot_service(db_session: AsyncSession) -> AsyncGenerator[SpotService, None]:
+async def provide_spot_service(db_session: NamedDependency[AsyncSession]) -> AsyncGenerator[SpotService, None]:
     async with SpotService.new(session=db_session) as service:
         yield service
 
@@ -74,6 +74,6 @@ class SpotMediaService(SQLAlchemyAsyncRepositoryService[SpotMedia]):
     repository_type=SpotMediaRepo
 
 
-async def provide_spot_media_service(db_session: AsyncSession) -> AsyncGenerator[SpotMediaService, None]:
+async def provide_spot_media_service(db_session: NamedDependency[AsyncSession]) -> AsyncGenerator[SpotMediaService, None]:
     async with SpotMediaService.new(session=db_session) as service:
         yield service

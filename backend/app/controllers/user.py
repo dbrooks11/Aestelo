@@ -10,7 +10,8 @@ from app.models import UserProfile, AuthUser
 from app.schemas.user import UserProfileEditSchema, UserProfileEditMediaSchema
 from app.plugins import plugins
 from app.lib.validation import validate
-
+from litestar.di import NamedDependency
+from litestar.params import JSONBody
 
 
 class UserController(Controller):
@@ -18,13 +19,13 @@ class UserController(Controller):
     dependencies = {'profile_service': Provide(provide_user_service)}
 
     @get(return_dto=UserProfileDTO)
-    async def profile_me(self, request: Request, profile_service: UserProfileService) -> UserProfile:
+    async def profile_me(self, request: Request, profile_service: NamedDependency[UserProfileService]) -> UserProfile:
         user_id: str = request.user.id
 
         return await profile_service.get_profile_me(user_id=user_id)
 
     @patch('/edit', return_dto=UserProfileEditInfoDTO)
-    async def edit_profile(self, db_session: AsyncSession, data: UserProfileEditSchema, request: Request, profile_service: UserProfileService) -> UserProfile:
+    async def edit_profile(self, db_session: NamedDependency[AsyncSession], data: JSONBody[UserProfileEditSchema], request: Request, profile_service: NamedDependency[UserProfileService]) -> UserProfile:
         user_id: str = request.user.id
         stmt = select(1).where(AuthUser.username == data.username, AuthUser.id != user_id)
         username_exists = await db_session.scalar(stmt) 
@@ -34,7 +35,7 @@ class UserController(Controller):
         return updated_profile
     
     @patch('/edit-media', return_dto=UserProfileEditMediaDTO)
-    async def edit_profile_media(self, data: UserProfileEditMediaSchema, request: Request, profile_service: UserProfileService) -> UserProfile| None:
+    async def edit_profile_media(self, data: JSONBody[UserProfileEditMediaSchema], request: Request, profile_service: NamedDependency[UserProfileService]) -> UserProfile| None:
         user_id: str = request.user.id
         if data.model_dump(exclude_none=True):
             profile = await profile_service.get_profile_me(user_id=user_id)
