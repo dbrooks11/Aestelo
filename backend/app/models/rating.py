@@ -1,5 +1,5 @@
-from typing import TYPE_CHECKING
 import uuid
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from app.models import Spot, UserProfile

@@ -1,6 +1,8 @@
-from typing import TYPE_CHECKING
 import uuid
+from typing import TYPE_CHECKING
+
 from advanced_alchemy.extensions.litestar import base
+
 from app.settings import settings
 
 if TYPE_CHECKING:
@@ -14,6 +16,22 @@ if TYPE_CHECKING:
         Spot,
         Visit,
     )
+from advanced_alchemy.types import DateTimeUTC
+from sqlalchemy import (
+    UUID,
+    BigInteger,
+    DateTime,
+    Enum,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    func,
+)
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.db.enums import (
     LanguagePreferenceEnum,
     UserGenderEnum,
@@ -21,21 +39,6 @@ from app.db.enums import (
     UserSubscriptionBillCycleEnum,
     UserSubscriptionTierEnum,
 )
-from sqlalchemy import (
-    UUID,
-    BigInteger,
-    DateTime,
-    Float,
-    ForeignKey,
-    Integer,
-    Text,
-    String,
-    Enum,
-    func,
-)
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.ext.hybrid import hybrid_property
-from advanced_alchemy.types import DateTimeUTC
 from app.lib.validation import validate
 
 

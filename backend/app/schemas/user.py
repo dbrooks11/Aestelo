@@ -1,8 +1,10 @@
-from app.schemas.base import CamelizedBaseSchema
-from pydantic import Field, field_validator
 from typing import Annotated
-from app.schemas.auth import username_invalidation
+
+from pydantic import Field, field_validator
+
 from app.lib.validation import validate
+from app.schemas.auth import username_invalidation
+from app.schemas.base import CamelizedBaseSchema
 
 
 class UserProfileEditSchema(CamelizedBaseSchema):

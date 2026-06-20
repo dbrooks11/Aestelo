@@ -10,18 +10,18 @@ import warnings
 from typing import TYPE_CHECKING, Any
 
 import sqlalchemy as sa
-from alembic import op
 from advanced_alchemy.types import (
-    EncryptedString,
-    EncryptedText,
     GUID,
     ORA_JSONB,
     DateTimeUTC,
-    StoredObject,
-    PasswordHash,
+    EncryptedString,
+    EncryptedText,
     FernetBackend,
+    PasswordHash,
+    StoredObject,
 )
 from advanced_alchemy.types.encrypted_string import PGCryptoBackend
+from alembic import op
 from sqlalchemy import Text  # noqa: F401
 
 try:

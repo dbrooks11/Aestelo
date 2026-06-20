@@ -1,6 +1,7 @@
 from litestar import get
-from app.settings import settings
 from litestar.controller import Controller
+
+from app.settings import settings
 
 
 class IndexController(Controller):

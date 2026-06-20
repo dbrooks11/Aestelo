@@ -1,12 +1,14 @@
-from advanced_alchemy.repository import SQLAlchemyAsyncRepository, ErrorMessages
+from collections.abc import AsyncGenerator
+
+from advanced_alchemy.repository import ErrorMessages, SQLAlchemyAsyncRepository
 from advanced_alchemy.service import SQLAlchemyAsyncRepositoryService
+from litestar.di import NamedDependency
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
+
 from app.models import UserProfile
 from app.schemas.user import UserProfileEditSchema
-from collections.abc import AsyncGenerator
-from sqlalchemy.orm import joinedload
 from app.services.auth import AuthService
-from litestar.di import NamedDependency
 
 
 class UserProfileService(SQLAlchemyAsyncRepositoryService[UserProfile]):

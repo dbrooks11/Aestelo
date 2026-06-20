@@ -4,6 +4,7 @@ from advanced_alchemy.extensions.litestar import base
 from advanced_alchemy.types import DateTimeUTC
 from sqlalchemy import DateTime, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.lib.validation import validate
 
 if TYPE_CHECKING:

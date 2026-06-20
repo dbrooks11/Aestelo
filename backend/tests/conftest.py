@@ -1,12 +1,13 @@
-from collections.abc import AsyncIterator
-import pytest
 import asyncio
-from litestar.testing import AsyncTestClient
-from tests.integration.test_auth import TestAuth
-from app.middleware.sessions import server_session_config
-from app.app import app
-from litestar import Litestar
+from collections.abc import AsyncIterator
 
+import pytest
+from litestar import Litestar
+from litestar.testing import AsyncTestClient
+
+from app.app import app
+from app.middleware.sessions import server_session_config
+from tests.integration.test_auth import TestAuth
 
 pytestmark = pytest.mark.anyio
 

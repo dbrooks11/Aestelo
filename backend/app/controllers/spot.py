@@ -1,16 +1,15 @@
+from litestar import Request, get, post
 from litestar.controller import Controller
-from litestar import get, post, Request
-from litestar.di import Provide
-from app.dto.spot import SpotDTO
-from app.services.spot import provide_spot_service, SpotService
-from app.services.rating import RatingService, provide_rate_service
-from app.models import Spot
-from app.schemas.spot import SpotSchemaBase, SpotInputWithMediaSchema, SpotRatingSchema
+from litestar.di import NamedDependency, Provide
 from litestar.pagination import ClassicPagination
-from litestar.params import FromPath
+from litestar.params import FromPath, JSONBody
+
+from app.dto.spot import SpotDTO
+from app.models import Spot
 from app.plugins import plugins
-from litestar.di import NamedDependency
-from litestar.params import JSONBody
+from app.schemas.spot import SpotInputWithMediaSchema, SpotRatingSchema, SpotSchemaBase
+from app.services.rating import RatingService, provide_rate_service
+from app.services.spot import SpotService, provide_spot_service
 
 
 class SpotController(Controller):

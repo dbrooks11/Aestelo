@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Final, Literal, ClassVar
+from typing import ClassVar, Final, Literal
 
 import structlog
 from litestar.data_extractors import RequestExtractorField, ResponseExtractorField
 from litestar.utils.module_loader import module_to_os_path
 from pydantic import computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
 from app.__metadata__ import __version__ as current_version
 
 ENV_FILE = "backend/.env"

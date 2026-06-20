@@ -1,17 +1,19 @@
-from app.models import Spot, SpotMedia, Rating, Visit, CollectionItem
-from advanced_alchemy.repository import SQLAlchemyAsyncRepository
-from advanced_alchemy.filters import LimitOffset, OrderBy, SearchFilter
-from advanced_alchemy.service import SQLAlchemyAsyncRepositoryService
-from typing import Any
-from sqlalchemy.ext.asyncio import AsyncSession
 from collections.abc import AsyncGenerator
-from app.schemas.spot import SpotSchemaBase
+from math import ceil
+from typing import Any
+
+from advanced_alchemy.filters import LimitOffset, OrderBy, SearchFilter
+from advanced_alchemy.repository import SQLAlchemyAsyncRepository
+from advanced_alchemy.service import SQLAlchemyAsyncRepositoryService
+from litestar.di import NamedDependency
 from litestar.pagination import ClassicPagination
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import with_expression
-from math import ceil
+
 from app.db.enums import UploadStatusEnum
-from litestar.di import NamedDependency
+from app.models import CollectionItem, Rating, Spot, SpotMedia, Visit
+from app.schemas.spot import SpotSchemaBase
 
 
 class SpotService(SQLAlchemyAsyncRepositoryService[Spot]):

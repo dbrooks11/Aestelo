@@ -1,9 +1,10 @@
-from litestar.controller import Controller
 from litestar import Request, post
+from litestar.controller import Controller
+from litestar.params import JSONBody
+
 from app.lib.validation import validate
 from app.schemas.s3 import FileUploadSchema
 from app.utils.storage import storage_private
-from litestar.params import JSONBody
 
 
 class ObjectStorageController(Controller):

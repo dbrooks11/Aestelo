@@ -1,28 +1,29 @@
 import uuid
-from app.settings import settings
 
+from advanced_alchemy.extensions.litestar import (
+    AlembicAsyncConfig,
+    AsyncSessionConfig,
+    async_autocommit_before_send_handler,
+)
+from advanced_alchemy.extensions.litestar.plugins import (
+    EngineConfig,
+    SQLAlchemyAsyncConfig,
+)
 from litestar.config.allowed_hosts import AllowedHostsConfig
 from litestar.config.cors import CORSConfig
 from litestar.config.csrf import CSRFConfig
 from litestar.logging.config import StructLoggingConfig
 from litestar.middleware.logging import LoggingMiddlewareConfig
 from litestar.openapi.config import OpenAPIConfig
-from advanced_alchemy.extensions.litestar import (
-    AsyncSessionConfig,
-    AlembicAsyncConfig,
-    async_autocommit_before_send_handler,
-)
-from advanced_alchemy.extensions.litestar.plugins import (
-    SQLAlchemyAsyncConfig,
-    EngineConfig,
-)
+from litestar.openapi.plugins import ScalarRenderPlugin
 from litestar.plugins.structlog import StructlogConfig
 from litestar_email import EmailConfig, ResendConfig, SMTPConfig
-from litestar_saq import SAQConfig, QueueConfig
-from app.tasks.worker import startup, shutdown, before_process, after_process
-from app.tasks.profile import process_profile_media
+from litestar_saq import QueueConfig, SAQConfig
+
+from app.settings import settings
 from app.tasks.media import process_post_pipeline
-from litestar.openapi.plugins import ScalarRenderPlugin
+from app.tasks.profile import process_profile_media
+from app.tasks.worker import after_process, before_process, shutdown, startup
 
 
 class Config:

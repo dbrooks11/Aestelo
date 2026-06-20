@@ -1,27 +1,28 @@
 import random
+
 from argon2 import PasswordHasher
-from app.models import AuthUser
-from litestar import Response, post, Request, get
+from litestar import Request, Response, get, post
+from litestar.controller import Controller
+from litestar.di import NamedDependency, Provide
 from litestar.exceptions import (
     HTTPException,
-    NotAuthorizedException,
     InternalServerException,
+    NotAuthorizedException,
 )
-from sqlalchemy.sql.functions import now
-from litestar.controller import Controller
-from app.settings import settings
-from app.schemas.auth import (
-    LoginRequestSchema,
-    SignupRequestSchema,
-    AuthServiceSignupSchema,
-)
+from litestar.middleware.csrf import generate_csrf_token
+from litestar.params import JSONBody
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.services.auth import provide_auth_service, AuthService
-from litestar.di import Provide
-from litestar.middleware.csrf import generate_csrf_token
-from litestar.di import NamedDependency
-from litestar.params import JSONBody
+from sqlalchemy.sql.functions import now
+
+from app.models import AuthUser
+from app.schemas.auth import (
+    AuthServiceSignupSchema,
+    LoginRequestSchema,
+    SignupRequestSchema,
+)
+from app.services.auth import AuthService, provide_auth_service
+from app.settings import settings
 
 ph = PasswordHasher()
 

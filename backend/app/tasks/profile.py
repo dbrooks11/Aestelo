@@ -1,8 +1,9 @@
-from saq.types import Context
-from app.utils.media import process_media_image
-from app.services.user import UserProfileService
-from app.db.session import get_db_session
 from litestar_saq import monitored_job
+from saq.types import Context
+
+from app.db.session import get_db_session
+from app.services.user import UserProfileService
+from app.utils.media import process_media_image
 from app.utils.storage import storage, storage_private
 
 

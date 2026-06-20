@@ -1,9 +1,10 @@
-from app.schemas.base import CamelizedBaseSchema
 import re
-from typing import Annotated
-from typing import Self
-from pydantic import EmailStr, model_validator, Field, field_validator
+from typing import Annotated, Self
+
+from pydantic import EmailStr, Field, field_validator, model_validator
+
 from app.lib.validation import validate
+from app.schemas.base import CamelizedBaseSchema
 
 
 def username_invalidation(value):

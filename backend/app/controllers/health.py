@@ -1,10 +1,9 @@
+from litestar import Response, get
 from litestar.controller import Controller
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from litestar import get
-from litestar.exceptions import ServiceUnavailableException
-from litestar import Response
 from litestar.di import NamedDependency
+from litestar.exceptions import ServiceUnavailableException
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class HealthCheckController(Controller):

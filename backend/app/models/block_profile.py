@@ -1,4 +1,5 @@
 import uuid
+
 from advanced_alchemy.extensions.litestar import base
 from sqlalchemy import UUID, ForeignKey, Index, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column

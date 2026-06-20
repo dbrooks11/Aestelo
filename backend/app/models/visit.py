@@ -1,10 +1,10 @@
-from typing import TYPE_CHECKING
 import uuid
-from app.db.enums import UploadStatusEnum
-from geoalchemy2 import Geography
+from typing import TYPE_CHECKING
+
 from advanced_alchemy.extensions.litestar import base
+from advanced_alchemy.types import DateTimeUTC
+from geoalchemy2 import Geography
 from sqlalchemy import (
-    Index,
     ARRAY,
     UUID,
     BigInteger,
@@ -12,12 +12,14 @@ from sqlalchemy import (
     DateTime,
     Enum,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from advanced_alchemy.types import DateTimeUTC
+
+from app.db.enums import UploadStatusEnum
 
 if TYPE_CHECKING:
     from app.models import CollectionItem, Likes, Spot, UserProfile

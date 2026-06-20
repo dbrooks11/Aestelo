@@ -1,6 +1,6 @@
-from litestar.testing import AsyncTestClient
 import pytest
 from litestar import Litestar
+from litestar.testing import AsyncTestClient
 
 
 @pytest.mark.anyio

@@ -1,18 +1,20 @@
-from app.models import Visit, VisitMedia
-from app.schemas.visit import VisitSchemaBase
-from advanced_alchemy.repository import SQLAlchemyAsyncRepository
+from collections.abc import AsyncGenerator
+from typing import Any, Literal
+
 from advanced_alchemy.filters import (
+    CollectionFilter,
     LimitOffset,
     OrderBy,
     SearchFilter,
-    CollectionFilter,
 )
+from advanced_alchemy.repository import SQLAlchemyAsyncRepository
 from advanced_alchemy.service import SQLAlchemyAsyncRepositoryService
-from typing import Literal, Any
-from sqlalchemy.ext.asyncio import AsyncSession
-from collections.abc import AsyncGenerator
-from litestar.pagination import OffsetPagination
 from litestar.di import NamedDependency
+from litestar.pagination import OffsetPagination
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models import Visit, VisitMedia
+from app.schemas.visit import VisitSchemaBase
 
 
 class VisitService(SQLAlchemyAsyncRepositoryService[Visit]):

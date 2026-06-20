@@ -1,9 +1,10 @@
-from app.config import config
-from litestar.plugins.problem_details import ProblemDetailsPlugin
 from advanced_alchemy.extensions.litestar.plugins import SQLAlchemyInitPlugin
+from litestar.plugins.problem_details import ProblemDetailsPlugin
 from litestar.plugins.structlog import StructlogPlugin
 from litestar_email import EmailPlugin
 from litestar_saq import SAQPlugin
+
+from app.config import config
 
 
 class Plugins:

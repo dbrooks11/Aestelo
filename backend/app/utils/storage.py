@@ -1,11 +1,12 @@
 import secrets
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from typing import Any
-from litestar.exceptions import ValidationException
+
 from aioboto3 import Session
 from aiobotocore.config import AioConfig
-from app.settings import settings
+from litestar.exceptions import ValidationException
 
+from app.settings import settings
 
 ALLOWED_POST_MIME_TYPES = {
     "image/jpeg": "jpg",

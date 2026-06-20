@@ -1,4 +1,5 @@
 from advanced_alchemy.extensions.litestar import SQLAlchemyDTO, SQLAlchemyDTOConfig
+
 from app.models.user import UserProfile
 
 

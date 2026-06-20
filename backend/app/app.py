@@ -1,15 +1,16 @@
-import app.models
-from app.config import config
-from app.plugins import plugins
-from app.controllers import all_controllers
-from app.middleware import middlewares
-from app.settings import settings
-from pydantic import BaseModel
-from litestar import Litestar
-from app.middleware.sessions import session_auth
-from litestar.stores.redis import RedisStore
 from geoalchemy2.elements import WKBElement
 from geoalchemy2.shape import to_shape
+from litestar import Litestar
+from litestar.stores.redis import RedisStore
+from pydantic import BaseModel
+
+import app.models
+from app.config import config
+from app.controllers import all_controllers
+from app.middleware import middlewares
+from app.middleware.sessions import session_auth
+from app.plugins import plugins
+from app.settings import settings
 
 
 def serialize_wkb(value: WKBElement) -> str:

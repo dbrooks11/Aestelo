@@ -1,13 +1,14 @@
+from dataclasses import dataclass
+
+from litestar.connection import ASGIConnection
+from litestar.exceptions import NotAuthorizedException
 from litestar.middleware.session.server_side import (
     ServerSideSessionBackend,
     ServerSideSessionConfig,
 )
 from litestar.security.session_auth import SessionAuth
-from litestar.connection import ASGIConnection
-from app.settings import settings
-from dataclasses import dataclass
-from litestar.exceptions import NotAuthorizedException
 
+from app.settings import settings
 
 auth_paths: dict[str, str] = {
     "login": "/login",

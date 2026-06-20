@@ -1,10 +1,11 @@
-from typing import TYPE_CHECKING
 import uuid
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from app.models import Spot, UserProfile, Visit
 
 from advanced_alchemy.extensions.litestar import base
+from advanced_alchemy.types import DateTimeUTC
 from sqlalchemy import (
     ARRAY,
     UUID,
@@ -17,7 +18,6 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from advanced_alchemy.types import DateTimeUTC
 
 
 class Collection(base.BigIntAuditBase):

@@ -1,18 +1,19 @@
-from litestar_saq import monitored_job
-from typing import Literal, Any
-from app.utils.gps import gps
-from app.settings import settings
-from app.utils.media import process_media_image
-from litestar.exceptions import ValidationException, InternalServerException
-from saq.types import Context
-from app.utils.storage import storage, storage_private
-from app.services.spot import SpotMediaService, SpotService
-from app.services.visit import VisitService, VisitMediaService
-from app.db.session import get_db_session
-from geoalchemy2.functions import ST_Point
-from app.db.enums import UploadStatusEnum
 import asyncio
+from typing import Any, Literal
 
+from geoalchemy2.functions import ST_Point
+from litestar.exceptions import InternalServerException, ValidationException
+from litestar_saq import monitored_job
+from saq.types import Context
+
+from app.db.enums import UploadStatusEnum
+from app.db.session import get_db_session
+from app.services.spot import SpotMediaService, SpotService
+from app.services.visit import VisitMediaService, VisitService
+from app.settings import settings
+from app.utils.gps import gps
+from app.utils.media import process_media_image
+from app.utils.storage import storage, storage_private
 
 media_semaphore = asyncio.Semaphore(settings.misc.MAX_CONCURRENT_IMAGES)
 

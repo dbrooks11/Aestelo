@@ -1,17 +1,17 @@
+from litestar import Request, get, patch
 from litestar.controller import Controller
+from litestar.di import NamedDependency, Provide
 from litestar.exceptions import ValidationException
-from litestar.di import Provide
-from litestar import get, patch, Request
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from app.services.user import provide_user_service, UserProfileService
-from app.dto.user import UserProfileDTO, UserProfileEditInfoDTO, UserProfileEditMediaDTO
-from app.models import UserProfile, AuthUser
-from app.schemas.user import UserProfileEditSchema, UserProfileEditMediaSchema
-from app.plugins import plugins
-from app.lib.validation import validate
-from litestar.di import NamedDependency
 from litestar.params import JSONBody
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.dto.user import UserProfileDTO, UserProfileEditInfoDTO, UserProfileEditMediaDTO
+from app.lib.validation import validate
+from app.models import AuthUser, UserProfile
+from app.plugins import plugins
+from app.schemas.user import UserProfileEditMediaSchema, UserProfileEditSchema
+from app.services.user import UserProfileService, provide_user_service
 
 
 class UserController(Controller):

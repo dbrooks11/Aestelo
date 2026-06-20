@@ -1,9 +1,10 @@
-from typing import TYPE_CHECKING
 import uuid
+from typing import TYPE_CHECKING
+
 from advanced_alchemy.extensions.litestar import base
+from advanced_alchemy.types import DateTimeUTC
 from sqlalchemy import UUID, DateTime, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from advanced_alchemy.types import DateTimeUTC
 
 if TYPE_CHECKING:
     from app.models import UserProfile

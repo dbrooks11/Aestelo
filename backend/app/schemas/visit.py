@@ -1,6 +1,7 @@
-from app.schemas.base import CamelizedBaseSchema
 from pydantic import Field
+
 from app.lib.validation import validate
+from app.schemas.base import CamelizedBaseSchema
 
 
 class VisitSchemaBase(CamelizedBaseSchema):

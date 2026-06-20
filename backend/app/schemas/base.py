@@ -2,8 +2,7 @@ from typing import Any
 
 import msgspec
 from advanced_alchemy.utils.text import camelize
-from pydantic import BaseModel
-from pydantic import ConfigDict
+from pydantic import BaseModel, ConfigDict
 
 
 class BaseStruct(msgspec.Struct):

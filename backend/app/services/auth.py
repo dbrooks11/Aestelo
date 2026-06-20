@@ -1,11 +1,13 @@
+from collections.abc import AsyncGenerator
+
 from advanced_alchemy.repository import SQLAlchemyAsyncRepository
 from advanced_alchemy.service import SQLAlchemyAsyncRepositoryService
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.models import AuthUser
-from collections.abc import AsyncGenerator
-from app.schemas.auth import AuthServiceSignupSchema
 from argon2 import PasswordHasher
 from litestar.di import NamedDependency
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models import AuthUser
+from app.schemas.auth import AuthServiceSignupSchema
 
 ph = PasswordHasher()
 

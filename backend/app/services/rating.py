@@ -1,10 +1,12 @@
-from app.models import Rating
+from collections.abc import AsyncGenerator
+
 from advanced_alchemy.repository import SQLAlchemyAsyncRepository
 from advanced_alchemy.service import SQLAlchemyAsyncRepositoryService
-from sqlalchemy.ext.asyncio import AsyncSession
-from collections.abc import AsyncGenerator
-from sqlalchemy import select
 from litestar.di import NamedDependency
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models import Rating
 
 
 class RatingService(SQLAlchemyAsyncRepositoryService[Rating]):
