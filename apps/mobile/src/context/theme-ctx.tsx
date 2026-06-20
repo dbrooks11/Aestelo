@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, type PropsWithChildren } from "react";
+import { createContext, useEffect, type PropsWithChildren } from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Uniwind, useUniwind } from "uniwind";
 

@@ -10,6 +10,7 @@ export default function TabLayout() {
             screenOptions={{
                 headerShadowVisible: false,
                 headerShown: false,
+                sceneStyle: {backgroundColor: "transparent"},
                 tabBarActiveTintColor: "#BF133C",
                 tabBarStyle: {
                     backgroundColor: "#0F0E0E"
@@ -36,7 +37,7 @@ export default function TabLayout() {
                 name="profile"
                 options={{
                     title: "Profile",
-                    tabBarIcon: ({ color, focused }) => (
+                    tabBarIcon: ({ color}) => (
                         <Feather name={'user'} color={color} size={24}/>
                     )
                 }}

@@ -1,17 +1,19 @@
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSession } from "@/context/auth-ctx";
-import ProfileBanner from "@/components/profile/Banner";
 
 
 
 
 export default function ProfileScreen() {
-    const {signOut} = useSession()
-
+    const { signOut } = useSession();
+    
+   
     return (
-        <View>
+        <View className="mt-30">
             <ScrollView>
-                <ProfileBanner/>
+                <Pressable onPress={signOut}>
+                    <Text className="text-primary">Sign Out Here</Text>
+                </Pressable>
             </ScrollView>
         </View>
     )

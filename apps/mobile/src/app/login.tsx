@@ -2,7 +2,6 @@ import { router } from "expo-router";
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { useSession } from "@/context/auth-ctx";
 import { useForm, Controller } from 'react-hook-form';
-import { tv } from "tailwind-variants";
 
 export type LoginFormData = {
     email: string;
@@ -16,7 +15,7 @@ export default function LoginScreen() {
     const {
         control,
         handleSubmit,
-        formState: { errors, isSubmitting },
+        formState: { isSubmitting },
     } = useForm<LoginFormData>({
         defaultValues: {
             email: '',
@@ -28,10 +27,6 @@ export default function LoginScreen() {
         login(data)
         router.replace('/')
     }
-
-    const label = tv({
-        base: ''
-    })
 
     return (
         <View className="flex-1 justify-center m-auto">

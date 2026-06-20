@@ -1,7 +1,6 @@
 import { use, createContext, type PropsWithChildren } from "react";
 import { useStorageState } from "@/state/use-storage-state";
 import { protectedInstance, publicInstance } from "@/config/axios";
-import { appConfig } from "@/config/api";
 import { LoginFormData } from "@/app/login";
 
 
@@ -41,7 +40,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
                         await protectedInstance.post('/auth/sign-out')
                         setSession(null)
                     } catch (error) {
-                        console.error('Failed to Logout')
+                        console.error('Failed to Logout', error)
                     }    
                 },
                 session,
